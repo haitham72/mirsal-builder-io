@@ -4839,161 +4839,6 @@
    }
   },
   {
-   "id": "ce467354",
-   "name": "Generic Emojis Mirsal",
-   "slug": "generic_emojis_mirsal",
-   "cover": "ce1b69c4",
-   "owner": "local",
-   "created": 1791785174.3386176,
-   "stickers": [
-    {
-     "id": "ce1b69c4",
-     "name": "Generic emojis mirsal happy",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-happy-generic_emojis_mirsal-20261012T060614-7d0fc3.png",
-     "type": "static",
-     "emoji": "😀",
-     "kb": 166,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 1
-     },
-     "created": 1791785174.5732787,
-     "file_name": "img-generic_emojis_mirsal-happy-20261012T060557-cfd6cc"
-    },
-    {
-     "id": "c39de98c",
-     "name": "Generic emojis mirsal laugh",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-laugh-generic_emojis_mirsal-20261012T060614-2e917b.png",
-     "type": "static",
-     "emoji": "🤣",
-     "kb": 175,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 2
-     },
-     "created": 1791785174.6166878,
-     "file_name": "img-generic_emojis_mirsal-laugh-20261012T060557-9479f7"
-    },
-    {
-     "id": "591f8fa0",
-     "name": "Generic emojis mirsal love",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-love-generic_emojis_mirsal-20261012T060614-587539.png",
-     "type": "static",
-     "emoji": "😍",
-     "kb": 189,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 3
-     },
-     "created": 1791785174.6608973,
-     "file_name": "img-generic_emojis_mirsal-love-20261012T060557-927b66"
-    },
-    {
-     "id": "dfe75fa1",
-     "name": "Generic emojis mirsal cry",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-cry-generic_emojis_mirsal-20261012T060614-16b4a2.png",
-     "type": "static",
-     "emoji": "😭",
-     "kb": 176,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 4
-     },
-     "created": 1791785174.7038007,
-     "file_name": "img-generic_emojis_mirsal-cry-20261012T060557-69aa0f"
-    },
-    {
-     "id": "fba19b71",
-     "name": "Generic emojis mirsal sad",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-sad-generic_emojis_mirsal-20261012T060614-1b6961.png",
-     "type": "static",
-     "emoji": "😔",
-     "kb": 169,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 5
-     },
-     "created": 1791785174.7445464,
-     "file_name": "img-generic_emojis_mirsal-sad-20261012T060557-23629b"
-    },
-    {
-     "id": "cc932754",
-     "name": "Generic emojis mirsal angry",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-angry-generic_emojis_mirsal-20261012T060614-d2bc20.png",
-     "type": "static",
-     "emoji": "😠",
-     "kb": 192,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 6
-     },
-     "created": 1791785174.786612,
-     "file_name": "img-generic_emojis_mirsal-angry-20261012T060557-d3bce3"
-    },
-    {
-     "id": "375d7741",
-     "name": "Generic emojis mirsal surprised",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-surprised-generic_emojis_mirsal-20261012T060614-9f297e.png",
-     "type": "static",
-     "emoji": "😮",
-     "kb": 172,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 7
-     },
-     "created": 1791785174.8265295,
-     "file_name": "img-generic_emojis_mirsal-surprised-20261012T060557-9f8c33"
-    },
-    {
-     "id": "74221de5",
-     "name": "Generic emojis mirsal scared",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-scared-generic_emojis_mirsal-20261012T060614-3a4375.png",
-     "type": "static",
-     "emoji": "😱",
-     "kb": 163,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 8
-     },
-     "created": 1791785174.868851,
-     "file_name": "img-generic_emojis_mirsal-scared-20261012T060557-cf070a"
-    },
-    {
-     "id": "0212baab",
-     "name": "Generic emojis mirsal thanks",
-     "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-thanks-generic_emojis_mirsal-20261012T060614-e7c731.png",
-     "type": "static",
-     "emoji": "🙏",
-     "kb": 172,
-     "w": 512,
-     "h": 512,
-     "source": {
-      "generation": "G144",
-      "index": 9
-     },
-     "created": 1791785174.9133937,
-     "file_name": "img-generic_emojis_mirsal-thanks-20261012T060557-a86075"
-    }
-   ],
-   "lead_at": 1791785175.143
-  },
-  {
    "id": "701a899d",
    "name": "Generic Emojis Smooth Colors Gradient Shiny",
    "slug": "generic_emojis_smooth_colors_gradient_shiny",
@@ -6790,159 +6635,205 @@
    "parent": "f1d63c25"
   },
   {
-   "id": "a9b93219",
-   "name": "Generic Emojis Mirsal 2",
-   "slug": "generic_emojis_mirsal_2",
-   "cover": "17a26f3a",
+   "id": "9ebb180c",
+   "name": "Generic Emojis - first batch",
+   "slug": "generic_emojis_first_batch",
+   "cover": "bc2d41fc",
    "owner": "local",
-   "created": 1791795658.062533,
+   "created": 1791865593.9571614,
    "stickers": [
     {
-     "id": "17a26f3a",
+     "id": "bc2d41fc",
      "name": "Generic emojis mirsal happy",
-     "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-happy-generic_emojis_mirsal_2-20261012T090058-a8d2f5.png",
-     "type": "static",
+     "file": "G146-generic_emojis_mirsal-20261012T085949/vid-generic_emojis_mirsal-happy-generic_emojis_first_bat-20261013T042634-27fbdb.webm",
+     "type": "animated",
      "emoji": "😀",
-     "kb": 148,
+     "kb": 251,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G146",
       "index": 1
      },
-     "created": 1791795658.2436433,
-     "file_name": "img-generic_emojis_mirsal-happy-20261012T085949-8cd1d0"
+     "created": 1791865594.301935,
+     "file_name": "img-generic_emojis_mirsal-happy-20261012T085949-8cd1d0",
+     "particles": [
+      "P010"
+     ]
     },
     {
-     "id": "05752331",
+     "id": "fc6b6fcf",
      "name": "Generic emojis mirsal laugh",
-     "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-laugh-generic_emojis_mirsal_2-20261012T090058-7d1df0.png",
-     "type": "static",
+     "file": "G146-generic_emojis_mirsal-20261012T085949/vid-generic_emojis_mirsal-laugh-generic_emojis_first_bat-20261013T042634-ef10bb.webm",
+     "type": "animated",
      "emoji": "🤣",
-     "kb": 152,
+     "kb": 234,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G146",
       "index": 2
      },
-     "created": 1791795658.275982,
-     "file_name": "img-generic_emojis_mirsal-laugh-20261012T085949-55df06"
+     "created": 1791865594.3380277,
+     "file_name": "img-generic_emojis_mirsal-laugh-20261012T085949-55df06",
+     "particles": [
+      "P010"
+     ]
     },
     {
-     "id": "50c55521",
+     "id": "87b01a0b",
      "name": "Generic emojis mirsal love",
-     "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-love-generic_emojis_mirsal_2-20261012T090058-c0f5e8.png",
-     "type": "static",
+     "file": "G146-generic_emojis_mirsal-20261012T085949/vid-generic_emojis_mirsal-love-generic_emojis_first_bat-20261013T042634-c3c97b.webm",
+     "type": "animated",
      "emoji": "😍",
-     "kb": 154,
+     "kb": 206,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G146",
       "index": 3
      },
-     "created": 1791795658.308674,
-     "file_name": "img-generic_emojis_mirsal-love-20261012T085949-62d6b8"
+     "created": 1791865594.374142,
+     "file_name": "img-generic_emojis_mirsal-love-20261012T085949-62d6b8",
+     "particles": [
+      "P010"
+     ]
     },
     {
-     "id": "f8fc6cb2",
+     "id": "59370b5c",
      "name": "Generic emojis mirsal cry",
-     "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-cry-generic_emojis_mirsal_2-20261012T090058-b7a2fc.png",
-     "type": "static",
+     "file": "G146-generic_emojis_mirsal-20261012T085949/vid-generic_emojis_mirsal-cry-generic_emojis_first_bat-20261013T042634-3e47c4.webm",
+     "type": "animated",
      "emoji": "😭",
-     "kb": 160,
+     "kb": 254,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G146",
       "index": 4
      },
-     "created": 1791795658.3412406,
-     "file_name": "img-generic_emojis_mirsal-cry-20261012T085949-51d69e"
+     "created": 1791865594.4306333,
+     "file_name": "img-generic_emojis_mirsal-cry-20261012T085949-51d69e",
+     "particles": [
+      "P010"
+     ]
     },
     {
-     "id": "d4f790a8",
+     "id": "82c2fc44",
      "name": "Generic emojis mirsal sad",
-     "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-sad-generic_emojis_mirsal_2-20261012T090058-b85d3a.png",
-     "type": "static",
+     "file": "G146-generic_emojis_mirsal-20261012T085949/vid-generic_emojis_mirsal-sad-generic_emojis_first_bat-20261013T042634-d57d0c.webm",
+     "type": "animated",
      "emoji": "😔",
-     "kb": 143,
+     "kb": 207,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G146",
       "index": 5
      },
-     "created": 1791795658.3738444,
-     "file_name": "img-generic_emojis_mirsal-sad-20261012T085949-79d4e1"
+     "created": 1791865594.4739144,
+     "file_name": "img-generic_emojis_mirsal-sad-20261012T085949-79d4e1",
+     "particles": [
+      "P010"
+     ]
     },
     {
-     "id": "4906387f",
+     "id": "631aa60a",
      "name": "Generic emojis mirsal angry",
-     "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-angry-generic_emojis_mirsal_2-20261012T090058-c4a31e.png",
-     "type": "static",
+     "file": "G146-generic_emojis_mirsal-20261012T085949/vid-generic_emojis_mirsal-angry-generic_emojis_first_bat-20261013T042634-c202e1.webm",
+     "type": "animated",
      "emoji": "😠",
-     "kb": 150,
+     "kb": 241,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G146",
       "index": 6
      },
-     "created": 1791795658.4070516,
-     "file_name": "img-generic_emojis_mirsal-angry-20261012T085949-9ed491"
+     "created": 1791865594.5135093,
+     "file_name": "img-generic_emojis_mirsal-angry-20261012T085949-9ed491",
+     "particles": [
+      "P010"
+     ]
     },
     {
-     "id": "afa67455",
+     "id": "a77a8ddf",
      "name": "Generic emojis mirsal surprised",
-     "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-surprised-generic_emojis_mirsal_2-20261012T090058-4f931f.png",
-     "type": "static",
+     "file": "G146-generic_emojis_mirsal-20261012T085949/vid-generic_emojis_mirsal-surprised-generic_emojis_first_bat-20261013T042634-25a999.webm",
+     "type": "animated",
      "emoji": "😮",
-     "kb": 149,
+     "kb": 207,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G146",
       "index": 7
      },
-     "created": 1791795658.4392552,
-     "file_name": "img-generic_emojis_mirsal-surprised-20261012T085949-52c7c1"
+     "created": 1791865594.5504334,
+     "file_name": "img-generic_emojis_mirsal-surprised-20261012T085949-52c7c1",
+     "particles": [
+      "P010"
+     ]
     },
     {
-     "id": "4966cc6f",
+     "id": "4900c90c",
      "name": "Generic emojis mirsal scared",
-     "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-scared-generic_emojis_mirsal_2-20261012T090058-febdb2.png",
-     "type": "static",
+     "file": "G146-generic_emojis_mirsal-20261012T085949/vid-generic_emojis_mirsal-scared-generic_emojis_first_bat-20261013T042634-c5d287.webm",
+     "type": "animated",
      "emoji": "😱",
-     "kb": 155,
+     "kb": 226,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G146",
       "index": 8
      },
-     "created": 1791795658.472463,
-     "file_name": "img-generic_emojis_mirsal-scared-20261012T085949-6934aa"
+     "created": 1791865594.59267,
+     "file_name": "img-generic_emojis_mirsal-scared-20261012T085949-6934aa",
+     "particles": [
+      "P010"
+     ]
     },
     {
-     "id": "724492a5",
+     "id": "7ed86c79",
      "name": "Generic emojis mirsal thanks",
-     "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-thanks-generic_emojis_mirsal_2-20261012T090058-b048fb.png",
-     "type": "static",
+     "file": "G146-generic_emojis_mirsal-20261012T085949/vid-generic_emojis_mirsal-thanks-generic_emojis_first_bat-20261013T042634-05ec3f.webm",
+     "type": "animated",
      "emoji": "🙏",
-     "kb": 142,
+     "kb": 231,
      "w": 512,
      "h": 512,
      "source": {
       "generation": "G146",
       "index": 9
      },
-     "created": 1791795658.5043092,
-     "file_name": "img-generic_emojis_mirsal-thanks-20261012T085949-47b2f1"
+     "created": 1791865594.6321342,
+     "file_name": "img-generic_emojis_mirsal-thanks-20261012T085949-47b2f1",
+     "particles": [
+      "P010"
+     ]
+    },
+    {
+     "id": "999f6b38",
+     "name": "Recovered particles · burst",
+     "file": "own/vid-recovered_particles_burst-custom-generic_emojis_first_bat-20261013T043947-e97937.webm",
+     "type": "animated",
+     "emoji": "😀🤣😍😭😔😠😮😱🙏",
+     "kb": 233,
+     "w": 512,
+     "h": 512,
+     "source": {
+      "kind": "stickers",
+      "particle_set": "P010",
+      "render": "R001",
+      "preset": "burst",
+      "source_pack": "9ebb180c",
+      "parent_sticker": "bc2d41fc"
+     },
+     "created": 1791866387.3296087
     }
    ],
-   "lead_at": 1791795658.667
+   "lead_at": 1791865594.89
   }
  ],
  "layout": 2,
@@ -7525,6 +7416,320 @@
     ],
     "lead_at": 1791715009.803,
     "deleted": 1791715611.512,
+    "deleted_by": "local"
+   },
+   {
+    "id": "ce467354",
+    "name": "Generic Emojis Mirsal",
+    "slug": "generic_emojis_mirsal",
+    "cover": "ce1b69c4",
+    "owner": "local",
+    "created": 1791785174.3386176,
+    "stickers": [
+     {
+      "id": "ce1b69c4",
+      "name": "Generic emojis mirsal happy",
+      "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-happy-generic_emojis_mirsal-20261012T060614-7d0fc3.png",
+      "type": "static",
+      "emoji": "😀",
+      "kb": 166,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G144",
+       "index": 1
+      },
+      "created": 1791785174.5732787,
+      "file_name": "img-generic_emojis_mirsal-happy-20261012T060557-cfd6cc"
+     },
+     {
+      "id": "c39de98c",
+      "name": "Generic emojis mirsal laugh",
+      "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-laugh-generic_emojis_mirsal-20261012T060614-2e917b.png",
+      "type": "static",
+      "emoji": "🤣",
+      "kb": 175,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G144",
+       "index": 2
+      },
+      "created": 1791785174.6166878,
+      "file_name": "img-generic_emojis_mirsal-laugh-20261012T060557-9479f7"
+     },
+     {
+      "id": "591f8fa0",
+      "name": "Generic emojis mirsal love",
+      "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-love-generic_emojis_mirsal-20261012T060614-587539.png",
+      "type": "static",
+      "emoji": "😍",
+      "kb": 189,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G144",
+       "index": 3
+      },
+      "created": 1791785174.6608973,
+      "file_name": "img-generic_emojis_mirsal-love-20261012T060557-927b66"
+     },
+     {
+      "id": "dfe75fa1",
+      "name": "Generic emojis mirsal cry",
+      "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-cry-generic_emojis_mirsal-20261012T060614-16b4a2.png",
+      "type": "static",
+      "emoji": "😭",
+      "kb": 176,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G144",
+       "index": 4
+      },
+      "created": 1791785174.7038007,
+      "file_name": "img-generic_emojis_mirsal-cry-20261012T060557-69aa0f"
+     },
+     {
+      "id": "fba19b71",
+      "name": "Generic emojis mirsal sad",
+      "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-sad-generic_emojis_mirsal-20261012T060614-1b6961.png",
+      "type": "static",
+      "emoji": "😔",
+      "kb": 169,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G144",
+       "index": 5
+      },
+      "created": 1791785174.7445464,
+      "file_name": "img-generic_emojis_mirsal-sad-20261012T060557-23629b"
+     },
+     {
+      "id": "cc932754",
+      "name": "Generic emojis mirsal angry",
+      "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-angry-generic_emojis_mirsal-20261012T060614-d2bc20.png",
+      "type": "static",
+      "emoji": "😠",
+      "kb": 192,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G144",
+       "index": 6
+      },
+      "created": 1791785174.786612,
+      "file_name": "img-generic_emojis_mirsal-angry-20261012T060557-d3bce3"
+     },
+     {
+      "id": "375d7741",
+      "name": "Generic emojis mirsal surprised",
+      "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-surprised-generic_emojis_mirsal-20261012T060614-9f297e.png",
+      "type": "static",
+      "emoji": "😮",
+      "kb": 172,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G144",
+       "index": 7
+      },
+      "created": 1791785174.8265295,
+      "file_name": "img-generic_emojis_mirsal-surprised-20261012T060557-9f8c33"
+     },
+     {
+      "id": "74221de5",
+      "name": "Generic emojis mirsal scared",
+      "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-scared-generic_emojis_mirsal-20261012T060614-3a4375.png",
+      "type": "static",
+      "emoji": "😱",
+      "kb": 163,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G144",
+       "index": 8
+      },
+      "created": 1791785174.868851,
+      "file_name": "img-generic_emojis_mirsal-scared-20261012T060557-cf070a"
+     },
+     {
+      "id": "0212baab",
+      "name": "Generic emojis mirsal thanks",
+      "file": "G144-generic_emojis_mirsal-20261012T060557/img-generic_emojis_mirsal-thanks-generic_emojis_mirsal-20261012T060614-e7c731.png",
+      "type": "static",
+      "emoji": "🙏",
+      "kb": 172,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G144",
+       "index": 9
+      },
+      "created": 1791785174.9133937,
+      "file_name": "img-generic_emojis_mirsal-thanks-20261012T060557-a86075"
+     }
+    ],
+    "lead_at": 1791785175.143,
+    "deleted": 1791865602.614,
+    "deleted_by": "local"
+   },
+   {
+    "id": "a9b93219",
+    "name": "Generic Emojis Mirsal 2",
+    "slug": "generic_emojis_mirsal_2",
+    "cover": "17a26f3a",
+    "owner": "local",
+    "created": 1791795658.062533,
+    "stickers": [
+     {
+      "id": "17a26f3a",
+      "name": "Generic emojis mirsal happy",
+      "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-happy-generic_emojis_mirsal_2-20261012T090058-a8d2f5.png",
+      "type": "static",
+      "emoji": "😀",
+      "kb": 148,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G146",
+       "index": 1
+      },
+      "created": 1791795658.2436433,
+      "file_name": "img-generic_emojis_mirsal-happy-20261012T085949-8cd1d0"
+     },
+     {
+      "id": "05752331",
+      "name": "Generic emojis mirsal laugh",
+      "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-laugh-generic_emojis_mirsal_2-20261012T090058-7d1df0.png",
+      "type": "static",
+      "emoji": "🤣",
+      "kb": 152,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G146",
+       "index": 2
+      },
+      "created": 1791795658.275982,
+      "file_name": "img-generic_emojis_mirsal-laugh-20261012T085949-55df06"
+     },
+     {
+      "id": "50c55521",
+      "name": "Generic emojis mirsal love",
+      "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-love-generic_emojis_mirsal_2-20261012T090058-c0f5e8.png",
+      "type": "static",
+      "emoji": "😍",
+      "kb": 154,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G146",
+       "index": 3
+      },
+      "created": 1791795658.308674,
+      "file_name": "img-generic_emojis_mirsal-love-20261012T085949-62d6b8"
+     },
+     {
+      "id": "f8fc6cb2",
+      "name": "Generic emojis mirsal cry",
+      "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-cry-generic_emojis_mirsal_2-20261012T090058-b7a2fc.png",
+      "type": "static",
+      "emoji": "😭",
+      "kb": 160,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G146",
+       "index": 4
+      },
+      "created": 1791795658.3412406,
+      "file_name": "img-generic_emojis_mirsal-cry-20261012T085949-51d69e"
+     },
+     {
+      "id": "d4f790a8",
+      "name": "Generic emojis mirsal sad",
+      "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-sad-generic_emojis_mirsal_2-20261012T090058-b85d3a.png",
+      "type": "static",
+      "emoji": "😔",
+      "kb": 143,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G146",
+       "index": 5
+      },
+      "created": 1791795658.3738444,
+      "file_name": "img-generic_emojis_mirsal-sad-20261012T085949-79d4e1"
+     },
+     {
+      "id": "4906387f",
+      "name": "Generic emojis mirsal angry",
+      "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-angry-generic_emojis_mirsal_2-20261012T090058-c4a31e.png",
+      "type": "static",
+      "emoji": "😠",
+      "kb": 150,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G146",
+       "index": 6
+      },
+      "created": 1791795658.4070516,
+      "file_name": "img-generic_emojis_mirsal-angry-20261012T085949-9ed491"
+     },
+     {
+      "id": "afa67455",
+      "name": "Generic emojis mirsal surprised",
+      "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-surprised-generic_emojis_mirsal_2-20261012T090058-4f931f.png",
+      "type": "static",
+      "emoji": "😮",
+      "kb": 149,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G146",
+       "index": 7
+      },
+      "created": 1791795658.4392552,
+      "file_name": "img-generic_emojis_mirsal-surprised-20261012T085949-52c7c1"
+     },
+     {
+      "id": "4966cc6f",
+      "name": "Generic emojis mirsal scared",
+      "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-scared-generic_emojis_mirsal_2-20261012T090058-febdb2.png",
+      "type": "static",
+      "emoji": "😱",
+      "kb": 155,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G146",
+       "index": 8
+      },
+      "created": 1791795658.472463,
+      "file_name": "img-generic_emojis_mirsal-scared-20261012T085949-6934aa"
+     },
+     {
+      "id": "724492a5",
+      "name": "Generic emojis mirsal thanks",
+      "file": "G146-generic_emojis_mirsal-20261012T085949/img-generic_emojis_mirsal-thanks-generic_emojis_mirsal_2-20261012T090058-b048fb.png",
+      "type": "static",
+      "emoji": "🙏",
+      "kb": 142,
+      "w": 512,
+      "h": 512,
+      "source": {
+       "generation": "G146",
+       "index": 9
+      },
+      "created": 1791795658.5043092,
+      "file_name": "img-generic_emojis_mirsal-thanks-20261012T085949-47b2f1"
+     }
+    ],
+    "lead_at": 1791795658.667,
+    "deleted": 1791865724.514,
     "deleted_by": "local"
    }
   ]

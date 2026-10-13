@@ -1396,6 +1396,163 @@
       "resolution_reason": null,
       "candidates": [],
       "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "518fdd11310bc756472f461f7aa2b3a195af3dbfda5e3323357f2440c4373d36": {
+      "emoji": "😀",
+      "emojis": [
+        "😀"
+      ],
+      "tag": "happy_smile_joy",
+      "tokens": [
+        "happy",
+        "smile",
+        "joy"
+      ],
+      "action": "happy",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "b2d1944c000bdfa62c7ac76134316eb963f2edc0d596d8eec6857638f75217ec": {
+      "emoji": "🤣",
+      "emojis": [
+        "🤣"
+      ],
+      "tag": "laugh_laughing_lol_rofl_lmao_lmfao",
+      "tokens": [
+        "laugh",
+        "laughing",
+        "lol",
+        "rofl",
+        "lmao",
+        "lmfao"
+      ],
+      "action": "laugh",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "b7dd2d00c9070526fbf940793f2269bfe121016f1776f50c1b6ba73b6a080124": {
+      "emoji": "😍",
+      "emojis": [
+        "😍"
+      ],
+      "tag": "love_heart_loving",
+      "tokens": [
+        "love",
+        "heart",
+        "loving"
+      ],
+      "action": "love",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "ba5d2984244acffab5014a15411dd56b30d18410af4681a521c14bb3f7b8e1eb": {
+      "emoji": "😭",
+      "emojis": [
+        "😭"
+      ],
+      "tag": "cry_crying_sobbing_tears",
+      "tokens": [
+        "cry",
+        "crying",
+        "sobbing",
+        "tears"
+      ],
+      "action": "cry",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "5b2679fb57b1569dfd1afc875bd7720874f56c9e05183cd829c2b975e00d6245": {
+      "emoji": "😔",
+      "emojis": [
+        "😔"
+      ],
+      "tag": "sad_unhappy_disappointed",
+      "tokens": [
+        "sad",
+        "unhappy",
+        "disappointed"
+      ],
+      "action": "sad",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "56fce83954306ecf3a4d89636591315914bde7f2d0c817e21cedc7ec8e5d26b0": {
+      "emoji": "😠",
+      "emojis": [
+        "😠"
+      ],
+      "tag": "angry_mad_furious_rage",
+      "tokens": [
+        "angry",
+        "mad",
+        "furious",
+        "rage"
+      ],
+      "action": "angry",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "78f9fa95870296b0126f33c4ebdb6c9f925ec280871ef4b05271caf99b2754c9": {
+      "emoji": "😮",
+      "emojis": [
+        "😮"
+      ],
+      "tag": "surprised_shocked_wow",
+      "tokens": [
+        "surprised",
+        "shocked",
+        "wow"
+      ],
+      "action": "surprised",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "33b386305bbd7bbb6b3e92e19535e8e65a8c76d997bf8f3cc2a7f5c0028cde91": {
+      "emoji": "😱",
+      "emojis": [
+        "😱"
+      ],
+      "tag": "scared_frightened_fear",
+      "tokens": [
+        "scared",
+        "frightened",
+        "fear"
+      ],
+      "action": "scared",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "7b13cba7c91389e26b7ed50d640e402d3e04d0303db091b2747dd61387d61ba1": {
+      "emoji": "🙏",
+      "emojis": [
+        "🙏"
+      ],
+      "tag": "thanks_thankyou",
+      "tokens": [
+        "thanks",
+        "thankyou"
+      ],
+      "action": "thanks",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
     }
   }
 }
