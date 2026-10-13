@@ -173,23 +173,23 @@ class StudioActionTests(unittest.TestCase):
         self.assertRegex(css, r"\.gsteps\{[^}]*display:flex", "the journey is one flex track: its stops (Particles and Telegram included) share it, however many there are")
         self.assertIn(".sp-modes", css)
 
-    def test_the_effect_functions_serve_both_screens_and_say_particles(self):
+    def test_the_effect_functions_serve_both_screens_and_say_reactions(self):
         """effects.js holds ONE implementation of an effect for the pro screen (state FX) and the Studio tab (state SP): every handler finds its state from its root (fxX, data-fxx). The drawn
-        particles are suggest -> chips -> price -> draw -> tick the cells -> particles_pick; a warning is a sentence and never a block; the size of the particles travels as sprite_px / scale;
-        what the person reads says 'particles' (the chrome has no 'pieces')."""
+        reactions are suggest -> chips -> price -> draw -> tick the cells -> particles_pick; a warning is a sentence and never a block; the size of the reactions travels as sprite_px / scale;
+        what the person reads says 'reactions' (the chrome has no 'pieces')."""
         import re
         ui, _ = self.scripts()
         fx = read_console(ui / "effects.js")
         for route in ("/suggest", "/particles_estimate", "/particles`", "/particles_pick"):
             self.assertIn(route, fx)
-        self.assertIn("sprite_px", read_console(ui / "particles.js"), "the size of the particles travels as sprite_px / scale, with the burst maker's preview and render")
-        self.assertIn("key_is_seamless:'The green screen has panels or patterns, so the keying may eat parts of the particles. Use it anyway, or make another take.'", fx)
-        self.assertIn("Draw ${fxCols(d.grid)} particles with AI", fx)
+        self.assertIn("sprite_px", read_console(ui / "particles.js"), "the size of the reactions travels as sprite_px / scale, with the burst maker's preview and render")
+        self.assertIn("key_is_seamless:'The green screen has panels or patterns, so the keying may eat parts of the reactions. Use it anyway, or make another take.'", fx)
+        self.assertIn("Draw ${fxCols(d.grid)} reactions with AI", fx)
         self.assertIn("Use it anyway", fx)
         self.assertNotIn("document.getElementById('fxpv", fx, "ids carry the state's name: two screens, two sets of previews")
         code = re.sub(r"/\*.*?\*/", "", fx, flags=re.S)
         code = re.sub(r"fx-pieces|\w*[Pp]iece\w*", "", code)
-        self.assertIsNone(re.search(r"\bpieces?\b", code, re.I), "the chrome says particles, not pieces")
+        self.assertIsNone(re.search(r"\bpieces?\b", code, re.I), "the chrome says reactions, not pieces")
         for name in ("const fxNew=", "const fxX=", "FXS.fx=", "function fxDrawn("):
             self.assertIn(name, fx)
 

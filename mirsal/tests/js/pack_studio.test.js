@@ -1,6 +1,6 @@
 const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The pack's particle studio and the sticker's one line (2026-10-03, docs/particles.md section 5): one set belongs to the pack, so the pack page carries the
-// particle studio (its sets as shared cards, its bursts with Add, Make particles for this pack / Use an existing set) and a sticker shows one line
+// particle studio (its sets as shared cards, its bursts with Add, Make reactions for this pack / Use an existing set) and a sticker shows one line
 // linking to it. The statements are read out of packs.js and run with the few globals they use stubbed. Run: node --test tests/js
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -36,21 +36,21 @@ const BURSTS = [{ set: 'P001', id: 'R001', set_name: 'Barbie hearts', preset: 'b
 test('while the pack’s sets are not read yet the studio says so and asks for nothing', () => {
   const h = load({ sets: {}, bursts: {} });
   const s = h.pkPsHtml({ id: 'p1', name: 'Barbie' });
-  assert.match(s, /Particle studio/);
-  assert.match(s, /Reading the pack's particle sets/);
+  assert.match(s, /Reaction studio/);
+  assert.match(s, /Reading the pack's reaction sets/);
   assert.doesNotMatch(s, /data-act=/);
 });
 
 test('the studio shows the pack’s sets as shared cards and both ways to get one', () => {
   const h = load({ sets: { p1: SETS }, bursts: {} });
   const s = h.pkPsHtml({ id: 'p1', name: 'Barbie' });
-  assert.match(s, /particles made for the stickers in this pack/);
-  assert.match(s, /data-act=psmakepack data-p=p1>Make particles for this pack</);
-  assert.match(s, /data-act=pspickpack data-p=p1>Use particles of another sticker</);
+  assert.match(s, /reactions made for the stickers in this pack/);
+  assert.match(s, /data-act=psmakepack data-p=p1>Make reactions for this pack</);
+  assert.match(s, /data-act=pspickpack data-p=p1>Use reactions of another sticker</);
   assert.match(s, /<setcard data-for=P001>/);
   assert.match(s, /<setcard data-for=P002>/);
   const empty = load({ sets: { p1: [] }, bursts: {} }).pkPsHtml({ id: 'p1', name: 'Barbie' });
-  assert.match(empty, /No particles made for these stickers yet/);
+  assert.match(empty, /No reactions made for these stickers yet/);
   assert.match(empty, /data-act=psmakepack/);
 });
 
@@ -78,16 +78,16 @@ test('a burst’s warnings are sentences, a missing file says so', () => {
   assert.match(h.pkBurst({ ...BURSTS[0], url: null, missing: true }), /file missing/);
 });
 
-test('a sticker shows only its own particles and scoped creation',()=>{
+test('a sticker shows only its own reactions and scoped creation',()=>{
  const h=load({sets:{},bursts:{}});assert.match(h.pkStickerLine({id:'a1',pack_id:'p1'}),/Reading the sticker/);
- const none=load({sets:{p1:[]},bursts:{}});assert.match(none.pkStickerLine({id:'a1',pack_id:'p1'}),/data-act=ptmake data-p=p1 data-s=a1>Create particles/);
+ const none=load({sets:{p1:[]},bursts:{}});assert.match(none.pkStickerLine({id:'a1',pack_id:'p1'}),/data-act=ptmake data-p=p1 data-s=a1>Create reactions/);
  const reading=load({sets:{p1:SETS},bursts:{}}).pkStickerLine({id:'a1',pack_id:'p1'});
  assert.match(reading,/Reading the sticker/);assert.match(reading,/>New version</);
  const some=load({sets:{p1:SETS},bursts:{},d:{a1:{rows:[{id:'P001',version:1}],drafts:[]}}}),line=some.pkStickerLine({id:'a1',pack_id:'p1'});
  assert.match(line,/1 saved version/);assert.doesNotMatch(line,/Bats|P002|No particles yet/);assert.match(line,/New version/);assert.match(line,/<owner-gallery>P001/);
 });
 
-test('the Library has a Particles tab on the shared switch, and every new action has a handler', () => {  assert.match(app, /data-act=libtab data-t=particles>Particles</, 'the third Library tab');
+test('the Library has a Reactions tab on the shared switch, and every new action has a handler', () => {  assert.match(app, /data-act=libtab data-t=particles>Reactions</, 'the third Library tab');
   const all = src + readConsoleFile(path.join(DIR, 'particles.js'), 'utf8') + readConsoleFile(path.join(DIR, 'effects.js'), 'utf8');
   for (const act of ['psopen', 'psassign', 'psassignsave', 'psunassign', 'psdup', 'psrename', 'psdel', 'psrestore', 'pspickcell', 'pspickcancel', 'pspicksave', 'pspickset', 'psmakepack', 'pspickpack', 'fxuseset']) {
     assert.match(all, new RegExp(`ACT\\.${act}=`), `${act} has a handler`);

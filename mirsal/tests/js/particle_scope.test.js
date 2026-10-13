@@ -21,7 +21,7 @@ test('pack entry is explicit and clears the old run',()=>{
 });
 test('Library with no scope asks which sticker and has no wizard body',()=>{
   run("route_='library';ACT.spopen({dataset:{}})");
-  assert.match(run('spBody([])'),/Particles for which sticker/);
+  assert.match(run('spBody([])'),/Reactions for which sticker/);
   assert.doesNotMatch(run('spBody([])'),/data-act=spstart/);
 });
 test('unpacked batch offers approval and no unrelated stickers',()=>{

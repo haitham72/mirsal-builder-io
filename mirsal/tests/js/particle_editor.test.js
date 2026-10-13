@@ -7,7 +7,7 @@ const set="{id:'P001',name:'Particles',owner:[{pack_id:'parent',sticker_id:'targ
 
 test('new AI choice shows image and animated sprite choices with prompt and both grids',()=>{
  const run=setup();run(owner+";spKind('video')");const html=run('spSetupHtml(SP,LIB.packs,[])');
- for(const label of ['AI image sprites','Kling animated · from scratch','Particle prompt','2 × 2','3 × 3'])assert.ok(html.includes(label),label);
+ for(const label of ['AI image sprites','Kling animated · from scratch','Reaction prompt','2 × 2','3 × 3'])assert.ok(html.includes(label),label);
  assert.match(html,/class="sp-mode on" data-act=spkind data-v=video/,'Kling is its own card, lit when chosen');
  assert.doesNotMatch(html,/Nothing is spent|starts and ends|ownership|ledger/i);
 });

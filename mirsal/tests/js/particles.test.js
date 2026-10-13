@@ -74,7 +74,7 @@ test('the Studio’s header gets a Particles step after Animation, and only once
   assert.equal(run(withPacks(`spSteps(${JSON.stringify(steps)},[{generation_id:'G012'}])`)), steps, 'a batch without stickers is not animated either');
   const h = run(withPacks(`spSteps(${JSON.stringify(steps)},${JSON.stringify(anim)})`));
   assert.ok(h.indexOf('data-t=particles') > h.indexOf('data-t=anim') && h.indexOf('data-t=particles') < h.indexOf('data-act=gadd'), 'between Animation and Pack');
-  assert.match(h, /<button class="gst todo " data-act=gtab data-t=particles><span class=gsm>5<\/span><span class=gsl><b>Particles<\/b><small>None yet<\/small>/);
+  assert.match(h, /<button class="gst todo " data-act=gtab data-t=particles><span class=gsm>5<\/span><span class=gsl><b>Reactions<\/b><small>None yet<\/small>/);
   assert.match(h, /data-act=gadd ><span class=gsm>6<\/span>/, 'Pack is the sixth step now');
   assert.match(h, /data-t=anim><span class=gsm>4<\/span>/, 'what is before it is untouched');
   assert.equal(run("spSteps('no steps at all',[])"), 'no steps at all');
@@ -87,7 +87,7 @@ test('the step counts what was made for the batch’s stickers', () => {
   const made = run(withPacks("(PKPT.c={p1:{a1:{created:2,saved:1},a3:{created:9,saved:9}}},spMade([{generation_id:'G012'}]))"));
   assert.equal(made, 3, 'only the stickers that came from this batch count');
   const h = run(withPacks("(PKPT.c={p1:{a1:{created:2,saved:1}}},spSteps('<button class=\"gst todo \" data-act=gadd ><span class=gsm>5</span></button>',[{generation_id:'G012',stickers:[{anim_status:'READY'}]}]))"));
-  assert.match(h, /data-t=particles><span class=gsm><svg data-i=check><\/svg><\/span><span class=gsl><b>Particles<\/b><small>3 made<\/small>/);
+  assert.match(h, /data-t=particles><span class=gsm><svg data-i=check><\/svg><\/span><span class=gsl><b>Reactions<\/b><small>3 made<\/small>/);
   assert.match(h, /class="gst done "/);
   run("PKPT.c={}");
 });
@@ -104,7 +104,7 @@ test('the batch section is ONE list of versions, each once, with one approval of
  assert.match(h,/data-particle-row=P001>v1<[\s\S]*data-particle-row=P002>v2<[\s\S]*data-particle-row=P009>Draft</,'oldest first, numbered for the batch; drafts last');
  assert.doesNotMatch(h,/Shared by|Uses the shared|S1 ·|data-act=spmake|<ptbody/,'no per-sticker blocks, no shared label');
  assert.equal((h.match(/Approve as a pack/g)||[]).length,1,'a sticker not in a pack still gets the one approval offer');
- assert.match(sec({gid:'G012',cells:[CELL(1,{link:LINK('a1')})]}),/No particles yet/);
+ assert.match(sec({gid:'G012',cells:[CELL(1,{link:LINK('a1')})]}),/No reactions yet/);
  assert.match(sec({gid:'G012',cells:[]},true),/sp-bh/);
 });
 
@@ -126,8 +126,8 @@ test('the section: a heading with the one button that opens the tab, and nothing
   assert.equal(run("spSecHtml([])"), '');
   const row = {id:'P001',version:1,label:'x',n_sprites:1,saved:true,saved_at:1,shared_with:0,sprites:[],in_pack:[],addable:null,preview:null,credits:0};
   const h = run(`spSecHtml([{gid:'G012',cells:[{index:1,key:'a',png:'s.png',link:{pack_id:'p1',pack:'P',sticker:{id:'a1'}},n:1,det:{rows:[${JSON.stringify(row)}],drafts:[]}}]}])`);
-  assert.match(h, /<h2><svg data-i=fx><\/svg> Particles<\/h2>/);
-  assert.match(h, /data-act=spopen>.*Create particles/s);
+  assert.match(h, /<h2><svg data-i=fx><\/svg> Reactions<\/h2>/);
+  assert.match(h, /data-act=spopen>.*Create reactions/s);
 });
 
 test('the tab replaces the body only while it is current, and a person can leave the flow at any point', () => {
@@ -135,7 +135,7 @@ test('the tab replaces the body only while it is current, and a person can leave
   assert.equal(run("(GS.tab='particles',gbodyHtml([{generation_id:'G012'}],{}))"), 'ORIGINAL BODY', 'no animation yet: no Particles tab either');
   const h = run(withPacks("(GS.tab='particles',SP.scope={generation:'G012'},SP.eid='',SP.pack='p1',SP.sel=new Set(['a1','a2']),gbodyHtml([{generation_id:'G012',stickers:[{anim_status:'READY'}]}],{}))"));
   assert.match(h, /^<section class="gplan sp fx" id=sp-root data-fxx=sp>/, 'the root every handler finds its state from');
-  assert.match(h, /<h2>Particles<\/h2>/);
+  assert.match(h, /<h2>Reactions<\/h2>/);
   assert.doesNotMatch(h, /Whatever you make is saved under its sticker/);
   assert.match(h, /data-act=spstart/);
   assert.match(run("(SP.eid='E007',SP.rec={id:'E007',pack_name:'Fruits',status:'NEW'},spBody([]))"), /Preparing sprites…/);
@@ -203,12 +203,12 @@ test('the library list: loading, empty, and the sets with a way to make more', (
   run("SPL.sets=null");
   assert.match(run("spLibHtml()"), /Reading the particle sets/);
   run("SPL.sets=[]");
-  assert.match(run("spLibHtml()"), /No particle sets yet/);
-  assert.match(run("spLibHtml()"), /data-act=spopen>.*Make particles/s);
+  assert.match(run("spLibHtml()"), /No reaction sets yet/);
+  assert.match(run("spLibHtml()"), /data-act=spopen>.*Make reactions/s);
   run(`SPL.sets=[${JSON.stringify(SET())}]`);
   const h = run("spLibHtml()");
   assert.match(h, /data-ps=P001/);
-  assert.match(h, /Make particles/);
+  assert.match(h, /Make reactions/);
   run("SPL.sets=null");
 });
 
@@ -216,7 +216,7 @@ test('the wizard’s existing-set card lists the sets with what they cost and wh
   run("SPL.sets=null");
   assert.match(run("spExistingHtml({pack:'p1',sel:new Set(['a1'])})"), /Reading the particle sets/);
   run("SPL.sets=[]");
-  assert.match(run("spExistingHtml({pack:'p1',sel:new Set(['a1'])})"), /No saved particles yet/);
+  assert.match(run("spExistingHtml({pack:'p1',sel:new Set(['a1'])})"), /No saved reactions yet/);
   run(`SPL.sets=[${JSON.stringify(SET())},${JSON.stringify(SET({ id: 'P002', name: 'Bats', owner:[], packs: [], used_in: [], n_picked: 2 }))}]`);
   const h = run("spExistingHtml({pack:'p1',sel:new Set(['a1'])})");
   assert.match(h, /Barbie &lt;hearts&gt;/);
@@ -268,7 +268,7 @@ test('the library shows the trash under the sets, and also when there are no liv
   run(`SPL.sets=[${JSON.stringify(SET())}];SPL.trash=[${JSON.stringify(GONE())}]`);
   assert.match(run("spLibHtml()"), /data-ps=P001[\s\S]*Deleted \(1\)[\s\S]*data-act=psrestore data-id=P007/);
   run("SPL.sets=[]");
-  assert.match(run("spLibHtml()"), /No particle sets yet[\s\S]*data-act=psrestore data-id=P007/, 'a person who deleted their last set can still get it back');
+  assert.match(run("spLibHtml()"), /No reaction sets yet[\s\S]*data-act=psrestore data-id=P007/, 'a person who deleted their last set can still get it back');
   run("SPL.trash=null");
   assert.doesNotMatch(run("spLibHtml()"), /Deleted \(/);
   run("SPL.sets=null");
@@ -291,7 +291,7 @@ test('the open set offers Generate more: the grid, the particles to draw, the pr
   assert.match(h, /Animated sprites · Kling/);
   assert.match(h, /data-act=psmoregrid data-id=P001 data-v=2x2/);
   assert.match(h, /data-act=psmoregrid data-id=P001 data-v=3x3/);
-  assert.match(h, /value="hearts, flowers"/, 'the set’s particles seed the prompt');
+  assert.match(h, /value="hearts, flowers"/, 'the set’s reactions seed the prompt');
 
   assert.match(h, /data-psmoreprompt=P001/);
   assert.match(h, /<div class=fx-price data-psmoreprice[^>]*>[^<]*<\/div>/, 'the price has its own line');
@@ -319,15 +319,15 @@ test('while a sheet is being drawn the set says so and cannot be sent twice', ()
   const h = moreOf({ drawing: true, sheets: [SHEET({ status: 'REQUESTED', generation: null, appended: [] })] });
   assert.match(h, /Waiting for the sheet \(J043\)/);
   assert.match(h.match(/<button[^>]*data-act=psmoredraw[^>]*>/)[0], /disabled/);
-  assert.match(moreOf({ drawing: true, sheets: [SHEET({ status: 'DRAWN', appended: [] })] }), /Cutting the particles \(G104\)/);
+  assert.match(moreOf({ drawing: true, sheets: [SHEET({ status: 'DRAWN', appended: [] })] }), /Cutting the reactions \(G104\)/);
 });
 
 test('every kind of sheet is told in plain words, newest first, and a dead end always has a next step', () => {
   const h = moreOf({ sheets: [SHEET(), SHEET({ n: 2, status: 'DONE', appended: [9, 10], skipped: [3, 4], generation: 'G105' }),
     SHEET({ n: 3, status: 'FAILED', generation: null, appended: [], error: 'the provider said no' }),
     SHEET({ n: 4, status: 'NO_CELLS', generation: 'G106', appended: [], skipped: [1, 2, 3, 4], error: 'No cell of this sheet came out.' })] });
-  assert.match(h, /Sheet 1: 4 particles added/);
-  assert.match(h, /Sheet 2: 2 particles added \(2 cells came out empty\)/);
+  assert.match(h, /Sheet 1: 4 reactions added/);
+  assert.match(h, /Sheet 2: 2 reactions added \(2 cells came out empty\)/);
   assert.match(h, /Sheet 3 failed: the provider said no\. Draw it again below/);
   assert.match(h, /Sheet 4 came back with no usable cell/);
   assert.match(h, /data-act=openstudio data-gen=G106 data-i=1[^>]*>Open G106/, 'a sheet with no key screen has one free “Cut it anyway” on its batch: the set links to it');
@@ -391,7 +391,7 @@ test('Motion: ONE preview for the pack, the five presets, Energy / Float / Swirl
   for (const l of ['Energy', 'Float', 'Swirl', 'Size']) assert.match(h, new RegExp(`<span>${l}<\\/span>`));
   assert.doesNotMatch(h, /Explosion|Gravity/);
   assert.match(h, /data-psbp=magnitude data-id=P001/, 'the engine’s keys travel unchanged: only the labels were renamed');
-  assert.match(h, /<details class=fx-adv><summary>Advanced: particles, spin<\/summary>/);
+  assert.match(h, /<details class=fx-adv><summary>Advanced: reactions, spin<\/summary>/);
   assert.match(h, /data-psbp=count/);
   assert.match(h, /data-psbp=spin/);
   assert.match(h, /data-psbp=particle_size data-id=P001/, 'Size is a main slider: how big the particles look (engine particle_size)');
