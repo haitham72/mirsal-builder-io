@@ -16,7 +16,7 @@ Mirsal Builder is a local, private app. The words below mean the same in
   model pre-reviews only and never approves.
 - **"Use it anyway" (allow)** — a recorded, reversible human click that lets a
   judgement-call block through. Only Telegram's own limits stay final.
-- **Particle set / burst** — still/animated sprites owned by library stickers, and the
+- **Reaction set / burst** — still/animated sprites owned by library stickers, and the
   burst rendered from them. Adding the burst affirms it in a pack.
 
 - **Plan** — saved character, cell, tag and prompt instructions before generation.
@@ -96,8 +96,8 @@ Python's blocks are final where Telegram itself would refuse the file, and nowhe
 | **Help & Support** | describe a problem in plain words: the local support agent answers from the published FAQ and `docs/` (staff also the code), reads a screenshot with the local vision model, and hands over to a person with one ticket and one Telegram ping; replies come back as notifications; a resolved issue proposes an FAQ entry for review. [docs/agent-and-chat.md](docs/agent-and-chat.md) "Support", [docs/api.md](docs/api.md) "Help & Support" |
 | **Tickets** | every server error, failed job or refused Telegram send, and every **Report** (batch, particle row, chat reply) is a ticket: what happened, the person's words, the issue, a proposed fix drafted by the local model, one-click questions; Settings > Tickets; a Postgres copy. LangSmith is gone. [docs/store-and-search.md](docs/store-and-search.md) |
 | **Testing** | tiers chosen by what a change can actually break: `mirsal test fast` (9s), `focused`, `area <module>` (what that file maps to). The slow tier is retired (Haitham, 2026-10-03): never run, never requested. Nothing maps, nothing runs. [docs/testing.md](docs/testing.md) |
-| **Particle effects** | AI image or text-only Kling animated sheets, keyed/cut sprites, one deterministic particle simulator, and ordinary animated-sticker delivery. Animated-sprite restoration is undergoing acceptance. [docs/effects.md](docs/effects.md) |
-| **Particle sets** | Sets belong to library stickers, one saved version per row (v1, v2...); three equal sources (sticker sprites, AI image sprites, Kling from scratch); animated sprites in the simulator; Save / Save as new / Add to pack; mistaken-pack recovery; soft delete and restore. [docs/particles.md](docs/particles.md) |
+| **Reaction effects** | AI image or text-only Kling animated sheets, keyed/cut sprites, one deterministic reaction simulator, and ordinary animated-sticker delivery. Animated-sprite restoration is undergoing acceptance. [docs/effects.md](docs/effects.md) |
+| **Reaction sets** | Sets belong to library stickers, one saved version per row (v1, v2...); three equal sources (sticker sprites, AI image sprites, Kling from scratch); animated sprites in the simulator; Save / Save as new / Add to pack; mistaken-pack recovery; soft delete and restore. One fixed animation per emoji (the 1800 wall); each pack varies art + Size/Energy. Optional Lottie export (web only). [docs/reaction.md](docs/reaction.md) |
 | **Trending** | public packs to like, comment on and copy into your own Library; maker names, views and uses, with relative attention scoring. [docs/api.md](docs/api.md) |
 | **Open work** | [docs/backlog.md](docs/backlog.md) lists unbuilt work; [docs/waiting-for-haitham.md](docs/waiting-for-haitham.md) holds human decisions and paid checks. The theme, Home bands, console refactor and fake-server batch proofs are complete on `edit-design`. Public hosting and Google OAuth remain paused: [deployment_plan.md](docs/deployment_plan.md). |
 | **Burst creation (proposal)** | many packs from one liked sheet: reuse the image, pick actions, one queue each, async; waits for Haitham's go (W27) | [docs/burst_plan.md](docs/burst_plan.md) |

@@ -165,7 +165,7 @@ Each line is the module's own first docstring line.
 - `measure.py` — Phase 2 step S4: how often does a video made from the normalised video sheet leave its cell?
 - `metrics.py` — Quality and timing numbers from what is already on disk: no new bookkeeping, no model, no network.
 - `notifications.py` — In-app notifications (docs/agent-and-chat.md "Support"): what reaches a person when an admin answers or resolves their issue.
-- `particle_sets.py` — Durable sticker-owned particle sets (`docs/particles.md`).
+- `particle_sets.py` — Durable sticker-owned particle sets (`docs/reaction.md`).
 - `people.py` — Account requests on the office LAN (docs/api.md, Office accounts on the LAN): a sign-up waiting for approval, a forgotten password, a request for more
 - `pipeline.py` — Generation lifecycle: 7 stages, each a real step with an event line in out/G00N/events.jsonl.
 - `purge.py` — Emptying the trash: the purge of removed batches and deleted packs (Haitham, 2026-10-03: "Cleaning the trash"). Remove batch, Delete pack and a …

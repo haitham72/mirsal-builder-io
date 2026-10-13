@@ -60,8 +60,6 @@ Recommendation: publish the accounts, telegram and troubleshooting entries first
 
 ## D. Particle verdicts (nothing is built on a guess)
 
-**25. Per-emoji motion or shared motion?** Sets belong to stickers, and ordinary animated-sticker delivery is settled. Should a pack use shared burst motion or different motion for each emoji? Recommendation: retain shared motion and presets until this is requested. Unblocks: an optional per-emoji motion design; it does not block the current simulator or Add to pack.
-
 **27. Go for burst creation (P14), and its four questions.** Many packs from one liked sheet (`docs/burst_plan.md`): is the go given, and (1) is 6 lanes per burst the right cap (a setting?), (2) does each lane become its own pack automatically or a batch the person adds to a pack, (3) may the suggestions use the vision model on the sheet (with the one-time AI vision yes), (4) is `B###/Q###` acceptable as the lane id? Recommendation: build when explicitly authorized; answers 6, a batch (adding stays your click), yes with the one-time yes, yes. Unblocks: the whole burst-creation build.
 
 

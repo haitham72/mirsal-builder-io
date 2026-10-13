@@ -537,7 +537,7 @@ and say which branch and commit in the report.
   engine import ban now covers `fastapi`/`pydantic` too (check the boundary
   test actually imports enough engine modules to catch it).
 - The **particle-set model** (a set belongs to stickers, one saved row per set;
-  `docs/particles.md` is the architecture): the Library > Particles screens,
+  `docs/reaction.md` is the architecture): the Library > Particles screens,
   the pack particle studio, the chat intents. Only Telegram delivery of a burst
   is open.
 - **Burst creation** (many packs from one liked sheet) is a **proposal only**,
@@ -589,7 +589,7 @@ the project against them) -> `docs/waiting-for-haitham.md` and `docs/backlog.md`
 `docs/engine-and-studio.md` (the golden path, the verifier, the gates, "Use it
 anyway") -> `docs/agent-and-chat.md` -> `docs/generation.md` +
 `docs/higgsfield.md` + `docs/operator.md` -> `docs/store-and-search.md` ->
-`docs/api.md` -> `docs/design.md` -> `docs/effects.md` + `docs/particles.md`
+`docs/api.md` -> `docs/design.md` -> `docs/effects.md` + `docs/reaction.md`
 -> `docs/burst_plan.md` (a proposal) -> `docs/onboarding.md` -> `docs/measurements.md`.
 Then `docs/inputs/` if you want the owner's own reference material.
 
@@ -681,7 +681,7 @@ other to a one-liner in §6.
   `welcome.js`, `console/index.html` vs `UI_FILES` servability,
   `tests/test_js.py` guard, `docs/api.md` vs `openapi.py` vs `server.py` vs
   `docs/http_route_inventory.md` drift, `docs/design.md` §9,
-  `docs/engine-and-studio.md`, `docs/particles.md`,
+  `docs/engine-and-studio.md`, `docs/reaction.md`,
   `docs/burst_plan.md`, README/CLAUDE/tracker contradictions, `out/`-in-git
   counts. Claims C23, C24. Hunts: dead stubs, disabled/ignored controls,
   servability (every script in `index.html` ⊆ `UI_FILES`), polling/memory

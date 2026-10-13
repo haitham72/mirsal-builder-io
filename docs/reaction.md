@@ -1,6 +1,6 @@
-# Particle sets and bursts
+# Reaction sets and bursts (renamed from Particles, 2026-10-13)
 
-This is the particle area's architecture document (the filename stays for existing links). Particles are owned by library stickers; every saved version is a row under its sticker; the editor offers three equal sources; animated sprites play inside the simulator; mistaken sticker packs can be recovered as particles. Accepted by Haitham in his browser on 2026-10-04. Open work is in `backlog.md` (particles).
+This is the reaction area's architecture document (formerly `docs/particles.md`; that path stays as a pointer). Reactions are owned by library stickers; every saved version is a row under its sticker; the editor offers three equal sources; animated sprites play inside the simulator; mistaken sticker packs can be recovered as reactions. Accepted by Haitham in his browser on 2026-10-04. Open work is in `backlog.md` (reactions). User-facing copy says **reaction** everywhere; API routes (`/api/particles`), storage (`out/particles/P###`) and internal names keep `particles` for compatibility.
 
 ## 1. Ownership and vocabulary
 
@@ -92,6 +92,22 @@ Legacy `/api/effects/*`, `packs` input and `/assign`/`unassign` remain for one r
 
 ## 7. How it is tested, and what is open
 
-Fake providers, temporary libraries and scratch copies of `out/` only; the browser on a spare port, never the live server; nothing is generated for a check (`docs/testing.md`, the test budget). The guards: `tests/test_particle_rows.py` (rows, Save / Save as new, Add to pack and its parent link, adopting older runs and drawn sheets), `tests/test_particle_sets.py`, `tests/test_particle_owner.py`, `tests/test_particle_animated.py`, and the node tests `pack_particles`, `particles`, `particle_editor`.
+Fake providers, temporary libraries and scratch copies of `out/` only; the browser on a spare port, never the live server; nothing is generated for a check (`docs/testing.md`, the test budget). The guards: `tests/test_particle_rows.py` (rows, Save / Save as new, Add to pack and its parent link, adopting older runs and drawn sheets), `tests/test_particle_sets.py`, `tests/test_particle_owner.py`, `tests/test_particle_animated.py`, `tests/test_emoji_motion.py` (the per-emoji map, Lottie keyframes), and the node tests `pack_particles`, `particles`, `particle_editor`.
 
-Ordinary animated stickers in the destination pack are the settled delivery. Open (`backlog.md`): per-emoji motion (W25), separate Telegram effect delivery, sprite refinement from the chat, a permanent purge of deleted sets, and burst creation across packs (W27, [burst_plan.md](burst_plan.md)).
+Ordinary animated stickers in the destination pack are the settled delivery. Open (`backlog.md`): separate Telegram effect delivery, sprite refinement from the chat, a permanent purge of deleted sets, and burst creation across packs (W27, [burst_plan.md](burst_plan.md)).
+
+## 8. One animation per emoji, pack variations on top (2026-10-13)
+
+**The rule (Haitham).** Every predefined emoji owns **one fixed animation**, shared by every pack; a pack varies only sprite art plus Size/Energy. This closes W25 (per-emoji vs shared motion) as per-emoji motion with locked type. Batch create/recreate is untouched.
+
+**The map.** `engine/emoji_motion.py` (pure, rule 3): `CORE_MOTIONS` pins the 36 mood tokens to a preset + param overrides; any other bank token falls back deterministically by hash onto the five simulator presets. Motion sentences come from the existing `FACE_SENTENCES` / `BODY_SENTENCES` (`generation/actions.py`). `flow/particle_sets.emoji_motions()` merges the map with `generation_bank()` (>1800, glyph + order) for the read-only wall: `GET /api/particles/emoji-motions` (alias `/api/particles/reactions`).
+
+**The two views (the anti-chaos).** The pack's Reaction studio has a scope switch: **This pack** (default) shows `GET /api/packs/{id}/reactions` (`reactions_for_pack`): one row per emoji in the pack — glyph, token, inherited preset + motion sentence (locked), its stickers and sets; art is changed per row, Size/Energy are the only tunable sliders. **All 1800** shows the generic wall (glyph + token + preset chip, search, first 120 matches): read-only, no Edit/Duplicate/Delete, motion never tunable there. Five legacy surfaces (Library cards, pack studio cards, sticker rows, batch section, `#/effects`) keep working; new work goes through these two views.
+
+## 9. Three outputs, all optional (2026-10-13)
+
+WebM VP9+alpha stays the primary and only Telegram delivery. Kling-animated sprites stay the paid path. **Lottie JSON** is the third, web-only output: `engine/particles.export_lottie()` maps deterministic trajectories onto position/scale/rotation/opacity keyframes (placeholder shapes; sprites attach by index); `POST /api/particles/{id}/export-lottie` stores `renders/L###.lottie.json`; the burst panel's **Lottie** button downloads it. No new dependency (stdlib JSON). Documented limits: large files for many particles × frames, renderer differences, Telegram never reads it.
+
+## 10. Migrating random sets onto the map (2026-10-13)
+
+`particle_sets.adopt_emoji_map()` (CLI `python -m mirsal particles adopt-emoji-map`): idempotent, free. Keeps every byte; replaces free motion with the emoji map's motion for the set's first owner sticker's emoji token (else its first element); preserves tuned Size/Energy; writes `set.json.pre-emoji-map` once; history `ADOPT_EMOJI`. Sets already mapped (`emoji_motion.version: 1`) are skipped.

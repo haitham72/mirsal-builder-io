@@ -12,11 +12,11 @@ Status words: **open** (can be built now) · **needs Haitham** (a verdict first,
 - Inline `style="font-size:..."` in the scripts is still off the type scale. **open**.
 - Haitham's eyes on every screen. **needs Haitham** (W1).
 
-## Particles and the welcome modal (`docs/effects.md` section 8, `docs/particles.md`, `docs/onboarding.md`)
+## Particles and the welcome modal (`docs/effects.md` section 8, `docs/reaction.md`, `docs/onboarding.md`)
 - **Animated sprites on their own.** A stand-alone set (the Studio's Particles choice, the chat's "on their own") draws still sprites only: the Kling path (`/more {mode: video}`) builds an effect from a pack's stickers and refuses a set no sticker owns. It needs an effect without a pack. **open**
 
 - A real paid run of the AI-drawn particle sheet from the screen, to see how a real Nano Banana particle sheet cuts (the price and the job path are tested on the fake CLI). **needs a paid test** (W2).
-- Per-emoji burst motion versus shared motion (W25), and separate Telegram effect/download delivery. **needs Haitham**.
+- Separate Telegram effect/download delivery. **needs Haitham** (per-emoji motion is settled: reaction.md section 8).
 - Burst creation, many packs from one liked sheet (P14; `docs/burst_plan.md`). **needs Haitham** (W27).
 - Particle sets are not part of the trash purge yet (a deleted set waits in `out/trash/particles/`). **open**.
 - `DEFAULT_SPRITE_PX` 100 vs 200. **needs Haitham** (W21).
