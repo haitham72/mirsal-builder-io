@@ -425,11 +425,10 @@ ACT.psbrender=async el=>{const [s,b]=spBurstSet(el);if(!s)return;if(!b.pack)retu
  await spBurstReload(s.id);if(typeof ptCounts==='function'&&b.pack)ptCounts(b.pack);toast(r.j.status==='READY'?'Rendered: the burst is below':'Rendered, but a Telegram limit is broken: see its checks',r.j.status!=='READY')};
 ACT.psblottie=async el=>{const [s,b]=spBurstSet(el);if(!s)return;el.disabled=true;
  const r=await post(`/api/particles/${s.id}/export-lottie`,{...(b.preset?{preset:b.preset}:{}),params:{...fxClean(b.par),...spBurstSize(b)}});el.disabled=false;
- if(!r.ok)return toast(r.j.error||'Could not export Lottie',1);
- const blob=new Blob([JSON.stringify({v:"5.7.4",layers:r.j.layers,note:"motion keyframes, web only; attach sprite PNGs by index"})],{type:"application/json"}),a=document.createElement('a');
- a.href=URL.createObjectURL(blob);a.download=`${s.name||s.id} ${r.j.id}.lottie.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
- toast(`Lottie ${r.j.id}: ${r.j.layers} layers (web only; Telegram stays WebM)`)};
-ACT.psbadd=async el=>{const id=el.dataset.id,pk=el.dataset.p,s=SPBS[id]||spFind(id);el.disabled=true;
+ if(!r.ok||!r.j.url)return toast((r.j&&r.j.error)||'Could not export Lottie',1);
+ const a=document.createElement('a');
+ a.href=r.j.url;a.download=`${s.name||s.id} ${r.j.id}.lottie.json`;document.body.appendChild(a);a.click();a.remove();
+ toast(`Lottie ${r.j.id}: ${r.j.layers} layers, full animation JSON (web only; Telegram stays WebM)`)};ACT.psbadd=async el=>{const id=el.dataset.id,pk=el.dataset.p,s=SPBS[id]||spFind(id);el.disabled=true;
  const sid=el.dataset.s||((SP.scope||{}).sticker_id)||undefined,r=await post(`/api/particles/${id}/add`,{renders:[el.dataset.r],pack_id:pk,...(sid?{sticker_id:sid}:{})});if(!r.ok){el.disabled=false;return toast(r.j.error||'Could not add it',1)}
  toast(`Added to ${s?spPackName(s,pk):'the pack'}: the burst is a sticker of the pack now`);
  if(typeof loadLib==='function')await loadLib();await spBurstReload(id);if(typeof ptCounts==='function')ptCounts(pk);if(typeof ptForget==='function')ptForget()};

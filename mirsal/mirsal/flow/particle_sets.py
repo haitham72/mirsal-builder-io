@@ -1650,15 +1650,17 @@ def export_lottie(out: Path, lib, pid: str, *, preset: str | None = None, params
     (d / "renders").mkdir(exist_ok=True)
     ids = [int(str(r.get("id") or "R000")[1:]) for r in s.get("renders") or [] if str(r.get("id", "")).startswith("R")]
     rid = f"L{(max(ids) if ids else 0) + 1:03d}"
-    (d / f"renders/{rid}.lottie.json").write_text(_json.dumps(doc), encoding="utf-8")
+    fname = f"renders/{rid}.lottie.json"
+    (d / fname).write_text(_json.dumps(doc), encoding="utf-8")
     with _LOCK:
         s = read(out, pid)
         s.setdefault("lottie", []).append({"id": rid, "preset": use_preset, "params": base.to_dict(),
-                                           "file": f"renders/{rid}.lottie.json", "created": round(__import__('time').time(), 3)})
+                                           "file": fname, "created": round(time.time(), 3)})
         hist(s, "local", "LOTTIE", f"exported {rid} as Lottie ({use_preset})", {"preset": use_preset})
         _write(out, s)
     return {"id": rid, "set": str(pid).upper(), "preset": use_preset, "params": base.to_dict(),
-            "file": f"renders/{rid}.lottie.json", "layers": len(doc.get("layers") or [])}
+            "file": fname, "url": f"/out/particles/{str(pid).upper()}/{fname}",
+            "layers": len(doc.get("layers") or [])}
 
 
 def adopt_emoji_map(out: Path, lib, user: str = "python") -> list[dict]:

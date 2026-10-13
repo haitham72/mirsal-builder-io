@@ -37,6 +37,15 @@ class ReactionBankTests(unittest.TestCase):
         self.assertIsNone(bank["school"]["set_id"])
         self.assertEqual(len(bank), len(ps.emoji_motions(self.out, None)), "every bank token is listed")
 
+    def test_export_lottie_returns_a_real_downloadable_document(self):
+        r = ps.export_lottie(self.out, None, "P002", preset="burst")
+        self.assertEqual(r["url"], "/out/particles/P002/renders/L001.lottie.json")
+        doc = json.loads((self.out / "particles" / "P002" / r["file"]).read_text(encoding="utf-8"))
+        self.assertEqual(doc["v"], "5.7.4")
+        self.assertGreater(len(doc["layers"]), 0)
+        self.assertTrue(all(l["ks"]["p"]["k"] for l in doc["layers"]), "every layer carries position keyframes")
+        self.assertEqual(r["layers"], len(doc["layers"]))
+
     def test_default_sprite_is_free_and_idempotent(self):
         first = ps.ensure_default_sprite(self.out, None, "P002")
         self.assertTrue(first["default"])
