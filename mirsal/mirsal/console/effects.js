@@ -40,7 +40,8 @@ const fxCols=grid=>grid==='3x3'?9:4;
 
 FX.root=()=>$('s-effects');FX.alive=()=>route_==='effects';FX.draw=()=>fxDraw();
 RENDER.effects=async arg=>{await loadLib();clearTimeout(FX.timer);
- if(arg&&/^E\d+$/i.test(arg)){if(FX.eid!==arg.toUpperCase())fxReset(FX);FX.eid=arg.toUpperCase();await fxLoad(FX)}else{FX.eid='';FX.rec=null;const r=await api('/api/effects');FX.past=r.ok?r.j.effects.slice(-8).reverse():[]}
+ if(arg&&/^E\d+$/i.test(arg)){if(FX.eid!==arg.toUpperCase())fxReset(FX);FX.eid=arg.toUpperCase();await fxLoad(FX)}else{FX.eid='';FX.rec=null;const r=await api('/api/effects');FX.past=r.ok?r.j.effects.slice(-8).reverse():[];
+  if(!FX.ekBank)api('/api/particles/emoji-motions').then(b=>{if(b.ok){FX.ekBank=b.j.motions||[];if(FX.alive()&&!FX.eid)fxDraw()}})}
  fxDraw()};
 ACT.fxback=()=>{FX.eid='';FX.rec=null;location.hash='#/effects'};
 /* a state forgets everything about the effect it was showing (the pack and the mode stay) */
@@ -61,33 +62,34 @@ const fxSig=X=>{const e=X.rec;if(!e)return'';const s=fxSet(e)||{};return JSON.st
 function fxPoll(X){clearTimeout(X.timer);if(!fxBusy(X)||!X.alive())return;
  X.timer=setTimeout(async()=>{if(!X.eid)return;await fxLoad(X);const sig=fxSig(X);if(X.alive()&&sig!==X.last){X.last=sig;X.draw()}},2200)}
 
-/* ---------- setup (the pro screen): a pack, its stickers, how */
-const fxPackOf=()=>packById(FX.pack);
-function fxSetup(){const p=fxPackOf(),packs=LIB.packs.filter(x=>x.stickers.length);
- return `<div class=ph><h1>Reaction effects</h1></div><div class=mut>Pick an emoji pack. Each sticker gets a 3-second burst of related reactions, like the reaction Telegram plays when you press the emoji: Batman bursts bat signals, a jewelry sticker gold bars and diamonds. It starts from nothing and ends with nothing.</div>
-  ${FX.past.length?`<div class=fx-past><span class=mut>Earlier</span>${FX.past.map(x=>`<a href="#/effects/${x.id}">${esc(x.id)} · ${esc(x.pack_name||'')} <small>${esc(String(x.status||'').toLowerCase())}</small></a>`).join('')}</div>`:''}
-  <div class=sh style="margin-top:18px">1 · Choose the pack</div>
-  <div class=fx-packs>${packs.map(x=>`<button class="fx-pack${x.id===FX.pack?' on':''}" data-act=fxpack data-id=${x.id}><span class=fx-cv>${coverMedia(x)}</span><b>${esc(x.name)}</b><small>${x.stickers.length} stickers</small></button>`).join('')||'<div class=mut>Make a pack first (Library).</div>'}</div>
-  ${p?`<div class=sh style="margin-top:18px">2 · Which stickers <button class="link" data-act=fxall data-v=1>all</button><button class=link data-act=fxall data-v=0>none</button></div>
-  <div class=fx-sts>${p.stickers.map(s=>`<button class="fx-st${FX.sel.has(s.id)?' on':''}" data-act=fxst data-id=${s.id} title="${esc(s.name)}">${media(s)}<span>${esc(s.emoji||'')}</span></button>`).join('')}</div>
-  <div class=sh style="margin-top:18px">3 · How are the reactions made</div>
-  <div class=fx-modes><label class="fx-mode${FX.mode==='sim'?' on':''}"><input type=radio name=fxm ${FX.mode==='sim'?'checked':''} data-act=fxmode data-v=sim><b>Simulate</b><small>Free. The reactions fly by gravity, explosion and vortex sliders you move, with a live preview. The reactions are drawn for you by AI (a sheet of different small particles, a few credits once), or they are the stickers themselves.</small></label>
-   <label class="fx-mode${FX.mode==='video'?' on':''}"><input type=radio name=fxm ${FX.mode==='video'?'checked':''} data-act=fxmode data-v=video><b>Video from scratch</b><small>Kling draws the burst from text only, on an empty screen. About 4.5 credits for a clip of 4 cells (2x2); the price is shown before anything is spent.</small></label></div>
-  ${FX.mode==='video'?`<div class=row><span class=mut>Cells in one clip</span><div class=tabs style="margin:0;gap:6px"><button class="tab${FX.grid==='2x2'?' on':''}" data-act=fxgrid data-v=2x2>2 x 2</button><button class="tab${FX.grid==='3x3'?' on':''}" data-act=fxgrid data-v=3x3>3 x 3</button></div>${FX.grid==='3x3'?'<span class=fx-warn>3 x 3 was measured poor: particles cross cells and nothing ends empty.</span>':''}</div>`:''}
-  <div class=row><input id=fxnote type=text placeholder="Your own reactions? e.g. reactions: gold bars, diamonds (optional)" value="${esc(FX.note)}" style="flex:1;min-width:260px"></div>
-  <div class=row><button class="btn pri gbig" data-act=fxgo ${FX.sel.size?'':'disabled'}>${ic('fx')} Look at ${FX.sel.size} sticker${FX.sel.size===1?'':'s'}</button><span class=mut>A vision model looks at them if you allow it (asked once); otherwise a built-in table decides.</span></div>`:''}`}
-ACT.fxpack=el=>{FX.pack=el.dataset.id;FX.sel=new Set((fxPackOf()||{stickers:[]}).stickers.map(s=>s.id));fxDraw()};
-ACT.fxst=el=>{const i=el.dataset.id;FX.sel.has(i)?FX.sel.delete(i):FX.sel.add(i);fxDraw()};
-ACT.fxall=el=>{const p=fxPackOf();FX.sel=el.dataset.v==='1'&&p?new Set(p.stickers.map(s=>s.id)):new Set();fxDraw()};
-ACT.fxmode=el=>{FX.mode=el.dataset.v;fxDraw()};
-ACT.fxgrid=el=>{FX.grid=el.dataset.v;fxDraw()};
-ACT.fxgo=()=>{const n=$('fxnote');FX.note=n?n.value:FX.note;
- if(vlmState()===null){VLM.then=()=>fxStart();return dlg(`<h2>Allow AI vision of your stickers?</h2><p class=mut>To choose what bursts out of each sticker, the pictures are sent to the vision model: the local one (LM Studio) when it is running, otherwise the cloud one if you set it up. You are asked once. Without it a built-in table of common emoji decides.</p>
-   <div class=row style="justify-content:flex-end"><button class=btn data-act=fxnovlm>Use the table</button><button class="btn pri" data-act=vlmyes>Allow</button></div>`)}
- fxStart()};
-ACT.fxnovlm=()=>{vlmSet('0');closeDlg();fxStart()};
-async function fxStart(){const r=await post('/api/effects',{pack_id:FX.pack,sticker_ids:[...FX.sel],mode:FX.mode,grid:FX.grid,note:FX.note,allow_vlm:vlmState()==='1'});
- if(!r.ok)return toast(r.j.error||'Could not start',1);fxReset(FX);FX.eid=r.j.id;location.hash='#/effects/'+FX.eid}
+/* ---------- setup: the emoji bank. No packs, no auto-playing stickers: search + pick emojis (static glyphs, motion locked), then create reactions for them as one free simulator set, opened in the Studio. Earlier E### runs stay as text links. docs/emoji-bank.md is the bank's human home; the code truth is generation/actions.py (`generation_bank`), read here through GET /api/particles/emoji-motions. */
+const FXEKQ={q:''};
+const fxEkSel=()=>FX.ekSel||(FX.ekSel=new Set());
+function fxEkList(){const bank=FX.ekBank||[],q=FXEKQ.q.trim().toLowerCase();
+ const list=q?bank.filter(m=>(m.token+' '+m.emoji+' '+(m.motion||'')).toLowerCase().includes(q)):bank;
+ return list.slice(0,120)}
+function fxEkCard(m){const on=fxEkSel().has(m.token);
+ return `<button class="ps-emo${on?' on':''}" data-act=fxek data-t="${esc(m.token)}" aria-pressed=${on} title="${esc((m.motion||m.preset||'')+' · motion locked')}"><span class=ps-glyph>${esc(m.emoji||'o')}</span><b>${esc(m.token)}</b><small class=mut>${esc(m.preset||'')}</small></button>`}
+function fxEkWrap(){const sel=fxEkSel();
+ return `<div class=row><input type=search data-fxekq placeholder="Search 1898 reactions..." value="${esc(FXEKQ.q)}" aria-label="Search the emoji bank"></div>
+ <div class=ps-wall data-fxekwall>${fxEkList().map(fxEkCard).join('')||'<span class=mut>No match.</span>'}</div>
+ <small class=mut>Showing ${fxEkList().length} of ${(FX.ekBank||[]).length} · core moods first · static glyphs: nothing plays until you render.</small>
+ <div class=row style="margin-top:10px"><button class="btn pri gbig" data-act=fxekgo ${sel.size?'':'disabled'}>${ic('fx')} Create reactions${sel.size?` for ${sel.size} emoji`:''}</button><span class=mut>A free simulator set, opened in the Studio. At most 9 emojis: a 2 × 2 sheet holds 4, a 3 × 3 holds 9.</span></div>`}
+function fxSetup(){
+ return `<div class=ph><h1>Reaction effects</h1></div><div class=mut>Pick emojis from the bank. Each has one fixed animation.</div>
+  ${FX.ekBank?`<div data-fxekwrap>${fxEkWrap()}</div>`:`<div class=fx-job><span class=spin></span> <span class=mut>Reading the emoji bank…</span></div>`}
+  ${FX.past.length?`<div class=fx-past><span class=mut>Earlier</span>${FX.past.map(x=>`<a href="#/effects/${x.id}">${esc(x.id)} · ${esc(x.pack_name||'')} <small>${esc(String(x.status||'').toLowerCase())}</small></a>`).join('')}</div>`:''}`}
+function fxEkRefresh(){const root=document.querySelector&&document.querySelector('[data-fxekwrap]');if(!root)return;
+ const wasQ=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.fxekq!==undefined;
+ root.outerHTML=`<div data-fxekwrap>${fxEkWrap()}</div>`;
+ if(wasQ){const inp=document.querySelector('[data-fxekq]');if(inp){inp.focus();try{inp.setSelectionRange(inp.value.length,inp.value.length)}catch(e){}}}}
+document.addEventListener('input',ev=>{const t=ev.target;if(t&&t.dataset&&t.dataset.fxekq!==undefined){FXEKQ.q=t.value;clearTimeout(FX.ekT);FX.ekT=setTimeout(fxEkRefresh,250)}});
+ACT.fxek=el=>{const sel=fxEkSel(),t=el.dataset.t;if(sel.has(t))sel.delete(t);else{if(sel.size>=9)return toast('A 3 × 3 sheet holds 9: take one off first',1);sel.add(t)}fxEkRefresh()};
+ACT.fxekgo=async el=>{const toks=[...fxEkSel()];if(!toks.length)return;el.disabled=true;
+ const r=await post('/api/particles',{from_request:'reactions for '+toks.join(', '),grid:toks.length>4?'3x3':'2x2'});el.disabled=false;
+ if(!r.ok)return toast(r.j.error||'Could not read those reactions',1);
+ fxEkSel().clear();if(FX.alive())fxDraw();toast('Reactions ready: opening the simulator');
+ location.hash='#/studio';setTimeout(()=>{if(typeof spOpenSet==='function')spOpenSet(r.j.id)},300)};
 
 /* ---------- one effect */
 const fxSticker=(e,sid)=>{const p=packById(e.pack_id),s=p&&p.stickers.find(x=>x.id===sid);return s||null};

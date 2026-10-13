@@ -676,6 +676,7 @@ button.logo{border:0;padding:0;cursor:pointer;background:none}button.logo:hover 
 .ps-emo{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px;border-radius:var(--r-m);background:var(--sf);box-shadow:inset 0 0 0 1px var(--aline);text-align:center}
 .ps-emo .ps-glyph{font-size:var(--fs-2xl);line-height:1}
 .ps-emo b{font-size:var(--fs-s)}.ps-emo small{color:var(--mut);font-size:var(--fs-xs)}
+.ps-emo.on{box-shadow:inset 0 0 0 2px var(--pri)}
 .sheet-picture{position:relative;min-width:0;overflow:hidden;border-radius:var(--r-m)}
 .sheet-picture img{display:block;width:100%;height:auto}
 .sheet-picture.blocked img{opacity:.45}

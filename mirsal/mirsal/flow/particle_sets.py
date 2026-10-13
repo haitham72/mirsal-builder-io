@@ -803,7 +803,7 @@ def drawing(s: dict) -> bool:
 
 
 _REQ_LEAD = re.compile(r"^\s*(?:please\s+)?(?:(?:can|could|would)\s+you\s+)?(?:create|make|generate|draw|give\s+me|i\s+want|i\s+need|build|do)?\s*"
-                       r"(?:me\s+)?(?:some\s+|a\s+set\s+of\s+|a\s+|an\s+)?(?:new\s+)?(?:particle\s+effects?|particle\s+sets?|particles?|bursts?)?\s*(?:for|of|with|from|showing|:)?\s*", re.I)
+                       r"(?:me\s+)?(?:some\s+|a\s+set\s+of\s+|a\s+|an\s+)?(?:new\s+)?(?:particle\s+effects?|particle\s+sets?|particles?|reaction\s+effects?|reaction\s+sets?|reactions?|bursts?)?\s*(?:for|of|with|from|showing|:)?\s*", re.I)
 _REQ_SPLIT = re.compile(r"\s*(?:,|;|&|\+|/|\band\b|\bplus\b|\bwith\b)\s*", re.I)
 
 
@@ -819,12 +819,12 @@ def _singular(word: str) -> str:
 
 
 def request_elements(text: str, limit: int) -> list[str]:
-    """The particles a plain request names: "create particles for lipsticks and ribbons" -> ["lipstick", "ribbon"]. The lead-in ("create particles
+    """The reactions a plain request names: "create particles for lipsticks and ribbons" -> ["lipstick", "ribbon"] (and "reactions for laugh, cry" -> ["laugh", "cry"]). The lead-in ("create particles
     for") goes, the rest splits on commas, "and", "&", "+", "/"; each is singular (a sprite is one thing), at most MAX_WORDS words, at most `limit`
     (the sheet's cells). Deterministic: no model is asked, so the same words always give the same set."""
     from ..generation import effect_prompts as ep
     t = _REQ_LEAD.sub("", " ".join(str(text or "").split()))
-    t = re.sub(r"\b(?:particle\s+effects?|particles?)\b", " ", t, flags=re.I)
+    t = re.sub(r"\b(?:particle\s+effects?|particles?|reaction\s+effects?|reactions?)\b", " ", t, flags=re.I)
     out: list[str] = []
     for part in _REQ_SPLIT.split(t):
         words = re.sub(r"[^\w\s'-]", " ", part).split()
