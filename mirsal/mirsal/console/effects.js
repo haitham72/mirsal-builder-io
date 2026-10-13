@@ -40,9 +40,10 @@ const fxOptNames=j=>{const a=(j&&(j.options||j.suggestions||j.elements||j.names)
 const fxCols=grid=>grid==='3x3'?9:4;
 
 FX.root=()=>$('s-effects');FX.alive=()=>route_==='effects';FX.draw=()=>fxDraw();
+/* one earlier run, #/effects/E###; #/effects itself is the Studio's particle editor (particles.js wraps this RENDER and passes only an argument) */
 RENDER.effects=async arg=>{await loadLib();clearTimeout(FX.timer);
- if(arg&&/^E\d+$/i.test(arg)){if(FX.eid!==arg.toUpperCase())fxReset(FX);FX.eid=arg.toUpperCase();await fxLoad(FX)}else{FX.eid='';FX.rec=null;const r=await api('/api/effects');FX.past=r.ok?r.j.effects.slice(-8).reverse():[];
-}
+ if(!/^E\d+$/i.test(arg||'')){FX.eid='';FX.rec=null;location.hash='#/effects';return}
+ if(FX.eid!==arg.toUpperCase())fxReset(FX);FX.eid=arg.toUpperCase();await fxLoad(FX);
  fxDraw()};
 ACT.fxback=()=>{FX.eid='';FX.rec=null;location.hash='#/effects'};
 /* a state forgets everything about the effect it was showing (the pack and the mode stay) */
@@ -62,11 +63,6 @@ const fxSig=X=>{const e=X.rec;if(!e)return'';const s=fxSet(e)||{};return JSON.st
   Object.keys(X.gen).map(n=>[n,fxReady(X,n).length,(X.gen[n]||{}).stage,!!(X.gen[n]||{}).busy])])};
 function fxPoll(X){clearTimeout(X.timer);if(!fxBusy(X)||!X.alive())return;
  X.timer=setTimeout(async()=>{if(!X.eid)return;await fxLoad(X);const sig=fxSig(X);if(X.alive()&&sig!==X.last){X.last=sig;X.draw()}},2200)}
-
-/* ---------- the #/effects entry without particles.js (which owns #/effects): earlier E### runs, and the way to Reaction effects (#/reactions, reactions.js) */
-function fxSetup(){
- return `<div class=ph><h1>Particle effects</h1></div><div class=mut>Reactions for one emoji are in <a href="#/reactions">Reaction effects</a>.</div>
-  ${FX.past.length?`<div class=fx-past><span class=mut>Earlier</span>${FX.past.map(x=>`<a href="#/effects/${x.id}">${esc(x.id)} · ${esc(x.pack_name||'')} <small>${esc(String(x.status||'').toLowerCase())}</small></a>`).join('')}</div>`:''}`}
 
 /* ---------- one effect */
 const fxSticker=(e,sid)=>{const p=packById(e.pack_id),s=p&&p.stickers.find(x=>x.id===sid);return s||null};
@@ -197,7 +193,7 @@ function fxRecord(){const e=FX.rec;if(!e)return '';
  if(e.status==='NEW')return head+`<div class=fx-job style="margin-top:16px"><span class=spin></span> <b>Looking at your stickers…</b> <span class=mut>choosing what bursts out of each</span></div>`;
  if(e.status==='ERROR')return head+`<div class=warn>${esc(e.error||'The analysis failed')} <button class=btn data-act=fxback>Back</button></div>`;
  return head+fxBody(FX,e)}
-function fxDraw(){const el=$('s-effects');if(!el)return;el.innerHTML=`<div class="page fx" data-fxx=fx>${FX.eid?fxRecord():fxSetup()}</div>`;FX.last=fxSig(FX);fxAfterDraw(FX)}
+function fxDraw(){const el=$('s-effects');if(!el||!FX.eid)return;el.innerHTML=`<div class="page fx" data-fxx=fx>${fxRecord()}</div>`;FX.last=fxSig(FX);fxAfterDraw(FX)}
 /* what a freshly drawn effect asks for: the ideas and the price of the drawn sheet, the first preview of the set's burst, the price of a video */
 function fxAfterDraw(X){if(X.who==='sp'&&typeof spAfterDraw==='function')return spAfterDraw();const e=X.rec;if(!e||!['READY','RESULTS','VIDEO_REQUESTED','DONE'].includes(e.status))return;
  if(e.mode==='sim')fxDrNeeds(X);if(X.set){if(X.set&&typeof spBurstPreview==='function'){const b=typeof SPB!=='undefined'?SPB[X.set.id]:null;if(!b||!b.pv)spBurstPreview(X.set.id)}}

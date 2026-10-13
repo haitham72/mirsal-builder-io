@@ -679,14 +679,14 @@ button.logo{border:0;padding:0;cursor:pointer;background:none}button.logo:hover 
 .ps-emo.on{box-shadow:inset 0 0 0 2px var(--pri)}
 /* Reaction effects (#/reactions, effects.js fxEkHtml): search + two rows of small emojis, one editor card for the picked one, then the created reactions as simple cards */
 .page.rx{display:flex;flex-direction:column;gap:18px;max-width:1040px}
-.rx-pick{display:flex;flex-direction:column;gap:8px}.rx-top input{width:min(100%,320px)}
+.rx-pick{display:flex;flex-direction:column;gap:8px}.rx-top{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap}.rx-top input{width:min(100%,320px)}
 .rx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:2px}
 .rx-e{position:relative;height:44px;padding:0;border:0;border-radius:var(--r-s);background:none;display:grid;place-items:center;cursor:pointer}
 .rx-e:hover{background:var(--wash)}.rx-e.on{background:var(--wash);box-shadow:inset 0 0 0 2px var(--pri)}
 .rx-g{font-size:var(--fs-2xl);line-height:1;transition:opacity .15s var(--ease),transform .15s var(--ease)}
 .rx-e.play .rx-g{opacity:.25;transform:scale(.8)}
 .rx-fx{position:absolute;left:50%;top:50%;width:160px;height:160px;margin:-80px 0 0 -80px;pointer-events:none;z-index:3}
-.rx-stage{display:grid;place-items:center;aspect-ratio:1;border-radius:var(--r-m);background:var(--wash);overflow:hidden}.rx-stage img{width:100%;height:100%;object-fit:contain}.rx-stage>.rx-g{font-size:calc(var(--fs-2xl)*2)}
+.rx-stage{display:grid;place-items:center;aspect-ratio:1;border-radius:var(--r-m);background:var(--wash);overflow:hidden}.rx-stage>*{grid-area:1/1}.rx-stage img{width:100%;height:100%;object-fit:contain}.rx-ghost{font-size:calc(var(--fs-2xl)*2);line-height:1;opacity:.22}
 .rx-ed{display:grid;grid-template-columns:220px 1fr;gap:18px;padding:14px;border-radius:var(--r-l);background:var(--sf);box-shadow:var(--sh),inset 0 0 0 1px var(--aline)}
 .rx-ctl{display:flex;flex-direction:column;gap:10px;min-width:0}
 .rx-h{display:flex;align-items:center;gap:8px}.rx-h .rx-g{font-size:var(--fs-2xl)}.rx-h b{font-size:var(--fs-l)}.rx-h .link{margin-left:auto}
@@ -702,7 +702,8 @@ button.logo{border:0;padding:0;cursor:pointer;background:none}button.logo:hover 
 .rx-card:hover{box-shadow:var(--sh),inset 0 0 0 1px var(--aline)}
 .rx-meta{display:flex;align-items:center;gap:6px;min-width:0}.rx-meta .rx-g{font-size:var(--fs-xl)}.rx-meta b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rx-meta small{margin-left:auto;white-space:nowrap}
 .rx-acts{display:flex;gap:6px}.rx-acts .btn{flex:1;justify-content:center}
-@media (max-width:760px){.rx-ed{grid-template-columns:1fr}.rx-ed .rx-stage{max-width:260px}.rx-cards{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}}
+.rx-foot{display:flex;padding-top:4px}
+@media (max-width:760px){.rx-foot{position:sticky;bottom:72px;z-index:2;padding:10px 0;background:var(--sf)}.rx-foot .btn{flex:1;justify-content:center}.rx-ed{grid-template-columns:1fr}.rx-ed .rx-stage{max-width:260px}.rx-cards{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}}
 .ps-libh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}.ps-libh h2{margin:0}
 .sheet-picture{position:relative;min-width:0;overflow:hidden;border-radius:var(--r-m)}
 .sheet-picture img{display:block;width:100%;height:auto}

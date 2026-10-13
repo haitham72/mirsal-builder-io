@@ -243,11 +243,3 @@ test('the video price is on its own line too, and the estimator fills that line'
   assert.doesNotMatch(h, /Make the video ·/, 'no price inside the button');
   assert.match(h, /data-fxest=g1/);
 });
-
-test('the #/effects fallback (without particles.js) lists earlier runs and points to Reaction effects; the bank lives in reactions.js', () => {
-  run("FX.past=[{id:'E001',pack_name:'Fruits',status:'READY'}]");
-  const h = run("fxSetup()");
-  assert.match(h, /href="#\/reactions"/);
-  assert.match(h, /E001 · Fruits/);
-  assert.doesNotMatch(h, /data-act=fx?ek|rx-e|<img|<video/, 'no emoji picker here');
-});

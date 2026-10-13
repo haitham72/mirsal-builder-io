@@ -143,9 +143,12 @@ Each line is the module's own first docstring line.
 - `config.py` — (settings: EngineConfig)
 - `effect_checks.py` — Checks for a particle-effect clip (`engine/particles.py`): is it empty at both ends, does it show a burst, does it stay in its cell, does it move; …
 - `effect_video.py` — Particle effects, the video side: a text-only Kling clip (a grid of burst cells on a key-colour screen, each cell empty at the start and at the end) …
+- `emoji_glyph.py` — One emoji glyph as a particle sprite, drawn with the system's colour emoji font (Reaction effects).
+- `emoji_motion.py` — Every bank emoji's one fixed animation (preset + params), pure.
 - `ffmpeg.py` — ffmpeg helpers (subprocess only). Works on Windows/macOS/Linux: uses PATH ffmpeg, else imageio-ffmpeg's bundled binary.
 - `grid.py` — Grid geometry: find where to cut a sticker sheet. Pure (numpy only).
 - `particles.py` — Particle burst: a few sprite images -> a 3 s Telegram video-sticker frame sequence. Pure, deterministic, no network.
+- `lottie.py` — A burst as a playable Lottie JSON: the simulator's trajectories as image layers over the real sprite PNGs (web only).
 - `render.py` — Scale + white outline + report, shared by stills and video frames.
 - `sheet.py` — Part A: rows x cols sheet (3x3, 2x2, 1x1) -> keyed cells -> 512x512 stickers. Pure: arrays in, results out, never raises per cell.
 - `verify.py` — The verifier: ONE catalogue of every check on the golden path (docs/engine-and-studio.md, "The verifier").
@@ -165,6 +168,7 @@ Each line is the module's own first docstring line.
 - `measure.py` — Phase 2 step S4: how often does a video made from the normalised video sheet leave its cell?
 - `metrics.py` — Quality and timing numbers from what is already on disk: no new bookkeeping, no model, no network.
 - `notifications.py` — In-app notifications (docs/agent-and-chat.md "Support"): what reaches a person when an admin answers or resolves their issue.
+- `emoji_reactions.py` — Reaction effects: one bank emoji -> its fixed motion flying as its own glyph -> a Lottie file; no set (`docs/reaction.md` section 13).
 - `particle_sets.py` — Durable sticker-owned particle sets (`docs/reaction.md`).
 - `people.py` — Account requests on the office LAN (docs/api.md, Office accounts on the LAN): a sign-up waiting for approval, a forgotten password, a request for more
 - `pipeline.py` — Generation lifecycle: 7 stages, each a real step with an event line in out/G00N/events.jsonl.

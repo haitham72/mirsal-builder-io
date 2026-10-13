@@ -16,7 +16,7 @@ test('the screen: search, small emojis only, no thumbnail cards of the bank, and
   assert.match(h, /data-rxq placeholder="Search 3 emoji"/);
   assert.equal((h.match(/class="rx-e/g) || []).length, 3, 'one small tile per emoji');
   assert.doesNotMatch(h.split('rx-made')[0], /<img|<video|<b>kiss<\/b>|burst/, 'the emoji rows are glyphs only: no names, no presets, nothing playing');
-  assert.equal((h.match(/<article class=rx-card>/g) || []).length, 2, 'one card per created reaction');
+  assert.equal((h.match(/<article class=rx-card /g) || []).length, 2, 'one card per created reaction');
   assert.match(h, /Your reactions <small class=mut>2<\/small>/);
   assert.match(h, /<img src="\/out\/particles\/emoji\/cry\/renders\/L002.webp"/, 'a card plays its own loop');
   assert.match(h, /data-act=rxdl data-u="\/out\/particles\/emoji\/kiss\/renders\/L001.lottie.json" data-n="kiss L001"/);

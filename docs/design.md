@@ -57,13 +57,13 @@ Interactive elements share hover, press, selected and `:focus-visible` states. C
    reached from the pack and the Library's sticker viewer (D6).
    **Reaction effects** (`#/reactions`, its own screen and file `reactions.js`, prefix `rx`, `studio.css` `.rx-*`; Haitham, 2026-10-13: "minimal small emojis",
    "do not do a lot of thumbnail cards", "search and show a couple of rows only, and only the created each in a proper designed simple card"). Three parts:
-   (1) a search box and **two rows** of small emoji glyphs (`.rx-grid`, 44 px tiles, no names; `rxClip` counts the grid's columns and hides every tile past the
+   (1) a search box with a one-line hint ("Pick an emoji: it flies as itself.") and **two rows** of small emoji glyphs (`.rx-grid`, 44 px tiles, no names; `rxClip` counts the grid's columns and hides every tile past the
    second row, so a search narrows the rows rather than growing them); pointing at a glyph plays its reaction over it, 160 px, in place. (2) The picked emoji in
-   ONE editor card (`.rx-ed`): its reaction looping in a 220 px stage (`.rx-stage`) beside the emoji, its motion sentence, **Motion** (a select, **its own ·
-   <preset>** first), then two groups, each with a heading and **Reset** (`.rx-groups`, `.rx-grp`, `.rx-gh`; side by side when wide): **Simulation** (Speed, Gravity, Swirl, Rotation, Amount, Spread: the motion's own values until moved, `…` before the server answers) and **Shape**: **Size** (×1), **Size variation** (the motion's own until moved, shown as a percent), **Size in**, **Size out**, **Hue** (`.rx-sl`; 0.4 s, 0.4 s, 25°; one line says Hue 0 keeps the emoji's own colours) and **Create reaction**.
-   (3) **Your reactions**: only what was created, newest first, one simple card each (`.rx-card`: the loop on a square stage, the emoji + name, motion · L###,
+   ONE editor card (`.rx-ed`): its reaction looping in a 220 px stage (`.rx-stage`) beside the emoji, its motion sentence,
+   then two groups, each with a heading and **Reset** (`.rx-groups`, `.rx-grp`, `.rx-gh`; side by side when wide): **Simulation** (**Motion**, a select with **its own · <preset>** first, then Speed, Gravity, Swirl, Rotation, Amount, Spread: the motion's own values until moved, `…` before the server answers) and **Shape**: **Size** (×1), **Size variation** (the motion's own until moved, shown as a percent), **Size in**, **Size out**, **Hue** (`.rx-sl`; 0.4 s, 0.4 s, 25°; one line says Hue 0 keeps the emoji's own colours) and **Create reaction**.
+   (3) **Your reactions**: only what was created, newest first, one simple card each (`.rx-card`: the loop on a square stage, the emoji + name, motion · how long ago (the L### id is the tooltip),
    **Lottie** (download) and **Edit** (reopens the editor with that card's options)); nothing else from the bank is ever a card. No pack picker, no sticker
-   grid, no `<video>`, no Kling, no Generate more.
+   grid, no `<video>`, no Kling, no Generate more. Every stage (editor and cards) shows the emoji faintly at its centre under the loop (`.rx-ghost`), because a loop starts and ends empty: a stage is never a blank box. On a phone, **Create reaction** stays on screen (`.rx-foot`, sticky above the tab bar) while the sliders scroll.
 3. **A persistent second column on every screen that has a list** — Library, Chat, AI for sure, and **Studio and Create** because both have real lists
    (Studio: the batches; Create: the pack/prepared sheets). `COL2` and `drawCol2()` (`app.js`) select the routes with lists; the shared column scrolls and can collapse, becoming a drawer below 900px.
 4. **Same geometry everywhere:** same gutters, same card radius, same header height, same place the page title sits. If a screen needs to break the
