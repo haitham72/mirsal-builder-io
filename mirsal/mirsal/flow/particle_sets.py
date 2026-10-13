@@ -1520,3 +1520,196 @@ def list_deleted(out: Path, lib) -> list[dict]:
                      "deleted_at": (gone[-1] if gone else (s.get("history") or [{}])[-1]).get("ts") or s.get("updated")})
     rows.sort(key=lambda r: (r.get("deleted_at") or 0, r["id"]), reverse=True)
     return rows
+
+
+# ---------- reactions: the per-emoji map + pack rows + lottie + migration ----------
+def emoji_motions(out: Path | None = None, lib=None) -> list[dict]:
+    """The generic 1800 wall (read-only): every bank token as emoji:animation.
+
+    Merges `generation.actions.generation_bank()` (glyph + order, >1800) with
+    `engine.emoji_motion.motion_for_token` (fixed preset+params) and the
+    face/body motion sentences. No spending, no writing. Falls back to the
+    core 36 when the bank cannot be read (tests without the full bank).
+    """
+    from ..engine import emoji_motion as em
+    try:
+        from ..generation import actions as bank
+        gen = bank.generation_bank()
+        face = getattr(bank, "FACE_SENTENCES", {})
+        body = getattr(bank, "BODY_SENTENCES", {})
+    except Exception:
+        gen, face, body = {}, {}, {}
+    if not gen:
+        try:
+            from ..generation.actions import ACTION_BANK
+            gen = dict(ACTION_BANK)
+        except Exception:
+            gen = {}
+    rows = []
+    for token, row in gen.items():
+        glyph = (row or {}).get("emoji", "")
+        mo = em.motion_for_token(token)
+        sent = (face.get(token) or body.get(token) or ("", ""))
+        rows.append({"token": token, "emoji": glyph,
+                     "preset": mo["preset"], "params": mo["params"],
+                     "label": (sent[0] if isinstance(sent, (list, tuple)) and len(sent) > 0 else ""),
+                     "motion": (sent[1] if isinstance(sent, (list, tuple)) and len(sent) > 1 else "")})
+    if not rows:
+        for token in sorted(em.CORE_MOTIONS):
+            mo = em.motion_for_token(token)
+            rows.append({"token": token, "emoji": "", "preset": mo["preset"],
+                         "params": mo["params"], "label": "", "motion": ""})
+    return rows
+
+
+def reactions_for_pack(out: Path, lib, pack_id: str) -> dict:
+    """This pack's reaction variations: one row per emoji in the pack.
+
+    Each row inherits its motion 1:1 from the emoji map (locked 🔒); the pack
+    varies only sprite art + Size/Energy. Rows resolve the pack's stickers by
+    emoji token (`actions.token_for_emoji`), attach the sticker-owned sets
+    (`for_sticker` rows) and the pack's bursts. Professional and simple: at
+    most the pack's own emojis, never the whole 1800.
+    """
+    from ..engine import emoji_motion as em
+    try:
+        from ..generation import actions as bank
+        _tok = getattr(bank, "token_for_emoji", None)
+    except Exception:
+        _tok = None
+    try:
+        pack = _lib_pack(lib, pack_id)
+    except SetError:
+        raise SetError(f"no such pack {pack_id}", 404)
+    stickers = pack.get("stickers") or []
+    by_token: dict[str, dict] = {}
+    for st in stickers:
+        glyphs = st.get("emoji") or ""
+        glyph = str(glyphs).strip().split()[0] if isinstance(glyphs, str) else (list(glyphs)[0] if glyphs else "")
+        token = None
+        if _tok is not None and glyph:
+            try:
+                token = _tok(glyph)
+            except Exception:
+                token = None
+        if not token:
+            token = str(st.get("key") or st.get("name") or "happy").strip().lower().split()[0]
+        row = by_token.setdefault(token, {"token": token, "emoji": glyph, "stickers": []})
+        row["stickers"].append({"id": st.get("id"), "name": st.get("name"), "emoji": st.get("emoji")})
+        if glyph and not row.get("emoji"):
+            row["emoji"] = glyph
+    motions = {m["token"]: m for m in emoji_motions(out, lib)}
+    out_rows = []
+    for token, row in sorted(by_token.items()):
+        mo = motions.get(token) or {"preset": em.motion_for_token(token)["preset"],
+                                    "params": em.motion_for_token(token)["params"],
+                                    "label": "", "motion": ""}
+        sets = []
+        for st in row["stickers"]:
+            try:
+                det = for_sticker(out, lib, pack_id, st["id"])
+                sets.extend(det.get("rows") or [])
+            except Exception:
+                continue
+        out_rows.append({**row, "preset": mo["preset"], "params": mo["params"],
+                         "label": mo.get("label", ""), "motion": mo.get("motion", ""),
+                         "locked": True, "sets": sets})
+    return {"pack_id": pack_id, "reactions": out_rows}
+
+
+def export_lottie(out: Path, lib, pid: str, *, preset: str | None = None, params: dict | None = None) -> dict:
+    """Optional third output (web only): the set's motion as Lottie JSON.
+
+    Uses the deterministic simulator trajectories (no sprites embedded, only
+    placeholder shapes + keyframes). Telegram stays WebM. Stored under
+    `renders/<id>.lottie.json` beside the WebM renders. Free.
+    """
+    import json as _json
+    from ..engine import particles as _p
+    from ..runtime import atomic as _atomic
+    s = migrate(out, lib, pid)
+    saved = (s.get("motion") or {})
+    use_preset = preset or saved.get("preset") or "burst"
+    use_params = dict(saved.get("params") or {})
+    if isinstance(params, dict):
+        use_params.update({k: v for k, v in params.items() if k in ("particle_size", "sprite_px", "scale") or True})
+    try:
+        p = _p.ParticleParams.from_dict({k: v for k, v in {"magnitude": 1.0}.items()})
+        _ = _p.preset(use_preset)
+    except ValueError as ex:
+        raise SetError(str(ex))
+    base = _p.preset(use_preset, **{k: v for k, v in (use_params or {}).items()
+                                    if k in ("gravity", "magnitude", "vortex", "count", "size_min", "size_max",
+                                             "particle_size", "spin", "lifetime", "spread", "pop", "seed",
+                                             "fps", "duration", "size", "origin", "show_source")})
+    n_cells = max(1, len([c for c in s.get("cells") or [] if c.get("picked")]) or len(s.get("cells") or []) or 1)
+    doc = _p.export_lottie(base, n_cells)
+    d = _dir(out, pid)
+    (d / "renders").mkdir(exist_ok=True)
+    ids = [int(str(r.get("id") or "R000")[1:]) for r in s.get("renders") or [] if str(r.get("id", "")).startswith("R")]
+    rid = f"L{(max(ids) if ids else 0) + 1:03d}"
+    (d / f"renders/{rid}.lottie.json").write_text(_json.dumps(doc), encoding="utf-8")
+    with _LOCK:
+        s = read(out, pid)
+        s.setdefault("lottie", []).append({"id": rid, "preset": use_preset, "params": base.to_dict(),
+                                           "file": f"renders/{rid}.lottie.json", "created": round(__import__('time').time(), 3)})
+        hist(s, "local", "LOTTIE", f"exported {rid} as Lottie ({use_preset})", {"preset": use_preset})
+        _write(out, s)
+    return {"id": rid, "set": str(pid).upper(), "preset": use_preset, "params": base.to_dict(),
+            "file": f"renders/{rid}.lottie.json", "layers": len(doc.get("layers") or [])}
+
+
+def adopt_emoji_map(out: Path, lib, user: str = "python") -> list[dict]:
+    """Migrate random particle sets onto the emoji map (idempotent, free).
+
+    Keeps every byte (cells, clips, renders untouched). Replaces free motion
+    with `emoji_motion.motion_for_token(token of the set's first owner
+    sticker emoji)`; records any Size/Energy delta the pack had tuned.
+    Writes `set.json.pre-emoji-map` once. History line ADOPT_EMOJI.
+    """
+    from ..engine import emoji_motion as em
+    try:
+        from ..generation import actions as bank
+        _tok = getattr(bank, "token_for_emoji", None)
+    except Exception:
+        _tok = None
+    made = []
+    for p in sorted(sets_dir(out).glob("P[0-9]*")):
+        try:
+            s = json.loads(atomic.read_text(p / "set.json"))
+        except (OSError, ValueError):
+            continue
+        if (s.get("emoji_motion") or {}).get("version") == 1:
+            continue
+        owners = s.get("owner") or []
+        token = None
+        if _tok is not None:
+            for o in owners:
+                try:
+                    pk = _lib_pack(lib, o.get("pack_id"))
+                    st = next((x for x in pk.get("stickers") or [] if x.get("id") == o.get("sticker_id")), {})
+                    glyph = str(st.get("emoji") or "").strip().split()
+                    if glyph and _tok(glyph[0]):
+                        token = _tok(glyph[0])
+                        break
+                except Exception:
+                    continue
+        if not token:
+            token = str(((s.get("elements") or ["happy"])[0])).strip().lower().split()[0]
+        mo = em.motion_for_token(token)
+        with _LOCK:
+            s = read(out, p.name)
+            if not (p / "set.json.pre-emoji-map").is_file():
+                (p / "set.json.pre-emoji-map").write_bytes((p / "set.json").read_bytes())
+            old = s.get("motion") or {}
+            keep = {k: old.get("params", {}).get(k) for k in ("particle_size", "magnitude") if isinstance(old.get("params"), dict)}
+            params = dict(mo["params"])
+            for k, v in keep.items():
+                if isinstance(v, (int, float)):
+                    params[k] = v
+            s["motion"] = {"preset": mo["preset"], "params": params}
+            s["emoji_motion"] = {"version": 1, "token": token}
+            hist(s, user, "ADOPT_EMOJI", f"motion mapped to emoji {token} ({mo['preset']})", {"token": token})
+            _write(out, s)
+        made.append({"set": s["id"], "token": token, "preset": mo["preset"]})
+    return made

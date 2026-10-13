@@ -1041,13 +1041,19 @@ def make_handler(c: Console):
                     return self._json(200, fx_sets.preview_for_sticker(c.out, c.lib, pp[2], pp[4]))
                 except fx_sets.SetError as e:
                     raise pl.PipelineError(str(e), e.code)
-            if pp[:2] == ["api", "packs"] and pp[-1] == "particles" and len(pp) in (4, 6) and (len(pp) == 4 or pp[3] == "stickers"):
+            if pp[:2] == ["api", "packs"] and pp[-1] in ("particles", "reactions") and len(pp) in (4, 6) and (len(pp) == 4 or pp[3] == "stickers"):
                 # the particles made for a sticker (GET /api/packs/{id}/stickers/{sid}/particles) or the counts for a whole pack (GET /api/packs/{id}/particles): a pure read; effects are owner only,
                 # a member's answer is simply empty (docs/effects.md)
+                # GET /api/packs/{id}/reactions: this pack's reaction variations (one row per emoji, motion inherited 🔒, art + Size/Energy vary)
                 if self.user.get("role") != "owner":
                     return self._json(200, {"sticker": pp[4], "created": [], "saved": [], "effects": [], "can_make": False} if len(pp) == 6 else {})
                 if len(pp) == 6:
                     return self._json(200, fx_sets.for_sticker(c.out, c.lib, pp[2], pp[4]))
+                if pp[-1] == "reactions":
+                    try:
+                        return self._json(200, fx_sets.reactions_for_pack(c.out, c.lib, pp[2]))
+                    except fx_sets.SetError as e:
+                        raise pl.PipelineError(str(e), e.code)
                 # the pack's particle studio (docs/particles.md 5): its sets and its bursts, plus the per-sticker counts the old answer carried
                 try:
                     return self._json(200, {**fx_sets.for_pack(c.out, c.lib, pp[2]), "counts": fx_sets.counts_for_pack(c.out, c.lib, pp[2])})
@@ -1330,6 +1336,9 @@ def make_handler(c: Console):
                 if len(parts) == 3:
                     if method == "GET" and pid == "deleted":       # the trash (owner only like the rest): Restore is reachable long after the delete
                         return self._json(200, {"sets": ps.list_deleted(c.out, c.lib)})
+                    if method == "GET" and pid in ("emoji-motions", "reactions"):
+                        # the generic 1800 wall (read-only emoji:animation map)
+                        return self._json(200, {"motions": ps.emoji_motions(c.out, c.lib)})
                     if method == "GET":
                         ps.settle(c.out, pid)                      # (a 404 for a missing set comes from here)
                         return self._json(200, ps.view(c.out, c.lib, pid))
@@ -1354,6 +1363,8 @@ def make_handler(c: Console):
                     return self._json(200, ps.restore(c.out, c.lib, pid, self.user["id"]))
                 if act == "preview":                               # the burst of the set's picked cells for a pack, as a small looping WebP (free)
                     return self._json(200, ps.preview(c.out, c.lib, pid, pack_id=body.get("pack_id"), preset=body.get("preset"), params=body.get("params") or {}, size=body.get("size", 256)))
+                if act == "export-lottie":                        # optional third output (web only): motion keyframes as Lottie JSON
+                    return self._json(200, ps.export_lottie(c.out, c.lib, pid, preset=body.get("preset"), params=body.get("params") or {}))
                 if act == "render":                                # the final 512 px WebM for a pack, judged and stored under renders/ (only Telegram's own limits make it FAILED)
                     return self._json(200, ps.render(c.out, c.lib, pid, c.cfg, pack_id=body.get("pack_id"), preset=body.get("preset"), params=body.get("params") or {}, user=self.user["id"]))
                 if act == "add":                                   # rendered bursts into the pack as animated stickers tagged with the pack's emoji

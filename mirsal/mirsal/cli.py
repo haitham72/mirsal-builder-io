@@ -684,8 +684,8 @@ def main(argv=None) -> int:
     su.add_argument("action", choices=["reindex", "status", "import-faq"]); su.add_argument("--repo", help="reindex: this folder instead of MIRSAL_SUPPORT_REPO; import-faq: the seed folder (default faq/)")
     su.add_argument("--publish", action="store_true", help="import-faq: publish the imported entries at once (default: drafts to review)")
     su.add_argument("--no-vectors", action="store_true", help="reindex: the lexical index only (no embedding calls)"); su.add_argument("--json", action="store_true", dest="as_json")
-    pa = sub.add_parser("particles", help="adopt: older effect runs that made something become saved particle rows under their stickers (idempotent, free)")
-    pa.add_argument("action", choices=["adopt"])
+    pa = sub.add_parser("particles", help="adopt: older effect runs that made something become saved particle rows under their stickers (idempotent, free); adopt-emoji-map: migrate random sets onto the per-emoji reaction map")
+    pa.add_argument("action", choices=["adopt", "adopt-emoji-map"])
     ph = sub.add_parser("photo", help="a photo -> a cut-out 512 sticker (3C; on-device by default)")
     ph.add_argument("file"); ph.add_argument("--method", default="auto", choices=["auto", "matte", "grabcut"])
     ph.add_argument("--outline", type=int, default=12); ph.add_argument("--erode", type=int, default=0)
@@ -724,6 +724,17 @@ def main(argv=None) -> int:
         from .flow import particle_sets
         from .media.library import Library
         from .runtime.writer_lock import WriterBusy, WriterLock
+        if getattr(args, "action", "adopt") == "adopt-emoji-map":
+            try:
+                with WriterLock(out, "mirsal particles adopt-emoji-map"):
+                    made = particle_sets.adopt_emoji_map(out, Library(out))
+            except (WriterBusy, pl.PipelineError) as e:
+                print(f"ERROR   {e}")
+                return 1
+            for m in made:
+                print(f"{m['set']} -> {m['token']} ({m['preset']})")
+            print(f"{len(made)} set(s) mapped" if made else "nothing to map")
+            return 0
         try:
             with WriterLock(out, "mirsal particles adopt"):      # a drawn sheet may be cut again as particles: result.json has one writer at a time
                 made = particle_sets.adopt_effects(out, Library(out), cfg=cfg)
