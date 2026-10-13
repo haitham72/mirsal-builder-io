@@ -57,6 +57,13 @@ class EmojiLottieTests(Base):
         self.assertEqual([h["decision"] for h in rec["history"]], ["LOTTIE"])
         self.assertEqual([x["id"] for x in rec["lottie"]], ["L001"])
         self.assertEqual(self.req("GET", j["url"])[0], 200, "the browser downloads the stored file")
+        self.assertEqual((d / "renders" / "L001.webp").read_bytes()[8:12], b"WEBP", "its card's loop is kept beside it")
+        code, made = self.req("GET", "/api/particles/emoji-lottie")
+        self.assertEqual(code, 200, made)
+        self.assertEqual([(r["id"], r["token"], r["url"], r["preview"]) for r in made["reactions"]],
+                         [("L001", "kiss", j["url"], "/out/particles/emoji/kiss/renders/L001.webp")])
+        self.req("POST", "/api/particles/emoji-lottie", {"token": "cry"})
+        self.assertEqual([r["token"] for r in self.req("GET", "/api/particles/emoji-lottie")[1]["reactions"]], ["cry", "kiss"], "newest first")
         self.assertEqual(self.req("GET", "/api/particles")[1]["sets"], [], "no set is made: this flow has no pack, no sticker, no set")
 
     def test_same_emoji_options_and_seed_are_the_same_bytes_and_each_export_is_numbered(self):

@@ -369,12 +369,20 @@ class ShellTests(unittest.TestCase):
             self.assertIn(route, pt)
         for gone in ("/preview`", "/render`", "sticker_id:sid"):
             self.assertNotIn(gone, fx, "effects.js has no per-sticker preview or render any more")
-        for act in ("data-act=fxek ", "data-act=fxekpreset", "data-act=fxeklottie", "data-act=fxekback"):
-            self.assertIn(act, fx, "the entry is the emoji bank only: one emoji, its preview, three controls, Download Lottie")
-        self.assertIn("/api/particles/emoji-motions", fx, "the bank comes from the per-emoji motion map")
-        for route in ("/api/particles/emoji-preview", "/api/particles/emoji-lottie"):
-            self.assertIn(route, fx, "the preview and the Lottie are the server's")
-        self.assertNotIn("data-act=fxekgo", fx, "no multi-emoji set from this entry: packs and sets stay in the Studio")
+        # docs/reaction.md section 13: Create > + New > Reaction effects is its own screen (#/reactions, reactions.js), the emoji bank only; #/effects stays the Studio's particle editor
+        rx = read_console(ui / "reactions.js")
+        self.assertIn("id=s-reactions", html)
+        self.assertIn("/ui/reactions.js", html)
+        self.assertIn('"reactions.js"', (ui.parent / "console" / "server.py").read_text(encoding="utf-8"))
+        self.assertIn("'reactions'", re.search(r"const SCREENS=\[(.*?)\]", app).group(1))
+        self.assertIn("reactions:'agent'", app, "the rail keeps Create lit on Reaction effects")
+        self.assertIn("data-to=reactions", app, "+ New > Reaction effects opens #/reactions, not the Studio's #/effects")
+        for act in ("data-act=rxpick ", "data-act=rxcreate", "data-act=rxdl", "data-act=rxedit", "data-act=rxclose"):
+            self.assertIn(act, rx)
+        for route in ("/api/particles/emoji-motions", "/api/particles/emoji-preview", "/api/particles/emoji-lottie"):
+            self.assertIn(route, rx, "the bank, the preview, create and the created list are the server's")
+        for gone in ("data-act=fxek", "/api/particles/emoji-lottie"):
+            self.assertNotIn(gone, fx, "the emoji screen left effects.js")
         for gone in ("data-act=fxpack", "data-act=fxgo", "data-act=fxst", "coverMedia", "fx-cv"):
             self.assertNotIn(gone, fx, "no pack picker and no auto-playing stickers on the entry")
         self.assertIn("go:true", fx.replace(" ", ""), "the click on 'Make the video' is the go-ahead, and it shows the price")

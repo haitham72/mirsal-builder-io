@@ -1734,15 +1734,17 @@ def emoji_preview(out: Path, token, *, preset=None, seed=1, size_in_dur=None, si
 
 def export_emoji_lottie(out: Path, token, *, preset=None, seed=1, size_in_dur=None, size_out_dur=None, hue_var=None, size=512, user: str = "local") -> dict:
     """The end of the Reaction effects flow: one bank emoji's fixed motion, flying as the literal glyph, as a playable Lottie JSON
-    (web only; Telegram stays WebM). Stores `out/particles/emoji/<token>/renders/L###.lottie.json` and `L###.png` (the glyph asset,
-    for inspection) and appends to that emoji's `emoji.json` (`lottie[]`, history `LOTTIE`). Same emoji + options + seed -> the same
+    (web only; Telegram stays WebM). Stores `out/particles/emoji/<token>/renders/L###.lottie.json`, `L###.png` (the glyph asset,
+    for inspection) and `L###.webp` (the same burst as a 256 px loop, for its card) and appends to that emoji's `emoji.json` (`lottie[]`, history `LOTTIE`). Same emoji + options + seed -> the same
     JSON bytes on the same machine (the glyph comes from its emoji font). 409 for an emoji outside the bank. Free."""
     from ..engine import particles as _p
     if isinstance(size, bool) or not isinstance(size, (int, float)) or not 128 <= size <= 1024:
         raise SetError("size must be a whole number from 128 to 1024")
     t, glyph, name, p = emoji_burst(token, preset=preset, seed=seed, size_in_dur=size_in_dur, size_out_dur=size_out_dur, hue_var=hue_var, size=int(size))
-    png = _p.png_bytes(_glyph(glyph))
+    img = _glyph(glyph)
+    png = _p.png_bytes(img)
     doc = _p.export_lottie(p, png, size=p.size)
+    loop = _p.preview_webp(_p.simulate([img], _p.ParticleParams.from_dict({**p.to_dict(), "size": 256})), size=256)
     doc["nm"] = f"{glyph} {t} ({name})"
     data = json.dumps(doc, separators=(",", ":"))
     d = emoji_dir(out, t)
@@ -1754,12 +1756,33 @@ def export_emoji_lottie(out: Path, token, *, preset=None, seed=1, size_in_dur=No
         (d / "renders").mkdir(parents=True, exist_ok=True)
         atomic.write_text(d / f"renders/{rid}.lottie.json", data)
         atomic.write_bytes(d / f"renders/{rid}.png", png)
+        atomic.write_bytes(d / f"renders/{rid}.webp", loop)
         rec.setdefault("lottie", []).append({"id": rid, "preset": name, "params": p.to_dict(), "file": f"renders/{rid}.lottie.json",
-                                             "glyph": f"renders/{rid}.png", "bytes": len(data), "created": round(time.time(), 3)})
+                                             "glyph": f"renders/{rid}.png", "preview": f"renders/{rid}.webp", "bytes": len(data), "created": round(time.time(), 3)})
         hist(rec, user, "LOTTIE", f"exported {rid} as Lottie ({name})", {"preset": name, "seed": p.seed})
         atomic.write_text(rec_f, json.dumps(rec, ensure_ascii=False, indent=1))
     return {"id": rid, "token": t, "emoji": glyph, "preset": name, "params": p.to_dict(), "file": f"renders/{rid}.lottie.json",
-            "url": f"/out/particles/emoji/{t}/renders/{rid}.lottie.json", "layers": len(doc["layers"]), "assets": len(doc["assets"]), "bytes": len(data)}
+            "url": f"/out/particles/emoji/{t}/renders/{rid}.lottie.json", "preview": f"/out/particles/emoji/{t}/renders/{rid}.webp",
+            "layers": len(doc["layers"]), "assets": len(doc["assets"]), "bytes": len(data)}
+
+
+def emoji_lotties(out: Path) -> list[dict]:
+    """Every created reaction (one per Lottie export), newest first: {id, token, emoji, preset, params, url, preview, bytes, created}.
+    `preview` is the export's own looping WebP (None for an export made before it was kept). Read-only, free."""
+    rows = []
+    for rec_f in sorted((sets_dir(out) / "emoji").glob("*/emoji.json")):
+        try:
+            rec = json.loads(atomic.read_text(rec_f))
+        except (OSError, ValueError):
+            continue
+        t, base = rec.get("token") or rec_f.parent.name, f"/out/particles/emoji/{rec_f.parent.name}/"
+        for x in rec.get("lottie") or []:
+            pv = x.get("preview")
+            rows.append({"id": x.get("id"), "token": t, "emoji": rec.get("emoji", ""), "preset": x.get("preset"), "params": x.get("params") or {},
+                         "url": base + x["file"], "preview": base + pv if pv and (rec_f.parent / pv).is_file() else None,
+                         "bytes": x.get("bytes"), "created": x.get("created")})
+    rows.sort(key=lambda r: (r.get("created") or 0, r["token"], r["id"] or ""), reverse=True)
+    return rows
 
 
 def adopt_emoji_map(out: Path, lib, user: str = "python") -> list[dict]:

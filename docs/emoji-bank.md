@@ -55,7 +55,7 @@ Not listed here row by row (it would rot): the full table is §6b of the export 
 
 ## Who reads the bank
 
-- **Reaction effects entry** (`#/effects`): search, click ONE emoji → its fixed motion flies as the literal glyph (`engine/particles.render_emoji`, the system's colour emoji font) → Size in / Size out / Hue / preset → **Download Lottie** (`POST /api/particles/emoji-preview`, `/emoji-lottie`; a token name or the glyph itself, resolved by `token_for_emoji`). No set, no pack ([reaction.md](reaction.md) §13).
+- **Reaction effects** (`#/reactions`, `console/reactions.js`): search, two rows of small emojis, pick ONE → its fixed motion flies as the literal glyph (`engine/particles.render_emoji`, the system's colour emoji font) → Size in / Size out / Hue / preset → **Create reaction** → its card with **Download Lottie** (`POST /api/particles/emoji-preview`, `POST` / `GET /api/particles/emoji-lottie`; a token name or the glyph itself, resolved by `token_for_emoji`). No set, no pack ([reaction.md](reaction.md) §13).
 - **Library > Reactions > Create** (`GET /api/particles/bank`): multi-select up to 9 → one stand-alone set per emoji ([reaction.md](reaction.md) §12).
 - **Per-emoji motion** (`engine/emoji_motion.py`, `GET /api/particles/emoji-motions`): every token owns one fixed animation ([reaction.md](reaction.md) §8).
 - **Planner** (`generation/tasks.py`, `generation/prompter.py`): predefined batches draw `next_tokens()` in bank order; named grids keep their cells.

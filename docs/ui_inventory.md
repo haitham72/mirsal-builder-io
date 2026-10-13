@@ -1,8 +1,8 @@
 # docs/ui_inventory.md — everything the browser sandbox can do (generated)
 
-Generated from `console/*.js` on 2026-10-13 (reactions branch: Reaction studio, emoji wall, Lottie export; Reaction effects is one bank emoji -> Download Lottie). Regenerate when actions move. The wiring is in `docs/architecture.md` §6; the redesign action map remains in `docs/redesign_plan.md` §4.
+Generated from `console/*.js` on 2026-10-13 (reactions branch: Reaction studio, emoji wall, Lottie export; Reaction effects is its own screen #/reactions in reactions.js: search + two rows of emoji, one editor card, the created reactions as cards). Regenerate when actions move. The wiring is in `docs/architecture.md` §6; the redesign action map remains in `docs/redesign_plan.md` §4.
 
-**460 actions** (461 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 34 scripts; **16 screens** (21 `RENDER` definitions); **168 named server routes**.
+**461 actions** (462 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 35 scripts; **17 screens** (22 `RENDER` definitions); **168 named server routes**.
 
 `tests/data/ui_baseline.json` and `tests/test_ui_inventory.py` prevent actions, screens or routes disappearing without a recorded rename or authorized retirement. The feature split changes no baseline entries.
 
@@ -26,6 +26,7 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `generate` | live.js |
 | `pack` | packs.js |
 | `effects` | particles.js |
+| `reactions` | reactions.js |
 | `prepare` | prepare.js |
 | `settings` | settings.js |
 | `generate` | studio-core.js |
@@ -63,11 +64,11 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `cfok` | 165 | app.js | none (browser only) |
 | `pk` | 179 | app.js | none (browser only) |
 | `pknew` | 184 | app.js | `/api/packs` |
-| `c2tog` | 298 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
-| `nav` | 300 | animate.js, app.js, auth.js, chat.js, editor.js, home.js, library.js, packs.js, prepare.js, tickets.js | none (browser only) |
-| `rme` | 305 | app.js | none (browser only) |
-| `thmtoggle` | 314 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
-| `rtrash` | 346 | app.js | none (browser only) |
+| `c2tog` | 300 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `nav` | 302 | animate.js, app.js, auth.js, chat.js, editor.js, home.js, library.js, packs.js, prepare.js, tickets.js | none (browser only) |
+| `rme` | 307 | app.js | none (browser only) |
+| `thmtoggle` | 316 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `rtrash` | 348 | app.js | none (browser only) |
 
 ### `auth.js` (12)
 
@@ -191,36 +192,32 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `xopen` | 225 | editor.js | none (browser only) |
 | `xmore` | 225 | editor.js | none (browser only) |
 
-### `effects.js` (26)
+### `effects.js` (22)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
 | `fxback` | 47 | effects.js | none (browser only) |
-| `fxek` | 109 | effects.js | `/api/particles/emoji-preview` |
-| `fxekback` | 110 | effects.js | none (browser only) |
-| `fxekpreset` | 111 | effects.js | `/api/particles/emoji-preview` |
-| `fxeklottie` | 112 | effects.js | `/api/particles/emoji-lottie` |
-| `fxdgrid` | 202 | effects.js | none (browser only) |
-| `fxdretry` | 203 | effects.js | `/api/effects/{}/suggest` |
-| `fxdchip` | 204 | effects.js | `/api/effects/{}/particles_estimate` |
-| `fxdadd` | 208 | effects.js | `/api/effects/{}/particles_estimate` |
-| `fxddraw` | 210 | effects.js, particles.js | `/api/effects`<br>`/api/effects/{}/particles`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
-| `fxdredo` | 213 | effects.js | none (browser only) |
-| `fxdcancel` | 214 | effects.js | none (browser only) |
-| `fxdchange` | 215 | effects.js | none (browser only) |
-| `fxdcell` | 216 | effects.js | none (browser only) |
-| `fxdall` | 217 | effects.js | none (browser only) |
-| `fxduse` | 218 | effects.js | `/api/effects`<br>`/api/effects/{}/particles_pick`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
-| `fxprice` | 255 | effects.js, particles.js | `/api/effects/{}/estimate` |
-| `fxdelpiece` | 259 | effects.js | `/api/effects`<br>`/api/effects/{}/plan`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
-| `fxaddpiece` | 261 | effects.js | `/api/effects/{}/plan` |
-| `fxvideo` | 262 | effects.js, particles.js | `/api/effects`<br>`/api/effects/{}/video`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
-| `fxpick` | 271 | effects.js | none (browser only) |
-| `fxpickall` | 272 | effects.js | none (browser only) |
-| `fxadd` | 273 | effects.js | `/api/effects`<br>`/api/effects/{}/add`<br>`/api/generations`<br>`/api/generations/{}/particles`<br>`/api/jobs`<br>`/api/particles` |
-| `fxopenset` | 291 | effects.js | `/api/particles/{}/preview` |
-| `fxuseset` | 299 | effects.js | `/api/particles` |
-| `psusesave` | 300 | (no `data-act` button: called from code, a key, or a form) | `/api/particles` |
+| `fxdgrid` | 155 | effects.js | none (browser only) |
+| `fxdretry` | 156 | effects.js | `/api/effects/{}/suggest` |
+| `fxdchip` | 157 | effects.js | `/api/effects/{}/particles_estimate` |
+| `fxdadd` | 161 | effects.js | `/api/effects/{}/particles_estimate` |
+| `fxddraw` | 163 | effects.js, particles.js | `/api/effects`<br>`/api/effects/{}/particles`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
+| `fxdredo` | 166 | effects.js | none (browser only) |
+| `fxdcancel` | 167 | effects.js | none (browser only) |
+| `fxdchange` | 168 | effects.js | none (browser only) |
+| `fxdcell` | 169 | effects.js | none (browser only) |
+| `fxdall` | 170 | effects.js | none (browser only) |
+| `fxduse` | 171 | effects.js | `/api/effects`<br>`/api/effects/{}/particles_pick`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
+| `fxprice` | 208 | effects.js, particles.js | `/api/effects/{}/estimate` |
+| `fxdelpiece` | 212 | effects.js | `/api/effects`<br>`/api/effects/{}/plan`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
+| `fxaddpiece` | 214 | effects.js | `/api/effects/{}/plan` |
+| `fxvideo` | 215 | effects.js, particles.js | `/api/effects`<br>`/api/effects/{}/video`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
+| `fxpick` | 224 | effects.js | none (browser only) |
+| `fxpickall` | 225 | effects.js | none (browser only) |
+| `fxadd` | 226 | effects.js | `/api/effects`<br>`/api/effects/{}/add`<br>`/api/generations`<br>`/api/generations/{}/particles`<br>`/api/jobs`<br>`/api/particles` |
+| `fxopenset` | 244 | effects.js | `/api/particles/{}/preview` |
+| `fxuseset` | 252 | effects.js | `/api/particles` |
+| `psusesave` | 253 | (no `data-act` button: called from code, a key, or a form) | `/api/particles` |
 
 ### `history.js` (5)
 
@@ -456,6 +453,16 @@ Each action row names its source, line, scripts drawing its button and routes it
 |---|---|---|---|
 | `pmlist` | 49 | projmap.js | `/api/generations/removed`<br>`/api/history` |
 | `pmopen` | 51 | projmap.js | `/api/generations/removed`<br>`/api/generations/{}/particles`<br>`/api/history` |
+
+### `reactions.js` (5)
+
+| action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
+|---|---|---|---|
+| `rxpick` | 75 | reactions.js | `/api/particles/emoji-preview` |
+| `rxclose` | 76 | reactions.js | none (browser only) |
+| `rxedit` | 77 | reactions.js | `/api/particles/emoji-preview` |
+| `rxdl` | 80 | reactions.js | none (browser only) |
+| `rxcreate` | 81 | reactions.js | `/api/particles/emoji-lottie` |
 
 ### `settings.js` (3)
 

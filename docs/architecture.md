@@ -123,7 +123,7 @@ studio-tiles.js → studio-sheet.js → studio-prompt.js → studio-animate.js �
 sheet-recovery.js → job-recovery.js → live.js → composer.js → imports.js
 history.js → telegram.js → packs.js → editor.js → chat.js
 agent.js → chat-cards.js → chat-stage.js → chat-core.js → prepare.js
-effects.js → particles.js → projmap.js → trash.js → tickets.js
+effects.js → reactions.js → particles.js → projmap.js → trash.js → tickets.js
 support.js → home.js → animate.js → welcome.js → trending.js
 users.js → auth.js
 ```
@@ -131,7 +131,7 @@ users.js → auth.js
 Source-reading tests use `tests/js/console_source.js` to resolve legacy logical groups and parse statements with vendored Acorn; VM tests execute the actual feature files. Multiline formatting no longer depends on one statement per line. `tests/test_ui_inventory.py` retains the existing baseline with no new renamed/retired entries.
 
 Screens today (`RENDER`): home, agent (AI), generate (Studio, `#/studio`), library, pack, chat (a phone preview), create (from a photo),
-editor, prepare, animate, export, effects, settings, users, help, history (watch folders).
+editor, prepare, animate, export, effects (the Studio's particle editor), reactions (Reaction effects: one bank emoji to Lottie), settings, users, help, history (watch folders).
 
 ## 7. Module index
 

@@ -198,6 +198,7 @@ const SCREENS = [
     'home',
     'agent',
     'effects',
+    'reactions',
     'generate',
     'history',
     'library',
@@ -226,6 +227,7 @@ const RAIL = [
     generate: 'agent',
     create: 'agent',
     effects: 'agent',
+    reactions: 'agent',
     editor: 'agent',
     export: 'agent',
     prepare: 'agent',
@@ -237,7 +239,7 @@ const RAIL = [
     history: 'me',
   };
 
-const CREATE_TABS = ['agent', 'generate', 'create', 'effects'];
+const CREATE_TABS = ['agent', 'generate', 'create', 'effects', 'reactions'];
 
 let route_ = 'home',
   PACK_ID = null,
@@ -290,8 +292,8 @@ function drawCtabs() {
   }
   const tab = (k, i, l) => `<button role=tab aria-selected=${route_ === k} data-act=nav data-to=${k}>${ic(i)}${l}</button>`;
   el.innerHTML = `<div class=ct-tabs role=tablist aria-label=Create>${tab('agent', 'chat', 'Chat')}${tab('generate', 'gen', 'Studio')}</div>
-  <details class=ct-new><summary class="btn sm">${ic('plus')} New</summary><div class=ct-menu role=menu><button role=menuitem data-act=nav data-to=create class="${route_ === 'create' ? 'on' : ''}">${ic('photo')} From a photo</button><button role=menuitem data-act=nav data-to=effects class="${route_ === 'effects' ? 'on' : ''}">${ic('film')} Reaction effects</button></div></details>
-  ${route_ === 'create' || route_ === 'effects' ? `<span class=ct-here>${route_ === 'create' ? 'From a photo' : 'Reaction effects'}</span>` : ''}`;
+  <details class=ct-new><summary class="btn sm">${ic('plus')} New</summary><div class=ct-menu role=menu><button role=menuitem data-act=nav data-to=create class="${route_ === 'create' ? 'on' : ''}">${ic('photo')} From a photo</button><button role=menuitem data-act=nav data-to=reactions class="${route_ === 'reactions' ? 'on' : ''}">${ic('fx')} Reaction effects</button></div></details>
+  ${route_ === 'create' || route_ === 'effects' || route_ === 'reactions' ? `<span class=ct-here>${route_ === 'create' ? 'From a photo' : route_ === 'effects' ? 'Particle effects' : 'Reaction effects'}</span>` : ''}`;
 }
 
 /* narrow screens: the second column is a drawer (studio.css, 'the shell on narrow screens') */

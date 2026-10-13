@@ -244,45 +244,10 @@ test('the video price is on its own line too, and the estimator fills that line'
   assert.match(h, /data-fxest=g1/);
 });
 
-test('the entry is the emoji bank only: static glyphs, one click opens one emoji, no packs, nothing auto-plays', () => {
-  run("FX.ek=null;FX.ekBank=[{token:'laugh',emoji:'🤣',preset:'fountain',motion:'tears fly'},{token:'school',emoji:'🏫',preset:'burst',motion:''}];FX.past=[{id:'E001',pack_name:'Fruits',status:'READY'}]");
+test('the #/effects fallback (without particles.js) lists earlier runs and points to Reaction effects; the bank lives in reactions.js', () => {
+  run("FX.past=[{id:'E001',pack_name:'Fruits',status:'READY'}]");
   const h = run("fxSetup()");
-  assert.match(h, /Reaction effects/);
-  assert.match(h, /data-fxekq/);
-  assert.match(h, /data-act=fxek data-t="laugh"/);
-  assert.match(h, /fountain/);
-  assert.match(h, /E001/);
-  assert.doesNotMatch(h, /<video|<img|data-act=fxekgo|data-act=fxpack|data-act=fxgo|data-act=fxst|data-act=fxmode|aria-pressed/, 'no pack picker, no multi-select, nothing auto-plays');
-});
-
-test('an open emoji: its preview, three controls with honest defaults, the preset override and Download Lottie; no pack, sticker, Kling or Generate more', async () => {
-  const r2 = loadConsole(['effects.js']);
-  r2("FX.ekBank=[{token:'kiss',emoji:'😘',preset:'burst',motion:'hearts pop'}];FX.past=[]");
-  r2("POSTREPLIES.push({ok:true,j:{url:'/out/particles/emoji/kiss/previews/a-256.webp'}})");
-  await r2("ACT.fxek({dataset:{t:'kiss'}})");
-  assert.deepEqual(JSON.parse(r2("JSON.stringify(POSTS)")), [['/api/particles/emoji-preview', { token: 'kiss', size_in_dur: 0.4, size_out_dur: 0.4, hue_var: 25, size: 256 }]],
-    'one click opens the emoji and asks the server for its fixed animation');
-  const h = r2("fxSetup()");
-  assert.match(h, /😘 kiss/);
-  assert.match(h, /src="\/out\/particles\/emoji\/kiss\/previews\/a-256.webp"/, 'the simulated preview plays (an animated WebP)');
-  for (const k of ['size_in_dur', 'size_out_dur', 'hue_var']) assert.match(h, new RegExp(`data-fxeko=${k}`));
-  assert.equal((h.match(/type=range/g) || []).length, 3, 'three sliders, nothing else to tune');
-  assert.match(h, /data-act=fxekpreset data-v="">its own · burst/);
-  for (const n of ['burst', 'fountain', 'vortex', 'rain', 'confetti']) assert.match(h, new RegExp(`data-act=fxekpreset data-v=${n}>`));
-  assert.match(h, /data-act=fxeklottie/);
-  assert.match(h, /Hue 0 keeps the emoji's own colours/);
-  assert.doesNotMatch(h, /<video|pack|sticker|Kling|Generate more|data-act=fxek data-t|psb|sprite picker/i, 'only the emoji, its preview and the three controls');
-
-  r2("POSTS.length=0;POSTREPLIES.push({ok:true,j:{url:'/x.webp'}})");
-  await r2("ACT.fxekpreset({dataset:{v:'vortex'}})");
-  assert.deepEqual(JSON.parse(r2("JSON.stringify(POSTS)"))[0][1].preset, 'vortex');
-  r2("POSTS.length=0;FX.ek.hue_var=0;FX.ek.size_in_dur=0");
-  r2("var DL=[];document.createElement=()=>({click(){DL.push(this.href+'|'+this.download)},remove(){}});document.body={appendChild(){}}");
-  r2("POSTREPLIES.push({ok:true,j:{id:'L003',token:'kiss',emoji:'😘',preset:'vortex',layers:36,url:'/out/particles/emoji/kiss/renders/L003.lottie.json'}})");
-  await r2("ACT.fxeklottie({disabled:false})");
-  assert.deepEqual(JSON.parse(r2("JSON.stringify(POSTS)")), [['/api/particles/emoji-lottie', { token: 'kiss', size_in_dur: 0, size_out_dur: 0.4, hue_var: 0, preset: 'vortex' }]],
-    'export posts the token and the options as they are');
-  assert.deepEqual(JSON.parse(r2("JSON.stringify(DL)")), ['/out/particles/emoji/kiss/renders/L003.lottie.json|kiss L003.lottie.json'], 'the stored file is downloaded');
-  r2("ACT.fxekback()");
-  assert.match(r2("fxSetup()"), /data-act=fxek data-t="kiss"/, 'back to the bank');
+  assert.match(h, /href="#\/reactions"/);
+  assert.match(h, /E001 · Fruits/);
+  assert.doesNotMatch(h, /data-act=fx?ek|rx-e|<img|<video/, 'no emoji picker here');
 });
