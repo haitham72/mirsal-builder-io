@@ -206,16 +206,59 @@ test('the open card: elements, source, motion, every cell with what is kept, and
 });
 
 test('the library list: loading, empty, and the sets with a way to make more', () => {
-  run("SPL.sets=null");
+  run("SPL.sets=null;SPL.view=null;SPL.bank=null;SPL.bankSel=null;SPL.build=[]");
   assert.match(run("spLibHtml()"), /Reading the particle sets/);
   run("SPL.sets=[]");
   assert.match(run("spLibHtml()"), /No reaction sets yet/);
-  assert.match(run("spLibHtml()"), /data-act=spopen>.*Make reactions/s);
+  assert.match(run("spLibHtml()"), /data-act=roscreate>.*Create</s);
   run(`SPL.sets=[${JSON.stringify(SET())}]`);
   const h = run("spLibHtml()");
   assert.match(h, /data-ps=P001/);
-  assert.match(h, /Make reactions/);
+  assert.match(h, /data-act=roscreate/);
   run("SPL.sets=null");
+});
+
+test('Library Reactions Create: predefined bank or stickers, finished and unclaimed states', () => {
+  run("SPL.sets=[];SPL.view=null;SPL.bank=null;SPL.bankSel=null;SPL.build=[]");
+  assert.match(run("spLibHtml()"), /data-act=roscreate/);
+  run("ACT.roscreate()");
+  const choose = run("spLibHtml()");
+  assert.match(choose, /data-act=rosbank><b>Predefined<\/b>/);
+  assert.match(choose, /data-act=rosstickers><b>Stickers<\/b>/);
+  run("SPL.bank=[{token:'laugh',emoji:'E',preset:'fountain',motion:'tears',state:'finished',building:false,set_id:'P001',n_picked:3},{token:'cry',emoji:'C',preset:'rain',motion:'',state:'unclaimed',building:false,set_id:null,n_picked:0}];SPL.view='bank'");
+  const bank = run("spLibHtml()");
+  assert.match(bank, /1 finished · 1 unclaimed/);
+  assert.match(bank, /data-act=rosbankpick data-t="laugh"/);
+  assert.match(bank, /finished/);
+  assert.match(bank, /data-act=rosbankbuild/);
+  run("ACT.rosbankpick({dataset:{t:'cry'}})");
+  assert.deepEqual(JSON.parse(run("JSON.stringify([...SPL.bankSel])")), ['cry']);
+  run("ACT.rosbankpick({dataset:{t:'cry'}})");
+  assert.deepEqual(JSON.parse(run("JSON.stringify([...SPL.bankSel])")), []);
+  run("SPL.view=null;SPL.bank=null;SPL.bankSel=null;SPL.build=[]");
+});
+
+test('Build makes one set per emoji with the default sprite, presents previews, approve collapses', async () => {
+  run("SPL.sets=[];SPL.view='build';SPL.bankSel=null;SPL.build=[];SPL.bank=[{token:'laugh',emoji:'E',preset:'fountain',motion:'',params:{},state:'unclaimed',building:false,set_id:null,n_picked:0}]");
+  run("SPL.bankSel=new Set(['laugh'])");
+  run0("POSTREPLIES.push({ok:true,j:{id:'P009'}},{ok:true,j:{default:true,n_picked:1}},{ok:true,j:{url:'/out/particles/P009/previews/p.webp'}})");
+  await run0("ACT.rosbankbuild()");
+  assert.deepEqual(JSON.parse(run0("JSON.stringify(POSTS)")), [
+    ['/api/particles', { from_request: 'reactions for laugh', grid: '2x2' }],
+    ['/api/particles/P009/default-sprite', {}],
+    ['/api/particles/P009/preview', { preset: 'fountain', params: {}, size: 256 }],
+  ]);
+  const card = run("spBuildHtml()");
+  assert.match(card, /p\.webp/);
+  assert.match(card, /data-act=rosapprove data-id=P009>Approve</);
+  run0("POSTREPLIES.push({ok:true,j:{id:'R001',status:'READY'}})");
+  await run0("ACT.rosapprove({dataset:{id:'P009'},disabled:false})");
+  assert.deepEqual(JSON.parse(run0("JSON.stringify(POSTS.slice(3))")), [
+    ['/api/particles/P009/render', { preset: 'fountain', params: {} }],
+  ]);
+  assert.deepEqual(JSON.parse(run("JSON.stringify(SPL.build)")), []);
+  assert.equal(run("SPL.view"), null, 'an approved build collapses back to the list');
+  run("SPL.sets=null;SPL.bank=null;SPL.bankSel=null;SPL.build=[];POSTS.length=0");
 });
 
 test('the wizard’s existing-set card lists the sets with what they cost and where they are', () => {

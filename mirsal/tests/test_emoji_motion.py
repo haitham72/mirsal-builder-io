@@ -1,6 +1,8 @@
 """Per-emoji reaction motions (reactions branch): every predefined emoji owns one fixed animation."""
 import unittest
 
+import numpy as np
+
 from mirsal.engine import emoji_motion as em
 from mirsal.engine import particles as p
 
@@ -32,6 +34,18 @@ class EmojiMotionTests(unittest.TestCase):
         self.assertEqual(len(first["ks"]["o"]["k"]), doc["op"])
         # placeholder shape per particle
         self.assertEqual(doc["layers"][0]["shapes"][0]["ty"], "gr")
+
+    def test_default_sprite_is_a_tight_rgba_sparkle(self):
+        a = p.default_sprite()
+        b = p.default_sprite()
+        self.assertEqual(a.shape, (128, 128, 4))
+        self.assertEqual(a.dtype, np.uint8)
+        np.testing.assert_array_equal(a, b)
+        self.assertTrue((a[..., 3] > 200).any(), "a solid core")
+        self.assertTrue((a[..., 3] == 0).any(), "transparent corners")
+        trimmed = p.trim_sprite(a)
+        self.assertIsNotNone(trimmed)
+        self.assertTrue(max(trimmed.shape[:2]) < 128, "mostly air around the sparkle")
 
 
 if __name__ == "__main__":

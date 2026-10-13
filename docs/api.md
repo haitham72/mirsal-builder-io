@@ -234,6 +234,11 @@ Particle sets (`P###`, `out/particles/P###/`) belong to **library stickers** thr
 | `GET /api/packs/{id}/stickers/{sid}/particles` | `rows[]` (saved versions, oldest first: `version`, `label`, `sprites[]` inside the row, `motion`, `preview`, `addable`, `in_pack[]`, `credits`, `job`, `shared_with`) and `drafts[]`, plus `sets[]`, `affirmed`, and grouped legacy `runs:[{effect,mode,cells,saved,imported_as:[Pids]}]`. Gallery displays one item per set/run, with slices inside; runs already imported into owned sets are suppressed. Compatibility `created[]`/`saved[]` remain intact. A sticker with an empty set still counts as created. |
 | `GET /api/generations/{id}/particles` | READY batch cells with links, sets, affirmation and optional approve-as-pack offer. |
 | `POST /api/generations/{id}/recut_particles` | Free re-cut of stored sheet mistakenly classified as stickers; 202. Existing slices can instead be imported directly. |
+| `GET /api/particles/emoji-motions` | Read-only emoji:animation map (1898): `{motions:[{token,emoji,preset,params,label,motion}]}`. Free. |
+| `GET /api/particles/bank` | Bank with per-token build state for Library > Create: `{bank:[{token,emoji,preset,params,label,motion,state:finished\|unclaimed,building,set_id,n_picked}]}`. Free. |
+| `POST /api/particles/{id}/export-lottie` | `{preset?,params?}` → stored Lottie keyframes `{id,set,preset,params,file,layers}` (web only; Telegram stays WebM). Free. |
+| `POST /api/particles/{id}/default-sprite` | Free instant fallback sparkle for sets with no drawn cells (picked at once; idempotent: `{default:true}` when added). Later Generate more replaces it. |
+| `GET /api/packs/{id}/reactions` | This pack's reaction variations: `{pack_id,reactions:[{token,emoji,stickers[],preset,params,label,motion,locked,sets[]}]}`. Free. |
 
 Animated cells expose `type:static|animated`, poster `url`, `clip_url`, `fps`, `frames`, `duration`; clips and lossless frame timelines retain transparency and timing. A peak PNG is a poster. Kling source job/cost survive even when the global job record is missing. Existing artwork recovery preserves source IDs and bytes and links only selected parent stickers. Sheet job records retain status, cost, appended/skipped cells and recoverable errors. Provider completion and video imports are idempotent.
 
