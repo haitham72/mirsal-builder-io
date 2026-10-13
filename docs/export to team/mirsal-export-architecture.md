@@ -76,6 +76,8 @@ Suggested constraints: unique pack `slug` per owner; unique `export_code` across
 
 ## 6. Canonical action bank (36 core + 1898 extended)
 
+Human-readable home: [docs/emoji-bank.md](../emoji-bank.md) (core table, groups, readers). Code truth: `generation/actions.py`. This section stays the export contract.
+
 Haitham, 2026-10-08: the bank grows from 30 to 36 core moods (rows 31–36 are new). 2026-10-11: the bank grows again with the §6b extended iOS bank (generated, exhaustive): every remaining base iOS emoji as a canonical token with its primary glyph and aliases. Default emoji are starting points, **not exclusive mappings** — the saved per-sticker emoji always wins. Other emoji, including ❤️, 😢 or 😂, stay valid associations.
 
 **Binding:** every new sticker's primary emoji MUST be a well-established public iOS emoji — i.e. a member of this bank (core §6 or extended §6b). An unlisted glyph fails validation and the cell exports `unresolved: true` until a human picks from the bank. Lookups try the core bank first, then exact extended tokens, then extended aliases (`actions.py`: three-pass order). Ambiguous extended aliases return candidates; a valid saved emoji may disambiguate them. `is_ios_emoji` validates the complete leading cluster against Unicode 15.1 fully-qualified sequences, including supported skin-tone variants.

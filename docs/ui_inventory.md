@@ -1,8 +1,8 @@
 # docs/ui_inventory.md — everything the browser sandbox can do (generated)
 
-Generated from `console/*.js` on 2026-10-13 (reactions branch: Reaction studio, emoji wall, Lottie export). Regenerate when actions move. The wiring is in `docs/architecture.md` §6; the redesign action map remains in `docs/redesign_plan.md` §4.
+Generated from `console/*.js` on 2026-10-13 (reactions branch: bank-picker effects entry, Reaction studio, emoji wall, Lottie export). Regenerate when actions move. The wiring is in `docs/architecture.md` §6; the redesign action map remains in `docs/redesign_plan.md` §4.
 
-**454 actions** (455 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 34 scripts; **16 screens** (21 `RENDER` definitions); **164 named server routes**.
+**449 actions** (450 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 34 scripts; **16 screens** (21 `RENDER` definitions); **164 named server routes**.
 
 `tests/data/ui_baseline.json` and `tests/test_ui_inventory.py` prevent actions, screens or routes disappearing without a recorded rename or authorized retirement. The feature split changes no baseline entries.
 
@@ -190,39 +190,34 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `xopen` | 225 | editor.js | none (browser only) |
 | `xmore` | 225 | editor.js | none (browser only) |
 
-### `effects.js` (29)
+### `effects.js` (24)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `fxback` | 45 | effects.js | none (browser only) |
-| `fxpack` | 79 | effects.js | none (browser only) |
-| `fxst` | 80 | effects.js | none (browser only) |
-| `fxall` | 81 | effects.js | none (browser only) |
-| `fxmode` | 82 | effects.js | none (browser only) |
-| `fxgrid` | 83 | effects.js | none (browser only) |
-| `fxgo` | 84 | effects.js | `/api/effects` |
-| `fxnovlm` | 88 | effects.js | `/api/effects` |
-| `fxdgrid` | 176 | effects.js | none (browser only) |
-| `fxdretry` | 177 | effects.js | `/api/effects/{}/suggest` |
-| `fxdchip` | 178 | effects.js | `/api/effects/{}/particles_estimate` |
-| `fxdadd` | 182 | effects.js | `/api/effects/{}/particles_estimate` |
-| `fxddraw` | 184 | effects.js, particles.js | `/api/effects`<br>`/api/effects/{}/particles`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
-| `fxdredo` | 187 | effects.js | none (browser only) |
-| `fxdcancel` | 188 | effects.js | none (browser only) |
-| `fxdchange` | 189 | effects.js | none (browser only) |
-| `fxdcell` | 190 | effects.js | none (browser only) |
-| `fxdall` | 191 | effects.js | none (browser only) |
-| `fxduse` | 192 | effects.js | `/api/effects`<br>`/api/effects/{}/particles_pick`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
-| `fxprice` | 229 | effects.js, particles.js | `/api/effects/{}/estimate` |
-| `fxdelpiece` | 233 | effects.js | `/api/effects`<br>`/api/effects/{}/plan`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
-| `fxaddpiece` | 235 | effects.js | `/api/effects/{}/plan` |
-| `fxvideo` | 236 | effects.js, particles.js | `/api/effects`<br>`/api/effects/{}/video`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
-| `fxpick` | 245 | effects.js | none (browser only) |
-| `fxpickall` | 246 | effects.js | none (browser only) |
-| `fxadd` | 247 | effects.js | `/api/effects`<br>`/api/effects/{}/add`<br>`/api/generations`<br>`/api/generations/{}/particles`<br>`/api/jobs`<br>`/api/particles` |
-| `fxopenset` | 265 | effects.js | `/api/particles/{}/preview` |
-| `fxuseset` | 273 | effects.js | `/api/particles` |
-| `psusesave` | 274 | (no `data-act` button: called from code, a key, or a form) | `/api/particles` |
+| `fxback` | 46 | effects.js | none (browser only) |
+| `fxek` | 87 | effects.js | none (browser only) |
+| `fxekgo` | 88 | effects.js | `/api/particles`<br>`/api/particles/{}/preview` |
+| `fxdgrid` | 178 | effects.js | none (browser only) |
+| `fxdretry` | 179 | effects.js | `/api/effects/{}/suggest` |
+| `fxdchip` | 180 | effects.js | `/api/effects/{}/particles_estimate` |
+| `fxdadd` | 184 | effects.js | `/api/effects/{}/particles_estimate` |
+| `fxddraw` | 186 | effects.js, particles.js | `/api/effects`<br>`/api/effects/{}/particles`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
+| `fxdredo` | 189 | effects.js | none (browser only) |
+| `fxdcancel` | 190 | effects.js | none (browser only) |
+| `fxdchange` | 191 | effects.js | none (browser only) |
+| `fxdcell` | 192 | effects.js | none (browser only) |
+| `fxdall` | 193 | effects.js | none (browser only) |
+| `fxduse` | 194 | effects.js | `/api/effects`<br>`/api/effects/{}/particles_pick`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
+| `fxprice` | 231 | effects.js, particles.js | `/api/effects/{}/estimate` |
+| `fxdelpiece` | 235 | effects.js | `/api/effects`<br>`/api/effects/{}/plan`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
+| `fxaddpiece` | 237 | effects.js | `/api/effects/{}/plan` |
+| `fxvideo` | 238 | effects.js, particles.js | `/api/effects`<br>`/api/effects/{}/video`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
+| `fxpick` | 247 | effects.js | none (browser only) |
+| `fxpickall` | 248 | effects.js | none (browser only) |
+| `fxadd` | 249 | effects.js | `/api/effects`<br>`/api/effects/{}/add`<br>`/api/generations`<br>`/api/generations/{}/particles`<br>`/api/jobs`<br>`/api/particles` |
+| `fxopenset` | 267 | effects.js | `/api/particles/{}/preview` |
+| `fxuseset` | 275 | effects.js | `/api/particles` |
+| `psusesave` | 276 | (no `data-act` button: called from code, a key, or a form) | `/api/particles` |
 
 ### `history.js` (5)
 
@@ -300,7 +295,7 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `ljdismiss` | 165 | live.js | `/api/jobs/{}/dismiss` |
 | `egapply` | 255 | live.js | `/api/generations/{}/edge` |
 | `egundo` | 259 | live.js | `/api/generations/{}/edge` |
-| `vlmyes` | 294 | effects.js | none (browser only) |
+| `vlmyes` | 294 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
 | `hunpack` | 322 | live.js, projmap.js | `/api/generations/{}/pack`<br>`/api/generations/{}/particles`<br>`/api/history` |
 | `hopenpack` | 323 | live.js | `/api/generations/{}/particles` |
 | `hleave` | 327 | projmap.js | `/api/generations/{}/leave`<br>`/api/generations/{}/particles`<br>`/api/history` |
@@ -315,104 +310,104 @@ Each action row names its source, line, scripts drawing its button and routes it
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
 | `pktab` | 6 | packs.js | none (browser only) |
-| `rtans` | 45 | packs.js | none (browser only) |
-| `pkzip` | 48 | packs.js | `/api/packs/{}/export.zip`<br>`/api/packs/{}/short` |
-| `colopen` | 50 | packs.js | `/api/collection`<br>`/api/packs/{}/short` |
-| `colsend` | 58 | packs.js | `/api/generations/{}/export-collection`<br>`/api/packs/{}/export-collection` |
-| `pkadd` | 66 | packs.js | none (browser only) |
-| `pkrename` | 67 | packs.js | `/api/packs` |
-| `pkdel` | 72 | packs.js | `/api/packs/{}/delete` |
-| `stanim` | 73 | packs.js | none (browser only) |
-| `stcover` | 74 | packs.js | `/api/packs` |
-| `stdel` | 75 | packs.js | `/api/packs/{}/stickers/{}/delete` |
-| `stedit` | 76 | packs.js | `/api/generations`<br>`/api/generations/{}/studio_edit`<br>`/api/projects/from_sticker` |
-| `stview` | 78 | packs.js | none (browser only) |
-| `stname` | 79 | packs.js | none (browser only) |
-| `strep` | 84 | packs.js | `/api/packs/{}/stickers/{}/replace` |
-| `strepone` | 93 | packs.js | `/api/packs/{}/stickers/{}/replace` |
-| `strepall` | 95 | packs.js | `/api/packs/{}/stickers/{}/replace` |
-| `strepundo` | 97 | packs.js | `/api/packs/{}/stickers/{}/replace` |
-| `stsave` | 98 | packs.js | `/api/packs/{}/stickers/{}` |
-| `pkpreview` | 99 | packs.js | none (browser only) |
-| `pvbg` | 102 | packs.js | none (browser only) |
-| `lcsend` | 144 | packs.js | none (browser only) |
-| `lcopen` | 145 | library.js | none (browser only) |
-| `lcclose` | 145 | packs.js | none (browser only) |
-| `lcprev` | 145 | packs.js | none (browser only) |
-| `lcnext` | 145 | packs.js | none (browser only) |
-| `lcgo` | 146 | packs.js | none (browser only) |
-| `lcbg` | 146 | packs.js | none (browser only) |
-| `lcpack` | 147 | packs.js | none (browser only) |
-| `lcedit` | 148 | packs.js | `/api/projects/from_sticker` |
-| `lctimeline` | 149 | packs.js | none (browser only) |
-| `lcmove` | 150 | packs.js | `/api/packs/{}/stickers/{}/move` |
-| `ptmake` | 207 | packs.js | none (browser only) |
-| `ptrunsim` | 208 | packs.js | `/api/effects`<br>`/api/effects/{}/estimate`<br>`/api/effects/{}/particles_estimate`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
-| `ptopen` | 209 | packs.js | none (browser only) |
-| `ptsaved` | 210 | packs.js | none (browser only) |
-| `ptadd` | 211 | packs.js | `/api/effects/{}/add`<br>`/api/generations/{}/particles`<br>`/api/packs/{}/stickers/{}/particles` |
-| `psshow` | 244 | packs.js | `/api/particles`<br>`/api/particles/{}/preview` |
-| `psscope` | 247 | packs.js | `/api/packs/{}/reactions`<br>`/api/particles/emoji-motions` |
+| `rtans` | 49 | packs.js | none (browser only) |
+| `pkzip` | 52 | packs.js | `/api/packs/{}/export.zip`<br>`/api/packs/{}/short` |
+| `colopen` | 54 | packs.js | `/api/collection`<br>`/api/packs/{}/short` |
+| `colsend` | 62 | packs.js | `/api/generations/{}/export-collection`<br>`/api/packs/{}/export-collection` |
+| `pkadd` | 70 | packs.js | none (browser only) |
+| `pkrename` | 71 | packs.js | `/api/packs` |
+| `pkdel` | 76 | packs.js | `/api/packs/{}/delete` |
+| `stanim` | 77 | packs.js | none (browser only) |
+| `stcover` | 78 | packs.js | `/api/packs` |
+| `stdel` | 79 | packs.js | `/api/packs/{}/stickers/{}/delete` |
+| `stedit` | 80 | packs.js | `/api/generations`<br>`/api/generations/{}/studio_edit`<br>`/api/projects/from_sticker` |
+| `stview` | 82 | packs.js | none (browser only) |
+| `stname` | 83 | packs.js | none (browser only) |
+| `strep` | 88 | packs.js | `/api/packs/{}/stickers/{}/replace` |
+| `strepone` | 97 | packs.js | `/api/packs/{}/stickers/{}/replace` |
+| `strepall` | 99 | packs.js | `/api/packs/{}/stickers/{}/replace` |
+| `strepundo` | 101 | packs.js | `/api/packs/{}/stickers/{}/replace` |
+| `stsave` | 102 | packs.js | `/api/packs/{}/stickers/{}` |
+| `pkpreview` | 103 | packs.js | none (browser only) |
+| `pvbg` | 106 | packs.js | none (browser only) |
+| `lcsend` | 148 | packs.js | none (browser only) |
+| `lcopen` | 149 | library.js | none (browser only) |
+| `lcclose` | 149 | packs.js | none (browser only) |
+| `lcprev` | 149 | packs.js | none (browser only) |
+| `lcnext` | 149 | packs.js | none (browser only) |
+| `lcgo` | 150 | packs.js | none (browser only) |
+| `lcbg` | 150 | packs.js | none (browser only) |
+| `lcpack` | 151 | packs.js | none (browser only) |
+| `lcedit` | 152 | packs.js | `/api/projects/from_sticker` |
+| `lctimeline` | 153 | packs.js | none (browser only) |
+| `lcmove` | 154 | packs.js | `/api/packs/{}/stickers/{}/move` |
+| `ptmake` | 211 | packs.js | none (browser only) |
+| `ptrunsim` | 212 | packs.js | `/api/effects`<br>`/api/effects/{}/estimate`<br>`/api/effects/{}/particles_estimate`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
+| `ptopen` | 213 | packs.js | none (browser only) |
+| `ptsaved` | 214 | packs.js | none (browser only) |
+| `ptadd` | 215 | packs.js | `/api/effects/{}/add`<br>`/api/generations/{}/particles`<br>`/api/packs/{}/stickers/{}/particles` |
+| `psshow` | 252 | packs.js | `/api/particles`<br>`/api/particles/{}/preview` |
+| `psscope` | 255 | packs.js | `/api/packs/{}/reactions`<br>`/api/particles/emoji-motions` |
 
 ### `particles.js` (55)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `spcontinue` | 29 | particles.js | `/api/effects`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
-| `spscope` | 30 | particles.js | none (browser only) |
-| `spapprove` | 32 | particles.js | none (browser only) |
-| `sppack` | 62 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
-| `spkind` | 63 | particles.js | none (browser only) |
-| `spgrid` | 64 | particles.js | none (browser only) |
-| `spst` | 65 | particles.js | none (browser only) |
-| `spall` | 67 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
-| `spstart` | 69 | particles.js | `/api/effects`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles`<br>`/api/particles/{}/preview` |
-| `spnovlm` | 70 | (no `data-act` button: called from code, a key, or a form) | `/api/effects`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles`<br>`/api/particles/{}/preview` |
-| `spreset` | 77 | particles.js | none (browser only) |
-| `spimportretry` | 100 | particles.js | `/api/effects/{}/estimate`<br>`/api/effects/{}/particles_estimate`<br>`/api/particles` |
-| `spprice` | 101 | particles.js | `/api/effects/{}/estimate`<br>`/api/effects/{}/particles_estimate`<br>`/api/particles` |
-| `spfresh` | 114 | particles.js | none (browser only) |
-| `spopen` | 136 | particles.js | none (browser only) |
-| `spmake` | 138 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
-| `psopen` | 210 | particles.js | `/api/particles`<br>`/api/particles/{}/more`<br>`/api/particles/{}/preview` |
-| `psassign` | 213 | particles.js | none (browser only) |
-| `psassignsave` | 215 | particles.js | `/api/particles`<br>`/api/particles/deleted`<br>`/api/particles/{}/link`<br>`/api/particles/{}/unlink` |
-| `psunassign` | 218 | particles.js | `/api/particles`<br>`/api/particles/deleted`<br>`/api/particles/{}/unlink` |
-| `psdup` | 219 | particles.js | `/api/particles`<br>`/api/particles/deleted`<br>`/api/particles/{}/duplicate` |
-| `psrename` | 220 | particles.js | `/api/particles`<br>`/api/particles/deleted`<br>`/api/particles/{}` |
-| `psdel` | 221 | particles.js | `/api/particles`<br>`/api/particles/deleted`<br>`/api/particles/{}/delete` |
-| `psrestore` | 227 | particles.js | `/api/particles`<br>`/api/particles/deleted`<br>`/api/particles/{}/restore` |
-| `pspickcell` | 228 | particles.js | none (browser only) |
-| `pspickcancel` | 231 | particles.js | none (browser only) |
-| `pspicksave` | 232 | particles.js | `/api/particles`<br>`/api/particles/deleted`<br>`/api/particles/{}`<br>`/api/particles/{}/preview` |
-| `psmoremode` | 267 | particles.js | `/api/particles/{}/more` |
-| `psmoreprice` | 268 | particles.js | `/api/particles/{}/more` |
-| `psmoreexisting` | 269 | particles.js | none (browser only) |
-| `psmoregrid` | 275 | particles.js | `/api/particles/{}/more` |
-| `psmorechip` | 276 | (no `data-act` button: called from code, a key, or a form) | `/api/particles/{}/more` |
-| `psmoreadd` | 281 | (no `data-act` button: called from code, a key, or a form) | `/api/particles/{}/more` |
-| `psmoredraw` | 283 | particles.js | `/api/effects`<br>`/api/generations`<br>`/api/jobs`<br>`/api/packs/{}/particles`<br>`/api/particles`<br>`/api/particles/deleted`<br>`/api/particles/{}/more` |
-| `psbnewpack` | 309 | particles.js | `/api/particles/{}/add` |
-| `psbpreset` | 344 | particles.js | `/api/particles/{}/preview` |
-| `psbshuffle` | 345 | particles.js | `/api/particles/{}/preview` |
-| `psbsave` | 353 | particles.js | `/api/packs/{}/stickers/{}/particles`<br>`/api/particles/{}` |
-| `psbsaveas` | 354 | particles.js | `/api/packs/{}/stickers/{}/particles`<br>`/api/particles/{}/preview`<br>`/api/particles/{}/save-as-new` |
-| `pschat` | 355 | particles.js | `/api/particles/{}` |
-| `psbrender` | 357 | particles.js | `/api/packs/{}/particles`<br>`/api/particles`<br>`/api/particles/{}/render` |
-| `psblottie` | 361 | particles.js | `/api/particles/{}/export-lottie` |
-| `psbadd` | 367 | packs.js, particles.js | `/api/packs/{}/particles`<br>`/api/particles`<br>`/api/particles/{}/add` |
-| `pspickset` | 379 | particles.js | `/api/particles/{}/link`<br>`/api/particles/{}/preview` |
-| `psmakepack` | 381 | packs.js | none (browser only) |
-| `pspickpack` | 382 | packs.js | none (browser only) |
-| `pspackassign` | 383 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
-| `agpscope` | 385 | chat-cards.js | `/api/particles` |
-| `agpopen` | 386 | chat-cards.js | `/api/particles`<br>`/api/particles/{}/preview` |
-| `agpapprove` | 387 | chat-cards.js | `/api/generations` |
-| `psrecover` | 389 | packs.js | none (browser only) |
-| `psrecovercreate` | 390 | particles.js | none (browser only) |
-| `psrecovergo` | 392 | particles.js | `/api/particles`<br>`/api/particles/{}/preview` |
-| `ptcancel` | 409 | particles.js | `/api/particles/{}/delete` |
-| `ptgo` | 410 | particles.js | `/api/history`<br>`/api/particles`<br>`/api/particles/{}/more`<br>`/api/particles/{}/preview` |
+| `spcontinue` | 30 | particles.js | `/api/effects`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
+| `spscope` | 31 | particles.js | none (browser only) |
+| `spapprove` | 33 | particles.js | none (browser only) |
+| `sppack` | 63 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `spkind` | 64 | particles.js | none (browser only) |
+| `spgrid` | 65 | particles.js | none (browser only) |
+| `spst` | 66 | particles.js | none (browser only) |
+| `spall` | 68 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `spstart` | 70 | particles.js | `/api/effects`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles`<br>`/api/particles/{}/preview` |
+| `spnovlm` | 71 | (no `data-act` button: called from code, a key, or a form) | `/api/effects`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles`<br>`/api/particles/{}/preview` |
+| `spreset` | 78 | particles.js | none (browser only) |
+| `spimportretry` | 101 | particles.js | `/api/effects/{}/estimate`<br>`/api/effects/{}/particles_estimate`<br>`/api/particles` |
+| `spprice` | 102 | particles.js | `/api/effects/{}/estimate`<br>`/api/effects/{}/particles_estimate`<br>`/api/particles` |
+| `spfresh` | 115 | particles.js | none (browser only) |
+| `spopen` | 137 | particles.js | none (browser only) |
+| `spmake` | 139 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `psopen` | 211 | particles.js | `/api/particles`<br>`/api/particles/{}/more`<br>`/api/particles/{}/preview` |
+| `psassign` | 214 | particles.js | none (browser only) |
+| `psassignsave` | 216 | particles.js | `/api/particles`<br>`/api/particles/deleted`<br>`/api/particles/{}/link`<br>`/api/particles/{}/unlink` |
+| `psunassign` | 219 | particles.js | `/api/particles`<br>`/api/particles/deleted`<br>`/api/particles/{}/unlink` |
+| `psdup` | 220 | particles.js | `/api/particles`<br>`/api/particles/deleted`<br>`/api/particles/{}/duplicate` |
+| `psrename` | 221 | particles.js | `/api/particles`<br>`/api/particles/deleted`<br>`/api/particles/{}` |
+| `psdel` | 222 | particles.js | `/api/particles`<br>`/api/particles/deleted`<br>`/api/particles/{}/delete` |
+| `psrestore` | 228 | particles.js | `/api/particles`<br>`/api/particles/deleted`<br>`/api/particles/{}/restore` |
+| `pspickcell` | 229 | particles.js | none (browser only) |
+| `pspickcancel` | 232 | particles.js | none (browser only) |
+| `pspicksave` | 233 | particles.js | `/api/particles`<br>`/api/particles/deleted`<br>`/api/particles/{}`<br>`/api/particles/{}/preview` |
+| `psmoremode` | 268 | particles.js | `/api/particles/{}/more` |
+| `psmoreprice` | 269 | particles.js | `/api/particles/{}/more` |
+| `psmoreexisting` | 270 | particles.js | none (browser only) |
+| `psmoregrid` | 276 | particles.js | `/api/particles/{}/more` |
+| `psmorechip` | 277 | (no `data-act` button: called from code, a key, or a form) | `/api/particles/{}/more` |
+| `psmoreadd` | 282 | (no `data-act` button: called from code, a key, or a form) | `/api/particles/{}/more` |
+| `psmoredraw` | 284 | particles.js | `/api/effects`<br>`/api/generations`<br>`/api/jobs`<br>`/api/packs/{}/particles`<br>`/api/particles`<br>`/api/particles/deleted`<br>`/api/particles/{}/more` |
+| `psbnewpack` | 310 | particles.js | `/api/particles/{}/add` |
+| `psbpreset` | 345 | particles.js | `/api/particles/{}/preview` |
+| `psbshuffle` | 346 | particles.js | `/api/particles/{}/preview` |
+| `psbsave` | 354 | particles.js | `/api/packs/{}/stickers/{}/particles`<br>`/api/particles/{}` |
+| `psbsaveas` | 355 | particles.js | `/api/packs/{}/stickers/{}/particles`<br>`/api/particles/{}/preview`<br>`/api/particles/{}/save-as-new` |
+| `pschat` | 356 | particles.js | `/api/particles/{}` |
+| `psbrender` | 358 | particles.js | `/api/packs/{}/particles`<br>`/api/particles`<br>`/api/particles/{}/render` |
+| `psblottie` | 362 | particles.js | `/api/particles/{}/export-lottie` |
+| `psbadd` | 368 | packs.js, particles.js | `/api/packs/{}/particles`<br>`/api/particles`<br>`/api/particles/{}/add` |
+| `pspickset` | 380 | particles.js | `/api/particles/{}/link`<br>`/api/particles/{}/preview` |
+| `psmakepack` | 382 | packs.js | none (browser only) |
+| `pspickpack` | 383 | packs.js | none (browser only) |
+| `pspackassign` | 384 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `agpscope` | 386 | chat-cards.js | `/api/particles` |
+| `agpopen` | 387 | chat-cards.js | `/api/particles`<br>`/api/particles/{}/preview` |
+| `agpapprove` | 388 | chat-cards.js | `/api/generations` |
+| `psrecover` | 390 | packs.js | none (browser only) |
+| `psrecovercreate` | 391 | particles.js | none (browser only) |
+| `psrecovergo` | 393 | particles.js | `/api/particles`<br>`/api/particles/{}/preview` |
+| `ptcancel` | 410 | particles.js | `/api/particles/{}/delete` |
+| `ptgo` | 411 | particles.js | `/api/history`<br>`/api/particles`<br>`/api/particles/{}/more`<br>`/api/particles/{}/preview` |
 
 ### `prepare.js` (24)
 

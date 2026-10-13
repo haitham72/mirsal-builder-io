@@ -98,7 +98,7 @@ Ordinary animated stickers in the destination pack are the settled delivery. Ope
 
 ## 8. One animation per emoji, pack variations on top (2026-10-13)
 
-**The rule (Haitham).** Every predefined emoji owns **one fixed animation**, shared by every pack; a pack varies only sprite art plus Size/Energy. This closes W25 (per-emoji vs shared motion) as per-emoji motion with locked type. Batch create/recreate is untouched.
+**The rule (Haitham).** Every predefined emoji owns **one fixed animation**, shared by every pack; a pack varies only sprite art plus Size/Energy. This closes W25 (per-emoji vs shared motion) as per-emoji motion with locked type. Batch create/recreate is untouched. The bank's human home is [emoji-bank.md](emoji-bank.md).
 
 **The map.** `engine/emoji_motion.py` (pure, rule 3): `CORE_MOTIONS` pins the 36 mood tokens to a preset + param overrides; any other bank token falls back deterministically by hash onto the five simulator presets. Motion sentences come from the existing `FACE_SENTENCES` / `BODY_SENTENCES` (`generation/actions.py`). `flow/particle_sets.emoji_motions()` merges the map with `generation_bank()` (>1800, glyph + order) for the read-only wall: `GET /api/particles/emoji-motions` (alias `/api/particles/reactions`).
 
