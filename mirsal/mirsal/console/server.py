@@ -1309,6 +1309,7 @@ def make_handler(c: Console):
             session stays `/api/effects`; `POST /api/particles {from_effect}` is the bridge that saves one. Free: nothing here spends. A delete moves the
             folder to the trash and a set in use says which packs before it goes (rule 9's spirit: nothing is destroyed on a click)."""
             ps = fx_sets
+            from ..flow import emoji_reactions as er                # Reaction effects: one bank emoji to Lottie (no set)
             parts = path.strip("/").split("/")                     # api, particles[, id[, action]]
             try:
                 if len(parts) == 2:
@@ -1344,14 +1345,14 @@ def make_handler(c: Console):
                         return self._json(200, {"bank": ps.bank_states(c.out, c.lib)})
                     if method == "GET" and pid == "emoji-lottie":
                         # Reaction effects: every created reaction, newest first (one per Lottie export), for its cards
-                        return self._json(200, {"reactions": ps.emoji_lotties(c.out)})
+                        return self._json(200, {"reactions": er.emoji_lotties(c.out)})
                     if method == "POST" and pid in ("emoji-preview", "emoji-lottie"):
                         # Reaction effects (Create > New): one bank emoji flying as its own glyph; a looping WebP, or the playable Lottie (free, no set)
                         opts = {k: body.get(k) for k in ("preset", "size_in_dur", "size_out_dur", "hue_var", "particle_size", "size_var")}
-                        opts["sim"] = {k: body[k] for k in ps.EMOJI_SIM if body.get(k) is not None}
+                        opts["sim"] = {k: body[k] for k in er.EMOJI_SIM if body.get(k) is not None}
                         if pid == "emoji-preview":
-                            return self._json(200, ps.emoji_preview(c.out, body.get("token"), seed=body.get("seed", 1), size=body.get("size", 256), **opts))
-                        return self._json(200, ps.export_emoji_lottie(c.out, body.get("token"), seed=body.get("seed", 1), size=body.get("size", 512),
+                            return self._json(200, er.emoji_preview(c.out, body.get("token"), seed=body.get("seed", 1), size=body.get("size", 256), **opts))
+                        return self._json(200, er.export_emoji_lottie(c.out, body.get("token"), seed=body.get("seed", 1), size=body.get("size", 512),
                                                                       user=self.user["id"], **opts))
                     if method == "GET":
                         ps.settle(c.out, pid)                      # (a 404 for a missing set comes from here)

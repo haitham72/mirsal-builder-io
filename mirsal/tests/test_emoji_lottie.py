@@ -9,17 +9,17 @@ from unittest import mock
 import numpy as np
 
 from mirsal.console.server import serve
-from mirsal.engine import particles
+from mirsal.engine import emoji_glyph, lottie, particles
 from mirsal.engine.config import EngineConfig
-from mirsal.flow import particle_sets as ps
+from mirsal.flow import emoji_reactions as er, particle_sets as ps
 from tests.test_live import Base
 
 
 class EmojiLottieTests(Base):
     def setUp(self):
         super().setUp()
-        if not particles.emoji_font():                          # no colour emoji font here: the contract is still tested, with a stand-in glyph
-            patch = mock.patch.object(particles, "render_emoji", lambda glyph, px=160, font_path=None: particles.default_sprite(px))
+        if not emoji_glyph.emoji_font():                          # no colour emoji font here: the contract is still tested, with a stand-in glyph
+            patch = mock.patch.object(emoji_glyph, "render_emoji", lambda glyph, px=160, font_path=None: particles.default_sprite(px))
             patch.start()
             self.addCleanup(patch.stop)
         self.srv, self.c = serve(self.out, self.tmp / "in", 0, cfg=EngineConfig(), block=False)
@@ -46,7 +46,7 @@ class EmojiLottieTests(Base):
         self.assertEqual(code, 200, j)
         self.assertEqual((j["id"], j["token"], j["emoji"], j["preset"]), ("L001", "kiss", "\U0001F618", "burst"))
         self.assertEqual((j["params"]["size_in_dur"], j["params"]["size_out_dur"], j["params"]["hue_var"]), (0.4, 0.4, 25.0), "the screen's defaults")
-        d = ps.emoji_dir(self.out, "kiss")
+        d = er.emoji_dir(self.out, "kiss")
         doc = json.loads((d / "renders" / "L001.lottie.json").read_text(encoding="utf-8"))
         self.assertTrue((d / "renders" / "L001.png").is_file(), "the glyph asset is kept for inspection")
         self.assertEqual(j["url"], "/out/particles/emoji/kiss/renders/L001.lottie.json")
@@ -71,7 +71,7 @@ class EmojiLottieTests(Base):
         a = self.req("POST", "/api/particles/emoji-lottie", body)[1]
         b = self.req("POST", "/api/particles/emoji-lottie", body)[1]
         self.assertEqual((a["id"], b["id"], a["token"], a["preset"]), ("L001", "L002", "kiss", "vortex"), "a glyph resolves to its token")
-        d = ps.emoji_dir(self.out, "kiss") / "renders"
+        d = er.emoji_dir(self.out, "kiss") / "renders"
         self.assertEqual((d / "L001.lottie.json").read_bytes(), (d / "L002.lottie.json").read_bytes())
         self.assertEqual(a["params"]["vortex"], particles.PRESETS["vortex"]["vortex"], "an override takes the preset's own look")
         other = self.req("POST", "/api/particles/emoji-lottie", {**body, "seed": 5})[1]
@@ -117,13 +117,13 @@ class EmojiLottieTests(Base):
         for bad in ({"preset": "spiral"}, {"hue_var": "lots"}, {"size_in_dur": True}, {"size": 20}):
             code, j = self.req("POST", "/api/particles/emoji-lottie", {"token": "kiss", **bad})
             self.assertEqual(code, 400, (bad, j))
-        self.assertFalse(ps.emoji_dir(self.out, "kiss").exists(), "a refused export writes nothing")
+        self.assertFalse(er.emoji_dir(self.out, "kiss").exists(), "a refused export writes nothing")
 
     def test_the_preview_is_a_cached_webp_of_the_same_burst(self):
         code, j = self.req("POST", "/api/particles/emoji-preview", {"token": "cry", "size": 128})
         self.assertEqual(code, 200, j)
         self.assertEqual((j["token"], j["preset"]), ("cry", "rain"))
-        f = ps.emoji_dir(self.out, "cry") / "previews" / j["url"].rsplit("/", 1)[1]
+        f = er.emoji_dir(self.out, "cry") / "previews" / j["url"].rsplit("/", 1)[1]
         self.assertTrue(f.is_file())
         self.assertEqual(f.read_bytes()[8:12], b"WEBP")
         again = self.req("POST", "/api/particles/emoji-preview", {"token": "cry", "size": 128})[1]
@@ -139,7 +139,7 @@ class SetLottieTests(unittest.TestCase):
         frames[1, 2:8, 2:8] = 255
         pngs = ps._sprite_pngs([still, particles.AnimatedSprite(frames, 30.0)])
         self.assertEqual(len(pngs), 2)
-        doc = particles.export_lottie(particles.preset("burst", count=6), pngs)
+        doc = lottie.export_lottie(particles.preset("burst", count=6), pngs)
         self.assertEqual(len(doc["assets"]), 2)
 
 

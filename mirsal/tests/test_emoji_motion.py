@@ -11,6 +11,8 @@ import numpy as np
 from PIL import Image
 
 from mirsal.engine import emoji_motion as em
+from mirsal.engine import emoji_glyph as glyph
+from mirsal.engine import lottie
 from mirsal.engine import particles as p
 
 PRESETS = ("burst", "fountain", "vortex", "rain", "confetti")
@@ -192,10 +194,10 @@ class EnvelopeAndHueTests(unittest.TestCase):
         self.assertGreater(int(np.abs(tinted[..., :3][on].astype(int) - plain[..., :3][on].astype(int)).max()), 60)
 
 
-@unittest.skipUnless(p.emoji_font(), "no colour emoji font on this machine")
+@unittest.skipUnless(glyph.emoji_font(), "no colour emoji font on this machine")
 class RenderEmojiTests(unittest.TestCase):
     def test_the_glyph_is_a_tight_coloured_rgba_sprite(self):
-        a = p.render_emoji("\U0001F618", 128)
+        a = glyph.render_emoji("\U0001F618", 128)
         self.assertEqual(a.dtype, np.uint8)
         self.assertEqual(a.ndim, 3)
         self.assertEqual(a.shape[2], 4)
@@ -203,22 +205,22 @@ class RenderEmojiTests(unittest.TestCase):
         self.assertTrue((a[..., 3] > 200).sum() > 0.3 * a.shape[0] * a.shape[1], "mostly glyph, little air")
         solid = a[a[..., 3] > 200][:, :3]
         self.assertGreater(len(np.unique(solid // 16, axis=0)), 8, "a colour emoji, not one flat colour")
-        np.testing.assert_array_equal(a, p.render_emoji("\U0001F618", 128), "deterministic")
-        self.assertEqual(p.render_emoji("\U0001F618", 128).shape, a.shape)
-        self.assertFalse(np.array_equal(a, p.render_emoji("\U0001F62D", 128)), "another emoji is another picture")
+        np.testing.assert_array_equal(a, glyph.render_emoji("\U0001F618", 128), "deterministic")
+        self.assertEqual(glyph.render_emoji("\U0001F618", 128).shape, a.shape)
+        self.assertFalse(np.array_equal(a, glyph.render_emoji("\U0001F62D", 128)), "another emoji is another picture")
 
     def test_nonsense_is_refused(self):
         with self.assertRaises(ValueError):
-            p.render_emoji("  ")
+            glyph.render_emoji("  ")
         with self.assertRaises(ValueError):
-            p.render_emoji("\U0001F618", 4)
+            glyph.render_emoji("\U0001F618", 4)
 
 
 class LottieTests(unittest.TestCase):
     def test_layers_are_image_layers_of_one_shared_embedded_asset(self):
         params = p.preset("burst", count=6, seed=7)
         png = sparkle_png()
-        doc = p.export_lottie(params, png)
+        doc = lottie.export_lottie(params, png)
         self.assertEqual(doc["v"], "5.7.4")
         self.assertEqual((doc["w"], doc["h"], doc["op"], doc["fr"]), (512, 512, 90, 30.0))
         self.assertEqual(len(doc["assets"]), 1, "the sprite is embedded once")
@@ -243,7 +245,7 @@ class LottieTests(unittest.TestCase):
 
     def test_layer_scale_draws_the_simulated_size(self):
         params = p.preset("burst", count=4, seed=2)
-        doc = p.export_lottie(params, sparkle_png(200))
+        doc = lottie.export_lottie(params, sparkle_png(200))
         tr = p.trajectories(params)
         a = doc["assets"][0]
         top_first = tr.draw_order[::-1].tolist()                    # Lottie's first layer is on top: the biggest particle, drawn last by simulate()
@@ -258,27 +260,27 @@ class LottieTests(unittest.TestCase):
     def test_hue_variation_adds_tinted_assets_and_is_deterministic(self):
         params = p.preset("confetti", count=48, seed=3, hue_var=60, size_in_dur=0.3, size_out_dur=0.3)
         png = sparkle_png()
-        a, b = p.export_lottie(params, png), p.export_lottie(params, png)
+        a, b = lottie.export_lottie(params, png), lottie.export_lottie(params, png)
         self.assertEqual(json.dumps(a), json.dumps(b), "same params + same PNG -> the same JSON")
         ids = [x["id"] for x in a["assets"]]
         self.assertGreater(len(ids), 1)
         self.assertEqual(len(ids), len(set(ids)))
-        self.assertLessEqual(len(ids), 2 * 60 / p.HUE_STEP + 1)
+        self.assertLessEqual(len(ids), 2 * 60 / lottie.HUE_STEP + 1)
         self.assertTrue({layer["refId"] for layer in a["layers"]} <= set(ids))
-        self.assertNotEqual(json.dumps(p.export_lottie(p.preset("confetti", count=48, seed=4, hue_var=60), png)), json.dumps(a))
+        self.assertNotEqual(json.dumps(lottie.export_lottie(p.preset("confetti", count=48, seed=4, hue_var=60), png)), json.dumps(a))
 
     def test_several_sprites_are_one_asset_each(self):
-        doc = p.export_lottie(p.preset("burst", count=10, seed=1), [sparkle_png(), p.png_bytes(np.full((20, 30, 4), 255, np.uint8))])
+        doc = lottie.export_lottie(p.preset("burst", count=10, seed=1), [sparkle_png(), p.png_bytes(np.full((20, 30, 4), 255, np.uint8))])
         self.assertEqual(len(doc["assets"]), 2)
         self.assertEqual({layer["refId"] for layer in doc["layers"]}, {x["id"] for x in doc["assets"]})
 
     def test_bad_sprites_are_refused(self):
         with self.assertRaises(ValueError):
-            p.export_lottie(p.preset("burst"), [])
+            lottie.export_lottie(p.preset("burst"), [])
         with self.assertRaises(ValueError):
-            p.export_lottie(p.preset("burst"), b"not a png")
+            lottie.export_lottie(p.preset("burst"), b"not a png")
         with self.assertRaises(ValueError):
-            p.export_lottie(p.preset("burst"), p.png_bytes(np.zeros((8, 8, 4), np.uint8)))
+            lottie.export_lottie(p.preset("burst"), p.png_bytes(np.zeros((8, 8, 4), np.uint8)))
 
 
 class DefaultSpriteTests(unittest.TestCase):
