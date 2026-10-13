@@ -529,7 +529,15 @@ test('the set card opens with Generate more AND the burst maker', () => {
 
 test('every new burst action has a handler, and the burst listeners are the file’s own', () => {
   const src = readConsoleFile(require('node:path').join(__dirname, '..', '..', 'mirsal', 'console', 'particles.js'), 'utf8');
-  for (const a of ['psbpreset', 'psbshuffle', 'psbrender', 'psbadd']) assert.match(src, new RegExp(`ACT\\.${a}=`), `${a} has a handler`);
+  for (const a of ['psbpreset', 'psbshuffle', 'psbrender', 'psbadd', 'psblottie']) assert.match(src, new RegExp(`ACT\\.${a}=`), `${a} has a handler`);
   assert.match(src, /addEventListener\('input'/);
   assert.match(src, /addEventListener\('change'/);
+});
+
+test('Lottie downloads the stored animation file, never a fabricated stub', () => {
+  const src = readConsoleFile(require('node:path').join(__dirname, '..', '..', 'mirsal', 'console', 'particles.js'), 'utf8');
+  const handler = src.slice(src.indexOf('ACT.psblottie='));
+  assert.match(handler, /export-lottie/, 'it calls the export route');
+  assert.match(handler, /a\.href=r\.j\.url/, 'it downloads the stored file url');
+  assert.doesNotMatch(handler, /new Blob/, 'no fabricated manifest blob');
 });
