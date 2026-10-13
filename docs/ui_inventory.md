@@ -1,8 +1,8 @@
 # docs/ui_inventory.md — everything the browser sandbox can do (generated)
 
-Generated from `console/*.js` on 2026-10-13 (reactions branch: Reaction studio, emoji wall, Lottie export). Regenerate when actions move. The wiring is in `docs/architecture.md` §6; the redesign action map remains in `docs/redesign_plan.md` §4.
+Generated from `console/*.js` on 2026-10-13 (reactions branch: Reaction studio, emoji wall, Lottie export; Reaction effects is one bank emoji -> Download Lottie). Regenerate when actions move. The wiring is in `docs/architecture.md` §6; the redesign action map remains in `docs/redesign_plan.md` §4.
 
-**458 actions** (459 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 34 scripts; **16 screens** (21 `RENDER` definitions); **166 named server routes**.
+**460 actions** (461 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 34 scripts; **16 screens** (21 `RENDER` definitions); **168 named server routes**.
 
 `tests/data/ui_baseline.json` and `tests/test_ui_inventory.py` prevent actions, screens or routes disappearing without a recorded rename or authorized retirement. The feature split changes no baseline entries.
 
@@ -36,9 +36,10 @@ Each action row names its source, line, scripts drawing its button and routes it
 
 ## Server routes the page names
 
-`/api`, `/api/ai`, `/api/ai/backend`, `/api/auth`, `/api/auth/credits`, `/api/auth/forgot`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`, `/api/auth/password`, `/api/auth/signup`, `/api/chat/*`, `/api/chat/agent`, `/api/chat/sessions`, `/api/chat/sessions/{}/delete`, `/api/chat/sessions/{}/messages`, `/api/chat/sessions/{}/settings`, `/api/collection`, `/api/cutout`, `/api/effects`, `/api/effects/{}/add`, `/api/effects/{}/estimate`, `/api/effects/{}/particles`, `/api/effects/{}/particles_estimate`, `/api/effects/{}/particles_pick`, `/api/effects/{}/plan`, `/api/effects/{}/suggest`, `/api/effects/{}/video`, `/api/faq`, `/api/faq/{}/{}`, `/api/generations`, `/api/generations/${+String(id).replace(/\D/g,`, `/api/generations/removed`, `/api/generations/{}/add`, `/api/generations/{}/allow`, `/api/generations/{}/animate`, `/api/generations/{}/drop`, `/api/generations/{}/edge`, `/api/generations/{}/edge_preview`, `/api/generations/{}/edit`, `/api/generations/{}/export-collection`, `/api/generations/{}/export.zip`, `/api/generations/{}/family`, `/api/generations/{}/join`, `/api/generations/{}/keep_size`, `/api/generations/{}/leave`, `/api/generations/{}/map`, `/api/generations/{}/pack`, `/api/generations/{}/particles`, `/api/generations/{}/pick`, `/api/generations/{}/pick_video`, `/api/generations/{}/quick_sheet`, `/api/generations/{}/recheck`, `/api/generations/{}/recut`, `/api/generations/{}/remove`, `/api/generations/{}/remove_video`, `/api/generations/{}/replace`, `/api/generations/{}/restore`, `/api/generations/{}/reveal`, `/api/generations/{}/sheet_preview`, `/api/generations/{}/studio_edit`, `/api/generations/{}/video_sheet/{}/video`, `/api/generations/{}/video_size`, `/api/higgsfield`, `/api/higgsfield/history`, `/api/higgsfield/import`, `/api/history`, `/api/import`, `/api/imports/candidates`, `/api/inputs`, `/api/jobs`, `/api/jobs/{}/dismiss`, `/api/jobs/{}/retry`, `/api/jobs/{}/retry_estimate`, `/api/jobs/{}/{}`, `/api/library`, `/api/live/cost`, `/api/live/ref`, `/api/live/sheet`, `/api/live/video`, `/api/llm/models`, `/api/models`, `/api/notifications`, `/api/packs`, `/api/packs/{}`, `/api/packs/{}/delete`, `/api/packs/{}/export-collection`, `/api/packs/{}/export.zip`, `/api/packs/{}/merge`, `/api/packs/{}/particles`, `/api/packs/{}/reactions`, `/api/packs/{}/render`, `/api/packs/{}/restore`, `/api/packs/{}/short`, `/api/packs/{}/stickers/{}`, `/api/packs/{}/stickers/{}/animate`, `/api/packs/{}/stickers/{}/delete`, `/api/packs/{}/stickers/{}/move`, `/api/packs/{}/stickers/{}/particle-preview`, `/api/packs/{}/stickers/{}/particles`, `/api/packs/{}/stickers/{}/replace`, `/api/packs/{}/telegram`, `/api/packs/{}/telegram.zip`, `/api/particles`, `/api/particles/bank`, `/api/particles/deleted`, `/api/particles/emoji-motions`, `/api/particles/{}`, `/api/particles/{}/add`, `/api/particles/{}/default-sprite`, `/api/particles/{}/delete`, `/api/particles/{}/duplicate`, `/api/particles/{}/export-lottie`, `/api/particles/{}/link`, `/api/particles/{}/more`, `/api/particles/{}/preview`, `/api/particles/{}/render`, `/api/particles/{}/restore`, `/api/particles/{}/save-as-new`, `/api/particles/{}/unlink`, `/api/people`, `/api/plan`, `/api/plan/more`, `/api/plan/next`, `/api/prefs`, `/api/prepared/match`, `/api/prepared/setting`, `/api/projects`, `/api/projects/from_sticker`, `/api/projects/{}/delete`, `/api/projects/{}/render`, `/api/stickers/delete`, `/api/stickers/move`, `/api/support/ask`, `/api/support/conversations`, `/api/support/conversations/{}/{}`, `/api/support/queue`, `/api/support/tickets`, `/api/tasks`, `/api/telegram`, `/api/telegram/config`, `/api/telegram/disconnect`, `/api/tickets`, `/api/tickets/{}/answer`, `/api/tickets/{}/reply`, `/api/tickets/{}/resolve`, `/api/tickets/{}/status`, `/api/trash`, `/api/trash/purge`, `/api/trash/purge_all`, `/api/trash/purges`, `/api/trending`, `/api/trending/{}/${on`, `/api/trending/{}/comments`, `/api/trending/{}/comments/{}/delete`, `/api/trending/{}/file/{}`, `/api/trending/{}/unshare`, `/api/trending/{}/use`, `/api/usage`, `/api/users`, `/api/users/me`, `/api/users/overview`, `/api/watch`, `/api/watch/purge`, `/api/watch/remove`, `/api/watch/restore`
+`/api`, `/api/ai`, `/api/ai/backend`, `/api/auth`, `/api/auth/credits`, `/api/auth/forgot`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/me`, `/api/auth/password`, `/api/auth/signup`, `/api/chat/*`, `/api/chat/agent`, `/api/chat/sessions`, `/api/chat/sessions/{}/delete`, `/api/chat/sessions/{}/messages`, `/api/chat/sessions/{}/settings`, `/api/collection`, `/api/cutout`, `/api/effects`, `/api/effects/{}/add`, `/api/effects/{}/estimate`, `/api/effects/{}/particles`, `/api/effects/{}/particles_estimate`, `/api/effects/{}/particles_pick`, `/api/effects/{}/plan`, `/api/effects/{}/suggest`, `/api/effects/{}/video`, `/api/faq`, `/api/faq/{}/{}`, `/api/generations`, `/api/generations/${+String(id).replace(/\D/g,`, `/api/generations/removed`, `/api/generations/{}/add`, `/api/generations/{}/allow`, `/api/generations/{}/animate`, `/api/generations/{}/drop`, `/api/generations/{}/edge`, `/api/generations/{}/edge_preview`, `/api/generations/{}/edit`, `/api/generations/{}/export-collection`, `/api/generations/{}/export.zip`, `/api/generations/{}/family`, `/api/generations/{}/join`, `/api/generations/{}/keep_size`, `/api/generations/{}/leave`, `/api/generations/{}/map`, `/api/generations/{}/pack`, `/api/generations/{}/particles`, `/api/generations/{}/pick`, `/api/generations/{}/pick_video`, `/api/generations/{}/quick_sheet`, `/api/generations/{}/recheck`, `/api/generations/{}/recut`, `/api/generations/{}/remove`, `/api/generations/{}/remove_video`, `/api/generations/{}/replace`, `/api/generations/{}/restore`, `/api/generations/{}/reveal`, `/api/generations/{}/sheet_preview`, `/api/generations/{}/studio_edit`, `/api/generations/{}/video_sheet/{}/video`, `/api/generations/{}/video_size`, `/api/higgsfield`, `/api/higgsfield/history`, `/api/higgsfield/import`, `/api/history`, `/api/import`, `/api/imports/candidates`, `/api/inputs`, `/api/jobs`, `/api/jobs/{}/dismiss`, `/api/jobs/{}/retry`, `/api/jobs/{}/retry_estimate`, `/api/jobs/{}/{}`, `/api/library`, `/api/live/cost`, `/api/live/ref`, `/api/live/sheet`, `/api/live/video`, `/api/llm/models`, `/api/models`, `/api/notifications`, `/api/packs`, `/api/packs/{}`, `/api/packs/{}/delete`, `/api/packs/{}/export-collection`, `/api/packs/{}/export.zip`, `/api/packs/{}/merge`, `/api/packs/{}/particles`, `/api/packs/{}/reactions`, `/api/packs/{}/render`, `/api/packs/{}/restore`, `/api/packs/{}/short`, `/api/packs/{}/stickers/{}`, `/api/packs/{}/stickers/{}/animate`, `/api/packs/{}/stickers/{}/delete`, `/api/packs/{}/stickers/{}/move`, `/api/packs/{}/stickers/{}/particle-preview`, `/api/packs/{}/stickers/{}/particles`, `/api/packs/{}/stickers/{}/replace`, `/api/packs/{}/telegram`, `/api/packs/{}/telegram.zip`, `/api/particles`, `/api/particles/bank`, `/api/particles/deleted`, `/api/particles/emoji-lottie`, `/api/particles/emoji-motions`, `/api/particles/emoji-preview`, `/api/particles/{}`, `/api/particles/{}/add`, `/api/particles/{}/default-sprite`, `/api/particles/{}/delete`, `/api/particles/{}/duplicate`, `/api/particles/{}/export-lottie`, `/api/particles/{}/link`, `/api/particles/{}/more`, `/api/particles/{}/preview`, `/api/particles/{}/render`, `/api/particles/{}/restore`, `/api/particles/{}/save-as-new`, `/api/particles/{}/unlink`, `/api/people`, `/api/plan`, `/api/plan/more`, `/api/plan/next`, `/api/prefs`, `/api/prepared/match`, `/api/prepared/setting`, `/api/projects`, `/api/projects/from_sticker`, `/api/projects/{}/delete`, `/api/projects/{}/render`, `/api/stickers/delete`, `/api/stickers/move`, `/api/support/ask`, `/api/support/conversations`, `/api/support/conversations/{}/{}`, `/api/support/queue`, `/api/support/tickets`, `/api/tasks`, `/api/telegram`, `/api/telegram/config`, `/api/telegram/disconnect`, `/api/tickets`, `/api/tickets/{}/answer`, `/api/tickets/{}/reply`, `/api/tickets/{}/resolve`, `/api/tickets/{}/status`, `/api/trash`, `/api/trash/purge`, `/api/trash/purge_all`, `/api/trash/purges`, `/api/trending`, `/api/trending/{}/${on`, `/api/trending/{}/comments`, `/api/trending/{}/comments/{}/delete`, `/api/trending/{}/file/{}`, `/api/trending/{}/unshare`, `/api/trending/{}/use`, `/api/usage`, `/api/users`, `/api/users/me`, `/api/users/overview`, `/api/watch`, `/api/watch/purge`, `/api/watch/remove`, `/api/watch/restore`
 
 ## Actions by script
+
 ### `animate.js` (8)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
@@ -190,34 +191,36 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `xopen` | 225 | editor.js | none (browser only) |
 | `xmore` | 225 | editor.js | none (browser only) |
 
-### `effects.js` (24)
+### `effects.js` (26)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `fxback` | 46 | effects.js | none (browser only) |
-| `fxek` | 87 | effects.js | none (browser only) |
-| `fxekgo` | 88 | effects.js | `/api/particles`<br>`/api/particles/{}/preview` |
-| `fxdgrid` | 178 | effects.js | none (browser only) |
-| `fxdretry` | 179 | effects.js | `/api/effects/{}/suggest` |
-| `fxdchip` | 180 | effects.js | `/api/effects/{}/particles_estimate` |
-| `fxdadd` | 184 | effects.js | `/api/effects/{}/particles_estimate` |
-| `fxddraw` | 186 | effects.js, particles.js | `/api/effects`<br>`/api/effects/{}/particles`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
-| `fxdredo` | 189 | effects.js | none (browser only) |
-| `fxdcancel` | 190 | effects.js | none (browser only) |
-| `fxdchange` | 191 | effects.js | none (browser only) |
-| `fxdcell` | 192 | effects.js | none (browser only) |
-| `fxdall` | 193 | effects.js | none (browser only) |
-| `fxduse` | 194 | effects.js | `/api/effects`<br>`/api/effects/{}/particles_pick`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
-| `fxprice` | 231 | effects.js, particles.js | `/api/effects/{}/estimate` |
-| `fxdelpiece` | 235 | effects.js | `/api/effects`<br>`/api/effects/{}/plan`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
-| `fxaddpiece` | 237 | effects.js | `/api/effects/{}/plan` |
-| `fxvideo` | 238 | effects.js, particles.js | `/api/effects`<br>`/api/effects/{}/video`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
-| `fxpick` | 247 | effects.js | none (browser only) |
-| `fxpickall` | 248 | effects.js | none (browser only) |
-| `fxadd` | 249 | effects.js | `/api/effects`<br>`/api/effects/{}/add`<br>`/api/generations`<br>`/api/generations/{}/particles`<br>`/api/jobs`<br>`/api/particles` |
-| `fxopenset` | 267 | effects.js | `/api/particles/{}/preview` |
-| `fxuseset` | 275 | effects.js | `/api/particles` |
-| `psusesave` | 276 | (no `data-act` button: called from code, a key, or a form) | `/api/particles` |
+| `fxback` | 47 | effects.js | none (browser only) |
+| `fxek` | 109 | effects.js | `/api/particles/emoji-preview` |
+| `fxekback` | 110 | effects.js | none (browser only) |
+| `fxekpreset` | 111 | effects.js | `/api/particles/emoji-preview` |
+| `fxeklottie` | 112 | effects.js | `/api/particles/emoji-lottie` |
+| `fxdgrid` | 202 | effects.js | none (browser only) |
+| `fxdretry` | 203 | effects.js | `/api/effects/{}/suggest` |
+| `fxdchip` | 204 | effects.js | `/api/effects/{}/particles_estimate` |
+| `fxdadd` | 208 | effects.js | `/api/effects/{}/particles_estimate` |
+| `fxddraw` | 210 | effects.js, particles.js | `/api/effects`<br>`/api/effects/{}/particles`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
+| `fxdredo` | 213 | effects.js | none (browser only) |
+| `fxdcancel` | 214 | effects.js | none (browser only) |
+| `fxdchange` | 215 | effects.js | none (browser only) |
+| `fxdcell` | 216 | effects.js | none (browser only) |
+| `fxdall` | 217 | effects.js | none (browser only) |
+| `fxduse` | 218 | effects.js | `/api/effects`<br>`/api/effects/{}/particles_pick`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
+| `fxprice` | 255 | effects.js, particles.js | `/api/effects/{}/estimate` |
+| `fxdelpiece` | 259 | effects.js | `/api/effects`<br>`/api/effects/{}/plan`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
+| `fxaddpiece` | 261 | effects.js | `/api/effects/{}/plan` |
+| `fxvideo` | 262 | effects.js, particles.js | `/api/effects`<br>`/api/effects/{}/video`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
+| `fxpick` | 271 | effects.js | none (browser only) |
+| `fxpickall` | 272 | effects.js | none (browser only) |
+| `fxadd` | 273 | effects.js | `/api/effects`<br>`/api/effects/{}/add`<br>`/api/generations`<br>`/api/generations/{}/particles`<br>`/api/jobs`<br>`/api/particles` |
+| `fxopenset` | 291 | effects.js | `/api/particles/{}/preview` |
+| `fxuseset` | 299 | effects.js | `/api/particles` |
+| `psusesave` | 300 | (no `data-act` button: called from code, a key, or a form) | `/api/particles` |
 
 ### `history.js` (5)
 
@@ -403,20 +406,20 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `psbsaveas` | 419 | particles.js | `/api/packs/{}/stickers/{}/particles`<br>`/api/particles/{}/preview`<br>`/api/particles/{}/save-as-new` |
 | `pschat` | 420 | particles.js | `/api/particles/{}` |
 | `psbrender` | 422 | particles.js | `/api/packs/{}/particles`<br>`/api/particles`<br>`/api/particles/{}/render` |
-| `psblottie` | 426 | particles.js | `/api/particles/{}/export-lottie` |
-| `psbadd` | 432 | packs.js, particles.js | `/api/packs/{}/particles`<br>`/api/particles`<br>`/api/particles/{}/add` |
-| `pspickset` | 444 | particles.js | `/api/particles/{}/link`<br>`/api/particles/{}/preview` |
-| `psmakepack` | 446 | packs.js | none (browser only) |
-| `pspickpack` | 447 | packs.js | none (browser only) |
-| `pspackassign` | 448 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
-| `agpscope` | 450 | chat-cards.js | `/api/particles` |
-| `agpopen` | 451 | chat-cards.js | `/api/particles`<br>`/api/particles/{}/preview` |
-| `agpapprove` | 452 | chat-cards.js | `/api/generations` |
-| `psrecover` | 454 | packs.js | none (browser only) |
-| `psrecovercreate` | 455 | particles.js | none (browser only) |
-| `psrecovergo` | 457 | particles.js | `/api/particles`<br>`/api/particles/{}/preview` |
-| `ptcancel` | 474 | particles.js | `/api/particles/{}/delete` |
-| `ptgo` | 475 | particles.js | `/api/history`<br>`/api/particles`<br>`/api/particles/{}/more`<br>`/api/particles/{}/preview` |
+| `psblottie` | 426 | particles.js | `/api/packs/{}/particles`<br>`/api/particles`<br>`/api/particles/{}/add`<br>`/api/particles/{}/export-lottie` |
+| `psbadd` | 431 | packs.js, particles.js | none (browser only) |
+| `pspickset` | 443 | particles.js | `/api/particles/{}/link`<br>`/api/particles/{}/preview` |
+| `psmakepack` | 445 | packs.js | none (browser only) |
+| `pspickpack` | 446 | packs.js | none (browser only) |
+| `pspackassign` | 447 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `agpscope` | 449 | chat-cards.js | `/api/particles` |
+| `agpopen` | 450 | chat-cards.js | `/api/particles`<br>`/api/particles/{}/preview` |
+| `agpapprove` | 451 | chat-cards.js | `/api/generations` |
+| `psrecover` | 453 | packs.js | none (browser only) |
+| `psrecovercreate` | 454 | particles.js | none (browser only) |
+| `psrecovergo` | 456 | particles.js | `/api/particles`<br>`/api/particles/{}/preview` |
+| `ptcancel` | 473 | particles.js | `/api/particles/{}/delete` |
+| `ptgo` | 474 | particles.js | `/api/history`<br>`/api/particles`<br>`/api/particles/{}/more`<br>`/api/particles/{}/preview` |
 
 ### `prepare.js` (24)
 

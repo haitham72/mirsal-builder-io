@@ -1,5 +1,6 @@
-/* Particle effects (#/effects, a tool of Create): the reaction Telegram plays when you press an emoji, made for a PACK. docs/effects.md.
-   Pick a pack and its stickers, see what bursts out of each (a vision model or a built-in table), then make the particles:
+/* Particle effects (#/effects, a tool of Create). Its ENTRY is Reaction effects: the emoji bank only (one emoji -> its fixed animation flying as its own glyph -> Download Lottie;
+   docs/reaction.md section 13). An earlier E### run (#/effects/E###) is the reaction Telegram plays when you press an emoji, made for a PACK. docs/effects.md.
+   In a run: pick a pack and its stickers, see what bursts out of each (a vision model or a built-in table), then make the particles:
    Simulate (free: gravity / explosion / vortex sliders with a live preview rendered by the engine; the particles are the pack's own stickers, or an AI-drawn sheet) or
    Video (a text-only Kling clip; the price is shown first and the click is the go-ahead). Results are 3-second Telegram stickers; Add puts them into the pack tagged with the source emoji
    and saves them under their sticker. Everything here calls /api/effects; nothing is decided in the browser.
@@ -62,34 +63,57 @@ const fxSig=X=>{const e=X.rec;if(!e)return'';const s=fxSet(e)||{};return JSON.st
 function fxPoll(X){clearTimeout(X.timer);if(!fxBusy(X)||!X.alive())return;
  X.timer=setTimeout(async()=>{if(!X.eid)return;await fxLoad(X);const sig=fxSig(X);if(X.alive()&&sig!==X.last){X.last=sig;X.draw()}},2200)}
 
-/* ---------- setup: the emoji bank. No packs, no auto-playing stickers: search + pick emojis (static glyphs, motion locked), then create reactions for them as one free simulator set, opened in the Studio. Earlier E### runs stay as text links. docs/emoji-bank.md is the bank's human home; the code truth is generation/actions.py (`generation_bank`), read here through GET /api/particles/emoji-motions. */
+/* ---------- the entry: Reaction effects = the emoji bank ONLY (docs/reaction.md section 13). Search the bank, click ONE emoji: its fixed animation plays at once, flying as the emoji's own glyph
+   (the server draws it with the system's colour emoji font: one sprite, no picker, no packs, no stickers, no Kling, no sheet), with three controls only (Size in / Size out, Hue, the preset), then
+   Download Lottie. Everything is the server's: POST /api/particles/emoji-preview (a looping WebP) and /emoji-lottie (the stored file, downloaded). Same emoji + options -> the same file.
+   The bank is read through GET /api/particles/emoji-motions (code truth: generation/actions.py `generation_bank`); earlier E### runs stay as text links. */
 const FXEKQ={q:''};
-const fxEkSel=()=>FX.ekSel||(FX.ekSel=new Set());
+const FXEKO=[['size_in_dur','Size in',0,1.5,.05,'s'],['size_out_dur','Size out',0,1.5,.05,'s'],['hue_var','Hue',0,180,5,'°']];
+const fxEkNew=t=>({token:t,preset:'',size_in_dur:.4,size_out_dur:.4,hue_var:25,pv:'',err:'',seq:0});
 function fxEkList(){const bank=FX.ekBank||[],q=FXEKQ.q.trim().toLowerCase();
  const list=q?bank.filter(m=>(m.token+' '+m.emoji+' '+(m.motion||'')).toLowerCase().includes(q)):bank;
  return list.slice(0,120)}
-function fxEkCard(m){const on=fxEkSel().has(m.token);
- return `<button class="ps-emo${on?' on':''}" data-act=fxek data-t="${esc(m.token)}" aria-pressed=${on} title="${esc((m.motion||m.preset||'')+' · motion locked')}"><span class=ps-glyph>${esc(m.emoji||'o')}</span><b>${esc(m.token)}</b><small class=mut>${esc(m.preset||'')}</small></button>`}
-function fxEkWrap(){const sel=fxEkSel();
- return `<div class=row><input type=search data-fxekq placeholder="Search 1898 reactions..." value="${esc(FXEKQ.q)}" aria-label="Search the emoji bank"></div>
+function fxEkCard(m){return `<button class=ps-emo data-act=fxek data-t="${esc(m.token)}" title="${esc((m.motion||m.preset||'')+' · open its reaction')}"><span class=ps-glyph>${esc(m.emoji||'o')}</span><b>${esc(m.token)}</b><small class=mut>${esc(m.preset||'')}</small></button>`}
+function fxEkWrap(){
+ return `<div class=row><input type=search data-fxekq placeholder="Search ${(FX.ekBank||[]).length} emojis..." value="${esc(FXEKQ.q)}" aria-label="Search the emoji bank"></div>
  <div class=ps-wall data-fxekwall>${fxEkList().map(fxEkCard).join('')||'<span class=mut>No match.</span>'}</div>
- <small class=mut>Showing ${fxEkList().length} of ${(FX.ekBank||[]).length} · core moods first · static glyphs: nothing plays until you render.</small>
- <div class=row style="margin-top:10px"><button class="btn pri gbig" data-act=fxekgo ${sel.size?'':'disabled'}>${ic('fx')} Create reactions${sel.size?` for ${sel.size} emoji`:''}</button><span class=mut>A free simulator set, opened in the Studio. At most 9 emojis: a 2 × 2 sheet holds 4, a 3 × 3 holds 9.</span></div>`}
-function fxSetup(){
- return `<div class=ph><h1>Reaction effects</h1></div><div class=mut>Pick emojis from the bank. Each has one fixed animation.</div>
+ <small class=mut>Showing ${fxEkList().length} of ${(FX.ekBank||[]).length} · core moods first · click one to open its reaction.</small>`}
+const fxEkRow=()=>(FX.ekBank||[]).find(m=>m.token===(FX.ek||{}).token)||{token:(FX.ek||{}).token,emoji:'',preset:'',motion:''};
+const fxEkBody=k=>({token:k.token,size_in_dur:+k.size_in_dur,size_out_dur:+k.size_out_dur,hue_var:+k.hue_var,...(k.preset?{preset:k.preset}:{})});
+function fxEkSlider(o){const k=FX.ek,v=k[o[0]];
+ return `<label class=fx-sl><span>${o[1]}</span><input type=range min=${o[2]} max=${o[3]} step=${o[4]} value="${v}" data-fxeko=${o[0]} aria-label="${o[1]}"><output>${+v}${o[5]}</output></label>`}
+function fxEkOpen(){const k=FX.ek,m=fxEkRow();
+ return `<div class=ph><h1>${esc(m.emoji)} ${esc(m.token)}</h1></div><button class=link data-act=fxekback>${ic('back')} all emojis</button>
+  <div class=ps-burst data-fxekopen><div class=ps-sim><div class=fx-pvbox>${k.pv?`<img data-fxekpv src="${esc(k.pv)}" alt="${esc(m.token)} reaction">`:k.err?`<span class=fx-warn>${esc(k.err)}</span>`:'<span class=spin></span>'}<small>${esc(m.motion||'')}</small></div>
+   <div class=fx-ctl><div class=fx-pre><button class="tab${k.preset?'':' on'}" data-act=fxekpreset data-v="">its own · ${esc(m.preset||'')}</button>${FXPRESETS.map(n=>`<button class="tab${k.preset===n?' on':''}" data-act=fxekpreset data-v=${n}>${n}</button>`).join('')}</div>
+    ${FXEKO.map(fxEkSlider).join('')}
+    <small class=mut>Size in / out: each emoji zooms from nothing and back to nothing. Hue 0 keeps the emoji's own colours; above 0 the colours are stylised.</small>
+    <div class=row><button class="btn pri" data-act=fxeklottie>${ic('download')} Download Lottie</button><span class=mut>A Lottie file for the web (Telegram keeps WebM).</span></div></div></div></div>`}
+function fxSetup(){if(FX.ek&&FX.ek.token)return fxEkOpen();
+ return `<div class=ph><h1>Reaction effects</h1></div><div class=mut>Pick an emoji: it flies as itself, with its own fixed animation, and downloads as a Lottie file.</div>
   ${FX.ekBank?`<div data-fxekwrap>${fxEkWrap()}</div>`:`<div class=fx-job><span class=spin></span> <span class=mut>Reading the emoji bank…</span></div>`}
   ${FX.past.length?`<div class=fx-past><span class=mut>Earlier</span>${FX.past.map(x=>`<a href="#/effects/${x.id}">${esc(x.id)} · ${esc(x.pack_name||'')} <small>${esc(String(x.status||'').toLowerCase())}</small></a>`).join('')}</div>`:''}`}
 function fxEkRefresh(){const root=document.querySelector&&document.querySelector('[data-fxekwrap]');if(!root)return;
  const wasQ=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.fxekq!==undefined;
  root.outerHTML=`<div data-fxekwrap>${fxEkWrap()}</div>`;
  if(wasQ){const inp=document.querySelector('[data-fxekq]');if(inp){inp.focus();try{inp.setSelectionRange(inp.value.length,inp.value.length)}catch(e){}}}}
-document.addEventListener('input',ev=>{const t=ev.target;if(t&&t.dataset&&t.dataset.fxekq!==undefined){FXEKQ.q=t.value;clearTimeout(FX.ekT);FX.ekT=setTimeout(fxEkRefresh,250)}});
-ACT.fxek=el=>{const sel=fxEkSel(),t=el.dataset.t;if(sel.has(t))sel.delete(t);else{if(sel.size>=9)return toast('A 3 × 3 sheet holds 9: take one off first',1);sel.add(t)}fxEkRefresh()};
-ACT.fxekgo=async el=>{const toks=[...fxEkSel()];if(!toks.length)return;el.disabled=true;
- const r=await post('/api/particles',{from_request:'reactions for '+toks.join(', '),grid:toks.length>4?'3x3':'2x2'});el.disabled=false;
- if(!r.ok)return toast(r.j.error||'Could not read those reactions',1);
- fxEkSel().clear();if(FX.alive())fxDraw();toast('Reactions ready: opening the simulator');
- location.hash='#/studio';setTimeout(()=>{if(typeof spOpenSet==='function')spOpenSet(r.j.id)},300)};
+/* the preview is the server's: a newer request wins (seq), and only the picture is repainted */
+async function fxEkPreview(){const k=FX.ek;if(!k||!k.token)return;const seq=++k.seq;
+ const r=await post('/api/particles/emoji-preview',{...fxEkBody(k),size:256});if(FX.ek!==k||seq!==k.seq)return;
+ if(r.ok){k.pv=r.j.url;k.err=''}else{k.pv='';k.err=r.j.error||'The preview could not be made.'}
+ const img=document.querySelector&&document.querySelector('[data-fxekpv]');if(img&&k.pv)img.src=k.pv;else if(FX.alive())fxDraw()}
+document.addEventListener('input',ev=>{const t=ev.target;if(!t||!t.dataset)return;
+ if(t.dataset.fxekq!==undefined){FXEKQ.q=t.value;clearTimeout(FX.ekT);FX.ekT=setTimeout(fxEkRefresh,250)}
+ else if(t.dataset.fxeko&&FX.ek){const o=FXEKO.find(x=>x[0]===t.dataset.fxeko);FX.ek[o[0]]=+t.value;const out=t.parentNode&&t.parentNode.querySelector('output');if(out)out.textContent=(+t.value)+o[5];
+  clearTimeout(FX.ekT);FX.ekT=setTimeout(fxEkPreview,350)}});
+ACT.fxek=el=>{FX.ek=fxEkNew(el.dataset.t);fxDraw();fxEkPreview()};
+ACT.fxekback=()=>{FX.ek=null;fxDraw()};
+ACT.fxekpreset=el=>{if(!FX.ek)return;FX.ek.preset=el.dataset.v||'';FX.ek.pv='';fxDraw();fxEkPreview()};
+ACT.fxeklottie=async el=>{const k=FX.ek;if(!k||!k.token)return;el.disabled=true;
+ const r=await post('/api/particles/emoji-lottie',fxEkBody(k));el.disabled=false;
+ if(!r.ok)return toast(r.j.error||'Could not make the Lottie file',1);
+ const a=document.createElement('a');a.href=r.j.url;a.download=`${r.j.token} ${r.j.id}.lottie.json`;document.body.appendChild(a);a.click();a.remove();
+ toast(`Lottie ${r.j.id} downloaded: ${r.j.layers} ${r.j.emoji} flying (${r.j.preset})`)};
 
 /* ---------- one effect */
 const fxSticker=(e,sid)=>{const p=packById(e.pack_id),s=p&&p.stickers.find(x=>x.id===sid);return s||null};

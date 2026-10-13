@@ -369,10 +369,12 @@ class ShellTests(unittest.TestCase):
             self.assertIn(route, pt)
         for gone in ("/preview`", "/render`", "sticker_id:sid"):
             self.assertNotIn(gone, fx, "effects.js has no per-sticker preview or render any more")
-        for act in ("data-act=fxek", "data-act=fxekgo"):
-            self.assertIn(act, fx, "the entry is the emoji bank: pick emojis, then create")
+        for act in ("data-act=fxek ", "data-act=fxekpreset", "data-act=fxeklottie", "data-act=fxekback"):
+            self.assertIn(act, fx, "the entry is the emoji bank only: one emoji, its preview, three controls, Download Lottie")
         self.assertIn("/api/particles/emoji-motions", fx, "the bank comes from the per-emoji motion map")
-        self.assertIn("from_request", fx, "picked bank tokens become one free simulator set")
+        for route in ("/api/particles/emoji-preview", "/api/particles/emoji-lottie"):
+            self.assertIn(route, fx, "the preview and the Lottie are the server's")
+        self.assertNotIn("data-act=fxekgo", fx, "no multi-emoji set from this entry: packs and sets stay in the Studio")
         for gone in ("data-act=fxpack", "data-act=fxgo", "data-act=fxst", "coverMedia", "fx-cv"):
             self.assertNotIn(gone, fx, "no pack picker and no auto-playing stickers on the entry")
         self.assertIn("go:true", fx.replace(" ", ""), "the click on 'Make the video' is the go-ahead, and it shows the price")
