@@ -1,6 +1,6 @@
 """Export a pack (or one Studio batch) to the AddCollection API, an external emoji CMS (`docs/Api/AddCollection-API .md`).
 
-`POST {base}/api/v1/Upload/AddCollection`, multipart/form-data, HTTP Basic:
+`POST {base}/api/v1/Upload/AddCollection`, multipart/form-data, `Authorization: Bearer <api key>`:
 - `CollectionName` (the pack's name), `Description` (optional),
 - `Media` repeated once per file (`.webm` animated, `.png` / `.webp` static),
 - `MediaMetadata`: ONE JSON string, an array of `{emoji_utf, tags}` paired with `Media` BY INDEX (never by file name).
@@ -10,7 +10,7 @@ stickers (accepted, animated where ready) and resolve each one's emoji and actio
 can never disagree. `emoji_utf` is the asset's first grapheme cluster, `tags` its action tokens joined by `_` (`laugh_rofl_lmao`).
 
 Configuration lives in the environment only (`.env`), never in a file in the repo: `MIRSAL_COLLECTION_API_URL` (default the CMS below) and
-`MIRSAL_COLLECTION_API_CREDENTIALS` (base64 of `user:password`, or `user:password` itself, which is encoded here). Every export, ok or not, is a line in
+`MIRSAL_COLLECTION_API_CREDENTIALS` (an `sk-...` API key, sent as `Authorization: Bearer`; a legacy `user:password` or its base64 still sends HTTP Basic). Every export, ok or not, is a line in
 `out/collection_exports.jsonl` (who, what, how many, the answer's status), never the credentials. Stdlib only; tests talk to a fake server."""
 from __future__ import annotations
 
@@ -44,11 +44,20 @@ def base_url() -> str:
 
 
 def credentials() -> str | None:
-    """The Basic token: base64 of `user:password`. A value holding `:` is the pair itself (base64 never contains `:`)."""
+    """The raw configured value: an `sk-...` API key, `user:password`, or its base64 (base64 never contains `:`)."""
     v = (os.environ.get("MIRSAL_COLLECTION_API_CREDENTIALS") or "").strip()
+    return v or None
+
+
+def auth_header() -> str | None:
+    """`Authorization` value for the CMS: `Bearer <key>` for an `sk-...` API key, else HTTP Basic (a `user:password`
+    value is encoded here; a value without `:` is already base64, as before)."""
+    v = credentials()
     if not v:
         return None
-    return base64.b64encode(v.encode("utf-8")).decode("ascii") if ":" in v else v
+    if v.startswith("sk-"):
+        return f"Bearer {v}"
+    return f"Basic {base64.b64encode(v.encode('utf-8')).decode('ascii') if ':' in v else v}"
 
 
 def status() -> dict:
@@ -113,12 +122,12 @@ def multipart(name: str, description: str, items: list[dict]) -> tuple[bytes, st
 
 def post(name: str, description: str, items: list[dict]) -> dict:
     """Send one collection. {ok, status, response}; the answer's body is JSON when it is JSON, else its text (an HTML error page)."""
-    token = credentials()
-    if not token:
+    auth = auth_header()
+    if not auth:
         raise CollectionError("The collection API is not set up: put MIRSAL_COLLECTION_API_CREDENTIALS in .env and restart the server", 503)
     body, ctype = multipart(name, description, items)
     req = urllib.request.Request(base_url() + ENDPOINT, data=body, method="POST",
-                                 headers={"Content-Type": ctype, "Authorization": f"Basic {token}", "Accept": "application/json"})
+                                 headers={"Content-Type": ctype, "Authorization": auth, "Accept": "application/json"})
     ctx = None
     if req.full_url.startswith("https:"):
         from .telegram import _ssl_context        # the tolerant TLS context (a malformed Windows certificate must not stop a send)

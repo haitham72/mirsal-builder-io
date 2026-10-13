@@ -152,9 +152,16 @@ class CollectionTests(unittest.TestCase):
             s, j = self.req(f"/api/generations/{g}/export-collection", {})
             self.assertEqual(s, 503)
             self.assertIn("MIRSAL_COLLECTION_API_CREDENTIALS", j["error"])
-        self.assertEqual(col.credentials(), base64.b64encode(b"me@nadi.ae:secret").decode())
+        self.assertEqual(col.credentials(), "me@nadi.ae:secret")
+        self.assertEqual(col.auth_header(), "Basic " + base64.b64encode(b"me@nadi.ae:secret").decode())
         with patch.dict(os.environ, {"MIRSAL_COLLECTION_API_CREDENTIALS": "already-base64="}):
-            self.assertEqual(col.credentials(), "already-base64=")
+            self.assertEqual(col.auth_header(), "Basic already-base64=")
+        with patch.dict(os.environ, {"MIRSAL_COLLECTION_API_CREDENTIALS": "sk-test-key-123"}):
+            self.assertEqual(col.auth_header(), "Bearer sk-test-key-123")
+            FakeCMS.answer = (200, b'{"id": 8, "message": "created"}', "application/json")
+            s, j = self.req(f"/api/generations/{g}/export-collection", {"name": "Bearer pack"})
+            self.assertEqual((s, j["ok"]), (200, True), j)
+            self.assertEqual(FakeCMS.seen[-1]["auth"], "Bearer sk-test-key-123")
 
     def test_tags_are_the_action_tokens_without_the_emoji(self):
         self.assertEqual(col.tags_of({"tags": ["laugh", "rofl", "LMAO", "🤣", "eye-roll", "laugh"]}), "laugh_rofl_lmao_eye_roll")
