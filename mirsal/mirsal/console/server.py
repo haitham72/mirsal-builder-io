@@ -1342,6 +1342,13 @@ def make_handler(c: Console):
                     if method == "GET" and pid == "bank":
                         # the bank with build state for Library > Reactions > Create (finished/unclaimed per token)
                         return self._json(200, {"bank": ps.bank_states(c.out, c.lib)})
+                    if method == "POST" and pid in ("emoji-preview", "emoji-lottie"):
+                        # Reaction effects (Create > New): one bank emoji flying as its own glyph; a looping WebP, or the playable Lottie (free, no set)
+                        opts = {k: body.get(k) for k in ("preset", "size_in_dur", "size_out_dur", "hue_var")}
+                        if pid == "emoji-preview":
+                            return self._json(200, ps.emoji_preview(c.out, body.get("token"), seed=body.get("seed", 1), size=body.get("size", 256), **opts))
+                        return self._json(200, ps.export_emoji_lottie(c.out, body.get("token"), seed=body.get("seed", 1), size=body.get("size", 512),
+                                                                      user=self.user["id"], **opts))
                     if method == "GET":
                         ps.settle(c.out, pid)                      # (a 404 for a missing set comes from here)
                         return self._json(200, ps.view(c.out, c.lib, pid))

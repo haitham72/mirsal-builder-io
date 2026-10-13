@@ -10,6 +10,8 @@ Layout of the module
   simulate()       trajectories + drawing -> frames `(N, size, size, 4) uint8`, STRAIGHT alpha.
   to_webm()        the engine's own VP9+alpha encoder path under `cfg.video_max_bytes`.
   preview_webp()   an animated WebP loop for the browser.
+  render_emoji()   one emoji glyph as a tight RGBA sprite, drawn with the system's colour emoji font.
+  export_lottie()  the same trajectories as a playable Lottie JSON with the real sprite PNGs embedded (web only).
 
 Units: positions are fractions of the canvas (0..1, y grows downward like an image); speeds are canvas/s; times are seconds.
 Same seed + same params + same sprites -> the same bytes (one local `numpy.random.default_rng(seed)`, no global state).
@@ -17,19 +19,22 @@ Pure numpy / OpenCV / Pillow; ffmpeg is only reached through `to_webm` (lazy imp
 """
 from __future__ import annotations
 
+import base64
 import io
 import math
+import os
 from dataclasses import dataclass, fields, replace
 from pathlib import Path
 
 import cv2
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 # ---- physics constants (canvas units) -------------------------------------------------------------------------------
 G_CANVAS = 1.6          # gravity=1 pulls down at this many canvas/s^2
 SPEED = 1.5             # magnitude=1 launches at SPEED * U(0.5, 1.1) canvas/s
-VORTEX_K = 3.0          # vortex=1: tangential acceleration = VORTEX_K * |position - origin| canvas/s^2
+VORTEX_W = 7.5          # vortex=1: the swirl's flow field turns at VORTEX_W rad/s around the origin (vortex=1.8 is about 2.1 turns a second)
+VORTEX_RELAX = 2.5      # |vortex|>=1: a particle's velocity relaxes toward that field at this rate per second (weaker swirls relax in proportion)
 DRAG = 0.9              # velocity decays by exp(-DRAG * dt): the burst slows down a little, never stops
 GROWTH = 0.12           # a particle grows by this share over its life while flying
 FADE_SHARE = 0.25       # the alpha fades to 0 over the last quarter of a particle's life
@@ -61,6 +66,9 @@ class ParticleParams:
     size: int = 512                 # canvas side in px
     origin: tuple = (0.5, 0.5)      # fractions of the canvas
     show_source: bool = False       # reserved: the source sticker is not drawn yet
+    size_in_dur: float = 0.0        # 0..1.5 s (<= lifetime/2): each particle zooms from nothing to full size over this long after its birth (0 = born full size)
+    size_out_dur: float = 0.0       # 0..1.5 s (<= lifetime/2): ... and back to nothing over this long before its death (0 = no zoom out)
+    hue_var: float = 0.0            # 0..180 degrees: each particle's colours turn by a seeded hue in [-hue_var, +hue_var] (0 = the sprite's own colours)
 
     @classmethod
     def from_dict(cls, d: dict) -> "ParticleParams":
@@ -110,6 +118,7 @@ class ParticleParams:
         size_min = lim(num("size_min", self.size_min), 0.02, 0.8)
         size_max = lim(num("size_max", self.size_max), size_min, 0.8)      # size_max below size_min is raised to it
         lifetime = lim(num("lifetime", self.lifetime), MIN_LIFE, max(MIN_LIFE, duration - 0.4))
+        envelope = min(1.5, lifetime / 2)
         return replace(
             self,
             gravity=lim(num("gravity", self.gravity), -2.0, 3.0),
@@ -127,15 +136,24 @@ class ParticleParams:
             size=int(lim(round(size), 16, 1024)),
             origin=(lim(ox, 0.0, 1.0), lim(oy, 0.0, 1.0)),
             show_source=bool(self.show_source),
+            size_in_dur=lim(num("size_in_dur", self.size_in_dur), 0.0, envelope),
+            size_out_dur=lim(num("size_out_dur", self.size_out_dur), 0.0, envelope),
+            hue_var=lim(num("hue_var", self.hue_var), 0.0, 180.0),
         )
 
 
+# Each preset has a measurable signature (tests/test_emoji_motion.py checks it on trajectories(), numbers only):
+#   burst     radial outward, a 360 degree fan from the centre
+#   fountain  from the bottom (0.5, 0.8), a cone of at most 90 degrees, launched upward, then falls back
+#   vortex    tangential speed well above radial (vortex >= 1.5, magnitude <= 0.6), two or more turns around the origin, stays on the canvas
+#   rain      from the top (0.5, 0.1), magnitude <= 0.5, gravity down, a spread of at most 120 degrees: it falls
+#   confetti  48 or more particles, low gravity, fast spin, a wide fan
 PRESETS: dict = {
     "burst": {},                                                                                   # the defaults: a 360 degree pop from the centre
     "fountain": {"spread": 70.0, "magnitude": 1.9, "gravity": 1.3, "count": 36, "origin": (0.5, 0.8), "spin": 1.5},
-    "vortex": {"vortex": 1.1, "gravity": 0.35, "magnitude": 0.8, "spin": 2.0, "count": 40},
-    "rain": {"gravity": 0.9, "magnitude": 0.45, "count": 50, "size_min": 0.07, "size_max": 0.15, "origin": (0.5, 0.1), "spin": 0.6},
-    "confetti": {"count": 64, "size_min": 0.06, "size_max": 0.12, "spin": 3.0, "gravity": 0.7, "magnitude": 1.5, "spread": 140.0, "lifetime": 2.4},
+    "vortex": {"vortex": 1.8, "gravity": 0.1, "magnitude": 0.5, "spin": 2.0, "count": 36, "lifetime": 2.6, "size_min": 0.07, "size_max": 0.14},
+    "rain": {"gravity": 0.9, "magnitude": 0.35, "count": 50, "size_min": 0.07, "size_max": 0.15, "origin": (0.5, 0.1), "spin": 0.6, "spread": 100.0},
+    "confetti": {"count": 64, "size_min": 0.06, "size_max": 0.12, "spin": 3.0, "gravity": 0.4, "magnitude": 1.5, "spread": 160.0, "lifetime": 2.4},
 }
 
 
@@ -158,6 +176,7 @@ class Trajectories:
     visible: np.ndarray      # (F, N) bool: spawned, not dead, scale and opacity worth drawing
     size_frac: np.ndarray    # (N,) sprite's longest side as a fraction of the canvas at scale 1
     sprite: np.ndarray       # (N,) which sprite each particle shows
+    hue: np.ndarray          # (N,) degrees each particle's colours are turned by (0 everywhere when hue_var is 0)
     spawn: np.ndarray        # (N,) first frame (>= 3)
     life: np.ndarray         # (N,) seconds
     draw_order: np.ndarray   # (N,) particle indices, smallest first (drawn first = behind)
@@ -199,6 +218,7 @@ def trajectories(p: ParticleParams, n_sprites: int = 1) -> Trajectories:
     omega = p.spin * rng.uniform(-2.0, 2.0, n)
     theta0 = p.spin * rng.uniform(-0.6, 0.6, n)
     jitter = rng.uniform(0.8, 1.0, n)
+    hue = rng.uniform(-1.0, 1.0, n) * p.hue_var                     # drawn LAST: every earlier draw (and so every older burst) is unchanged
     life = np.minimum(p.lifetime * jitter, (p.duration - QUIET_TAIL) - spawn * dt)          # dead before duration - 0.2 s
     life = np.maximum(life, 4 * dt)
 
@@ -206,15 +226,21 @@ def trajectories(p: ParticleParams, n_sprites: int = 1) -> Trajectories:
     v0 = np.stack([np.cos(ang), np.sin(ang)], 1) * speed[:, None]
     g_eff = p.gravity * G_CANVAS
     decay = math.exp(-DRAG * dt)
+    swirl = min(1.0, abs(p.vortex))                                  # the swirl is a flow field: velocity relaxes toward a rotation about the origin,
+    turn = p.vortex * VORTEX_W                                       # and the centripetal term keeps the orbit (no centrifugal fling off the canvas)
     pos, vel = np.tile(origin, (n, 1)), np.zeros((n, 2))
     P = np.empty((F, n, 2))
     for f in range(F):
         flying = spawn < f
         if flying.any():
-            rel = pos - origin
-            acc = np.empty_like(pos)
-            acc[:, 0] = -p.vortex * VORTEX_K * rel[:, 1]
-            acc[:, 1] = g_eff + p.vortex * VORTEX_K * rel[:, 0]
+            acc = np.zeros_like(pos)
+            acc[:, 1] = g_eff
+            if swirl:
+                rel = pos - origin
+                r = np.hypot(rel[:, 0], rel[:, 1])[:, None] + 1e-6
+                field = np.stack([-rel[:, 1], rel[:, 0]], 1) * turn
+                tang = (rel[:, 0] * vel[:, 1] - rel[:, 1] * vel[:, 0])[:, None] / r
+                acc += VORTEX_RELAX * swirl * (field - vel) - swirl * (tang * tang / r) * (rel / r)
             vel[flying] = (vel[flying] + acc[flying] * dt) * decay
             pos[flying] = np.clip(pos[flying] + vel[flying] * dt, -_POS_LIMIT, _POS_LIMIT)
         born = spawn == f
@@ -228,12 +254,17 @@ def trajectories(p: ParticleParams, n_sprites: int = 1) -> Trajectories:
     alive = (age >= 0) & (age < life[None, :])
     a = np.clip(age, 0.0, None)
     pop_scale = np.maximum(_ease_out_back(np.clip(a / p.pop, 0.0, 1.0)), 0.0)
-    scale = np.where(alive, pop_scale * (1.0 + GROWTH * a / life[None, :]), 0.0)
+    envelope = np.ones_like(a)                                       # Size in / Size out: multiplies the pop-in and the growth, never replaces them
+    if p.size_in_dur > 0:
+        envelope *= np.clip(a / p.size_in_dur, 0.0, 1.0)
+    if p.size_out_dur > 0:
+        envelope *= np.clip((life[None, :] - a) / p.size_out_dur, 0.0, 1.0)
+    scale = np.where(alive, pop_scale * (1.0 + GROWTH * a / life[None, :]) * envelope, 0.0)
     x = np.clip((life[None, :] - a) / (FADE_SHARE * life[None, :]), 0.0, 1.0)
     opacity = np.where(alive, x * x * (3.0 - 2.0 * x), 0.0)
     angle = theta0[None, :] + omega[None, :] * a
     visible = alive & (scale > 0.02) & (opacity > 0.004)
-    return Trajectories(P, scale, angle, opacity, visible, size_frac, sprite, spawn, life,
+    return Trajectories(P, scale, angle, opacity, visible, size_frac, sprite, hue, spawn, life,
                         np.argsort(size_frac, kind="stable"), p)
 
 
@@ -370,6 +401,24 @@ def fit_sprites(sprites: list, px: int) -> list:
     return out
 
 
+# ---- hue ------------------------------------------------------------------------------------------------------------
+def hue_matrix(deg: float) -> np.ndarray:
+    """The 3x3 hue rotation of CSS `filter: hue-rotate(deg)` (a turn about the grey axis, luminance weights 0.213/0.715/0.072).
+    Linear in RGB, so it applies to premultiplied colour as it is. 0 degrees is the identity."""
+    c, s = math.cos(math.radians(deg)), math.sin(math.radians(deg))
+    return np.array([[0.213 + c * 0.787 - s * 0.213, 0.715 - c * 0.715 - s * 0.715, 0.072 - c * 0.072 + s * 0.928],
+                     [0.213 - c * 0.213 + s * 0.143, 0.715 + c * 0.285 + s * 0.140, 0.072 - c * 0.072 - s * 0.283],
+                     [0.213 - c * 0.213 - s * 0.787, 0.715 - c * 0.715 + s * 0.715, 0.072 + c * 0.928 + s * 0.072]], np.float32)
+
+
+def hue_rotate(img: np.ndarray, deg: float) -> np.ndarray:
+    """A straight-alpha RGBA uint8 picture with its colours turned by `deg` degrees (hue_matrix); alpha untouched. Pure."""
+    if abs(deg) <= 1e-9:
+        return img.copy()
+    rgb = img[..., :3].astype(np.float32) @ hue_matrix(deg).T
+    return np.dstack([np.clip(rgb + 0.5, 0, 255).astype(np.uint8), img[..., 3]])
+
+
 # ---- drawing --------------------------------------------------------------------------------------------------------
 def simulate(sprites: list, p: ParticleParams, on_frame=None) -> np.ndarray:
     """Draw one burst. `sprites` are static RGBA uint8 arrays or AnimatedSprite timelines (trimmed to their union alpha bbox; fully transparent ones are ignored;
@@ -388,6 +437,7 @@ def simulate(sprites: list, p: ParticleParams, on_frame=None) -> np.ndarray:
     cos, sin = np.cos(tr.angle), np.sin(tr.angle)
     length = tr.size_frac[None, :] * S * tr.scale                 # the sprite's longest side in px, per frame
     sprite_of = tr.sprite.tolist()
+    turn = {i: hue_matrix(h) for i, h in enumerate(tr.hue.tolist()) if abs(h) > 1e-9}
     for f in range(F):
         idx = tr.draw_order[tr.visible[f, tr.draw_order]].tolist()
         dirty = None
@@ -414,6 +464,8 @@ def simulate(sprites: list, p: ParticleParams, on_frame=None) -> np.ndarray:
             M = np.array([[sc * c, -sc * s, (cx - x0) - (sc * c * scx - sc * s * scy)],
                           [sc * s, sc * c, (cy - y0) - (sc * s * scx + sc * c * scy)]])
             buf = cv2.warpAffine(lvl, M, (x1 - x0, y1 - y0), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=0)
+            if i in turn:                                          # linear, so it is exact on premultiplied colour; alpha untouched
+                buf[..., :3] = np.clip(buf[..., :3] @ turn[i].T, 0.0, buf[..., 3:4])
             op = float(tr.opacity[f, i])
             if op < 0.999:
                 buf *= op
@@ -508,52 +560,134 @@ def default_sprite(px: int = 128) -> np.ndarray:
     return np.clip(rgba + 0.5, 0, 255).astype(np.uint8)
 
 
+# ---- the emoji glyph as a sprite --------------------------------------------------------------------------------------
+# The Win+. glyph itself, drawn by the system's colour emoji font (COLR on Windows, sbix on macOS, CBDT on Linux). A bitmap
+# font only opens at its own strike sizes (Noto 109, Apple 160), so each size is tried in turn; a scalable one takes the first.
+EMOJI_FONTS = (
+    str(Path(os.environ.get("WINDIR", "C:/Windows")) / "Fonts" / "seguiemj.ttf"),     # Segoe UI Emoji
+    "/System/Library/Fonts/Apple Color Emoji.ttc",
+    "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
+    "/usr/share/fonts/noto/NotoColorEmoji.ttf",
+    "/usr/share/fonts/google-noto-emoji/NotoColorEmoji.ttf",
+)
+_EMOJI_STRIKES = (109, 160, 137, 128, 96, 64)
+
+
+def emoji_font() -> str | None:
+    """The first colour emoji font of EMOJI_FONTS present on this machine, or None."""
+    return next((f for f in EMOJI_FONTS if Path(f).is_file()), None)
+
+
+def render_emoji(glyph: str, px: int = 160, font_path: str | None = None) -> np.ndarray:
+    """One emoji glyph as a tight RGBA uint8 sprite whose longest side is `px` (trimmed to its alpha box like trim_sprite, 2 px of air).
+    Deterministic for a given font file. Without a text-shaping library a ZWJ sequence draws as its parts side by side.
+    ValueError for an empty glyph; RuntimeError when no colour emoji font is found or none draws the glyph."""
+    glyph, px = str(glyph or "").strip(), int(px)
+    if not glyph:
+        raise ValueError("no emoji given")
+    if px < 8:
+        raise ValueError("px must be at least 8")
+    fonts = [font_path] if font_path else [f for f in EMOJI_FONTS if Path(f).is_file()]
+    for path in fonts:
+        for size in _EMOJI_STRIKES:
+            try:
+                font = ImageFont.truetype(str(path), size)
+            except OSError:
+                continue
+            w, h = size * (len(glyph) + 2), size * 2
+            im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+            ImageDraw.Draw(im).text((w / 2, h / 2), glyph, font=font, anchor="mm", embedded_color=True)
+            tight = trim_sprite(np.asarray(im), pad=0)
+            if tight is None:
+                break                                                # the font opened but has nothing for this glyph: try the next font
+            th, tw = tight.shape[:2]
+            k = (px - 4) / max(th, tw)
+            fit = Image.fromarray(np.ascontiguousarray(tight), "RGBA").resize((max(1, round(tw * k)), max(1, round(th * k))), Image.LANCZOS)
+            out = Image.new("RGBA", (fit.width + 4, fit.height + 4), (0, 0, 0, 0))
+            out.paste(fit, (2, 2))
+            return np.asarray(out, np.uint8).copy()
+    raise RuntimeError("no colour emoji font on this machine draws " + repr(glyph) + " (looked for Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji)")
+
+
+def png_bytes(img: np.ndarray) -> bytes:
+    """An RGBA uint8 array as PNG bytes (Pillow, deterministic for the same pixels)."""
+    buf = io.BytesIO()
+    Image.fromarray(np.ascontiguousarray(img), "RGBA").save(buf, "PNG")
+    return buf.getvalue()
+
+
 # ---- lottie (optional web export; Telegram stays WebM) ---------------------------------------------------------------
-def export_lottie(p: ParticleParams, n_sprites: int = 1, size: int = 512) -> dict:
-    """A Lottie JSON skeleton of one burst (web use only, optional third output).
+HUE_STEP = 10.0         # Lottie cannot turn an image's hue: each particle's hue is rounded to this step and every step used is one embedded asset
 
-    Maps the deterministic `trajectories()` (positions, scale, angle, opacity
-    per particle per frame) onto Lottie transform keyframes. Sprites themselves
-    are not embedded here (the caller attaches PNG assets by sprite index);
-    each particle is an ellipse placeholder rect of its mean size so the motion
-    reads without assets. Pure (no dependency beyond numpy); the JSON is
-    stdlib-serialisable.
-    """
-    tr = trajectories(p, n_sprites)
-    F, N = tr.frames, int(p.clamped().count)
-    fps = float(p.clamped().fps)
+
+def export_lottie(p: ParticleParams, emoji_png, *, size: int = 512) -> dict:
+    """A playable Lottie JSON of one burst (web use only; Telegram stays WebM): the deterministic `trajectories()` mapped onto
+    image layers (`ty: 2`) that show the real sprite, so any standard player (lottie-web, the LottieFiles preview) plays the
+    picture flying, never a placeholder shape.
+
+    `emoji_png` is the sprite as PNG bytes (RGBA), or a list of PNG bytes, one per sprite index. Each sprite is embedded ONCE as a
+    base64 data URI asset (`e: 1`) and every particle that shows it references it. With `hue_var` > 0 the particle's hue is
+    rounded to HUE_STEP degrees and each distinct (sprite, hue) is one more asset, tinted by hue_rotate(); with `hue_var` 0
+    one sprite is exactly one asset. A layer lives only from its particle's birth to its death (`ip`/`op`), with one hold
+    keyframe per frame for position, scale, rotation and opacity. Same params + same PNG bytes -> the same JSON. Pure."""
+    pngs = [emoji_png] if isinstance(emoji_png, (bytes, bytearray)) else list(emoji_png or [])
+    if not pngs:
+        raise ValueError("no sprite given")
+    sprites = []
+    for data in pngs:
+        try:
+            img = np.asarray(Image.open(io.BytesIO(bytes(data))).convert("RGBA"), np.uint8)
+        except Exception:
+            raise ValueError("a sprite must be PNG bytes") from None
+        tight = trim_sprite(img, pad=1)
+        if tight is None:
+            raise ValueError("a sprite is fully transparent")
+        sprites.append(tight)
+    p = p.clamped()
     W = H = int(size)
+    cap = max(8, math.ceil(min(p.size_max * p.particle_size, 0.9) * W * 1.2))      # the biggest it is drawn: no point embedding more pixels
+    for k, img in enumerate(sprites):
+        h, w = img.shape[:2]
+        if max(h, w) > cap:
+            r = cap / max(h, w)
+            sprites[k] = np.asarray(Image.fromarray(img, "RGBA").resize((max(1, round(w * r)), max(1, round(h * r))), Image.LANCZOS), np.uint8)
+    tr = trajectories(p, len(sprites))
+    F, fps = tr.frames, float(p.fps)
+    assets, ids = [], {}
+
+    def asset(k: int, hue: float) -> tuple[str, int]:
+        key = (k, hue)
+        if key not in ids:
+            img = sprites[k] if hue == 0 else hue_rotate(sprites[k], hue)
+            ids[key] = f"sprite_{k}" + ("" if hue == 0 else f"_hue{int(hue):+d}")
+            assets.append({"id": ids[key], "w": int(img.shape[1]), "h": int(img.shape[0]), "u": "",
+                           "p": "data:image/png;base64," + base64.b64encode(png_bytes(img)).decode("ascii"), "e": 1})
+        return ids[key], max(sprites[k].shape[:2])
+
+    def keys(frames, vals):
+        return {"a": 1, "k": [{"t": f, "s": v, "h": 1} for f, v in zip(frames, vals)]}
+
     layers = []
-    for i in range(N):
-        px = (tr.pos[:, i, 0] * W).tolist()
-        py = (tr.pos[:, i, 1] * H).tolist()
-        sc = (tr.scale[:, i] * 100.0).tolist()
-        rot = (tr.angle[:, i] * 180.0 / math.pi).tolist()
-        op = (tr.opacity[:, i] * 100.0).tolist()
-
-        def _keys(vals):
-            return {"a": 1, "k": [{"t": f, "s": [round(float(v), 3)]} for f, v in enumerate(vals)]}
-
-        mean_frac = float(tr.size_frac[i]) if len(tr.size_frac) > i else 0.15
-        d = max(4.0, round(mean_frac * W, 1))
+    for i in tr.draw_order[::-1].tolist():                          # Lottie draws its first layer on top: the biggest particle first, as simulate() does last
+        alive = np.flatnonzero(tr.scale[:, i] > 0)
+        if not len(alive):
+            continue
+        ip, op = int(alive[0]), int(alive[-1]) + 1
+        fr = list(range(ip, op))
+        hue = 0.0 if p.hue_var == 0 else float(round(float(tr.hue[i]) / HUE_STEP) * HUE_STEP)
+        ref, long_side = asset(int(tr.sprite[i]), hue + 0.0)
+        k_scale = 100.0 * float(tr.size_frac[i]) * W / long_side
+        img_h, img_w = sprites[int(tr.sprite[i])].shape[:2]
         layers.append({
-            "ddd": 0, "ind": i + 1, "ty": 4, "nm": f"particle {i + 1} (sprite {int(tr.sprite[i])})",
-            "sr": 1,
+            "ddd": 0, "ind": len(layers) + 1, "ty": 2, "nm": f"particle {i + 1}", "refId": ref, "sr": 1, "ao": 0, "bm": 0,
             "ks": {
-                "o": _keys(op),
-                "r": _keys(rot),
-                "p": {"a": 1, "k": [{"t": f, "s": [round(float(px[f]), 1), round(float(py[f]), 1), 0.0]} for f in range(F)]},
-                "a": {"a": 0, "k": [0.0, 0.0, 0.0]},
-                "s": {"a": 1, "k": [{"t": f, "s": [round(float(sc[f]), 2)] * 3} for f in range(F)]},
+                "o": keys(fr, [[round(float(tr.opacity[f, i]) * 100.0, 1)] for f in fr]),
+                "r": keys(fr, [[round(math.degrees(float(tr.angle[f, i])), 1)] for f in fr]),
+                "p": keys(fr, [[round(float(tr.pos[f, i, 0]) * W, 1), round(float(tr.pos[f, i, 1]) * H, 1), 0] for f in fr]),
+                "a": {"a": 0, "k": [img_w / 2.0, img_h / 2.0, 0]},
+                "s": keys(fr, [[round(float(tr.scale[f, i]) * k_scale, 2)] * 2 + [100] for f in fr]),
             },
-            "shapes": [{"ty": "gr", "nm": "sprite placeholder", "it": [
-                {"ty": "el", "p": {"a": 0, "k": [0.0, 0.0]}, "s": {"a": 0, "k": [d, d]}},
-                {"ty": "fl", "c": {"a": 0, "k": [1, 1, 1, 1]}, "o": {"a": 0, "k": 100}},
-                {"ty": "tr", "p": {"a": 0, "k": [0.0, 0.0]}, "a": {"a": 0, "k": [0.0, 0.0]},
-                 "s": {"a": 0, "k": [100, 100]}, "r": {"a": 0, "k": 0}, "o": {"a": 0, "k": 100}},
-            ]}],
-            "ip": 0, "op": F, "st": 0,
+            "ip": ip, "op": op, "st": 0,
         })
-    return {"v": "5.7.4", "fr": fps, "ip": 0, "op": F, "w": W, "h": H,
-            "nm": f"reaction burst ({p.clamped().count} particles)",
-            "ddd": 0, "assets": [], "layers": layers}
+    return {"v": "5.7.4", "fr": fps, "ip": 0, "op": F, "w": W, "h": H, "nm": f"reaction burst ({p.count} particles)",
+            "ddd": 0, "assets": assets, "layers": layers}

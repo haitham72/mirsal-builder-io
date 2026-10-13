@@ -1619,48 +1619,147 @@ def reactions_for_pack(out: Path, lib, pack_id: str) -> dict:
     return {"pack_id": pack_id, "reactions": out_rows}
 
 
-def export_lottie(out: Path, lib, pid: str, *, preset: str | None = None, params: dict | None = None) -> dict:
-    """Optional third output (web only): the set's motion as Lottie JSON.
-
-    Uses the deterministic simulator trajectories (no sprites embedded, only
-    placeholder shapes + keyframes). Telegram stays WebM. Stored under
-    `renders/<id>.lottie.json` beside the WebM renders. Free.
-    """
-    import json as _json
+def _sprite_pngs(pcs) -> list[bytes]:
+    """The flying sprites as PNG bytes for a Lottie asset each: a still as it is, an animated sprite as its fullest frame (Lottie
+    image layers are stills: an animated sprite's own motion is not carried)."""
+    import numpy as np
     from ..engine import particles as _p
-    from ..runtime import atomic as _atomic
+    out = []
+    for pc in pcs:
+        if isinstance(pc, _p.AnimatedSprite):
+            pc = pc.frames[int(np.argmax(pc.frames[..., 3].reshape(len(pc.frames), -1).sum(1)))]
+        out.append(_p.png_bytes(pc))
+    return out
+
+
+def export_lottie(out: Path, lib, pid: str, *, preset: str | None = None, params: dict | None = None) -> dict:
+    """Optional third output (web only): the set's burst as a playable Lottie JSON.
+
+    The same deterministic trajectories as the preview and the render (`_burst`: the set's motion under the person's params),
+    with the set's picked sprites embedded as PNG image assets (`engine.particles.export_lottie`), so a player shows the real
+    sprites flying. Telegram stays WebM. Stored under `renders/L###.lottie.json` beside the WebM renders. Free."""
+    from ..engine import particles as _p
     s = migrate(out, lib, pid)
-    saved = (s.get("motion") or {})
-    use_preset = preset or saved.get("preset") or "burst"
-    use_params = dict(saved.get("params") or {})
-    if isinstance(params, dict):
-        use_params.update({k: v for k, v in params.items() if k in ("particle_size", "sprite_px", "scale") or True})
+    pack = _pick_pack(s, lib, None, required=False)
+    name, px, sc, base = _burst(s, preset, params)
+    pcs, _source = sprites_of(out, lib, s, pack, sprite_px=max(1, round(px * sc)))
     try:
-        p = _p.ParticleParams.from_dict({k: v for k, v in {"magnitude": 1.0}.items()})
-        _ = _p.preset(use_preset)
+        doc = _p.export_lottie(base, _sprite_pngs(pcs), size=base.size)
     except ValueError as ex:
         raise SetError(str(ex))
-    base = _p.preset(use_preset, **{k: v for k, v in (use_params or {}).items()
-                                    if k in ("gravity", "magnitude", "vortex", "count", "size_min", "size_max",
-                                             "particle_size", "spin", "lifetime", "spread", "pop", "seed",
-                                             "fps", "duration", "size", "origin", "show_source")})
-    n_cells = max(1, len([c for c in s.get("cells") or [] if c.get("picked")]) or len(s.get("cells") or []) or 1)
-    doc = _p.export_lottie(base, n_cells)
     d = _dir(out, pid)
     (d / "renders").mkdir(exist_ok=True)
-    ids = [int(str(r.get("id") or "R000")[1:]) for r in s.get("renders") or [] if str(r.get("id", "")).startswith("R")]
-    rid = f"L{(max(ids) if ids else 0) + 1:03d}"
-    fname = f"renders/{rid}.lottie.json"
-    (d / fname).write_text(_json.dumps(doc), encoding="utf-8")
     with _LOCK:
         s = read(out, pid)
-        s.setdefault("lottie", []).append({"id": rid, "preset": use_preset, "params": base.to_dict(),
-                                           "file": fname, "created": round(time.time(), 3)})
-        hist(s, "local", "LOTTIE", f"exported {rid} as Lottie ({use_preset})", {"preset": use_preset})
+        nums = [int(str(r.get("id"))[1:]) for r in s.get("lottie") or [] if str(r.get("id", "")).startswith("L") and str(r.get("id"))[1:].isdigit()]
+        rid = f"L{max(nums + [0]) + 1:03d}"
+        fname = f"renders/{rid}.lottie.json"
+        atomic.write_text(d / fname, json.dumps(doc, separators=(",", ":")))
+        s.setdefault("lottie", []).append({"id": rid, "preset": name, "params": base.to_dict(), "file": fname, "created": round(time.time(), 3)})
+        hist(s, "local", "LOTTIE", f"exported {rid} as Lottie ({name})", {"preset": name})
         _write(out, s)
-    return {"id": rid, "set": str(pid).upper(), "preset": use_preset, "params": base.to_dict(),
-            "file": fname, "url": f"/out/particles/{str(pid).upper()}/{fname}",
-            "layers": len(doc.get("layers") or [])}
+    return {"id": rid, "set": str(pid).upper(), "preset": name, "params": base.to_dict(),
+            "file": fname, "url": f"/out/particles/{str(pid).upper()}/{fname}", "layers": len(doc["layers"])}
+
+
+# ---------- Reaction effects: one bank emoji -> its fixed motion, flying as the literal glyph -> a Lottie file ----------
+# The Create > New "Reaction effects" screen (effects.js). No set, no pack, no sticker: the sprite IS the emoji glyph, drawn by the
+# system's colour emoji font (`engine.particles.render_emoji`); the only controls are Size in / Size out, Hue and a preset override.
+EMOJI_OPTIONS = {"size_in_dur": 0.4, "size_out_dur": 0.4, "hue_var": 25.0}    # the screen's defaults; 0 / 0 / 0 is the plain look
+EMOJI_PX = 160                                                                  # the glyph's longest side: sharp at the biggest a particle is drawn on 512
+
+
+def emoji_dir(out: Path, token: str) -> Path:
+    return sets_dir(out) / "emoji" / token                                      # never a P### name: the set scans skip it
+
+
+def emoji_token(token) -> tuple[str, str]:
+    """(token, glyph) of one bank emoji, named by its token ("kiss") or by the glyph itself (`actions.token_for_emoji`).
+    409 when the bank has neither (the bank is fixed: an unknown emoji is a conflict with it, not a malformed request)."""
+    from ..generation import actions as bank
+    raw = str(token or "").strip()
+    gen = bank.generation_bank()
+    t = raw.lower() if raw.lower() in gen else (bank.token_for_emoji(raw) if raw else None)
+    if not t or t not in gen:
+        raise SetError(f"{raw or 'nothing'} is not an emoji of the bank", 409)
+    return t, gen[t]["emoji"]
+
+
+def emoji_burst(token, *, preset=None, seed=1, size_in_dur=None, size_out_dur=None, hue_var=None, size=512) -> tuple[str, str, str, object]:
+    """(token, glyph, preset name, ParticleParams) of one bank emoji: its fixed motion (`emoji_motion.motion_for_token`), or a
+    preset override (the override takes the preset's own look: the token's pinned values belong to its own preset), with the
+    three options on top (None = the screen's default). Deterministic: same emoji + options + seed -> the same params. 400 for a
+    bad option."""
+    from ..engine import emoji_motion as em, particles as _p
+    t, glyph = emoji_token(token)
+    motion = em.motion_for_token(t)
+    name = str(preset or motion["preset"])
+    if name not in _p.PRESETS:
+        raise SetError(f"unknown preset {name!r}; choose one of {', '.join(_p.PRESETS)}")
+    over = dict(motion["params"]) if name == motion["preset"] else {}
+    opts = {k: (EMOJI_OPTIONS[k] if v is None else v) for k, v in (("size_in_dur", size_in_dur), ("size_out_dur", size_out_dur), ("hue_var", hue_var))}
+    for k, v in (*opts.items(), ("seed", seed), ("size", size)):
+        if isinstance(v, bool) or not isinstance(v, (int, float)):
+            raise SetError(f"{k} must be a number")
+    try:
+        return t, glyph, name, _p.preset(name, **over, **opts, seed=int(seed), size=int(size))
+    except ValueError as ex:
+        raise SetError(str(ex))
+
+
+def _glyph(glyph: str):
+    from ..engine import particles as _p
+    try:
+        return _p.render_emoji(glyph, EMOJI_PX)
+    except RuntimeError as ex:                                                   # no colour emoji font on this machine
+        raise SetError(str(ex), 503)
+
+
+def emoji_preview(out: Path, token, *, preset=None, seed=1, size_in_dur=None, size_out_dur=None, hue_var=None, size=256) -> dict:
+    """The emoji's burst as a small looping WebP for the screen, by the same simulator as the Lottie (free). Cached by what it was
+    made from, so the same options are the same file."""
+    import hashlib
+    from ..engine import particles as _p
+    if isinstance(size, bool) or not isinstance(size, (int, float)) or not 64 <= size <= 512:
+        raise SetError("size must be a whole number from 64 to 512")
+    t, glyph, name, p = emoji_burst(token, preset=preset, seed=seed, size_in_dur=size_in_dur, size_out_dur=size_out_dur, hue_var=hue_var, size=int(size))
+    img = _glyph(glyph)
+    key = hashlib.sha256(json.dumps({"p": p.to_dict(), "glyph": glyph}, sort_keys=True).encode() + img.tobytes()).hexdigest()[:16]
+    f = emoji_dir(out, t) / "previews" / f"{key}-{int(size)}.webp"
+    if not f.is_file():
+        f.parent.mkdir(parents=True, exist_ok=True)
+        atomic.write_bytes(f, _p.preview_webp(_p.simulate([img], p), size=int(size)))
+    return {"token": t, "emoji": glyph, "preset": name, "params": p.to_dict(), "url": f"/out/particles/emoji/{t}/previews/{f.name}"}
+
+
+def export_emoji_lottie(out: Path, token, *, preset=None, seed=1, size_in_dur=None, size_out_dur=None, hue_var=None, size=512, user: str = "local") -> dict:
+    """The end of the Reaction effects flow: one bank emoji's fixed motion, flying as the literal glyph, as a playable Lottie JSON
+    (web only; Telegram stays WebM). Stores `out/particles/emoji/<token>/renders/L###.lottie.json` and `L###.png` (the glyph asset,
+    for inspection) and appends to that emoji's `emoji.json` (`lottie[]`, history `LOTTIE`). Same emoji + options + seed -> the same
+    JSON bytes on the same machine (the glyph comes from its emoji font). 409 for an emoji outside the bank. Free."""
+    from ..engine import particles as _p
+    if isinstance(size, bool) or not isinstance(size, (int, float)) or not 128 <= size <= 1024:
+        raise SetError("size must be a whole number from 128 to 1024")
+    t, glyph, name, p = emoji_burst(token, preset=preset, seed=seed, size_in_dur=size_in_dur, size_out_dur=size_out_dur, hue_var=hue_var, size=int(size))
+    png = _p.png_bytes(_glyph(glyph))
+    doc = _p.export_lottie(p, png, size=p.size)
+    doc["nm"] = f"{glyph} {t} ({name})"
+    data = json.dumps(doc, separators=(",", ":"))
+    d = emoji_dir(out, t)
+    with _LOCK:
+        rec_f = d / "emoji.json"
+        rec = json.loads(atomic.read_text(rec_f)) if rec_f.is_file() else {"token": t, "emoji": glyph, "lottie": [], "history": []}
+        nums = [int(str(r.get("id"))[1:]) for r in rec.get("lottie") or [] if str(r.get("id", ""))[1:].isdigit()]
+        rid = f"L{max(nums + [0]) + 1:03d}"
+        (d / "renders").mkdir(parents=True, exist_ok=True)
+        atomic.write_text(d / f"renders/{rid}.lottie.json", data)
+        atomic.write_bytes(d / f"renders/{rid}.png", png)
+        rec.setdefault("lottie", []).append({"id": rid, "preset": name, "params": p.to_dict(), "file": f"renders/{rid}.lottie.json",
+                                             "glyph": f"renders/{rid}.png", "bytes": len(data), "created": round(time.time(), 3)})
+        hist(rec, user, "LOTTIE", f"exported {rid} as Lottie ({name})", {"preset": name, "seed": p.seed})
+        atomic.write_text(rec_f, json.dumps(rec, ensure_ascii=False, indent=1))
+    return {"id": rid, "token": t, "emoji": glyph, "preset": name, "params": p.to_dict(), "file": f"renders/{rid}.lottie.json",
+            "url": f"/out/particles/emoji/{t}/renders/{rid}.lottie.json", "layers": len(doc["layers"]), "assets": len(doc["assets"]), "bytes": len(data)}
 
 
 def adopt_emoji_map(out: Path, lib, user: str = "python") -> list[dict]:

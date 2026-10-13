@@ -38,12 +38,17 @@ class ReactionBankTests(unittest.TestCase):
         self.assertEqual(len(bank), len(ps.emoji_motions(self.out, None)), "every bank token is listed")
 
     def test_export_lottie_returns_a_real_downloadable_document(self):
+        with self.assertRaises(ps.SetError) as no_sprite:              # nothing to fly: an honest 409, never a placeholder shape
+            ps.export_lottie(self.out, None, "P002", preset="burst")
+        self.assertEqual(no_sprite.exception.code, 409)
+        ps.ensure_default_sprite(self.out, None, "P002")
         r = ps.export_lottie(self.out, None, "P002", preset="burst")
         self.assertEqual(r["url"], "/out/particles/P002/renders/L001.lottie.json")
         doc = json.loads((self.out / "particles" / "P002" / r["file"]).read_text(encoding="utf-8"))
         self.assertEqual(doc["v"], "5.7.4")
         self.assertGreater(len(doc["layers"]), 0)
-        self.assertTrue(all(l["ks"]["p"]["k"] for l in doc["layers"]), "every layer carries position keyframes")
+        self.assertTrue(all(l["ty"] == 2 and l["ks"]["p"]["k"] for l in doc["layers"]), "image layers with position keyframes")
+        self.assertEqual(len(doc["assets"]), 1, "the set's one picked sprite, embedded once")
         self.assertEqual(r["layers"], len(doc["layers"]))
 
     def test_default_sprite_is_free_and_idempotent(self):

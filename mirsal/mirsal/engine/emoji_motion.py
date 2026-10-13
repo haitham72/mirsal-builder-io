@@ -19,44 +19,46 @@ import hashlib
 _PRESET_BASE = ("burst", "fountain", "vortex", "rain", "confetti")
 
 # Core 36 mood tokens -> (preset, {param overrides}).
-# Hand-picked for readability at small size; Size/Energy remain pack-tunable.
+# Every row keeps its preset's measurable signature (engine.particles PRESETS; tests/test_emoji_motion.py checks each
+# token on trajectories()): a vortex row swirls (|vortex| >= 1.5, magnitude <= 0.6), a rain row falls (magnitude <= 0.5),
+# a fountain row rises from the bottom, a confetti row scatters with low gravity. Size/Energy remain pack-tunable.
 CORE_MOTIONS: dict[str, dict] = {
-    "happy": {"preset": "burst", "params": {"magnitude": 1.0, "gravity": 1.0, "vortex": 0.0}},
+    "happy": {"preset": "burst", "params": {"magnitude": 1.0, "gravity": 1.0}},
     "laugh": {"preset": "fountain", "params": {"magnitude": 1.9, "gravity": 1.3, "spin": 1.5}},
     "cry": {"preset": "rain", "params": {"magnitude": 0.45, "gravity": 0.9}},
-    "sad": {"preset": "rain", "params": {"magnitude": 0.4, "gravity": 0.8}},
+    "sad": {"preset": "rain", "params": {"magnitude": 0.3, "gravity": 0.7}},
     "love": {"preset": "burst", "params": {"magnitude": 0.9, "gravity": 0.6, "vortex": 0.3}},
     "angry": {"preset": "burst", "params": {"magnitude": 1.6, "gravity": 1.1}},
     "wink": {"preset": "burst", "params": {"magnitude": 0.8, "gravity": 0.7}},
     "kiss": {"preset": "burst", "params": {"magnitude": 0.8, "gravity": 0.5}},
     "surprised": {"preset": "burst", "params": {"magnitude": 1.4, "gravity": 0.9}},
-    "scared": {"preset": "vortex", "params": {"magnitude": 0.9, "gravity": 0.5}},
-    "confused": {"preset": "vortex", "params": {"magnitude": 0.7, "gravity": 0.5}},
-    "think": {"preset": "vortex", "params": {"magnitude": 0.6, "gravity": 0.4}},
-    "eye-roll": {"preset": "vortex", "params": {"magnitude": 0.7, "gravity": 0.6}},
+    "scared": {"preset": "vortex", "params": {"vortex": 2.0, "magnitude": 0.45, "gravity": 0.1}},
+    "confused": {"preset": "vortex", "params": {"vortex": 1.6, "magnitude": 0.4, "gravity": 0.1}},
+    "think": {"preset": "vortex", "params": {"vortex": 1.5, "magnitude": 0.35, "gravity": 0.05}},
+    "eye-roll": {"preset": "vortex", "params": {"vortex": -1.8, "magnitude": 0.5, "gravity": 0.1}},
     "sleep": {"preset": "rain", "params": {"magnitude": 0.3, "gravity": 0.5}},
     "cool": {"preset": "burst", "params": {"magnitude": 1.0, "gravity": 0.8}},
     "shy": {"preset": "burst", "params": {"magnitude": 0.7, "gravity": 0.6}},
     "sick": {"preset": "rain", "params": {"magnitude": 0.35, "gravity": 0.6}},
     "sneeze": {"preset": "burst", "params": {"magnitude": 1.5, "gravity": 1.0}},
     "celebrate": {"preset": "confetti", "params": {}},
-    "clap": {"preset": "confetti", "params": {"magnitude": 1.5, "gravity": 0.7}},
+    "clap": {"preset": "confetti", "params": {"magnitude": 1.3, "gravity": 0.3}},
     "approve": {"preset": "burst", "params": {"magnitude": 1.1, "gravity": 0.8}},
     "disapprove": {"preset": "burst", "params": {"magnitude": 0.9, "gravity": 1.0}},
     "thanks": {"preset": "fountain", "params": {"magnitude": 1.2, "gravity": 1.0}},
     "hello": {"preset": "fountain", "params": {"magnitude": 1.4, "gravity": 1.0}},
     "hug": {"preset": "fountain", "params": {"magnitude": 1.3, "gravity": 0.9}},
     "flex": {"preset": "burst", "params": {"magnitude": 1.2, "gravity": 0.9}},
-    "scheme": {"preset": "vortex", "params": {"magnitude": 0.8, "gravity": 0.35}},
+    "scheme": {"preset": "vortex", "params": {"vortex": -1.6, "magnitude": 0.5, "gravity": 0.05}},
     "facepalm": {"preset": "rain", "params": {"magnitude": 0.5, "gravity": 0.8}},
-    "shrug": {"preset": "vortex", "params": {"magnitude": 0.7, "gravity": 0.6}},
+    "shrug": {"preset": "vortex", "params": {"vortex": 1.6, "magnitude": 0.45, "gravity": 0.1}},
     "bored": {"preset": "rain", "params": {"magnitude": 0.3, "gravity": 0.5}},
-    "dance": {"preset": "confetti", "params": {"magnitude": 1.5, "gravity": 0.7}},
+    "dance": {"preset": "confetti", "params": {"magnitude": 1.6, "gravity": 0.3}},
     "plead": {"preset": "fountain", "params": {"magnitude": 1.0, "gravity": 1.0}},
     "salute": {"preset": "burst", "params": {"magnitude": 1.1, "gravity": 0.9}},
     "cheers": {"preset": "confetti", "params": {}},
     "gift": {"preset": "fountain", "params": {"magnitude": 1.5, "gravity": 1.1}},
-    "star-struck": {"preset": "confetti", "params": {"magnitude": 1.6, "gravity": 0.7}},
+    "star-struck": {"preset": "confetti", "params": {"magnitude": 1.7, "gravity": 0.3}},
 }
 
 
