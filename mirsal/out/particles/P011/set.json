@@ -1,0 +1,72 @@
+{
+  "id": "P011",
+  "name": "Recovered particles",
+  "created": 1791876627.541,
+  "user": "local",
+  "elements": [],
+  "source": {
+    "kind": "stickers",
+    "sticker_ids": [
+      "3b008026"
+    ],
+    "recovered_stickers": [
+      "3b008026"
+    ]
+  },
+  "cells": [
+    {
+      "n": 1,
+      "cell": 4,
+      "file": "cells/c01.png",
+      "status": "READY",
+      "warnings": [],
+      "key": "Batman lego on the move",
+      "sprite": true,
+      "w": 345,
+      "h": 316,
+      "picked": true,
+      "created": 1791876627.57,
+      "source_sticker": "3b008026",
+      "source_pack": "20b742ee",
+      "clip": "cells/c01.webm",
+      "fps": 24.0,
+      "frames": 72,
+      "timeline": "cells/c01.npz"
+    }
+  ],
+  "motion": {},
+  "saved_at": null,
+  "owner": [
+    {
+      "sticker_id": "3b008026",
+      "pack_id": "20b742ee",
+      "generation": "G002",
+      "index": 4
+    }
+  ],
+  "renders": [],
+  "credits": 0.0,
+  "notes": [],
+  "history": [
+    {
+      "ts": 1791876627.543,
+      "actor": "local",
+      "decision": "CREATE",
+      "reason": "a new set (stickers)",
+      "detail": null
+    },
+    {
+      "ts": 1791876627.968,
+      "actor": "local",
+      "decision": "RECOVER_STICKERS",
+      "reason": null,
+      "detail": {
+        "stickers": [
+          "3b008026"
+        ],
+        "parent_pack_id": "20b742ee"
+      }
+    }
+  ],
+  "updated": 1791876627.968
+}

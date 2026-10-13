@@ -1,0 +1,221 @@
+{
+  "generation_id": "G148",
+  "number": 148,
+  "owner": "local",
+  "created": 1791876933.325,
+  "parent": null,
+  "prompt": "generic emojis mirsal",
+  "task": "generic emojis mirsal",
+  "task_slug": "generic_emojis_mirsal",
+  "source": {
+    "subject": "generic_emojis_mirsal",
+    "subject_id": "import",
+    "variant": 1,
+    "n_variants": 1,
+    "sheet": "20261013T073533-hf_f1a92d39-2f83-4e5c-b88c-d98466a6f932-b6c780803ebc.png",
+    "video": null,
+    "has_video": false,
+    "pairing": "folder",
+    "clips_dup_of": null,
+    "prepared": false,
+    "clips": {},
+    "sheet_path": "G:\\Haitham\\VsCode\\Mirsal-Builder\\mirsal\\out\\imports\\20261013T073533-hf_f1a92d39-2f83-4e5c-b88c-d98466a6f932-b6c780803ebc.png",
+    "video_path": null,
+    "sheet_copy": "source/sheet.png",
+    "sheet_size": [
+      1520,
+      2688
+    ]
+  },
+  "grid": [
+    1,
+    1
+  ],
+  "stage": "sliced",
+  "error": null,
+  "plan_source": "stub (generation/prompter.py)",
+  "sheet_prompt": "A single face and head alone, large and centred on a square canvas.\nSubject: generic emojis mirsal.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nExpression, big and readable at small size: bursting with excitement, star-sparkle eyes, huge open smile — the face and head alone, never a body, arms, hands, legs, feet, ears, tails or props.\nBackground: one single flat pure green (#00FF00) colour over the entire image, one identical shade everywhere; no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nMargin: the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of the canvas), nothing touching or crossing the edge.",
+  "video_prompt": "Animate this 1x1 sheet of emojis as a 3-second clip.\nCreate a very expressive animation of each emoji, each having its own personality with a wide range of emotions.\n1. eyes sparkle, the grin stretches, the face vibrates with joy\nEach emoji moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every emoji's design unchanged. Faces only: no bodies, no hands.",
+  "custom_prompts": [],
+  "template_id": "single_1x1",
+  "template_version": 4,
+  "slots": {
+    "subject_description": "generic emojis mirsal",
+    "style_id": "flat_vector",
+    "mode": "single_1x1",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "bursting with excitement, star-sparkle eyes, huge open smile",
+        "tags": [
+          "generic_emojis_mirsal_excited",
+          "bursting",
+          "excitement",
+          "star"
+        ],
+        "emoji": "🤩",
+        "motion": "eyes sparkle, the grin stretches, the face vibrates with joy"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "face": true,
+    "preset": null
+  },
+  "task_id": null,
+  "name_key": "generic_emojis_mirsal",
+  "regen_of": null,
+  "verify_version": 2,
+  "outline_px": 0,
+  "erode_px": 0,
+  "reviews": {
+    "plan": null,
+    "video_sheet": {},
+    "pack": null
+  },
+  "video_sheets": [],
+  "verify": {
+    "sheet": [
+      {
+        "name": "sheet_decodes",
+        "ok": true,
+        "detail": "1520x2688",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "1520x2688",
+        "limit": "RGB/RGBA image",
+        "data": {
+          "ms": 51.0
+        }
+      },
+      {
+        "name": "sheet_size",
+        "ok": true,
+        "detail": "shortest side 1520px",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": 1520,
+        "limit": 1024,
+        "data": {
+          "ms": 0.0
+        }
+      },
+      {
+        "name": "background_is_key",
+        "ok": false,
+        "detail": "outer ring is -18 green-ward; a sheet without a green screen cannot be chroma keyed (matte keyer, Phase 3C)",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": -18.0,
+        "limit": 60.0,
+        "data": {
+          "ms": 13.5
+        }
+      },
+      {
+        "name": "grid_detected",
+        "ok": true,
+        "detail": "found 1x1, plan says 1x1",
+        "severity": "BLOCK",
+        "stage": "sheet",
+        "value": "1x1",
+        "limit": "1x1",
+        "data": {
+          "ms": 40.0
+        }
+      },
+      {
+        "name": "cut_clean",
+        "ok": true,
+        "detail": "cut method: single",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": "single",
+        "limit": "gutter",
+        "data": {
+          "xs": [
+            0,
+            1520
+          ],
+          "ys": [
+            0,
+            2688
+          ],
+          "ms": 38.9
+        }
+      },
+      {
+        "name": "background_flat",
+        "ok": true,
+        "detail": "key-channel std-dev 0.0 over the gutters",
+        "severity": "WARN",
+        "stage": "sheet",
+        "value": 0.0,
+        "limit": 12.0,
+        "data": {
+          "ms": 84.2
+        }
+      }
+    ]
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "key": "generic_emojis_mirsal_excited",
+      "tags": [
+        "generic_emojis_mirsal_excited",
+        "bursting",
+        "excitement",
+        "star"
+      ],
+      "emoji": "🤩",
+      "prompt": "generic emojis mirsal bursting with excitement, star-sparkle eyes, huge open smile, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "name": "img-generic_emojis_mirsal-excited-20261013T073533-50d096",
+      "status": "FAILED",
+      "reason": "background_is_key",
+      "report": [
+        {
+          "name": "background_is_key",
+          "ok": false,
+          "detail": "outer ring is -18 green-ward; a sheet without a green screen cannot be chroma keyed (matte keyer, Phase 3C)",
+          "severity": "BLOCK",
+          "stage": "sheet",
+          "value": -18.0,
+          "limit": 60.0,
+          "data": {
+            "ms": 13.5
+          }
+        }
+      ],
+      "metrics": {
+        "sheet_blocked": true
+      },
+      "png": null,
+      "anim_status": "NOT_REQUESTED",
+      "anim_reason": null,
+      "anim_metrics": {},
+      "webm": null,
+      "review": {
+        "still": "BLOCKED",
+        "anim": "NONE"
+      },
+      "history": [
+        {
+          "ts": 1791876933.862,
+          "stage": "sheet",
+          "actor": "python",
+          "decision": "BLOCK",
+          "reason": "background_is_key",
+          "ref": null,
+          "detail": {
+            "check": "background_is_key",
+            "value": -18.0,
+            "limit": 60.0,
+            "note": "outer ring is -18 green-ward; a sheet without a green screen cannot be chroma keyed (matte keyer, Phase 3C)"
+          }
+        }
+      ]
+    }
+  ],
+  "sheet_issues": []
+}

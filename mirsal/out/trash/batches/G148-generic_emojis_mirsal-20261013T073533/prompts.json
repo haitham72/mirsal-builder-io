@@ -1,0 +1,62 @@
+{
+  "task": "generic emojis mirsal",
+  "task_slug": "generic_emojis_mirsal",
+  "subject": "generic emojis mirsal",
+  "scene": "",
+  "described": "generic emojis mirsal",
+  "context": "",
+  "kind": "default",
+  "grid": [
+    1,
+    1
+  ],
+  "template_id": "single_1x1",
+  "template_version": 4,
+  "slots": {
+    "subject_description": "generic emojis mirsal",
+    "style_id": "flat_vector",
+    "mode": "single_1x1",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "bursting with excitement, star-sparkle eyes, huge open smile",
+        "tags": [
+          "generic_emojis_mirsal_excited",
+          "bursting",
+          "excitement",
+          "star"
+        ],
+        "emoji": "🤩",
+        "motion": "eyes sparkle, the grin stretches, the face vibrates with joy"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "face": true,
+    "preset": null
+  },
+  "guidelines": {
+    "sheet": "1x1 sticker sheet, 1 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 1 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+  },
+  "sheet_prompt": "A single face and head alone, large and centred on a square canvas.\nSubject: generic emojis mirsal.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nExpression, big and readable at small size: bursting with excitement, star-sparkle eyes, huge open smile — the face and head alone, never a body, arms, hands, legs, feet, ears, tails or props.\nBackground: one single flat pure green (#00FF00) colour over the entire image, one identical shade everywhere; no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nMargin: the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of the canvas), nothing touching or crossing the edge.",
+  "video_prompt": "Animate this 1x1 sheet of emojis as a 3-second clip.\nCreate a very expressive animation of each emoji, each having its own personality with a wide range of emotions.\n1. eyes sparkle, the grin stretches, the face vibrates with joy\nEach emoji moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every emoji's design unchanged. Faces only: no bodies, no hands.",
+  "stickers": [
+    {
+      "index": 1,
+      "id": "prompt01",
+      "prompt": "generic emojis mirsal bursting with excitement, star-sparkle eyes, huge open smile, face and head alone, large and centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_emojis_mirsal_excited",
+      "tags": [
+        "generic_emojis_mirsal_excited",
+        "bursting",
+        "excitement",
+        "star"
+      ],
+      "emoji": "🤩"
+    }
+  ]
+}
