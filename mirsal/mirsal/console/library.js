@@ -300,7 +300,7 @@ RENDER.library = async () => {
   drawCol2();
   $('s-library').innerHTML = `<div class=page><div class=ph><h1>Sticker Library</h1></div>
    <input type=search id=libq placeholder="Search stickers or packs…" value="${esc(LIBQ)}" style="margin-bottom:14px">
-   <div class=tabs><button class="tab ${LIBTAB === 'recent' ? 'on' : ''}" data-act=libtab data-t=recent>Recent</button><button class="tab ${LIBTAB === 'mine' ? 'on' : ''}" data-act=libtab data-t=mine>My Stickers</button><button class="tab ${LIBTAB === 'particles' ? 'on' : ''}" data-act=libtab data-t=particles>Particles</button><button class="tab ${LIBTAB === 'trending' ? 'on' : ''}" data-act=libtab data-t=trending>Trending</button></div>
+   <div class=tabs><button class="tab ${LIBTAB === 'recent' ? 'on' : ''}" data-act=libtab data-t=recent>Recent</button><button class="tab ${LIBTAB === 'mine' ? 'on' : ''}" data-act=libtab data-t=mine>My Stickers</button><button class="tab ${LIBTAB === 'particles' ? 'on' : ''}" data-act=libtab data-t=particles>Reactions</button><button class="tab ${LIBTAB === 'trending' ? 'on' : ''}" data-act=libtab data-t=trending>Trending</button></div>
    <div id=libbody></div><div class=fab><button class="btn pri" data-act=nav data-to=create>${ic('plus')} Create</button></div></div>`;
   $('libq').oninput = (e) => {
     LIBQ = e.target.value;

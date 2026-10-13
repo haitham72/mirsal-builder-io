@@ -1,4 +1,4 @@
-/* Particle effects (#/effects, a tool of Create): the burst Telegram plays when you press an emoji, made for a PACK. docs/effects.md.
+/* Particle effects (#/effects, a tool of Create): the reaction Telegram plays when you press an emoji, made for a PACK. docs/effects.md.
    Pick a pack and its stickers, see what bursts out of each (a vision model or a built-in table), then make the particles:
    Simulate (free: gravity / explosion / vortex sliders with a live preview rendered by the engine; the particles are the pack's own stickers, or an AI-drawn sheet) or
    Video (a text-only Kling clip; the price is shown first and the click is the go-ahead). Results are 3-second Telegram stickers; Add puts them into the pack tagged with the source emoji
@@ -13,12 +13,12 @@ const fxNew=who=>({who,pack:'',sel:new Set(),mode:'video',grid:'2x2',note:'',eid
   dr:{grid:'2x2',opts:{},extra:[],chosen:[],est:{},busy:{},use:null,useN:0,redo:false,change:false,picked:''}});
 const FX=FXS.fx=fxNew('fx');
 const fxX=el=>{const r=el&&el.closest?el.closest('[data-fxx]'):null;return FXS[r?r.dataset.fxx:'fx']||FX};
-const FXSL=[['magnitude','Energy',0,3,.05],['gravity','Float',-2,3,.05],['vortex','Swirl',-2,2,.05],['particle_size','Size',.25,3,.05],['count','Particles',4,80,1],['spin','Spin',0,3,.05]];
+const FXSL=[['magnitude','Energy',0,3,.05],['gravity','Float',-2,3,.05],['vortex','Swirl',-2,2,.05],['particle_size','Size',.25,3,.05],['count','Reactions',4,80,1],['spin','Spin',0,3,.05]];
 const FXMAIN=['magnitude','gravity','vortex','particle_size'];
 const FXPRESETS=['burst','fountain','vortex','rain','confetti'];
 const FXWHY={effect_tail_faded:'Particles were still on screen at the end, so the last frames were faded out to end empty, like a Telegram effect.',effect_empty_start:'Something is on screen in the first frames.',
  effect_empty_end:'Something is still on screen in the last frames.',effect_has_burst:'Hardly anything bursts: the effect is nearly empty.',effect_not_a_still:'Nothing moves.',effect_inside_cell:'Particles leave their cell.',
- key_is_seamless:'The green screen has panels or patterns, so the keying may eat parts of the particles. Use it anyway, or make another take.',
+ key_is_seamless:'The green screen has panels or patterns, so the keying may eat parts of the reactions. Use it anyway, or make another take.',
  grid_detected:'The sheet was cut anyway, but its grid lines were not clear: look at each cell.',sheet_size:'The sheet came back at an unusual size and was cut anyway.',
  size_budget:'Over Telegram’s size limit.',codec_vp9:'Not VP9.',dimensions:'Not 512 x 512.',fps:'Not 30 fps.',duration:'Longer than 3 seconds.',alpha_decoded:'No transparency came out.',cell_unreadable:'This cell could not be read.'};
 /* a drawn cell's warnings (generate.js's WARNWHY speaks of "the character"; these speak of the particle) */
@@ -64,17 +64,17 @@ function fxPoll(X){clearTimeout(X.timer);if(!fxBusy(X)||!X.alive())return;
 /* ---------- setup (the pro screen): a pack, its stickers, how */
 const fxPackOf=()=>packById(FX.pack);
 function fxSetup(){const p=fxPackOf(),packs=LIB.packs.filter(x=>x.stickers.length);
- return `<div class=ph><h1>Particle effects</h1></div><div class=mut>Pick an emoji pack. Each sticker gets a 3-second burst of related particles, like the effect Telegram plays when you press the emoji: Batman bursts bat signals, a jewelry sticker gold bars and diamonds. It starts from nothing and ends with nothing.</div>
+ return `<div class=ph><h1>Reaction effects</h1></div><div class=mut>Pick an emoji pack. Each sticker gets a 3-second burst of related reactions, like the reaction Telegram plays when you press the emoji: Batman bursts bat signals, a jewelry sticker gold bars and diamonds. It starts from nothing and ends with nothing.</div>
   ${FX.past.length?`<div class=fx-past><span class=mut>Earlier</span>${FX.past.map(x=>`<a href="#/effects/${x.id}">${esc(x.id)} · ${esc(x.pack_name||'')} <small>${esc(String(x.status||'').toLowerCase())}</small></a>`).join('')}</div>`:''}
   <div class=sh style="margin-top:18px">1 · Choose the pack</div>
   <div class=fx-packs>${packs.map(x=>`<button class="fx-pack${x.id===FX.pack?' on':''}" data-act=fxpack data-id=${x.id}><span class=fx-cv>${coverMedia(x)}</span><b>${esc(x.name)}</b><small>${x.stickers.length} stickers</small></button>`).join('')||'<div class=mut>Make a pack first (Library).</div>'}</div>
   ${p?`<div class=sh style="margin-top:18px">2 · Which stickers <button class="link" data-act=fxall data-v=1>all</button><button class=link data-act=fxall data-v=0>none</button></div>
   <div class=fx-sts>${p.stickers.map(s=>`<button class="fx-st${FX.sel.has(s.id)?' on':''}" data-act=fxst data-id=${s.id} title="${esc(s.name)}">${media(s)}<span>${esc(s.emoji||'')}</span></button>`).join('')}</div>
-  <div class=sh style="margin-top:18px">3 · How are the particles made</div>
-  <div class=fx-modes><label class="fx-mode${FX.mode==='sim'?' on':''}"><input type=radio name=fxm ${FX.mode==='sim'?'checked':''} data-act=fxmode data-v=sim><b>Simulate</b><small>Free. The particles fly by gravity, explosion and vortex sliders you move, with a live preview. The particles are drawn for you by AI (a sheet of different small particles, a few credits once), or they are the stickers themselves.</small></label>
+  <div class=sh style="margin-top:18px">3 · How are the reactions made</div>
+  <div class=fx-modes><label class="fx-mode${FX.mode==='sim'?' on':''}"><input type=radio name=fxm ${FX.mode==='sim'?'checked':''} data-act=fxmode data-v=sim><b>Simulate</b><small>Free. The reactions fly by gravity, explosion and vortex sliders you move, with a live preview. The reactions are drawn for you by AI (a sheet of different small particles, a few credits once), or they are the stickers themselves.</small></label>
    <label class="fx-mode${FX.mode==='video'?' on':''}"><input type=radio name=fxm ${FX.mode==='video'?'checked':''} data-act=fxmode data-v=video><b>Video from scratch</b><small>Kling draws the burst from text only, on an empty screen. About 4.5 credits for a clip of 4 cells (2x2); the price is shown before anything is spent.</small></label></div>
   ${FX.mode==='video'?`<div class=row><span class=mut>Cells in one clip</span><div class=tabs style="margin:0;gap:6px"><button class="tab${FX.grid==='2x2'?' on':''}" data-act=fxgrid data-v=2x2>2 x 2</button><button class="tab${FX.grid==='3x3'?' on':''}" data-act=fxgrid data-v=3x3>3 x 3</button></div>${FX.grid==='3x3'?'<span class=fx-warn>3 x 3 was measured poor: particles cross cells and nothing ends empty.</span>':''}</div>`:''}
-  <div class=row><input id=fxnote type=text placeholder="Your own particles? e.g. particles: gold bars, diamonds (optional)" value="${esc(FX.note)}" style="flex:1;min-width:260px"></div>
+  <div class=row><input id=fxnote type=text placeholder="Your own reactions? e.g. reactions: gold bars, diamonds (optional)" value="${esc(FX.note)}" style="flex:1;min-width:260px"></div>
   <div class=row><button class="btn pri gbig" data-act=fxgo ${FX.sel.size?'':'disabled'}>${ic('fx')} Look at ${FX.sel.size} sticker${FX.sel.size===1?'':'s'}</button><span class=mut>A vision model looks at them if you allow it (asked once); otherwise a built-in table decides.</span></div>`:''}`}
 ACT.fxpack=el=>{FX.pack=el.dataset.id;FX.sel=new Set((fxPackOf()||{stickers:[]}).stickers.map(s=>s.id));fxDraw()};
 ACT.fxst=el=>{const i=el.dataset.id;FX.sel.has(i)?FX.sel.delete(i):FX.sel.add(i);fxDraw()};
@@ -92,7 +92,7 @@ async function fxStart(){const r=await post('/api/effects',{pack_id:FX.pack,stic
 /* ---------- one effect */
 const fxSticker=(e,sid)=>{const p=packById(e.pack_id),s=p&&p.stickers.find(x=>x.id===sid);return s||null};
 function fxPieces(X,g){return `<div class=fx-pieces>${g.elements.map((x,i)=>`<span class=fx-chip>${esc(x)}<button data-act=fxdelpiece data-g=${g.id} data-i=${i} aria-label="Remove ${esc(x)}">${ic('x')}</button></span>`).join('')}
- <input class=fx-add type=text placeholder="add a particle" data-fxadd=${g.id}><button class="btn sm" data-act=fxaddpiece data-g=${g.id}>Add</button></div>`}
+ <input class=fx-add type=text placeholder="add a reaction" data-fxadd=${g.id}><button class="btn sm" data-act=fxaddpiece data-g=${g.id}>Add</button></div>`}
 function fxVideoPanel(X,e,g){const v=(e.video||{})[g.id]||{},est=X.est[g.id+e.grid.join('x')];
  if(v.status==='REQUESTED'){const j=v.live||{};return `<div class=fx-job>${fxJobBad(j)?`<b class=bad>The video failed</b><div class=mut>${esc(j.error||'')}</div><button class="btn" data-act=fxvideo data-g=${g.id} ${est&&est.credits!=null?'':'disabled'}>Try again</button>`:`<span class=spin></span> <b>Making the video</b> <span class=mut>${esc(v.job||'')} · ${esc(j.stage||j.status||'waiting')}</span>`}</div>`}
  return `<div class=fx-job><span class=mut>${e.grid[0]} x ${e.grid[1]} cells, screen ${esc(g.key)}, Kling pro 3 s, no start image.</span>
@@ -115,7 +115,7 @@ function fxDrState(X,e){const s=fxSet(e),d=X.dr;
  if(fxCutting(X.gen[n]))return'cut';
  return fxPicked(X,e)&&!d.change?'done':'pick'}
 const fxDrBusy=(X,e)=>{if(e.mode!=='sim'||X.src==='own')return false;const st=fxDrState(X,e);return st==='wait'||st==='cut'};
-function fxDrBtnHtml(X){const d=X.dr;return `${ic('fx')} Draw ${fxCols(d.grid)} particles with AI`}
+function fxDrBtnHtml(X){const d=X.dr;return `${ic('fx')} Draw ${fxCols(d.grid)} reactions with AI`}
 /* the price lives on its own line above the button, never inside it: the button says what it does, the line says what it costs */
 function fxDrPriceHtml(X){const d=X.dr,est=d.est[fxDrKey(d)];
  if(!d.chosen.length)return'';
@@ -123,36 +123,36 @@ function fxDrPriceHtml(X){const d=X.dr,est=d.est[fxDrKey(d)];
  if(est.credits!=null)return`about ${est.credits} credit${est.credits===1?'':'s'}`;
  return''}
 function fxDrMake(X,e){const d=X.dr,N=fxCols(d.grid),o=d.opts[d.grid]||{},names=fxDrNames(d),ch=d.chosen,est=d.est[fxDrKey(d)],ok=ch.length&&est&&est.credits!=null,prev=fxSet(e);
- return `<div class=fx-pc-draw><span class=mut>Particles on the sheet</span><div class=tabs style="margin:0;gap:6px"><button class="tab${d.grid==='2x2'?' on':''}" data-act=fxdgrid data-v=2x2>2 x 2 · 4</button><button class="tab${d.grid==='3x3'?' on':''}" data-act=fxdgrid data-v=3x3>3 x 3 · 9</button></div></div>
+ return `<div class=fx-pc-draw><span class=mut>Reactions on the sheet</span><div class=tabs style="margin:0;gap:6px"><button class="tab${d.grid==='2x2'?' on':''}" data-act=fxdgrid data-v=2x2>2 x 2 · 4</button><button class="tab${d.grid==='3x3'?' on':''}" data-act=fxdgrid data-v=3x3>3 x 3 · 9</button></div></div>
   <div class=fx-dr-ideas>${!o.state||o.state==='loading'?'<span class=fx-pc-st><span class=spin></span> <span class=mut>The vision model is looking at the stickers for ideas…</span></span>'
    :o.state==='err'?`<span class=fx-warn>${esc(o.err)}</span> <button class=link data-act=fxdretry>Try again</button>`
    :`<span class=mut>Ideas${o.by?' from '+(o.by==='vlm'?'the vision model':'the built-in table'):''}: pick up to ${N}. Click a name to take it or leave it.</span>${(o.notes||[]).map(n=>`<small class=mut>${esc(n)}</small>`).join('')}`}
    <div class=fx-opts>${names.map(n=>`<button class="fx-opt${ch.includes(n)?' on':''}" data-act=fxdchip data-v="${esc(n)}" aria-pressed=${ch.includes(n)}>${esc(n)}</button>`).join('')}</div>
-   <div class=row><input type=text class=fx-add data-fxdown placeholder="add your own" maxlength=40 aria-label="Add your own particle"><button class="btn sm" data-act=fxdadd>Add</button><small class=mut data-fxdcount>${ch.length} of ${N} chosen${ch.length&&ch.length<N?' · fewer is fine, the sheet repeats them in other sizes and angles':''}</small></div></div>
+   <div class=row><input type=text class=fx-add data-fxdown placeholder="add your own" maxlength=40 aria-label="Add your own reaction"><button class="btn sm" data-act=fxdadd>Add</button><small class=mut data-fxdcount>${ch.length} of ${N} chosen${ch.length&&ch.length<N?' · fewer is fine, the sheet repeats them in other sizes and angles':''}</small></div></div>
   <div class=fx-pc-draw><div class=fx-price data-fxdprice>${esc(fxDrPriceHtml(X))}</div><button class="btn pri" data-act=fxddraw ${ok?'':'disabled'}>${fxDrBtnHtml(X)}</button>${est&&est.credits==null&&est.error?`<span class=fx-warn data-fxdwhy>${esc(est.error)}</span>`:'<span class=mut data-fxdwhy>Nothing is spent until you press the button.</span>'}</div>
-  ${prev&&prev.status==='DRAWN'?`<div class=row><small class=mut>Drawing again replaces the particles you picked.</small>${X.dr.redo&&fxSetGen(e)?'<button class=link data-act=fxdcancel>Keep the ones I have</button>':''}</div>`:''}`}
+  ${prev&&prev.status==='DRAWN'?`<div class=row><small class=mut>Drawing again replaces the reactions you picked.</small>${X.dr.redo&&fxSetGen(e)?'<button class=link data-act=fxdcancel>Keep the ones I have</button>':''}</div>`:''}`}
 function fxDrCells(X,e,pick){const n=fxSetGen(e),r=X.gen[n],cells=(r&&r.stickers)||[],d=X.dr;
  if(d.use==null||d.useN!==n){const pk=(fxSet(e)||{}).picked;d.use=new Set(Array.isArray(pk)&&pk.length?pk.map(fxNum):cells.map(c=>c.index));d.useN=n}
  const sw=((r&&r.verify&&r.verify.sheet)||[]).filter(c=>!c.ok&&c.severity!=='BLOCK').map(c=>fxWords(c.name)),N=fxTicked(X,e).length;
- return `<div class=fx-pc-st><b>${cells.filter(c=>c.png).length} of ${cells.length} particles drawn</b> <span class=mut>${esc((r||{}).generation_id||'')} · ${X.src==='drawn'?'tick the ones to use, then press Use':'all of them are used until you say otherwise: untick the ones you do not want, then press Use'}</span></div>
+ return `<div class=fx-pc-st><b>${cells.filter(c=>c.png).length} of ${cells.length} reactions drawn</b> <span class=mut>${esc((r||{}).generation_id||'')} · ${X.src==='drawn'?'tick the ones to use, then press Use':'all of them are used until you say otherwise: untick the ones you do not want, then press Use'}</span></div>
   ${sw.length?`<ul class=pk-pt-w>${sw.map(w=>`<li>${esc(w)}</li>`).join('')}</ul>`:''}
   <div class=fx-cells>${cells.map(c=>{const has=!!c.png,on=has&&d.use.has(c.index),why=fxCellWhy(c);
    return `<div class="fx-cell${on?' on':''}${has?'':' off'}"><button class=fx-cb data-act=fxdcell data-i=${c.index} aria-pressed=${on} ${has?'':'disabled'} title="${has?(on?'Click to leave it out':'Click to use it'):'No picture came out of this cell'}"><span class=fx-ck>${on?ic('check'):''}</span><span class=fx-cm>${has?`<img src="/out/${esc(r.generation_id)}/${esc(c.png)}" alt="" loading=lazy>`:'<span class=mut>No picture</span>'}</span></button>
     <b>${c.index}${c.key?' · '+esc(String(c.key).replace(/_/g,' ')):''}</b>${why.length?`<ul class=pk-pt-w>${why.map(w=>`<li>${esc(w)}</li>`).join('')}</ul>`:''}</div>`}).join('')}</div>
-  <div class=row><button class="btn pri" data-act=fxduse ${N?'':'disabled'}>Use ${N} particle${N===1?'':'s'}</button><button class=link data-act=fxdall data-v=1>all</button><button class=link data-act=fxdall data-v=0>none</button><button class=link data-act=fxdredo>Draw again</button>
-   <span class=mut>${pick==='change'?'Pick again: ':''}the stickers burst with the ticked particles.</span></div>`}
+  <div class=row><button class="btn pri" data-act=fxduse ${N?'':'disabled'}>Use ${N} reaction${N===1?'':'s'}</button><button class=link data-act=fxdall data-v=1>all</button><button class=link data-act=fxdall data-v=0>none</button><button class=link data-act=fxdredo>Draw again</button>
+   <span class=mut>${pick==='change'?'Pick again: ':''}the stickers burst with the ticked reactions.</span></div>`}
 function fxDrDone(X,e){const n=fxSetGen(e),r=X.gen[n],s=fxSet(e)||{},idx=Array.isArray(s.picked)&&s.picked.length?s.picked.map(fxNum):fxReady(X,n).map(c=>c.index),cells=fxCells(X,n).filter(c=>idx.includes(c.index)&&c.png);
- return `<div class=fx-pc-st><b>Using ${cells.length} drawn particle${cells.length===1?'':'s'}</b> <span class=mut>${esc((r||{}).generation_id||'')}</span></div>
+ return `<div class=fx-pc-st><b>Using ${cells.length} drawn reaction${cells.length===1?'':'s'}</b> <span class=mut>${esc((r||{}).generation_id||'')}</span></div>
   <div class=fx-pc-ths>${cells.map(c=>`<span class=fx-pc-th title="${esc(c.key||'')}"><img src="/out/${esc(r.generation_id)}/${esc(c.png)}" alt="${esc(c.key||'')}" loading=lazy></span>`).join('')}</div>
   <div class=row><button class="btn sm" data-act=fxdchange>Change which ones</button><button class="btn sm" data-act=fxdredo>Draw again</button></div>`}
 function fxDrawn(X,e){const st=fxDrState(X,e),s=fxSet(e)||{},j=s.live||{};let body;
  if(st==='make')body=fxDrMake(X,e);
- else if(st==='wait')body=`<div class=fx-pc-st><span class=spin></span> <b>Drawing the particles</b> <span class=mut>${esc(s.job||'')} · ${esc(j.stage||j.status||'waiting')}</span></div>`;
+ else if(st==='wait')body=`<div class=fx-pc-st><span class=spin></span> <b>Drawing the reactions</b> <span class=mut>${esc(s.job||'')} · ${esc(j.stage||j.status||'waiting')}</span></div>`;
  else if(st==='failed')body=`<div class=fx-pc-st><b class=bad>The sheet failed</b><span class=mut>${esc(j.error||s.error||s.status||'')}</span></div><div class=row><button class="btn" data-act=fxdredo>Try again</button></div>`;
- else if(st==='cut')body=`<div class=fx-pc-st><span class=spin></span> <b>Cutting the particles</b> <span class=mut>G${String(fxSetGen(e)).padStart(3,'0')}</span></div>`;
+ else if(st==='cut')body=`<div class=fx-pc-st><span class=spin></span> <b>Cutting the reactions</b> <span class=mut>G${String(fxSetGen(e)).padStart(3,'0')}</span></div>`;
  else if(st==='pick')body=fxDrCells(X,e,X.dr.change?'change':'');
  else body=fxDrDone(X,e);
- return `<div class="fx-pc fx-dr" data-fxdr=${st}><div class=fx-pc-h><b>Drawn particles</b><span class=mut>An AI draws a sheet of different small particles that burst out of the stickers. It costs credits once; every change after that is free.</span></div>${body}</div>`}
+ return `<div class="fx-pc fx-dr" data-fxdr=${st}><div class=fx-pc-h><b>Drawn reactions</b><span class=mut>An AI draws a sheet of different small reactions that burst out of the stickers. It costs credits once; every change after that is free.</span></div>${body}</div>`}
 /* repaint only the drawn panel (a chip, a tick) so nothing else on the page moves */
 function fxDrRefresh(X){const e=X.rec,r=X.root(),el=r&&r.querySelector('.fx-dr');if(!e||!el||!X.alive())return;el.outerHTML=fxDrawn(X,e);fxDrNeeds(X)}
 function fxDrNeeds(X){const e=X.rec;if(!e||e.mode!=='sim'||X.src==='own'||e.status==='NEW'||e.status==='ERROR'||fxDrState(X,e)!=='make')return;
@@ -183,7 +183,7 @@ ACT.fxdadd=el=>{const X=fxX(el),i=X.root().querySelector('[data-fxdown]');fxDrAd
 document.addEventListener('keydown',e=>{const t=e.target;if(e.key==='Enter'&&t&&t.dataset){if(t.dataset.fxadd){e.preventDefault();fxAddPiece(fxX(t),t.dataset.fxadd,t.value)}else if(t.dataset.fxdown!==undefined){e.preventDefault();fxDrAdd(fxX(t),t.value)}}});
 ACT.fxddraw=async el=>{const X=fxX(el),d=X.dr,est=d.est[fxDrKey(d)];if(!est||est.credits==null||!d.chosen.length)return;el.disabled=true;
  const r=await post(`/api/effects/${X.eid}/particles`,{grid:d.grid,elements:d.chosen,go:true});if(!r.ok){el.disabled=false;return toast(r.j.error||'Could not start',1)}
- d.redo=false;d.change=false;d.picked='';d.use=null;toast(`Drawing ${fxCols(d.grid)} particles: ${r.j.estimate!=null?r.j.estimate+' credits':'the price is shown in your ledger'}`);await fxLoad(X);X.draw()};
+ d.redo=false;d.change=false;d.picked='';d.use=null;toast(`Drawing ${fxCols(d.grid)} reactions: ${r.j.estimate!=null?r.j.estimate+' credits':'the price is shown in your ledger'}`);await fxLoad(X);X.draw()};
 ACT.fxdredo=el=>{const X=fxX(el);X.dr.redo=true;X.dr.change=false;fxDrRefresh(X)};
 ACT.fxdcancel=el=>{const X=fxX(el);X.dr.redo=false;fxDrRefresh(X)};
 ACT.fxdchange=el=>{const X=fxX(el);X.dr.change=true;X.dr.use=null;fxDrRefresh(X)};
@@ -191,11 +191,11 @@ ACT.fxdcell=el=>{const X=fxX(el),d=X.dr,i=+el.dataset.i;d.use.has(i)?d.use.delet
 ACT.fxdall=el=>{const X=fxX(el),e=X.rec,d=X.dr;d.use=new Set(el.dataset.v==='1'?fxCells(X,fxSetGen(e)).filter(c=>c.png).map(c=>c.index):[]);fxDrRefresh(X)};
 ACT.fxduse=async el=>{const X=fxX(el),d=X.dr,idx=fxTicked(X,X.rec);if(!idx.length)return;el.disabled=true;
  const r=await post(`/api/effects/${X.eid}/particles_pick`,{indexes:idx});if(!r.ok){el.disabled=false;return toast(r.j.error||'Could not use them',1)}
- d.picked=X.rec.id+':'+fxSetGen(X.rec);d.change=false;await fxLoad(X);X.draw();toast(`Using ${idx.length} particle${idx.length===1?'':'s'}: the stickers burst with them`)};
+ d.picked=X.rec.id+':'+fxSetGen(X.rec);d.change=false;await fxLoad(X);X.draw();toast(`Using ${idx.length} reaction${idx.length===1?'':'s'}: the stickers burst with them`)};
 
 /* ---------- the body of an effect: the drawn particles, the way to a set and the set's Motion (a simulation), or per group its elements (a video), then the results */
 function fxGroupHtml(X,e,g){
- return `<section class=fx-g><header><b>${esc(g.subject)}</b><span class="fx-key ${esc(g.key)}">screen ${esc(g.key)}</span><small class=mut>particles chosen by ${g.by==='vlm'?'the vision model':g.by==='you'?'you':'the built-in table'}</small></header>
+ return `<section class=fx-g><header><b>${esc(g.subject)}</b><span class="fx-key ${esc(g.key)}">screen ${esc(g.key)}</span><small class=mut>reactions chosen by ${g.by==='vlm'?'the vision model':g.by==='you'?'you':'the built-in table'}</small></header>
   ${fxPieces(X,g)}<div class=fx-gst>${g.stickers.map(sid=>{const s=fxSticker(e,sid);return s?`<span class=fx-th title="${esc(s.name)}">${media(s)}</span>`:''}).join('')}</div>${fxVideoPanel(X,e,g)}</section>`}
 function fxResults(X,e){const rs=e.results||[];if(!rs.length)return '';const n=X.pick.size;
  return `<details class=fx-original><summary>Original sprite clips</summary><div class=sh style="margin-top:22px">Results <button class=link data-act=fxpickall>select all that can be added</button></div><div class=fx-res>${rs.map(r=>{
@@ -204,13 +204,13 @@ function fxResults(X,e){const rs=e.results||[];if(!rs.length)return '';const n=X
    <div class=fx-rm><b>${esc(r.id)} · ${r.mode==='video'?'cell '+r.cell:esc((fxSticker(e,r.sticker_id)||{}).name||'')}</b><small>${Math.round((r.bytes||0)/1024)} KB · ${esc(String(r.status).toLowerCase())}</small>
    ${bl.map(c=>`<span class="fx-w bad" title="${esc(c.detail||'')}">${esc(fxWords(c.id))}</span>`).join('')}${ws.map(c=>`<span class=fx-w title="${esc(c.detail||'')}">${esc(fxWords(c.id))}</span>`).join('')}
    ${r.added_to?'<small class=mut>added to the pack</small>':''}${ok?`<button class="btn sm${on?' pri':''}" data-act=fxpick data-id=${r.id}>${on?'Selected':ws.length?'Use it anyway':'Use'}</button>`:''}</div></div>`}).join('')}</div>
-  <div class=row><button class="btn pri gbig" data-act=fxadd ${n?'':'disabled'}>Add ${n||''} sprite clips</button><span class=mut>Warnings are only warnings: you decide. A particle sticker keeps the emoji of its source and is saved under that sticker.</span></div></details>`}
+  <div class=row><button class="btn pri gbig" data-act=fxadd ${n?'':'disabled'}>Add ${n||''} sprite clips</button><span class=mut>Warnings are only warnings: you decide. A reaction sticker keeps the emoji of its source and is saved under that sticker.</span></div></details>`}
 function fxBody(X,e){const sim=e.mode==='sim';
  return (e.notes||[]).map(n=>`<div class=mut style="margin-top:6px">${esc(n)}</div>`).join('')+(sim&&X.src!=='own'?fxDrawn(X,e):'')+(sim?fxSaveBlock(X,e)+fxMotion(X,e):(e.groups||[]).map(g=>fxGroupHtml(X,e,g)).join('')+fxSaveBlock(X,e)+fxMotion(X,e))+fxResults(X,e)}
 /* Motion (a simulation): ONE section for the whole run, whatever its stickers or groups (docs/particles.md section 4). The burst is made from the SET for the PACK, so it waits for the run to be saved as a set;
    then the panel is the set's own (spBurstHtml: one preview, the presets, Energy / Float / Swirl, Render, Add). */
 function fxMotion(X,e){const s=X.set;
- if(!s)return `<section class="fx-g fx-mo"><header><b>Motion</b></header><div class=mut>Save the particles as a set first (above): the burst is made from the set, for the whole pack, with one preview.</div></section>`;
+ if(!s)return `<section class="fx-g fx-mo"><header><b>Motion</b></header><div class=mut>Save the reactions as a set first (above): the burst is made from the set, for the whole pack, with one preview.</div></section>`;
  if(typeof spBurstState==='function')spBurstState(s,e.pack_id);
  return `<section class="fx-g fx-mo"><header><b>${esc(s.name||s.id)}</b><span class=mut>${esc(s.id)} · ${s.n_picked||0} picked · ${(s.used_in||[]).length?'used in '+s.used_in.map(p=>esc(p.name||p.id)).join(', '):'stand-alone'}</span></header>${typeof spBurstHtml==='function'?spBurstHtml(s):''}</section>`}
 function fxRecord(){const e=FX.rec;if(!e)return '';
@@ -230,7 +230,7 @@ ACT.fxprice=el=>{const X=fxX(el);delete X.est[el.dataset.g+X.rec.grid.join('x')]
 
 /* ---------- editing the elements of a video */
 async function fxPlan(X,body){const r=await post(`/api/effects/${X.eid}/plan`,body);if(!r.ok)return toast(r.j.error||'Not possible',1);X.rec=r.j;X.est={};await fxLoad(X);X.draw()}
-ACT.fxdelpiece=el=>{const X=fxX(el),g=X.rec.groups.find(x=>x.id===el.dataset.g);if(!g)return;const els=g.elements.filter((_,i)=>i!==+el.dataset.i);if(!els.length)return toast('Keep at least one particle',1);fxPlan(X,{group:g.id,elements:els})};
+ACT.fxdelpiece=el=>{const X=fxX(el),g=X.rec.groups.find(x=>x.id===el.dataset.g);if(!g)return;const els=g.elements.filter((_,i)=>i!==+el.dataset.i);if(!els.length)return toast('Keep at least one reaction',1);fxPlan(X,{group:g.id,elements:els})};
 function fxAddPiece(X,gid,value){const g=X.rec.groups.find(x=>x.id===gid),v=String(value||'').trim();if(!g||!v)return;fxPlan(X,{group:g.id,elements:g.elements.concat(v)})}
 ACT.fxaddpiece=el=>{const X=fxX(el),i=X.root().querySelector(`[data-fxadd="${el.dataset.g}"]`);fxAddPiece(X,el.dataset.g,i?i.value:'')};
 ACT.fxvideo=async el=>{const X=fxX(el),g=el.dataset.g,est=X.est[g+X.rec.grid.join('x')];if(!est||est.credits==null)return;el.disabled=true;
@@ -245,7 +245,7 @@ const fxClean=p=>{const o={};if(p)Object.entries(p).forEach(([k,v])=>{if(k!=='to
 ACT.fxpick=el=>{const X=fxX(el),i=el.dataset.id;X.pick.has(i)?X.pick.delete(i):X.pick.add(i);X.draw()};
 ACT.fxpickall=el=>{const X=fxX(el);(X.rec.results||[]).filter(r=>r.status==='READY'&&!r.added_to).forEach(r=>X.pick.add(r.id));X.draw()};
 ACT.fxadd=async el=>{const X=fxX(el),r=await post(`/api/effects/${X.eid}/add`,{results:[...X.pick]});if(!r.ok)return toast(r.j.error||'Could not add',1);
- toast(`Added ${r.j.added.length} particle sticker${r.j.added.length===1?'':'s'} to the pack: saved under the sticker${r.j.added.length===1?'':'s'}`);X.pick.clear();await loadLib();if(typeof ptForget==='function')ptForget();await fxLoad(X);X.draw();if(typeof spSecSync==='function')spSecSync(true)};
+ toast(`Added ${r.j.added.length} reaction sticker${r.j.added.length===1?'':'s'} to the pack: saved under the sticker${r.j.added.length===1?'':'s'}`);X.pick.clear();await loadLib();if(typeof ptForget==='function')ptForget();await fxLoad(X);X.draw();if(typeof spSecSync==='function')spSecSync(true)};
 
 /* ---------- Use as particle set: the working session ends in a durable set P### (docs/particles.md 4.5). POST /api/particles {from_effect, name, packs, picked?}.
    One implementation for the pro screen and the Studio tab (the block sits in fxBody, the state comes from the root). A drawn sheet is saved with its picked cells (the set outlives the run); a run
@@ -258,7 +258,7 @@ function fxSaved(X,e){const t=X.set;if(!t)return false;const n=fxSetGen(e),s=fxS
 function fxSaveBlock(X,e){if(fxSaved(X,e))return '<div class=fx-save><button class="btn pri" data-act=fxopenset>Open in simulator</button></div>';
  if(e.mode==='video'){const n=(e.results||[]).filter(r=>r.mode==='video'&&r.file).length;return n?`<div class=fx-save><b>From Kling video · ${n} cells</b><button class="btn pri" data-act=fxuseset data-v=video>Use in simulator · free</button></div>`:'';}
  const s=fxSet(e),n=s&&s.status==='DRAWN'&&Array.isArray(s.picked)?s.picked:[];
- if(n.length)return `<div class=fx-save><b>Keep these particles</b><button class="btn pri" data-act=fxuseset data-v=drawn>Use in simulator · free</button></div>`;
+ if(n.length)return `<div class=fx-save><b>Keep these reactions</b><button class="btn pri" data-act=fxuseset data-v=drawn>Use in simulator · free</button></div>`;
  return `<div class=fx-save><b>Or use the pack’s own stickers</b><span class=mut>Free. Nothing is drawn: the stickers of ${esc(e.pack_name||'the pack')} fly out as the particles.</span><button class="btn" data-act=fxuseset data-v=stickers>Use the pack’s stickers as the set</button></div>`}
 const fxPendingSet={eid:'',who:'fx',picked:null};
 function fxOpenSimulator(X,set,owners){const e=X.rec;if(typeof spEnter==='function'){spEnter({pack_id:e.pack_id,sticker_ids:owners.map(o=>o.sticker_id)});SP.entry=(SP.entry||0)+1;SP.set=set;SP.target=set.id;SP.eid='';SPL.detail[set.id]=set;spDraw();spBurstPreview(set.id);return}X.set=set;X.draw()}
