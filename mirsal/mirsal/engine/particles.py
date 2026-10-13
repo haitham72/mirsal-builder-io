@@ -485,6 +485,29 @@ def preview_webp(frames: np.ndarray, size: int = 256, fps: float = 30.0) -> byte
     return buf.getvalue()
 
 
+# ---- default sprite -----------------------------------------------------------------------------------------------------
+def default_sprite(px: int = 128) -> np.ndarray:
+    """A procedural fallback sprite (RGBA uint8): a soft four-point sparkle on transparency. Deterministic, free, no network.
+
+    Bank reactions start life with this while they have no drawn sprites yet (a person replaces it later through Generate more).
+    Pure numpy / OpenCV."""
+    px = int(px)
+    if px < 8:
+        raise ValueError("px must be at least 8")
+    yy, xx = np.mgrid[0:px, 0:px].astype(np.float64)
+    cx = cy = (px - 1) / 2.0
+    dx, dy = xx - cx, yy - cy
+    r = np.sqrt(dx * dx + dy * dy) / (px / 2.0)
+    glow = np.clip(1.0 - r, 0.0, 1.0) ** 2.2
+    arm = np.clip(1.0 - np.abs(dx) / (px * 0.045), 0.0, 1.0) * np.clip(1.0 - np.abs(dy) / (px * 0.42), 0.0, 1.0)
+    arm = np.maximum(arm, np.clip(1.0 - np.abs(dy) / (px * 0.045), 0.0, 1.0) * np.clip(1.0 - np.abs(dx) / (px * 0.42), 0.0, 1.0))
+    core = np.clip(1.0 - r / 0.16, 0.0, 1.0) ** 1.5
+    alpha = np.clip(glow * 0.55 + arm * 0.75 + core, 0.0, 1.0)
+    rgb = np.full((px, px, 3), 255.0)
+    rgba = np.dstack([rgb, alpha * 255.0])
+    return np.clip(rgba + 0.5, 0, 255).astype(np.uint8)
+
+
 # ---- lottie (optional web export; Telegram stays WebM) ---------------------------------------------------------------
 def export_lottie(p: ParticleParams, n_sprites: int = 1, size: int = 512) -> dict:
     """A Lottie JSON skeleton of one burst (web use only, optional third output).

@@ -32,7 +32,7 @@ ACT.spscope=el=>spEnter(el.dataset.g?{generation:spGid(el.dataset.g)}:{pack_id:e
 const spApproveHtml=scope=>`<div class=sp-line><span class=mut>Approve this batch as a pack first, so the particles have a sticker to live in</span><button class="btn pri" data-act=spapprove data-g=${esc(scope.generation)}>Approve as a pack</button></div>`;
 ACT.spapprove=async el=>{SP.pendingScope={generation:spGid(el.dataset.g)};await ACT.gadd({dataset:{g:el.dataset.g}})};
 async function spAfterPack(){if(!SP.pendingScope)return;const scope=SP.pendingScope;SP.pendingScope=null;await loadLib();spEnter(scope)}
-function spScopePicker(){return `<h2>Reactions for which sticker?</h2><div class=fx-packs>${(LIB.packs||[]).flatMap(p=>(p.stickers||[]).filter(st=>!((st.source||{}).particle_set)).map(st=>`<button class=fx-pack data-act=spscope data-p=${esc(p.id)} data-s=${esc(st.id)}>${media(st)}<b>${esc(st.name)}</b><small>${esc(p.name)}</small></button>`)).join('')}</div>`}
+function spScopePicker(act){return `<h2>Reactions for which sticker?</h2><div class=fx-packs>${(LIB.packs||[]).flatMap(p=>(p.stickers||[]).filter(st=>!((st.source||{}).particle_set)).map(st=>`<button class=fx-pack data-act=${act||'spscope'} data-p=${esc(p.id)} data-s=${esc(st.id)}>${media(st)}<b>${esc(st.name)}</b><small>${esc(p.name)}</small></button>`)).join('')}</div>`}
 
 /* ---------- which library stickers came from a batch (pure): the pack sticker of cell `index` of batch `gid`, a still preferred to an animated one */
 const spGid=v=>{const m=String(v==null?'':v).toUpperCase().match(/^G?(\d+)$/);return m?'G'+m[1].padStart(3,'0'):''};
@@ -166,8 +166,9 @@ setInterval(()=>{if(route_==='generate'&&!document.hidden)spSecSync()},2500);
 /* ---------- Library > Particles: every durable set as a card (docs/particles.md 5). Reads GET /api/particles; writes rename/assign/unassign/duplicate/delete/restore.
    The trash is listed (GET /api/particles/deleted): Restore is offered on the notice right after a delete AND from the "Deleted" list under the sets, long after. One set belongs to pack(s): the card says
    "used in: A, B" or "stand-alone", never per sticker. */
-const SPL={sets:null,busy:false,open:'',detail:{},pick:{},deleted:null,trash:null,poll:0};
-const spSetsForget=()=>{SPL.sets=null;SPL.detail={};SPL.open='';SPL.deleted=null;SPL.trash=null};
+const SPL={sets:null,busy:false,open:'',detail:{},pick:{},deleted:null,trash:null,poll:0,
+ view:null,bank:null,bankBusy:false,bankQ:'',bankSel:null,build:[]};
+const spSetsForget=()=>{SPL.sets=null;SPL.detail={};SPL.open='';SPL.deleted=null;SPL.trash=null;SPL.view=null;SPL.bank=null;SPL.bankQ='';SPL.bankSel=null;SPL.build=[]};
 const spCredits=n=>n==null||+n===0?'nothing spent yet':`about ${+n} credit${+n===1?'':'s'} spent`;
 function spSetCard(s){const cells=s.cells||[],picked=cells.filter(c=>c.picked),strip=picked.slice(0,8),used=s.used_in||[],open=SPL.open===s.id;
  return `<div class="ps-card${open?' open':''}" data-ps=${esc(s.id)}>
@@ -192,8 +193,71 @@ function spSetDetail(s){const d=SPL.detail[s.id],full=d&&d.id===s.id?d:s,cells=f
 function spLibHtml(){const sets=SPL.sets;
  if(!sets)return `<div class=pk-pt-load><div class=spin></div><span class=mut>Reading the particle sets…</span></div>`;
  const del=SPL.deleted?`<div class=ps-del><span>Deleted ${esc(SPL.deleted.name)}: it is in the trash, nothing is destroyed.</span><button class="btn sm" data-act=psrestore data-id=${esc(SPL.deleted.id)}>Restore</button></div>`:'',trash=spTrashHtml(SPL.trash);
- if(!sets.length)return `${del}<div class="card" style="text-align:center;padding:40px"><h2>No reaction sets yet</h2><p class=mut>Reactions live in stickers. Choose a sticker to create its reactions.</p><button class="btn pri" data-act=spopen>${ic('fx')} Make reactions</button></div>${trash}`;
- return `${del}<div class=ps-lib>${sets.map(spSetCard).join('')}</div><div class=row><button class="btn pri" data-act=spopen>${ic('fx')} Make reactions</button></div>${trash}`}
+ const create=SPL.view==='choose'?spCreateChooseHtml():SPL.view==='bank'?(SPL.bank?`<div data-rosbank>${spBankHtml()}</div>`:`<div class=fx-job><span class=spin></span> <span class=mut>Reading the bank…</span></div>`):SPL.view==='build'?spBuildHtml():SPL.view==='stickers'?spScopePicker('rosscope'):'';
+ const list=sets.length?`<div class=ps-lib>${sets.map(spSetCard).join('')}</div>`:'';
+ const empty=!sets.length&&!SPL.view?`${del}<div class="card" style="text-align:center;padding:40px"><h2>No reaction sets yet</h2><p class=mut>Create one from the bank or from your stickers.</p><button class="btn pri" data-act=roscreate>${ic('fx')} Create</button></div>${trash}`:'';
+ if(empty)return empty;
+ return `${del}${spLibHead()}${create}${list}${trash}`}
+const spBankSel=()=>SPL.bankSel||(SPL.bankSel=new Set());
+function spBankCounts(){const bank=SPL.bank||[];let f=0;for(const m of bank)if(m.state==='finished')f++;return{finished:f,unclaimed:bank.length-f}}
+function spLibHead(){const c=SPL.bank?spBankCounts():null;
+ return `<div class=ps-libh><h2>Reactions</h2>${c?`<span class=mut>${c.finished} finished · ${c.unclaimed} unclaimed</span>`:''}<span class=gspace></span>${SPL.view?`<button class=btn data-act=rosback>Back</button>`:`<button class="btn pri" data-act=roscreate>${ic('fx')} Create</button>`}</div>`}
+function spCreateChooseHtml(){
+ return `<div class=sp-modes><button class=sp-mode data-act=rosbank><b>Predefined</b><em>The emoji bank</em></button><button class=sp-mode data-act=rosstickers><b>Stickers</b><em>Your stickers</em></button></div>
+ <div class=mut>Predefined: finished and unclaimed bank reactions, built one by one or in batches. Stickers: reactions from your stickers, in the Studio.</div>`}
+function spBankList(){const bank=SPL.bank||[],q=(SPL.bankQ||'').trim().toLowerCase();
+ const list=(q?bank.filter(m=>(m.token+' '+m.emoji+' '+(m.motion||'')).toLowerCase().includes(q)):bank).slice(0,120);
+ return{list,total:bank.length}}
+function spBankCard(m){const sel=spBankSel(),on=sel.has(m.token),fin=m.state==='finished';
+ return `<button class="ps-emo${on?' on':''}" data-act=rosbankpick data-t="${esc(m.token)}" aria-pressed=${on} ${m.building?'disabled':''} title="${esc((m.motion||m.preset||'')+' · motion locked · '+(fin?'finished':m.building?'drawing':'unclaimed'))}"><span class=ps-glyph>${esc(m.emoji||'o')}</span><b>${esc(m.token)}</b><small class=mut>${fin?'finished':m.building?'drawing':esc(m.preset||'unclaimed')}</small></button>`}
+function spBankHtml(){const{list,total}=spBankList(),sel=spBankSel();
+ return `<div class=row><input type=search data-rosbankq placeholder="Search 1898 reactions..." value="${esc(SPL.bankQ)}" aria-label="Search the bank"></div>
+ <div class=ps-wall>${list.map(spBankCard).join('')||'<span class=mut>No match.</span>'}</div>
+ <small class=mut>Showing ${list.length} of ${total} · motion locked · a finished token rebuilds as a new take.</small>
+ <div class=row style="margin-top:10px"><button class="btn pri gbig" data-act=rosbankbuild ${sel.size?'':'disabled'}>${ic('fx')} Build${sel.size?` ${sel.size} reaction${sel.size===1?'':'s'}`:''}</button><span class=mut>One set per emoji, default sprite, free. Previews appear below for approval.</span></div>`}
+function spBuildCard(b){
+ const head=`<div class=ps-main><b>${esc(b.emoji||'o')} ${esc(b.token)}</b><small class=mut>${esc(b.preset||'')} · motion locked · ${esc(b.set_id||'starting…')}</small></div>`;
+ if(b.status==='ready')return `<div class=ps-card data-build=${esc(b.set_id)}><img src="${esc(b.preview)}" alt="" loading=lazy style="max-width:220px;border-radius:8px">${head}<div class=row><button class="btn pri sm" data-act=rosapprove data-id=${esc(b.set_id)}>Approve</button></div></div>`;
+ if(b.status==='error')return `<div class=ps-card data-build=${esc(b.token)}>${head}<div class=warn>${esc(b.error||'Could not build')}</div></div>`;
+ return `<div class=ps-card data-build=${esc(b.token)}>${head}<div class=fx-job><span class=spin></span> <span class=mut>Building preview…</span></div></div>`}
+function spBuildHtml(){const items=SPL.build||[],ready=items.filter(b=>b.status==='ready');
+ return `${ready.length>1?`<div class=row><button class="btn pri" data-act=rosapproveall>Approve all ${ready.length} ready</button></div>`:''}${items.length?`<div class=ps-lib>${items.map(spBuildCard).join('')}</div>`:'<span class=mut>Nothing building.</span>'}`}
+async function spBankSync(force){if(SPL.bankBusy||(SPL.bank&&!force))return;SPL.bankBusy=true;
+ try{const r=await api('/api/particles/bank');if(r.ok){SPL.bank=r.j.bank||[];spLibRefresh()}}finally{SPL.bankBusy=false}}
+function spBankRefresh(){const root=document.querySelector&&document.querySelector('[data-rosbank]');if(!root)return;
+ const wasQ=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.rosbankq!==undefined;
+ root.outerHTML=`<div data-rosbank>${spBankHtml()}</div>`;
+ if(wasQ){const inp=document.querySelector('[data-rosbankq]');if(inp){inp.focus();try{inp.setSelectionRange(inp.value.length,inp.value.length)}catch(e){}}}}
+document.addEventListener('input',ev=>{const t=ev.target;if(t&&t.dataset&&t.dataset.rosbankq!==undefined){SPL.bankQ=t.value;clearTimeout(SPL.bankT);SPL.bankT=setTimeout(spBankRefresh,250)}});
+ACT.roscreate=()=>{SPL.view='choose';spLibRefresh()};
+ACT.rosback=()=>{SPL.view=null;spLibRefresh()};
+ACT.rosbank=()=>{SPL.view='bank';spBankSync();spLibRefresh()};
+ACT.rosstickers=()=>{SPL.view='stickers';spLibRefresh()};
+ACT.rosscope=el=>{SPL.view=null;spEnter({pack_id:el.dataset.p,sticker_id:el.dataset.s||undefined});location.hash='#/generate';if(typeof GS!=='undefined')GS.tab='particles';if(typeof tick==='function'){try{tick(true)}catch(e){}}};
+ACT.rosbankpick=el=>{const sel=spBankSel(),t=el.dataset.t;if(sel.has(t))sel.delete(t);else{if(sel.size>=9){toast('At most 9 in one batch',1);return}sel.add(t)}spLibRefresh()};
+ACT.rosbankbuild=async el=>{const toks=[...spBankSel()];if(!toks.length)return;await spLibSync(true);
+ SPL.view='build';SPL.bankSel=new Set();
+ SPL.build=toks.map(t=>{const m=(SPL.bank||[]).find(x=>x.token===t)||{token:t};
+  const cover=(SPL.sets||[]).find(s=>((s.elements||[]).map(e=>String(e).toLowerCase())).includes(t));
+  return{token:t,emoji:m.emoji,preset:m.preset,params:m.params,motion:m.motion,set_id:(m.state==='finished'||!cover?null:cover.id),status:'starting',preview:null,error:null}});
+ spLibRefresh();
+ for(const b of SPL.build){
+  try{
+   if(!b.set_id){const r=await post('/api/particles',{from_request:'reactions for '+b.token,grid:'2x2'});if(!r.ok)throw new Error((r.j&&r.j.error)||'Could not start');b.set_id=r.j.id}
+   const d=await post(`/api/particles/${b.set_id}/default-sprite`,{});if(!d.ok)throw new Error((d.j&&d.j.error)||'No sprites');
+   const p=await post(`/api/particles/${b.set_id}/preview`,{preset:b.preset,params:b.params||{},size:256});if(!p.ok)throw new Error((p.j&&p.j.error)||'No preview');
+   b.preview=p.j.url;b.status='ready';
+  }catch(e){b.status='error';b.error=String((e&&e.message)||e)}
+  spLibRefresh()}
+ SPL.bank=null;spBankSync();spLibSync(true)};
+async function rosApproveItem(b){const r=await post(`/api/particles/${b.set_id}/render`,{preset:b.preset,params:b.params||{}});
+ if(!r.ok){b.status='error';b.error=(r.j&&r.j.error)||'Could not render';spLibRefresh();return false}
+ SPL.build=(SPL.build||[]).filter(x=>x!==b);toast(`Approved: ${b.token} is a finished reaction`);return true}
+ACT.rosapprove=async el=>{const b=(SPL.build||[]).find(x=>x.set_id===el.dataset.id);if(!b||b.status!=='ready')return;el.disabled=true;
+ await rosApproveItem(b);el.disabled=false;SPL.bank=null;spBankSync();spLibSync(true);if(!(SPL.build||[]).length)SPL.view=null;spLibRefresh()};
+ACT.rosapproveall=async el=>{el.disabled=true;
+ for(const b of [...(SPL.build||[])].filter(x=>x.status==='ready')){await rosApproveItem(b);spLibRefresh()}
+ el.disabled=false;SPL.bank=null;spBankSync();spLibSync(true);if(!(SPL.build||[]).length)SPL.view=null;spLibRefresh()};
 function spLibRefresh(){if(SP.set&&!SP.eid&&SP.alive())spDraw();if(typeof route_!=='undefined'&&route_==='library'&&typeof LIBTAB!=='undefined'&&LIBTAB==='particles'&&typeof RENDER!=='undefined'&&RENDER.library)RENDER.library();
  if(typeof route_!=='undefined'&&route_==='pack'&&typeof drawPack==='function')drawPack()}
 async function spLibSync(force){if(SPL.busy||(SPL.sets&&!force))return;SPL.busy=true;

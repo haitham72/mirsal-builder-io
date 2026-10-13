@@ -1339,6 +1339,9 @@ def make_handler(c: Console):
                     if method == "GET" and pid in ("emoji-motions", "reactions"):
                         # the generic 1800 wall (read-only emoji:animation map)
                         return self._json(200, {"motions": ps.emoji_motions(c.out, c.lib)})
+                    if method == "GET" and pid == "bank":
+                        # the bank with build state for Library > Reactions > Create (finished/unclaimed per token)
+                        return self._json(200, {"bank": ps.bank_states(c.out, c.lib)})
                     if method == "GET":
                         ps.settle(c.out, pid)                      # (a 404 for a missing set comes from here)
                         return self._json(200, ps.view(c.out, c.lib, pid))
@@ -1365,6 +1368,8 @@ def make_handler(c: Console):
                     return self._json(200, ps.preview(c.out, c.lib, pid, pack_id=body.get("pack_id"), preset=body.get("preset"), params=body.get("params") or {}, size=body.get("size", 256)))
                 if act == "export-lottie":                        # optional third output (web only): motion keyframes as Lottie JSON
                     return self._json(200, ps.export_lottie(c.out, c.lib, pid, preset=body.get("preset"), params=body.get("params") or {}))
+                if act == "default-sprite":                      # free instant fallback sprite for bank reactions with no drawn cells yet
+                    return self._json(200, ps.ensure_default_sprite(c.out, c.lib, pid, user=self.user["id"]))
                 if act == "render":                                # the final 512 px WebM for a pack, judged and stored under renders/ (only Telegram's own limits make it FAILED)
                     return self._json(200, ps.render(c.out, c.lib, pid, c.cfg, pack_id=body.get("pack_id"), preset=body.get("preset"), params=body.get("params") or {}, user=self.user["id"]))
                 if act == "add":                                   # rendered bursts into the pack as animated stickers tagged with the pack's emoji

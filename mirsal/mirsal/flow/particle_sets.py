@@ -1715,3 +1715,72 @@ def adopt_emoji_map(out: Path, lib, user: str = "python") -> list[dict]:
             _write(out, s)
         made.append({"set": s["id"], "token": token, "preset": mo["preset"]})
     return made
+
+
+def ensure_default_sprite(out: Path, lib, pid: str, user: str = "local") -> dict:
+    """A bank reaction with no drawn sprites yet gets the procedural sparkle as its first picked cell (free, instant).
+
+    Idempotent: a set with any picked cell that still has its picture keeps it and nothing is written. Otherwise the sparkle
+    (`engine.particles.default_sprite`) is stored as `cells/cNN.png` and picked, so preview/render work at once; a person
+    replaces it later through Generate more. History `DEFAULT_SPRITE`."""
+    import io
+    from PIL import Image
+    from ..engine import particles as _particles
+    s = migrate(out, lib, pid)
+    d = _dir(out, pid)
+    have = [c for c in s.get("cells") or []
+            if c.get("picked") and c.get("file") and (d / c["file"]).is_file()]
+    if have:
+        return {**view(out, lib, pid), "default": False}
+    img = _particles.default_sprite()
+    buf = io.BytesIO()
+    Image.fromarray(img, "RGBA").save(buf, "PNG")
+    data = buf.getvalue()
+    w, h = _png_size(data)
+    with _LOCK:
+        s = read(out, pid)
+        have = [c for c in s.get("cells") or []
+                if c.get("picked") and c.get("file") and (d / c["file"]).is_file()]
+        if have:
+            return {**view(out, lib, pid), "default": False}
+        n = max([int(c.get("n") or 0) for c in s.get("cells") or []] + [0]) + 1
+        (d / "cells").mkdir(exist_ok=True)
+        atomic.write_bytes(d / f"cells/c{n:02d}.png", data)
+        s.setdefault("cells", []).append({"n": n, "cell": 0, "file": f"cells/c{n:02d}.png", "status": "READY",
+                                          "warnings": [], "key": "spark", "sprite": True, "w": w, "h": h,
+                                          "picked": True, "created": round(time.time(), 3), "default": True})
+        hist(s, user, "DEFAULT_SPRITE", "the procedural sparkle until drawn sprites replace it", {"cell": n})
+        _write(out, s)
+    return {**view(out, lib, pid), "default": True}
+
+
+def bank_states(out: Path, lib) -> list[dict]:
+    """The emoji bank with per-token build state for Library > Reactions > Create (read-only, free).
+
+    Every motion from `emoji_motions()` plus: `state` (`finished` when a covering set holds a READY render, else
+    `unclaimed`), `building` (a covering set is drawing), `set_id` (the covering set to reuse: the finished one,
+    else the newest covering one, else null) and `n_picked` (its picked sprites, so the UI can say "has sprites").
+    A set covers the tokens in its `elements`."""
+    covering: dict[str, list[str]] = {}
+    rows = {r["id"]: r for r in list_sets(out, lib)}
+    for r in rows.values():
+        for t in r.get("elements") or []:
+            covering.setdefault(str(t).strip().lower(), []).append(r["id"])
+    full: dict[str, dict] = {}
+    for pid in {pid for pids in covering.values() for pid in pids}:
+        try:
+            full[pid] = read(out, pid)
+        except (SetError, OSError, ValueError):
+            continue
+    out_rows = []
+    for m in emoji_motions(out, lib):
+        pids = covering.get(m["token"], [])
+        recs = [(pid, full.get(pid)) for pid in pids if pid in full]
+        ready = next((pid for pid, s in recs
+                      if any((r or {}).get("status") == "READY" for r in (s.get("renders") or []))), None)
+        newest = max(pids, key=lambda pid: ((rows[pid].get("created") or 0), pid)) if pids else None
+        picked = max([rows[pid].get("n_picked") or 0 for pid in pids] + [0])
+        building = any(bool(rows[pid].get("drawing")) for pid in pids)
+        out_rows.append({**m, "state": "finished" if ready else "unclaimed", "building": building,
+                         "set_id": ready or newest, "n_picked": picked})
+    return out_rows
