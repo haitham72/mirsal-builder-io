@@ -56,7 +56,7 @@ RENDER.home=async()=>{await loadLib();const ps=LIB.packs,st=ps.flatMap(p=>p.stic
   </div></div>
  <div class=hm-tools>
   <button class=hm-tool data-act=hmai>${hmIc('ai')}<div><h3>Create with AI</h3><p>Start with a little idea</p></div>${ic('chev')}</button>
-  <button class=hm-tool data-act=nav data-to=generate>${hmIc('gen')}<div><h3>Sticker Studio</h3><p>Make every detail yours</p></div>${ic('chev')}</button>
+  <button class=hm-tool data-act=railcreate data-to=generate>${hmIc('gen')}<div><h3>Sticker Studio</h3><p>Make every detail yours</p></div>${ic('chev')}</button>
   ${canImport?`<button class=hm-tool data-act=impackopen>${hmIc('upload')}<div><h3>Bring your own</h3><p>Start from an existing sheet</p></div>${ic('chev')}</button>`:`<button class=hm-tool data-act=nav data-to=create>${hmIc('create')}<div><h3>From a photo</h3><p>Turn a picture into a sticker</p></div>${ic('chev')}</button>`}
   <button class=hm-tool data-act=nav data-to=library>${hmIc('lib')}<div><h3>Your library</h3><p>Every sticker, every pack</p></div>${ic('chev')}</button></div>
  <section class=hm-disc id=hm-disc><div class=hm-head><div><h2>Made by you. Ready to express.</h2><p>Your characters, your reactions, your little universe.</p></div><button class=hm-link data-act=nav data-to=library>View all packs ${ic('chev')}</button></div>

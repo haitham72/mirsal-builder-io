@@ -307,21 +307,19 @@ ACT.nav = (el) => {
 /* the rail's Create is always a NEW, empty start (Haitham, 2026-10-14: "create should be empty and new"): the Studio without the last session's
    batches (it used to reopen the last batch and its green-screen sheet), the chat without the last conversation. The work is not lost: Earlier
    batches, the chat list and Open in Studio still reopen it, and the Chat | Studio tabs inside Create keep the current project. */
-ACT.railcreate = () => {
-  if (CTAB === 'generate') {
-    if (typeof SES !== 'undefined') {
-      SES = { prompt: '', gens: [], off: [], pack: '' };
-      if (typeof saveSes === 'function') saveSes();
-      if (typeof glast !== 'undefined') glast = '';
-    }
+ACT.railcreate = (el) => {
+  /* both sides start new, whichever opens (Haitham, 2026-10-14: opening Create on Chat left the Studio tab on the last batch) */
+  if (typeof SES !== 'undefined') {
+    SES = { prompt: '', gens: [], off: [], pack: '' };
+    if (typeof saveSes === 'function') saveSes();
+    if (typeof glast !== 'undefined') glast = '';
+  }
+  if (typeof ACT.agnew === 'function') ACT.agnew(); /* a new chat: no session, the last one forgotten; it sets #/agent without a hashchange */
+  const to = (el && el.dataset && el.dataset.to) || CTAB;
+  if (to === 'generate') {
     if (location.hash === '#/studio') route();
     else location.hash = '#/studio';
-    return;
-  }
-  if (typeof ACT.agnew === 'function') {
-    ACT.agnew(); /* a new chat: no session, the last one forgotten; it sets #/agent without a hashchange */
-    if (route_ !== 'agent') route();
-  } else location.hash = '#/agent/new';
+  } else if (route_ !== 'agent' || location.hash !== '#/agent') route();
 };
 
 ACT.rme = () => {
