@@ -3,12 +3,14 @@
 **For implementation by another LLM, on branch `handpicked-lottie`.** A new, separate logic beside Reaction effects: no emoji bank, no Windows/iOS glyphs,
 no motion presets (burst/fountain/vortex/rain/confetti). Every particle is a Lottie animation. Read first: `docs/reaction/16-16-handpicked-lottie-files-origin-morph.md`
 (the drop zone, already built), `docs/reaction/14-13-reaction-effects-one-emoji-flying-as-itself-t.md` (the settings table), `mirsal/mirsal/engine/particles.py`
-(`ParticleParams`, `trajectories`), `mirsal/mirsal/engine/lottie.py` (`_layers`, the slot export). The old Reaction effects screen stays untouched (rule: no action disappears).
+(`ParticleParams`, `trajectories`), `mirsal/mirsal/engine/lottie.py` (`_layers`, the slot export).
+
+**Two styles, both permanent (Haitham 2026-10-14): "Emoji" style (today's Reaction effects: the emoji bank, motion presets, slot Lottie export) and "Lottie" style (this plan).** Neither retires the other; Emoji style keeps every behaviour, route and test it has now. They share the engine (`ParticleParams`, `trajectories`) and the 512 viewer; every new engine field defaults to off, so Emoji style output is byte-identical.
 
 ## Fixed decisions (Haitham)
 - **Source:** every `*.json` Lottie in `mirsal/lottie/` (`MIRSAL_LOTTIE_DIR`), 20-80 files, imported by file name (the name is the id). The existing
   `handpicked_files()` scan (size cap, Lottie check) is reused. Nothing else is listed.
-- **Screen:** a grid of the files by name (`#/lottie`, rail entry "Lottie reactions"); a click opens the editor on that file: the 512 x 512 viewer
+- **Screen:** the Reaction effects screen (`#/reactions`) gets a **Style: Emoji | Lottie** switch at the top (remembered per browser; Emoji is the default so nothing moves for today's users). Lottie shows a grid of the files by name; a click opens the editor on that file: the 512 x 512 viewer
   (viewer = export, the Border checkbox kept) and the settings.
 - **Default settings:** one neutral default (the `ParticleParams` defaults: burst from the centre, no vortex, no motion preset), **2 s** clip
   (`REACTION_SECONDS`), every current slider kept (Speed, Gravity, Swirl, Rotation, Amount, Spread, Fade out start / duration / variation, Size,
@@ -44,7 +46,7 @@ no motion presets (burst/fountain/vortex/rain/confetti). Every particle is a Lot
    file under `console/vendor/`, no CDN at runtime) and play the exported JSON itself in the 512 viewer, so viewer = export byte for byte.
    (Haitham may choose otherwise; the alternative is a server renderer such as rlottie, a new native dependency.)
 7. Docs: a new section file `docs/reaction/17-...lottie-reactions.md` + its line in `docs/reaction.md`; the routes in `docs/http_route_inventory.md`
-   and `docs/api-parts/`; `ui_baseline.json` for the new rail entry. Tests: engine numbers only (children origins/spawns, flip scale sign, pulse,
+   and `docs/api-parts/`; `ui_baseline.json` for the new Style switch (an added action, nothing renamed or retired). Tests: engine numbers only (children origins/spawns, flip scale sign, pulse,
    speed spread, morph layer timing, precomp ids unique, `sr`), one route test, a JS test for the grid/editor. Narrowest runs only.
 
 ## Open (ask Haitham only if blocking)
