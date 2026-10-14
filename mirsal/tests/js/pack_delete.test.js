@@ -40,3 +40,19 @@ test('the text is plain (confirmDlg escapes it once) and the pack screen shows a
   assert.match(src, /data-act=pkdel[^>]*>\$\{ic\('trash'\)\} Delete pack</, 'a label, not only an icon');
   assert.match(src, /ACT\.pkdel=.*pkDelText\(/, 'the confirmation is the one that counts');
 });
+
+// The pack screen (Haitham, 2026-10-14): Open in Studio | Download .zip | Send to Telegram | ⋯; everything else moved into ⋯; one group per batch.
+test('the header is Open in Studio, Download .zip, Send to Telegram, then ⋯ with every other pack action', () => {
+  const head = src.slice(src.indexOf('<div class=pk-acts>'), src.indexOf('Delete pack</button>'));
+  const order = ['data-act=pkstudio', 'data-act=pkzip data-l=1', 'data-act=tgsend', 'class=gh-more'].map(k => head.indexOf(k));
+  assert.ok(order.every(i => i >= 0) && order.every((v, i) => !i || v > order[i - 1]), 'the four in this order');
+  const more = head.slice(head.indexOf('class=gh-more'));
+  for (const k of ['pkrename', 'trShareBtn', 'colBtn', 'pkpreview', 'pkzip data-l=0', 'data-to=chat', 'pkadd']) assert.ok(more.includes(k), k + ' is in ⋯');
+});
+
+test('stickers are grouped per batch, in the order of their first sticker, the ones from outside the Studio last', () => {
+  const { pkGroups } = new Function(statement('const pkGenOf=') + '\n' + statement('function pkGroups(') + '\nreturn {pkGroups};')();
+  const g = pkGroups([st('a', { generation: 'G146', index: 1 }), st('b'), st('c', { generation: '12', index: 2 }), st('d', { generation: 'G146', index: 3 })]);
+  assert.deepEqual(g.map(x => [x.gen, x.items.map(s => s.id).join('')]), [['G146', 'ad'], ['G012', 'c'], ['', 'b']]);
+  assert.match(src, /data-act=pkgdel[^>]*>\$\{ic\('trash'\)\} Remove \$\{g\.gen\?'this batch':'these'\} from the pack/);
+});

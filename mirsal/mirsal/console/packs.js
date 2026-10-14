@@ -10,25 +10,29 @@ function drawPack(){
  const{stickers,reactions}=pkSplit(p);
  const n=stickers.length,nr=reactions.length,total=n+nr,anim=stickers.filter(s=>s.type==='animated').length;
  const owner=typeof ME==='undefined'||!ME||ME.role==='owner',tab=PKTAB.id===p.id?PKTAB.t:'stickers';
- /* the pack screen (redesign phase 8, mockup pack.html): one header (cover, name, counts; Send to Telegram first, then Preview, Download, Try it in a chat, Add;
-    ⋯ Rename, Share, Export to collection, Delete), then two tabs: Stickers and Particles. Every button is the one it always was. */
+ /* the pack screen (Haitham, 2026-10-14): one header (cover, name, counts; Open in Studio, Download .zip, Send to Telegram; ⋯ Rename, Make public,
+    Export to collection, Preview, Full-quality zip, Try it in a chat, Add sticker, Delete pack), then two tabs: Stickers (one group per batch, each
+    with its own ⋯: Open in Studio, Remove this batch from the pack) and Reactions. Every button is the one it always was, only moved. */
+ const groups=pkGroups(stickers),gens=groups.map(g=>g.gen).filter(Boolean);
  el.innerHTML=`<div class="page pk-page">
   <nav class=pm-crumbs aria-label="Where you are"><button data-act=nav data-to=library>Library</button><i>›</i><span>${esc(p.name)}</span></nav>
   <header class=pk-head><div class=cover>${coverMedia(p)}</div>
    <div class=pk-ttl><h1>${esc(p.name)}</h1><small>${n} sticker${n===1?'':'s'}${anim?` · ${anim} animated`:''}${nr?` · ${nr} reaction${nr===1?'':'s'}`:''} · a Telegram set takes up to 120</small></div>
-   <div class=pk-acts>${owner?`<button class="btn pri" data-act=tgsend ${total?'':'disabled'}>${ic('telegram')} Send to Telegram</button>`:''}
-    <button class=btn data-act=pkpreview ${total?'':'disabled'}>${ic('eye')} Preview</button>
-    ${total?`<button class=btn data-act=pkzip data-l=1 title="Every sticker file of this pack in one zip, compressed small (animated: the whole clip in 30 frames or fewer, ~20 KB each; crf and size per file are in manifest.json): .webm for the animated ones, .png / .webp for the static ones, a grey silhouette PNG beside each animated one ({its name}_grey.png), and a manifest.json">${ic('download')} Download .zip</button><button class=link data-act=pkzip data-l=0 title="The same zip with the full-size animation files">full quality</button>`:`<button class=btn disabled>${ic('download')} Download .zip</button>`}
-    <button class=btn data-act=nav data-to=chat title="Try the stickers in a phone chat preview">${ic('chat')} Try it in a chat</button>
-    <button class=btn data-act=pkadd>${ic('plus')} Add sticker</button>
+   <div class=pk-acts><button class="btn pri" data-act=pkstudio ${gens.length?'':'disabled'} title="${gens.length?`Open this pack's batch${gens.length===1?'':'es'} (${gens.join(', ')}) in the Studio`:'No sticker of this pack came from a Studio batch'}">${ic('gen')} Open in Studio</button>
+    ${total?`<button class=btn data-act=pkzip data-l=1 title="Every sticker file of this pack in one zip, compressed small (animated: the whole clip in 30 frames or fewer, ~20 KB each; crf and size per file are in manifest.json): .webm for the animated ones, .png / .webp for the static ones, a grey silhouette PNG beside each animated one ({its name}_grey.png), and a manifest.json">${ic('download')} Download .zip</button>`:`<button class=btn disabled>${ic('download')} Download .zip</button>`}
+    ${owner?`<button class=btn data-act=tgsend ${total?'':'disabled'}>${ic('telegram')} Send to Telegram</button>`:''}
     <details class=gh-more><summary class="btn" aria-label="More for this pack" title="More for this pack">⋯</summary><div class=gh-pop role=menu>
      <button class=btn data-act=pkrename>${ic('edit')} Rename</button>${total&&typeof trShareBtn==='function'?trShareBtn(p.id):''}${colBtn('pack',p.id,total,p.name)}
+     <button class=btn data-act=pkpreview ${total?'':'disabled'}>${ic('eye')} Preview</button>
+     <button class=btn data-act=pkzip data-l=0 ${total?'':'disabled'} title="The same zip with the full-size animation files">${ic('download')} Full-quality zip</button>
+     <button class=btn data-act=nav data-to=chat title="Try the stickers in a phone chat preview">${ic('chat')} Try it in a chat</button>
+     <button class=btn data-act=pkadd>${ic('plus')} Add sticker</button>
      <button class="btn dng" data-act=pkdel title="Move this pack to the trash. You can restore it, or delete it for good, from Settings, Trash.">${ic('trash')} Delete pack</button></div></details></div></header>
   <div class="gseg pk-tabs" role=tablist aria-label="This pack"><button type=button role=tab data-act=pktab data-t=stickers aria-pressed=${tab==='stickers'}>Stickers <small>${n}</small></button><button type=button role=tab data-act=pktab data-t=particles aria-pressed=${tab==='particles'}>Reactions</button></div>
   ${tab==='particles'?pkPsHtml(p):`  <div class=row><span class=mut>Click a sticker to view it. Drag to reorder, or drop one on another pack in the Packs column to move it. Tick the square or drag a box to select several (Shift adds, Ctrl un-selects).</span></div>${selBarHtml(n)}
-   ${n?`<div class="grid selgrid ${SEL.size?'selmode':''}" id=pkgrid>${stickers.map(s=>`<div class="cell ${s.id===p.cover?'cov':''} ${SEL.has(selKey(p.id,s.id))?'sel':''}" draggable=true data-act=stview data-id=${s.id} title="Click to view, drag to reorder"><span class="selbox ${SEL.has(selKey(p.id,s.id))?'on':''}" data-act=lsel data-p=${p.id} data-id=${s.id} title="Select"></span>${s.id===p.cover?'<span class=badge2>cover</span>':''}${ptBadge(p.id,s.id)}${media(s)}
+   ${n?`<div class="selgrid pk-bybatch ${SEL.size?'selmode':''}" id=pkgrid>${groups.map(g=>pkGroupHead(g)+`<div class=grid>${g.items.map(s=>`<div class="cell ${s.id===p.cover?'cov':''} ${SEL.has(selKey(p.id,s.id))?'sel':''}" draggable=true data-act=stview data-id=${s.id} title="Click to view, drag to reorder"><span class="selbox ${SEL.has(selKey(p.id,s.id))?'on':''}" data-act=lsel data-p=${p.id} data-id=${s.id} title="Select"></span>${s.id===p.cover?'<span class=badge2>cover</span>':''}${ptBadge(p.id,s.id)}${media(s)}
     <div class=hov><button data-act=stview data-id=${s.id} title=Preview>${ic('eye')}</button><button data-act=stedit data-id=${s.id} title="${(s.source&&s.source.generation)?'Edit in the Studio (text, emoji; image and animation together)':s.type==='static'?'Edit a copy in the editor':'Edit: add text or emoji, trim'}">${ic('edit')}</button>${s.type==='animated'?`<button data-act=stanim data-id=${s.id} title="Timeline (trim, frame rate, export)">${ic('play')}</button>`:''}<button data-act=stcover data-id=${s.id} title="Set as cover">${ic('star')}</button><button data-act=stdel data-id=${s.id} title=Delete>${ic('trash')}</button></div>
-    <div class=cap data-act=stname data-id=${s.id} title="Rename / change emoji">${esc(s.emoji)} ${esc(s.name)} · ${s.kb}KB</div></div>`).join('')}</div>`
+    <div class=cap data-act=stname data-id=${s.id} title="Rename / change emoji">${esc(s.emoji)} ${esc(s.name)} · ${s.kb}KB</div></div>`).join('')}</div></section>`).join('')}</div>`
    :nr?'':`<div class=card style="text-align:center;padding:40px"><h2>This pack is empty</h2><p class=mut>Make stickers in the Studio, or create one from a photo.</p><button class="btn pri" data-act=pkadd>${ic('plus')} Add sticker</button> <button class=btn data-act=nav data-to=generate>${ic('gen')} Generate</button></div>`}
    ${nr?`<section class=pk-reactions><div class=pk-ps-h><h2>${ic('fx')} Reactions in this pack</h2></div><div class="grid" id=pkreactions>${reactions.map(s=>`<div class="cell" data-act=stview data-id=${s.id} title="Reaction burst: click to view"><span class=badge2>reaction</span>${media(s)}
     <div class=hov><button data-act=stview data-id=${s.id} title=Preview>${ic('eye')}</button><button data-act=stdel data-id=${s.id} title=Delete>${ic('trash')}</button></div>
@@ -74,6 +78,27 @@ async function colWatch(id,tries=0){let r={ok:false,status:0,j:{}};try{r=await a
  if(r.status===404||tries>720)return;setTimeout(()=>colWatch(id,tries+1),2500)}
 const sOf=id=>packById(PACK_ID).stickers.find(s=>s.id===id);
 async function pkUpdate(body,msg){const r=await post('/api/packs/'+PACK_ID,body);if(!r.ok)return toast(r.j.error,1);await loadLib();drawPack();if(msg)toast(msg)}
+/* one group per batch (Haitham, 2026-10-14): the stickers of each Studio batch together, in the pack's order of their first sticker; the ones made
+   outside the Studio (editor, imports) are one last group. A group's ⋯ opens that batch in the Studio or removes its stickers from this pack. */
+const pkGenOf=s=>{const g=s&&s.source&&s.source.generation;const n=g?String(g).replace(/\D/g,''):'';return n?'G'+n.padStart(3,'0'):''};
+function pkGroups(stickers){const by=new Map();stickers.forEach(s=>{const k=pkGenOf(s);if(!by.has(k))by.set(k,{gen:k,items:[]});by.get(k).items.push(s)});
+ const own=by.get('');by.delete('');return[...by.values(),...(own?[own]:[])]}
+function pkGroupHead(g){const n=g.items.length;
+ return `<section class=pk-grp data-g="${esc(g.gen)}"><div class=pk-grph><b>${g.gen?`Batch ${esc(g.gen)}`:'Made outside the Studio'}</b><small class=mut>${n} sticker${n===1?'':'s'}</small>
+  <details class=gh-more><summary class="btn sm" aria-label="More for this batch" title="More for this batch">⋯</summary><div class=gh-pop role=menu>
+   ${g.gen?`<button class=btn data-act=pkgstudio data-g="${esc(g.gen)}">${ic('gen')} Open in Studio</button>`:''}
+   <button class="btn dng" data-act=pkgdel data-g="${esc(g.gen)}" title="Delete these ${n} sticker${n===1?'':'s'} from this pack; the batch itself stays in the Studio">${ic('trash')} Remove ${g.gen?'this batch':'these'} from the pack</button></div></details></div>`}
+/* Open in Studio: every batch of the pack (or one group's) in the Studio, the same session shape as a sticker's Open in Studio (studio-animate.js openstudio) */
+async function pkOpenStudio(gens){const ids=gens.map(g=>+String(g).replace(/\D/g,'')).filter(Boolean);if(!ids.length)return;
+ const r=await api('/api/generations/'+ids[0]);if(!r.ok)return toast('That batch is not available any more',1);
+ SES={prompt:r.j.prompt||'',gens:ids,off:[],pack:''};saveSes();GS.tab=(r.j.stickers||[]).some(t=>t.anim_status==='READY')?'anim':'stickers';glast='';location.hash='#/studio'}
+ACT.pkstudio=()=>{const p=packById(PACK_ID);if(p)pkOpenStudio(pkGroups(pkSplit(p).stickers).map(g=>g.gen).filter(Boolean))};
+ACT.pkgstudio=el=>pkOpenStudio([el.dataset.g]);
+ACT.pkgdel=el=>{const p=packById(PACK_ID);if(!p)return;const g=pkGroups(pkSplit(p).stickers).find(x=>x.gen===el.dataset.g);if(!g)return;
+ const items=g.items.map(s=>({pack_id:p.id,id:s.id})),n=items.length;
+ confirmDlg(`Remove ${g.gen?`batch ${g.gen}`:'these stickers'} from “${p.name}”? Its ${n} sticker${n===1?'':'s'} leave this pack (this cannot be undone); ${g.gen?'the batch itself stays in the Studio.':'nothing else changes.'}`,async()=>{
+  const r=await post('/api/stickers/delete',{items});if(!r.ok)return toast(r.j.error,1);
+  items.forEach(x=>SEL.delete(selKey(x.pack_id,x.id)));await loadLib();drawPack();toast(`Removed ${r.j.deleted} sticker${r.j.deleted===1?'':'s'} from the pack`)})};
 ACT.pkadd=()=>{Ed.targetPack=PACK_ID;location.hash='#/create'};
 ACT.pkrename=()=>askText('Rename pack',packById(PACK_ID).name,n=>pkUpdate({name:n},'Renamed'));
 /* what Delete pack will do, said before it is done (plain text: confirmDlg escapes it): the pack goes to the TRASH with its stickers and files untouched (Settings > Trash restores it or deletes it for good, flow/purge.py); the stickers that came from a batch also stay in that batch */

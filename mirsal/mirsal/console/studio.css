@@ -769,6 +769,8 @@ button.logo{border:0;padding:0;cursor:pointer;background:none}button.logo:hover 
 .pwlead{display:flex;align-items:center;gap:6px;margin:8px 0 2px;font-size:var(--fs-s)}   /* Add to a pack: Assign as parent (generate.js gadd) */
 /* drag-to-select starts only inside the sticker grid (app.js): the grid shows where (a little room around the stickers, a crosshair over its gaps) */
 .grid.selgrid{padding:8px;margin:-8px;border-radius:var(--r-m);cursor:crosshair}.grid.selgrid .cell{cursor:pointer}
+.pk-bybatch{display:flex;flex-direction:column;gap:14px;cursor:crosshair}.pk-bybatch .cell{cursor:pointer}
+.pk-grp{padding:12px 14px;border-radius:var(--r-l);background:var(--glass);box-shadow:inset 0 0 0 1px var(--aline)}.pk-grph{display:flex;align-items:center;gap:8px;margin-bottom:10px}.pk-grph b{font-size:var(--fs-m)}.pk-grph .gh-more{margin-left:auto}
 .lib-bypack{display:flex;flex-direction:column;gap:14px;cursor:crosshair}.lib-bypack .cell{cursor:pointer}
 .lib-pk{padding:12px 14px;border-radius:var(--r-l);background:var(--glass);box-shadow:inset 0 0 0 1px var(--aline)}.lib-pkh{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}.lib-pkh b{font-size:var(--fs-m)}.lib-pkh .link{margin-left:auto}
 .crow.sub .pkmerge{margin-left:auto;font-size:var(--fs-xs);white-space:nowrap}   /* Library: fold a group's pack into its parent (app.js pkmerge) */
