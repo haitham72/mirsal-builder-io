@@ -81,8 +81,9 @@ function rxAgo(ts){
 const rxPlural=(n,w)=>`${n} ${w}${n===1?'':'s'}`;
 
 /* ---------- views ---------- */
-/* the hover reaction leaves from the tile's right edge, like Telegram's: the burst's own origin (a fountain starts low, rain at the top) sits on that edge */
-function rxFxStyle(par){const [ox,oy]=(par&&par.origin)||[.5,.5];return `width:${RXHOV}px;height:${RXHOV}px;left:calc(100% - ${Math.round(ox*RXHOV)}px);top:calc(50% - ${Math.round(oy*RXHOV)}px)`}
+/* the hover reaction plays as Telegram plays one: the burst's own origin (a fountain starts low, rain at the top) sits on the sticker's
+   bottom-right, 90% across and 90% down (Haitham, 2026-10-14) */
+function rxFxStyle(par){const [ox,oy]=(par&&par.origin)||[.5,.5];return `width:${RXHOV}px;height:${RXHOV}px;left:calc(90% - ${Math.round(ox*RXHOV)}px);top:calc(90% - ${Math.round(oy*RXHOV)}px)`}
 /* the hover's own preview: the whole burst scaled into its square (fit), never cut at its edges (Haitham, 2026-10-14) */
 const rxHovKey=t=>rxKey(rxFor(t))+'|fit';
 function rxTile(m){
@@ -133,24 +134,27 @@ function rxVersions(k){
  const vs=rxSaved(k.token);if(!vs.length)return '<small class=mut>not saved yet</small>';
  return `<label class=rx-ver><span class=mut>Saved</span><select data-rxver aria-label="Saved versions">${k.ver?'':'<option value="" selected>new, not saved</option>'}`+
   `${vs.map((r,i)=>`<option value="${esc(r.id)}"${r.id===k.ver?' selected':''}>v${vs.length-i} · ${esc(rxAgo(r.created))}</option>`).join('')}</select></label>`}
-/* Presets: Save as new, Update the loaded one, Load (this motion's first), Remove */
-function rxPresetMenu(k,m){
- const ps=RXS.presets||[],mo=k.preset||m.preset,own=ps.filter(p=>p.motion===mo),rest=ps.filter(p=>p.motion!==mo),cur=ps.find(p=>p.id===k.presetId);
- const item=(p,act,cls='btn')=>`<button class="${cls}" data-act=${act} data-id="${esc(p.id)}">${esc(p.name)} <small class=mut>${esc(p.motion||'')}</small></button>`;
+/* the presets as chips in the editor's foot (this motion's first): a click loads one; Presets ▾ then acts on the picked one (Haitham, 2026-10-14) */
+function rxPresetChips(k,m){
+ const ps=RXS.presets||[],mo=k.preset||m.preset,list=[...ps.filter(p=>p.motion===mo),...ps.filter(p=>p.motion!==mo)];
+ return list.map(p=>`<button class="btn sm rx-chip${p.id===k.presetId?' on':''}" data-act=rxpload data-id="${esc(p.id)}" aria-pressed=${p.id===k.presetId} title="${esc(p.name)} · ${esc(p.motion||'')}">${esc(p.name)}</button>`).join('')}
+/* Presets ▾: Save as new preset | Update and Remove the picked one */
+function rxPresetMenu(k){
+ const cur=(RXS.presets||[]).find(p=>p.id===k.presetId);
  return `<details class="gh-more rx-pmenu"><summary class=btn aria-label="Presets">Presets ▾</summary><div class=gh-pop role=menu>`+
-  `<button class=btn data-act=rxsave>Save as new preset</button>${cur?`<button class=btn data-act=rxpupd data-id="${esc(cur.id)}">Update “${esc(cur.name)}”</button>`:''}`+
-  `${ps.length?`<div class=rx-pm-h>Load</div>${[...own,...rest].map(p=>item(p,'rxpload')).join('')}<div class=rx-pm-h>Remove</div>${ps.map(p=>item(p,'rxpdel','btn dng')).join('')}`:'<small class=mut>No preset saved yet</small>'}</div></details>`}
+  `<button class=btn data-act=rxsave>Save as new preset</button>`+
+  `${cur?`<button class=btn data-act=rxpupd data-id="${esc(cur.id)}">Update “${esc(cur.name)}”</button><button class="btn dng" data-act=rxpdel data-id="${esc(cur.id)}">Remove “${esc(cur.name)}”</button>`:'<small class=mut>Pick a preset to update or remove it</small>'}</div></details>`}
 function rxEditor(){
  const k=RXS.ek;if(!k)return '<div data-rxed></div>';const m=rxRow(k.token),cur=k.ver&&rxSaved(k.token).find(r=>r.id===k.ver);
  return `<section class=rx-ed data-rxed><div class=rx-stage data-rxstage>${rxStage(k)}</div><div class=rx-ctl>
-  <div class=rx-h><span class=rx-g>${esc(m.emoji)}</span><b>${esc(m.token)}</b>${rxVersions(k)}<button class=link data-act=rxclose aria-label="Close">${ic('x')}</button></div>
+  <div class=rx-h><span class=rx-g>${esc(m.emoji)}</span><b>${esc(m.token)}</b>${rxVersions(k)}${cur?`<button class="btn sm" data-act=rxdl data-u="${esc(cur.url)}" data-n="${esc(k.token+' '+cur.id)}" title="Download this version's Lottie">${ic('download')} Lottie</button>`:''}<button class=link data-act=rxclose aria-label="Close">${ic('x')}</button></div>
   ${m.motion?`<small class=mut>${esc(m.motion)}</small>`:''}
   <div class=rx-groups>
    ${rxGroup('Simulation','sim',true,rxMotion(k,m)+RXSIM.map(o=>rxSlider(k,o)).join(''))}
    ${rxGroup('Shape','shape',true,RXO.map(o=>rxSlider(k,o)).join('')+'<small class=mut>Hue 0 keeps the emoji\'s own colours.</small>')}
   </div>${k.err?`<span class=fx-warn>${esc(k.err)}</span>`:''}
   <div class=rx-foot><button class="btn pri" data-act=rxcreate ${k.busy?'disabled':''}>${k.busy?'<span class=spin></span> Creating…':'Create reaction'}</button>`+
-  `${cur?`<button class=btn data-act=rxdl data-u="${esc(cur.url)}" data-n="${esc(k.token+' '+cur.id)}">${ic('download')} Lottie</button>`:''}<span class=sp></span>${rxPresetMenu(k,m)}</div></div></section>`}
+  `<span class=rx-chips>${rxPresetChips(k,m)}</span><span class=sp></span>${rxPresetMenu(k)}</div></div></section>`}
 /* Animation presets: the saved presets by motion, each with its preview; Open / Apply to selected / ×, and a random preset of each emoji's own motion for many */
 function rxPresetCard(p){
  const n=RXS.sel.size,url=RXS.ppv[p.id]||'';
@@ -161,13 +165,13 @@ function rxPresetsHtml(){
  const ps=RXS.presets;
  if(ps===null)return `<section class=rx-made><div class=sh>Animation presets</div><span class=spin></span></section>`;
  const total=(RXS.bank||[]).length,todo=total-rxDone().size,n=RXS.sel.size,busy=!!(RXS.run&&RXS.run.state==='running');
- const by={};ps.forEach(p=>(by[p.motion||'other']=by[p.motion||'other']||[]).push(p));
+ const order=[...ps].sort((a,b)=>RXPRESETS.indexOf(a.motion)-RXPRESETS.indexOf(b.motion)||(a.created||0)-(b.created||0));
  return `<section class=rx-made data-rxpresets><div class=rx-ph><div class=sh>Animation presets <small class=mut>${ps.length||''}</small></div>`+
   `${ps.length?`<span class=rx-rnd><span class=mut>A random preset of each emoji's own motion</span>`+
   `<button class="btn sm" data-act=rxbatch data-m=random data-w=sel ${n&&!busy?'':'disabled'}>Selected${n?' ('+n+')':''}</button>`+
   `<button class="btn sm" data-act=rxbatch data-m=random data-w=todo ${todo&&!busy?'':'disabled'}>Not done (${todo})</button>`+
   `<button class="btn sm" data-act=rxbatch data-m=random data-w=all ${total&&!busy?'':'disabled'}>All ${total}</button></span>`:''}</div>`+
-  `${ps.length?Object.entries(by).map(([mo,xs])=>`<div class=rx-pg><b>${esc(mo)}</b><div class=rx-cards>${xs.map(rxPresetCard).join('')}</div></div>`).join('')
+  `${ps.length?`<div class=rx-cards>${order.map(rxPresetCard).join('')}</div>`
    :'<div class=mut>No preset yet: open an emoji, shape its reaction, then Presets ▾ › Save as new preset.</div>'}</section>`}
 function rxHtml(){
  if(!RXS.bank)return `<div class="page rx"><div class=fx-job><span class=spin></span> <span class=mut>Reading the emoji bank…</span></div></div>`;
@@ -227,11 +231,11 @@ async function rxFxOn(host,glyph){host.dataset.rxon='1';await rxBankEnsure();con
 function rxFxOff(host){host.dataset.rxon='';host.classList.remove('rxon');const i=host.querySelector(':scope > .rx-fx');if(i)i.remove()}
 async function rxLoadMade(quiet){const r=await api('/api/particles/emoji-lottie');RXS.made=r.ok?(r.j.reactions||[]):[];RXS.done=null;if(!quiet&&route_==='reactions')rxDraw()}
 async function rxLoadPresets(){const r=await api('/api/particles/emoji-presets');RXS.presets=r.ok?(r.j.presets||[]):[];if(route_==='reactions')rxDraw()}
-/* each preset card shows its own look on the emoji it was made on (the same fit preview as the hover) */
+/* each preset card shows its own look on the emoji it was made on, at its real size (the fit is only the hover's) */
 async function rxPresetPreviews(){
  for(const p of RXS.presets||[]){
   if(RXS.ppv[p.id]!==undefined)continue;RXS.ppv[p.id]='';
-  const r=await post('/api/particles/emoji-preview',{token:p.token||'happy',...(p.settings||{}),size:RXPX,fit:true});
+  const r=await post('/api/particles/emoji-preview',{token:p.token||'happy',...(p.settings||{}),size:RXPX});
   RXS.ppv[p.id]=r.ok?r.j.url:'';if(r.ok&&route_==='reactions'){const el=document.querySelector&&document.querySelector(`[data-act=rxpopen][data-id="${p.id}"]`);const c=el&&el.closest('.rx-card');if(c)c.outerHTML=rxPresetCard(p)}}}
 /* the newest created first */
 function rxAddMade(rs){RXS.made=[...rs.map(r=>({id:r.id,token:r.token,emoji:r.emoji,preset:r.preset,params:r.params,settings:r.settings,url:r.url,preview:r.preview,bytes:r.bytes,created:Date.now()/1000})).reverse(),...(RXS.made||[])];RXS.done=null}

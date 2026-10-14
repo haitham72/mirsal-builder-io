@@ -69,7 +69,8 @@ test('Presets ▾: Save as new carries the emoji (its motion files it), Update c
   await r('ACT.rxsave()');
   assert.deepEqual(J(r, "POSTS.find(p=>p[0]==='/api/particles/emoji-presets')"), ['/api/particles/emoji-presets', { settings: START, token: 'school' }]);
   assert.equal(r('RXS.ek.presetId'), 'preset01');
-  assert.match(r('rxEditor()'), /data-act=rxpupd data-id="preset01">Update “Preset 01”/);
+  assert.match(r('rxEditor()'), /data-act=rxpupd data-id="preset01">Update “Preset 01”<\/button><button class="btn dng" data-act=rxpdel data-id="preset01">Remove “Preset 01”/);
+  assert.match(r('rxEditor()'), /data-act=rxcreate[^>]*>Create reaction<\/button><span class=rx-chips><button class="btn sm rx-chip on" data-act=rxpload data-id="preset01"/, 'Create reaction | the presets as chips | Presets ▾');
   r("RXS.ek.sim.count=40;POSTREPLIES.push({ok:true,j:{id:'preset01',name:'Preset 01',motion:'burst',token:'school',settings:{count:40}}})");
   await r("ACT.rxpupd({dataset:{id:'preset01'}})");
   assert.ok(J(r, "POSTS.some(p=>p[0]==='/api/particles/emoji-presets/preset01')"), 'Update posts to the preset itself');
@@ -97,8 +98,8 @@ test('the hover reaction is 64 px from the tile right edge, and plays the newest
   const r = screen();
   r("RXS.ek=null;RXS.hover='cry';const k=rxHovKey('cry');RXS.pv[k]='/r.webp';RXS.par[k]={origin:[0.5,0.1]}");
   const t = r("rxTile(rxRow('cry'))");
-  assert.match(t, /class=rx-fx src="\/r.webp" style="width:64px;height:64px;left:calc\(100% - 32px\);top:calc\(50% - 6px\)"/,
-    "the rain's origin (top centre) sits on the tile's right edge");
+  assert.match(t, /class=rx-fx src="\/r.webp" style="width:64px;height:64px;left:calc\(90% - 32px\);top:calc\(90% - 6px\)"/,
+    "the rain's origin (top centre) sits on the sticker's bottom-right, 90% / 90%, as Telegram plays it");
   assert.equal(J(r, "rxFor('cry')").magnitude, 1.2, 'its saved look, not the start look');
 });
 
