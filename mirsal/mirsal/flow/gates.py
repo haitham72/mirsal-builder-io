@@ -833,6 +833,35 @@ def attach_video(out: Path, gid: int, aid: str, data: bytes, filename: str = "vi
     return {"sheet": aid, "bytes": len(data)}
 
 
+def anim_preview(out: Path, gid: int, index: int, cfg: EngineConfig, scale=None, keep=None) -> tuple[bytes, dict]:
+    """ONE sticker's animation as it would be cut with this Video size (`scale`, None = what it has now) and Keep approved size (`keep`, None = the
+    batch's), from the stored video: the same process_video, layout, still and animation cache as the real re-cut, but nothing is written to the batch
+    (Haitham, 2026-10-14: a size change previews on one thumbnail with Apply / Cancel, instead of re-cutting all nine on every 5% step).
+    Returns (the WebM, {cut_off_frames, frames, scale, size_mode}); the cache means Apply is then instant for this sticker."""
+    from dataclasses import replace
+    res = pl.read_result(out, gid)
+    v = cut_sheet(res)
+    if not v:
+        raise pl.PipelineError("This batch has no cut video to preview", 409)
+    if not 1 <= int(index) <= len(res["stickers"]) or int(index) not in v["slots"]:
+        raise pl.PipelineError(f"S{index} is not on the video sheet", 404)
+    st, d = res["stickers"][int(index) - 1], pl.gen_dir(out, gid)
+    if scale is not None and not pl.VIDEO_SIZE[0] <= float(scale) <= pl.VIDEO_SIZE[1]:
+        raise pl.PipelineError("scale must be from 0.5 to 1.5")
+    c_cfg = pl.cfg_for(res, cfg)
+    own = st.get("anim_scale")
+    f = float(scale) if scale is not None else float(own if own is not None else c_cfg.anim_scale)
+    c_cfg = replace(c_cfg, anim_scale=round(f, 2), **({"anim_keep_size": bool(keep)} if keep is not None else {}))
+    layout = json.loads((d / v["layout"]).read_text(encoding="utf-8"))
+    refs = {int(index): _read_rgba(d / st["png"])} if st.get("png") else {}
+    r = process_video(d / v["video"], c_cfg, cells=[int(index)], layout=layout, refs=refs, cache=AnimCache(out / "cache" / "anim"),
+                      waive={int(index): set(st.get("anim_override") or [])})[0]
+    if not r.data:
+        raise pl.PipelineError(f"S{index} could not be cut with this size: {r.reason or 'no animation'}", 422)
+    m = r.metrics or {}
+    return r.data, {"index": int(index), "scale": round(f, 2), "keep": c_cfg.anim_keep_size, "status": r.status, "cut_off_frames": m.get("cut_off_frames"), "frames": m.get("frames_out")}
+
+
 def slice_video(out: Path, gid: int, aid: str, cfg: EngineConfig, pace: float = 0.0, only: list | None = None,
                 remember_verdicts: bool = False) -> None:
     """Background job: video-stage checks on the returned video, then each approved slot is decoded from the layout's exact

@@ -927,6 +927,17 @@ class LiveConsoleTests(Base):
         again2 = self.until(lambda: (lambda x: x if not x["busy"] and not any(t["anim_status"] in ("STALE", "PROCESSING") for t in x["stickers"]) else None)(
             self.req("GET", f"/api/generations/{gid}")[1]), "cached re-apply")
         self.assertTrue(all((t.get("anim_metrics") or {}).get("cache") == "hit" for t in again2["stickers"] if t["anim_status"] == "READY"))
+        # a Video size / Keep approved size TEST: one sticker re-cut on the fly, nothing in the batch changes (gates.anim_preview)
+        one = next(t for t in again2["stickers"] if t["anim_status"] == "READY")
+        s, pv = self.req("GET", f"/api/generations/{gid}/anim_preview?index={one['index']}&scale=0.8&keep=0")
+        self.assertEqual(s, 200, pv)
+        self.assertTrue(pv["src"].startswith("data:video/webm;base64,"))
+        self.assertEqual((pv["index"], pv["scale"], pv["keep"]), (one["index"], 0.8, False))
+        self.assertGreater(pv["frames"], 0)
+        after = self.req("GET", f"/api/generations/{gid}")[1]
+        self.assertEqual([(t.get("anim_scale"), t.get("webm")) for t in after["stickers"]], [(t.get("anim_scale"), t.get("webm")) for t in again2["stickers"]])
+        self.assertEqual((after.get("anim_scale"), after.get("keep_size")), (again2.get("anim_scale"), again2.get("keep_size")), "a test is never stored")
+        self.assertEqual(self.req("GET", f"/api/generations/{gid}/anim_preview?index={one['index']}&scale=3")[0], 400)
         h = self.req("GET", "/api/history?limit=1")[1]
         self.assertEqual((len(h["items"]), h["items"][0]["generation_id"], h["items"][0]["animated"], h["more"] is False), (1, st["generation_id"], sum(1 for t in again2["stickers"] if t["anim_status"] == "READY"), True))
         u = self.req("GET", "/api/usage")[1]

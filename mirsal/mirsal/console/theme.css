@@ -88,7 +88,7 @@ html[data-theme=dark] .tl .ph2{background:#e2e8f0}
 html[data-theme=dark] .gbar{background:rgba(20,26,32,.95);box-shadow:0 8px 28px #000000a0}
 html[data-theme=dark] #modal.side .mbox.gm-panel{box-shadow:-18px 0 50px #000000a0,-1px 0 0 var(--bd)}
 html[data-theme=dark] .dbox{box-shadow:0 24px 60px #000000a0}
-html[data-theme=dark] #egcard{box-shadow:0 12px 36px #000000a0}
+html[data-theme=dark] #egcard,html[data-theme=dark] #vzcard{box-shadow:0 12px 36px #000000a0}
 html[data-theme=dark] .lv-qhead{box-shadow:0 12px 32px #000000a0}
 html[data-theme=dark] .lv-qlist{box-shadow:0 12px 32px #000000a0}
 html[data-theme=dark] .tgpop{box-shadow:0 12px 32px #000000c0}

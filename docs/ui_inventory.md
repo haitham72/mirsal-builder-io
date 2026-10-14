@@ -2,7 +2,7 @@
 
 Generated from `console/*.js` on 2026-10-14 (reactions branch: Reaction studio, emoji wall, Lottie export; Reaction effects is its own screen #/reactions in reactions.js: search + two rows of emoji, one editor card, the created reactions as cards). Regenerate when actions move. The wiring is in `docs/architecture.md` §6; the redesign action map remains in `docs/redesign_plan.md` §4.
 
-**470 actions** (471 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 35 scripts; **17 screens** (22 `RENDER` definitions); **171 named server routes**.
+**473 actions** (474 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 35 scripts; **17 screens** (22 `RENDER` definitions); **171 named server routes**.
 
 `tests/data/ui_baseline.json` and `tests/test_ui_inventory.py` prevent actions, screens or routes disappearing without a recorded rename or authorized retirement. The feature split changes no baseline entries.
 
@@ -333,24 +333,24 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `stsave` | 134 | packs.js | `/api/packs/{}/stickers/{}` |
 | `pkpreview` | 135 | packs.js | none (browser only) |
 | `pvbg` | 138 | packs.js | none (browser only) |
-| `lcsend` | 180 | packs.js | none (browser only) |
-| `lcopen` | 181 | library.js | none (browser only) |
-| `lcclose` | 181 | packs.js | none (browser only) |
-| `lcprev` | 181 | packs.js | none (browser only) |
-| `lcnext` | 181 | packs.js | none (browser only) |
-| `lcgo` | 182 | packs.js | none (browser only) |
-| `lcbg` | 182 | packs.js | none (browser only) |
-| `lcpack` | 183 | packs.js | none (browser only) |
-| `lcedit` | 184 | packs.js | `/api/projects/from_sticker` |
-| `lctimeline` | 185 | packs.js | none (browser only) |
-| `lcmove` | 186 | packs.js | `/api/packs/{}/stickers/{}/move` |
-| `ptmake` | 243 | packs.js | none (browser only) |
-| `ptrunsim` | 244 | packs.js | `/api/effects`<br>`/api/effects/{}/estimate`<br>`/api/effects/{}/particles_estimate`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
-| `ptopen` | 245 | packs.js | none (browser only) |
-| `ptsaved` | 246 | packs.js | none (browser only) |
-| `ptadd` | 247 | packs.js | `/api/effects/{}/add`<br>`/api/generations/{}/particles`<br>`/api/packs/{}/stickers/{}/particles` |
-| `psshow` | 284 | packs.js | `/api/particles`<br>`/api/particles/{}/preview` |
-| `psscope` | 287 | packs.js | `/api/packs/{}/reactions`<br>`/api/particles/emoji-motions` |
+| `lcsend` | 185 | packs.js | none (browser only) |
+| `lcopen` | 186 | library.js | none (browser only) |
+| `lcclose` | 186 | packs.js | none (browser only) |
+| `lcprev` | 186 | packs.js | none (browser only) |
+| `lcnext` | 186 | packs.js | none (browser only) |
+| `lcgo` | 187 | packs.js | none (browser only) |
+| `lcbg` | 187 | packs.js | none (browser only) |
+| `lcpack` | 188 | packs.js | none (browser only) |
+| `lcedit` | 189 | packs.js | `/api/projects/from_sticker` |
+| `lctimeline` | 190 | packs.js | none (browser only) |
+| `lcmove` | 191 | packs.js | `/api/packs/{}/stickers/{}/move` |
+| `ptmake` | 248 | packs.js | none (browser only) |
+| `ptrunsim` | 249 | packs.js | `/api/effects`<br>`/api/effects/{}/estimate`<br>`/api/effects/{}/particles_estimate`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
+| `ptopen` | 250 | packs.js | none (browser only) |
+| `ptsaved` | 251 | packs.js | none (browser only) |
+| `ptadd` | 252 | packs.js | `/api/effects/{}/add`<br>`/api/generations/{}/particles`<br>`/api/packs/{}/stickers/{}/particles` |
+| `psshow` | 289 | packs.js | `/api/particles`<br>`/api/particles/{}/preview` |
+| `psscope` | 292 | packs.js | `/api/packs/{}/reactions`<br>`/api/particles/emoji-motions` |
 
 ### `particles.js` (64)
 
@@ -461,17 +461,17 @@ Each action row names its source, line, scripts drawing its button and routes it
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `rxpick` | 192 | reactions.js | `/api/particles/emoji-preview` |
-| `rxmulti` | 196 | reactions.js | none (browser only) |
-| `rxclear` | 197 | reactions.js | none (browser only) |
-| `rxmany` | 198 | reactions.js | `/api/particles/emoji-lottie/batch` |
-| `rxsave` | 205 | reactions.js | `/api/particles/emoji-presets` |
-| `rxpdel` | 210 | reactions.js | `/api/particles/emoji-presets/{}/delete` |
-| `rxclose` | 213 | reactions.js | none (browser only) |
-| `rxreset` | 214 | reactions.js | `/api/particles/emoji-preview` |
-| `rxedit` | 216 | reactions.js | `/api/particles/emoji-preview` |
-| `rxdl` | 223 | reactions.js | none (browser only) |
-| `rxcreate` | 224 | reactions.js | `/api/particles/emoji-lottie` |
+| `rxpick` | 208 | reactions.js | `/api/particles/emoji-preview` |
+| `rxmulti` | 212 | reactions.js | none (browser only) |
+| `rxclear` | 213 | reactions.js | none (browser only) |
+| `rxmany` | 214 | reactions.js | `/api/particles/emoji-lottie/batch` |
+| `rxsave` | 221 | reactions.js | `/api/particles/emoji-presets` |
+| `rxpdel` | 226 | reactions.js | `/api/particles/emoji-presets/{}/delete` |
+| `rxclose` | 229 | reactions.js | none (browser only) |
+| `rxreset` | 230 | reactions.js | `/api/particles/emoji-preview` |
+| `rxedit` | 232 | reactions.js | `/api/particles/emoji-preview` |
+| `rxdl` | 239 | reactions.js | none (browser only) |
+| `rxcreate` | 240 | reactions.js | `/api/particles/emoji-lottie` |
 
 ### `settings.js` (3)
 
@@ -505,7 +505,7 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `lcstudioedit` | 388 | packs.js | `/api/generations`<br>`/api/generations/{}/studio_edit` |
 | `lcopenstudio` | 394 | packs.js | none (browser only) |
 
-### `studio-core.js` (16)
+### `studio-core.js` (19)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
@@ -522,9 +522,12 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `gretrysheet` | 684 | studio-core.js | `/api/generations` |
 | `greqgo` | 692 | studio-core.js | `/api/generations` |
 | `gopenfolder` | 757 | studio-core.js | `/api/generations/{}/reveal` |
-| `gvsize` | 790 | studio-core.js | `/api/generations/{}/video_size` |
-| `gzipdl` | 804 | studio-core.js | `/api/generations/{}/export.zip` |
-| `gkeepsize` | 811 | studio-core.js | `/api/generations/{}/keep_size` |
+| `gvsize` | 846 | studio-core.js | `/api/generations/{}/anim_preview`<br>`/api/generations/{}/keep_size`<br>`/api/generations/{}/video_size` |
+| `gkeepsize` | 858 | studio-core.js | `/api/generations/{}/anim_preview` |
+| `vzapply` | 880 | studio-core.js | `/api/generations/{}/keep_size`<br>`/api/generations/{}/video_size` |
+| `vzcancel` | 889 | studio-core.js | none (browser only) |
+| `gzipdl` | 894 | studio-core.js | `/api/generations/{}/export.zip` |
+| `gkeepsize` | 901 | studio-core.js | `/api/generations/{}/keep_size` |
 
 ### `studio-panel.js` (6)
 

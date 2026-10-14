@@ -766,8 +766,8 @@ ACT.gopenfolder = async (el) => {
    batch already has animations they are cut again from the stored video, free (POST /api/generations/{id}/keep_size). */
 function keepSizeBtn(g) {
   if (!g || g.kind === 'particles' || making(g)) return '';
-  const on = g.keep_size !== false;
-  return `<button class="btn sm ${on ? 'act' : ''}" data-act=gkeepsize data-g=${g.number} aria-pressed=${on} title="${on ? 'On: each animation keeps the size and place of its approved still; motion that goes past the frame is cut off. Click to fit the whole motion instead (the sticker gets smaller)' : 'Off: each animation is shrunk until its whole motion fits, so a lively one plays smaller than its approved still. Click to keep the approved size'}">Keep approved size: ${on ? 'on' : 'off'}</button>`;
+  const on = vzKeep(g);
+  return `<button class="btn sm ${on ? 'act' : ''}${vzOn(g) && VZ.keep != null ? ' vztest' : ''}" data-act=gkeepsize data-g=${g.number} aria-pressed=${on} title="${on ? 'On: each animation keeps the size and place of its approved still; motion that goes past the frame is cut off. Click to fit the whole motion instead (the sticker gets smaller)' : 'Off: each animation is shrunk until its whole motion fits, so a lively one plays smaller than its approved still. Click to keep the approved size'}">Keep approved size: ${on ? 'on' : 'off'}</button>`;
 }
 
 /* Video size after the video is received (Haitham, 2026-10-12): the batch's (every animation) in the batch row, one sticker's under its tile, 50-150%
@@ -777,28 +777,118 @@ const VSTEP = 0.05,
   pct = (f) => `${Math.round(f * 100)}%`;
 function vsizeBatch(g) {
   if (!g || g.kind === 'particles' || making(g)) return '';
-  const f = g.anim_scale || 1;
+  const f = vzOn(g) && VZ.i == null && VZ.scale != null ? VZ.scale : g.anim_scale || 1;
   return `<span class=vsize title="Video size of every animation in this batch, after the video came back (a sticker with its own size keeps it)">Video size <button class="btn sm" data-act=gvsize data-g=${g.number} data-f=${(f - VSTEP).toFixed(2)} ${f <= 0.5 ? 'disabled' : ''} aria-label="Smaller">−</button><b>${pct(f)}</b><button class="btn sm" data-act=gvsize data-g=${g.number} data-f=${(f + VSTEP).toFixed(2)} ${f >= 1.5 ? 'disabled' : ''} aria-label="Larger">+</button>${f !== 1 ? `<button class="btn sm" data-act=gvsize data-g=${g.number} data-f=1 title="Back to 100%">Reset</button>` : ''}</span>`;
 }
 function vsizeRow(g, t) {
   const own = t.anim_scale,
-    f = own != null ? own : g.anim_scale || 1,
+    f = vzOn(g) && VZ.i === t.index && VZ.scale != null ? VZ.scale : own != null ? own : g.anim_scale || 1,
     b = `data-act=gvsize data-g=${g.number} data-i=${t.index}`;
   return `<div class=vsize title="This sticker's video size${own != null ? ' (its own)' : ' (from the batch)'}"><button class="btn sm" ${b} data-f=${(f - VSTEP).toFixed(2)} ${f <= 0.5 ? 'disabled' : ''} aria-label="Smaller">−</button><b>${pct(f)}</b><button class="btn sm" ${b} data-f=${(f + VSTEP).toFixed(2)} ${f >= 1.5 ? 'disabled' : ''} aria-label="Larger">+</button>${own != null ? `<button class="btn sm" ${b} data-f="" title="Follow the batch's video size again">batch</button>` : ''}</div>`;
 }
 
-ACT.gvsize = async (el) => {
+/* Video size and Keep approved size are a TEST until they are applied (Haitham, 2026-10-14: every 5% step re-cut all nine animations and held the
+   job queue for minutes). A click changes ONE sticker only, re-cut on the fly and never stored (GET /api/generations/{id}/anim_preview), shown on a
+   floating card copied from the edge's test card (live.js egCard: the sticker large on the checkerboard, a "test" badge, Apply and Cancel). Apply
+   sends the change once (video_size / keep_size with reslice); Cancel drops it. The test sticker: the one whose size was clicked, else the open one,
+   else the first animated sticker. */
+const VZ = { g: null, i: null, scale: null, keep: null, src: '', meta: null, busy: false, n: 0, t: 0 };
+const vzOn = (g) => !!g && VZ.g === g.number && (VZ.scale != null || VZ.keep != null);
+const vzKeep = (g) => (vzOn(g) && VZ.keep != null ? VZ.keep : g.keep_size !== false);
+function vzTarget(g) {
+  const ok = (i) => { const t = g.stickers[i - 1]; return !!(t && t.anim_status === 'READY'); };
+  if (VZ.i && ok(VZ.i)) return VZ.i;
+  if (typeof MD !== 'undefined' && MD && MD.g === g.number && ok(MD.i)) return MD.i;
+  const t = g.stickers.find((x) => x.anim_status === 'READY');
+  return t ? t.index : null;
+}
+function vzClear() { Object.assign(VZ, { g: null, i: null, scale: null, keep: null, src: '', meta: null }); vzCard(false); }
+function vzCard(show) {
+  let c = document.getElementById('vzcard');
+  if (!show) { if (c) c.remove(); return; }
+  const g = GM.get(VZ.g), i = g && vzTarget(g);
+  if (!g || !i) return vzCard(false);
+  if (!c) {
+    c = document.createElement('div'); c.id = 'vzcard';
+    c.innerHTML = '<div class="egcimg bg-checker"><video autoplay loop muted playsinline></video><span class=egbadge>test</span><span class=spin></span></div><div class=egccap></div><div class=egcbtn><button class="btn sm pri" data-act=vzapply>Apply</button><button class="btn sm" data-act=vzcancel>Cancel</button></div>';
+    document.body.appendChild(c);
+  }
+  const v = c.querySelector('video');
+  if (VZ.src && v.getAttribute('src') !== VZ.src) v.src = VZ.src;
+  c.querySelector('.spin').style.display = VZ.src ? 'none' : '';
+  const f = VZ.scale != null ? VZ.scale : (g.stickers[i - 1].anim_scale != null ? g.stickers[i - 1].anim_scale : g.anim_scale || 1),
+    m = VZ.meta, cut = m && m.cut_off_frames ? ` · cut off in ${m.cut_off_frames} of ${m.frames} frames` : m ? ' · nothing cut off' : '';
+  c.querySelector('.egccap').textContent = `S${i} · video size ${pct(f)} · keep approved size ${vzKeep(g) ? 'on' : 'off'}${cut} · Apply uses it on ${VZ.i ? 'S' + VZ.i : 'all'}`;
+  c.querySelectorAll('.egcbtn .btn').forEach((b) => (b.disabled = VZ.busy));
+  const anchor = document.querySelector(`[data-act=gvsize][data-g="${g.number}"]${VZ.i ? `[data-i="${VZ.i}"]` : ':not([data-i])'}`) || document.querySelector(`[data-act=gkeepsize][data-g="${g.number}"]`),
+    r = anchor ? anchor.getBoundingClientRect() : null, w = Math.min(300, innerWidth - 24);
+  c.style.width = w + 'px';
+  c.style.left = Math.max(12, Math.min(innerWidth - w - 12, r ? r.left : 12)) + 'px';
+  c.style.top = Math.max(70, Math.min(innerHeight - w - 110, r ? r.bottom + 8 : 90)) + 'px';
+}
+/* ask for the test sticker; a newer click wins over an older answer */
+function vzPreview() {
+  const g = GM.get(VZ.g), i = g && vzTarget(g);
+  if (!g || !i) return vzCard(false);
+  VZ.src = ''; VZ.meta = null; vzCard(true);
+  const n = ++VZ.n;
+  clearTimeout(VZ.t);
+  VZ.t = setTimeout(async () => {
+    const q = `index=${i}${VZ.scale != null ? '&scale=' + VZ.scale : ''}${VZ.keep != null ? '&keep=' + (VZ.keep ? 1 : 0) : ''}`;
+    const r = await api(`/api/generations/${g.number}/anim_preview?${q}`);
+    if (n !== VZ.n) return;
+    if (!r.ok) { toast(r.j.error || 'Could not preview this size', 1); return vzClear(); }
+    VZ.src = r.j.src; VZ.meta = r.j; vzCard(true);
+  }, 250);
+}
+function vzStart(g, i) { if (VZ.g !== g.number || (VZ.i || null) !== (i || null)) { vzClear(); VZ.g = g.number; VZ.i = i || null; } }
+
+ACT.gvsize = (el) => {
   const g = GM.get(+el.dataset.g);
   if (!g) return;
-  const idx = el.dataset.i ? +el.dataset.i : undefined,
-    scale = el.dataset.f === '' ? null : Math.round(+el.dataset.f * 100) / 100,
-    redo = (g.stickers || []).some((s) => s.anim_status === 'READY');
-  const r = await post(`/api/generations/${g.number}/video_size`, { scale, ...(idx ? { index: idx } : {}), reslice: redo });
-  if (!r.ok) return toast(r.j.error || 'Could not change the size', 1);
-  toast(`${idx ? 'S' + idx : 'Batch'} video size ${scale == null ? 'follows the batch' : pct(scale)}${r.j.resliced ? ' · cutting again (free)' : ''}`);
-  glast = '';
-  tick(true);
+  const idx = el.dataset.i ? +el.dataset.i : null,
+    scale = el.dataset.f === '' ? null : Math.round(+el.dataset.f * 100) / 100;
+  if (idx && scale == null) {                                   /* "batch": hand the sticker back to the batch's size, at once (nothing to test) */
+    vzClear();
+    return vzSend(g, { scale: null, index: idx });
+  }
+  vzStart(g, idx); VZ.scale = scale; vzPreview(); glast = ''; tick(true);
 };
+
+ACT.gkeepsize = (el) => {
+  const g = GM.get(+el.dataset.g);
+  if (!g) return;
+  if (VZ.g !== g.number) vzStart(g, null);
+  VZ.keep = !vzKeep(g);
+  if (VZ.keep === (g.keep_size !== false) && VZ.scale == null) return vzClear(), (glast = ''), tick(true);
+  vzPreview(); glast = ''; tick(true);
+};
+
+async function vzSend(g, { scale, index, keep }) {
+  const redo = (g.stickers || []).some((s) => s.anim_status === 'READY');
+  if (scale !== undefined) {
+    const r = await post(`/api/generations/${g.number}/video_size`, { scale, ...(index ? { index } : {}), reslice: redo && keep == null });
+    if (!r.ok) return toast(r.j.error || 'Could not change the size', 1), false;
+  }
+  if (keep != null) {
+    const r = await post(`/api/generations/${g.number}/keep_size`, { on: keep, reslice: redo });
+    if (!r.ok) return toast(r.j.error || 'Could not change it', 1), false;
+  }
+  glast = ''; tick(true);
+  return true;
+}
+ACT.vzapply = async () => {
+  const g = GM.get(VZ.g);
+  if (!g || VZ.busy) return;
+  VZ.busy = true; vzCard(true);
+  const keep = VZ.keep != null && VZ.keep !== (g.keep_size !== false) ? VZ.keep : null,
+    ok = await vzSend(g, { ...(VZ.scale != null ? { scale: VZ.scale } : {}), index: VZ.i, keep });
+  VZ.busy = false;
+  if (ok) { toast(`Applied to ${VZ.i ? 'S' + VZ.i : 'the batch'}: cutting again (free)`); vzClear(); } else vzCard(true);
+};
+ACT.vzcancel = () => { vzClear(); glast = ''; tick(true); };
+addEventListener('scroll', () => { if (document.getElementById('vzcard')) vzCard(true); }, { passive: true });
+addEventListener('resize', () => { if (document.getElementById('vzcard')) vzCard(true); });
 
 /* the batch's Download .zip asks first when an animation is shorter than 3 s (packs.js retimeAsk): Retime to 3 s or keep their length */
 ACT.gzipdl = async (el) => {

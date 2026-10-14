@@ -43,7 +43,7 @@ _LOG_IDS = (re.compile(r"^/api/generations/(\d+)"), "generation_id", "G"), (re.c
 _SRC_PATH = re.compile(r"^/src/(\d+)/")
 _KEY_PATH = re.compile(r"^G(\d+)(?:-[A-Za-z0-9_-]+)?/")
 MEMBER_GEN_POST = {"review", "more", "regen", "animate", "recut", "video_sheet", "quick_sheet", "drop", "allow", "judge", "captions", "appearance", "keep_size", "video_size", "edge", "reslice", "recheck", "add", "pack_add"}
-MEMBER_GEN_GET = {"edge_preview", "sheet_preview", "events", "history", "captions"}
+MEMBER_GEN_GET = {"edge_preview", "anim_preview", "sheet_preview", "events", "history", "captions"}
 MEMBER_GET = {"/api/health", "/api/openapi.json", "/api/me", "/api/prefs", "/api/chat/agent", "/api/llm/models", "/api/search", "/api/generations", "/api/jobs",
               "/api/prepared/match"}
 MEMBER_POST = {"/api/prefs", "/api/generations", "/api/assets/sign", "/api/live/cost", "/api/live/sheet", "/api/live/video", "/api/live/ref"}
@@ -1209,6 +1209,17 @@ def make_handler(c: Console):
                 q = parse_qs(urlparse(self.path).query)
                 png = pl.edge_preview(c.out, int(path.split("/")[3]), int(q.get("index", ["1"])[0]), int(q.get("outline", ["0"])[0]), int(q.get("erode", ["0"])[0]), int(q.get("px", ["420"])[0]))
                 return self._send(200, png, "image/png")
+            if path.startswith("/api/generations/") and path.endswith("/anim_preview"):        # ONE sticker re-cut with a Video size / Keep approved size, not stored (gates.anim_preview)
+                q = parse_qs(urlparse(self.path).query)
+                sc, kp = q.get("scale", [""])[0], q.get("keep", [""])[0]
+                try:
+                    scale = float(sc) if sc not in ("", "null") else None
+                except ValueError:
+                    raise pl.PipelineError("scale must be a number")
+                webm, meta = gates.anim_preview(c.out, int(path.split("/")[3]), int(q.get("index", ["1"])[0]), c.cfg, scale,
+                                                {"1": True, "0": False}.get(kp))
+                import base64
+                return self._json(200, {**meta, "src": "data:video/webm;base64," + base64.b64encode(webm).decode("ascii")})
             if path.startswith("/api/generations/") and path.endswith("/sheet_preview"):      # the video sheet at a given fill, small and not stored
                 q = parse_qs(urlparse(self.path).query)
                 fill = min(0.92, max(0.5, float(q.get("fill", [c.cfg.slot_fill])[0])))
