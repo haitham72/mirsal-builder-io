@@ -1,0 +1,236 @@
+{
+  "reviewed_commit": "170f26e36893a194248eaf5d88449ecba9e9bcd7",
+  "date": "2026-10-14",
+  "screenshots": [
+    "J1-01-studio-dark.jpg",
+    "J1-02-plan-dark.jpg",
+    "J1-03-batch-dark.jpg",
+    "J1-03-batch-light.jpg",
+    "J1-04-preview-dark.jpg",
+    "J11-01-library-dark.jpg",
+    "J11-03-pack-dark.jpg",
+    "J11-04-viewer-dark.jpg",
+    "J11-05-wall-dark.jpg",
+    "J11-06-editor-dark.jpg",
+    "J11-06-editor-light.jpg",
+    "J2-01-chat-dark.jpg",
+    "J2-03-plan-dark.jpg",
+    "J3-01-library-dark.jpg",
+    "J3-02-grouped-dark.jpg",
+    "J3-03-pack-dark.jpg",
+    "J3-03-pack-light.jpg",
+    "J3-04-viewer-dark.jpg",
+    "J3-05-cover-hover-dark.jpg",
+    "J3-05-timeline-dark.jpg",
+    "J4-01-wall-light.jpg",
+    "J4-02-editor-dark.jpg",
+    "J4-02-editor-light.jpg",
+    "J4-03-presets-light.jpg",
+    "J4-04-batch-dark.jpg",
+    "J5-01-pack-reactions-light.jpg",
+    "J5-02-set-card-light.jpg",
+    "J5-03-motion-light.jpg",
+    "J5-04-effects-light.jpg",
+    "J6-01-blocked-animation-dark.jpg",
+    "J6-02-rejected-still-dark.jpg",
+    "J6-02-rejected-still-detail-dark.jpg",
+    "J6-02-rejected-still-light.jpg",
+    "J6-03-chat-review-dark.jpg",
+    "J7-01-home-dark.jpg",
+    "J7-03-welcome-settled-dark.jpg",
+    "J7-03-welcome-settled-light.jpg",
+    "J8-01-settings-dark.jpg",
+    "J8-01-settings-light.jpg",
+    "J8-02-trash-dark.jpg",
+    "J8-02-trash-light.jpg",
+    "J8-04-faq-dark.jpg",
+    "J8-05-trending-dark.jpg",
+    "J8-06-tickets-bottom-dark.jpg",
+    "J9-01-retime-dark.jpg",
+    "J9-02-collection-dark.jpg",
+    "J9-03-telegram-dark.jpg",
+    "J3-06-edit-project-light.jpg"
+  ],
+  "shot_findings": {
+    "J1-01-studio-dark.jpg": [
+      "F-19",
+      "F-32"
+    ],
+    "J1-02-plan-dark.jpg": [
+      "F-32"
+    ],
+    "J1-03-batch-dark.jpg": [
+      "F-05",
+      "F-22",
+      "F-23"
+    ],
+    "J1-03-batch-light.jpg": [
+      "F-19"
+    ],
+    "J1-04-preview-dark.jpg": [
+      "F-01",
+      "F-02",
+      "F-09"
+    ],
+    "J11-01-library-dark.jpg": [
+      "F-35"
+    ],
+    "J11-03-pack-dark.jpg": [
+      "F-19"
+    ],
+    "J11-04-viewer-dark.jpg": [
+      "F-22",
+      "F-36"
+    ],
+    "J11-05-wall-dark.jpg": [
+      "F-19"
+    ],
+    "J11-06-editor-dark.jpg": [
+      "F-22"
+    ],
+    "J11-06-editor-light.jpg": [
+      "F-19"
+    ],
+    "J2-01-chat-dark.jpg": [
+      "F-19"
+    ],
+    "J2-03-plan-dark.jpg": [
+      "F-32"
+    ],
+    "J3-01-library-dark.jpg": [
+      "F-19"
+    ],
+    "J3-02-grouped-dark.jpg": [
+      "F-03",
+      "F-29"
+    ],
+    "J3-03-pack-dark.jpg": [
+      "F-03",
+      "F-07"
+    ],
+    "J3-03-pack-light.jpg": [
+      "F-19"
+    ],
+    "J3-04-viewer-dark.jpg": [
+      "F-22"
+    ],
+    "J3-05-cover-hover-dark.jpg": [
+      "F-24"
+    ],
+    "J3-05-timeline-dark.jpg": [
+      "F-22"
+    ],
+    "J4-01-wall-light.jpg": [
+      "F-25"
+    ],
+    "J4-02-editor-dark.jpg": [
+      "F-04",
+      "F-25"
+    ],
+    "J4-02-editor-light.jpg": [
+      "F-09"
+    ],
+    "J4-03-presets-light.jpg": [
+      "F-07",
+      "F-25"
+    ],
+    "J4-04-batch-dark.jpg": [
+      "F-22",
+      "F-25"
+    ],
+    "J5-01-pack-reactions-light.jpg": [
+      "F-19"
+    ],
+    "J5-02-set-card-light.jpg": [
+      "F-25"
+    ],
+    "J5-03-motion-light.jpg": [
+      "F-04",
+      "F-25"
+    ],
+    "J5-04-effects-light.jpg": [
+      "F-31"
+    ],
+    "J6-01-blocked-animation-dark.jpg": [
+      "F-13",
+      "F-23"
+    ],
+    "J6-02-rejected-still-dark.jpg": [
+      "F-22"
+    ],
+    "J6-02-rejected-still-detail-dark.jpg": [
+      "F-13"
+    ],
+    "J6-02-rejected-still-light.jpg": [
+      "F-22"
+    ],
+    "J6-03-chat-review-dark.jpg": [
+      "F-22"
+    ],
+    "J7-01-home-dark.jpg": [
+      "F-29",
+      "F-31"
+    ],
+    "J7-03-welcome-settled-dark.jpg": [
+      "F-30"
+    ],
+    "J7-03-welcome-settled-light.jpg": [
+      "F-30"
+    ],
+    "J8-01-settings-dark.jpg": [
+      "F-07",
+      "F-26"
+    ],
+    "J8-01-settings-light.jpg": [
+      "F-26"
+    ],
+    "J8-02-trash-dark.jpg": [
+      "F-22"
+    ],
+    "J8-02-trash-light.jpg": [
+      "F-22"
+    ],
+    "J8-04-faq-dark.jpg": [
+      "F-28"
+    ],
+    "J8-05-trending-dark.jpg": [
+      "F-29"
+    ],
+    "J8-06-tickets-bottom-dark.jpg": [
+      "F-27"
+    ],
+    "J9-01-retime-dark.jpg": [
+      "F-06"
+    ],
+    "J9-02-collection-dark.jpg": [
+      "F-10"
+    ],
+    "J9-03-telegram-dark.jpg": [
+      "F-06"
+    ],
+    "J3-06-edit-project-light.jpg": [
+      "F-12",
+      "F-19"
+    ]
+  },
+  "screenshot_count": 48,
+  "contact_sheet_count": 11,
+  "total_image_count": 59,
+  "limit": 60,
+  "contact_sheets": [
+    "contact-J1.jpg",
+    "contact-J10.jpg",
+    "contact-J11.jpg",
+    "contact-J2.jpg",
+    "contact-J3.jpg",
+    "contact-J4.jpg",
+    "contact-J5.jpg",
+    "contact-J6.jpg",
+    "contact-J7.jpg",
+    "contact-J8.jpg",
+    "contact-J9.jpg"
+  ],
+  "capture_limits": [
+    "Studio dark/light pair has differing media tabs after async redraw; context evidence only, not an exact same-state contrast measurement."
+  ]
+}
