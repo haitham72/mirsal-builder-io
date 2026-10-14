@@ -243,7 +243,7 @@ Each line is the module's own first docstring line.
 **`services/`**
 
 - `admin_bot.py` — Haitham's admin channel in the Mirsal Telegram bot (docs/api.md, Office accounts on the LAN): the bot already configured in Settings (token + …
-- `collection.py` — Export a pack (or one Studio batch) to the AddCollection API, an external emoji CMS (`docs/Api/AddCollection-API .md`).
+- `collection.py` — Export a pack (or one Studio batch) to the AddCollection API, an external emoji CMS (`docs/Api/AddCollection-API .md`): Media + MediaThumbnails + MediaMetadata by index; queued, one export at a time on a worker thread, state in `out/collection_exports/<id>.json`.
 - `embed.py` — Text embeddings for the sticker pool (Phase 3B).
 - `llm.py` — Chat Completions over urllib, provider-qualified local/router/OpenAI routing, persisted selections and an official OpenAI Luna cloud default with fixed `high` reasoning; old Luna ids normalize on use.
 - `llm_catalog.py` — Authenticated cached provider catalogs intersected with approved image-capable cloud models; shared by browser and Telegram selectors and API validation. Official OpenAI uses only `OPENAI_API_KEY`; Nararouter uses only `NARAROUTER_API_KEY` with `MIRSAL_CLOUD_URL`, including vision recovery.

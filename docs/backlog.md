@@ -75,7 +75,6 @@ Other open items:
 - **Paid proof of the face preset**: one `generic emojis` sheet (v4 + core-v1), measure keying and the cut only (never open the media); if limbs
   persist, tighten the v4 clause once (new `_v5` files, never edit v4) and retry once; then one pack at the default gap. About 2 credits + one pack.
   **needs a paid test** (W50).
-- **Export to collection** (`services/collection.py`) has never reached the real CMS since the ContentSubType fix. **needs Haitham** (W49).
 
 - S4 re-run with Kling `pro` and the default gap decision (`slot_fill`); S7 decisions (one 3x3 sheet vs single stickers; the engine's outline vs a model-drawn one). **needs a paid test** (W7).
 - The vision judge's recovery is a recommendation (`vision/recovery.py`); nothing executes it. Executing means paid regenerations, so it needs a confirmation flow. **needs Haitham**.
