@@ -394,7 +394,9 @@ def _fit(pcs: list[np.ndarray], px: int, scale) -> list[np.ndarray]:
 
 
 def sim_preview(out: Path, lib, eid: str, sticker_id: str, overrides: dict | None = None, size: int = 256) -> dict:
-    """The burst as a small looping WebP, rendered by the same engine as the final file (the sliders are live). Cached by what it was made from (sprites, params, `sprite_px`, `scale`)."""
+    """The burst as a small looping WebP, rendered by the same engine as the final file (the sliders are live). Cached by what it was made from (sprites, params, `sprite_px`, `scale`).
+    A previews/ folder is a throwaway cache (nothing stores its paths): each new write keeps only the newest files (`particle_sets.prune_previews`)."""
+    from .particle_sets import prune_previews
     e = read(out, eid)
     g = next((g for g in e["groups"] if sticker_id in g["stickers"]), None)
     if not g:
@@ -409,6 +411,7 @@ def sim_preview(out: Path, lib, eid: str, sticker_id: str, overrides: dict | Non
         fr = particles.simulate(_fit(pcs, px, sc), small)
         f.parent.mkdir(exist_ok=True)
         atomic.write_bytes(f, particles.preview_webp(fr, size=int(size)))
+        prune_previews(f.parent)
     return {"url": f"/out/effects/{e['id']}/previews/{f.name}", "file": f"previews/{f.name}", "params": {**p.to_dict(), "sprite_px": px, "scale": sc}, "sprites": len(pcs)}
 
 

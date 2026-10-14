@@ -94,12 +94,13 @@ def prune_previews(d: Path, keep: int = PREVIEW_KEEP) -> int:
 
 
 def sweep_previews(out: Path, keep: int = PREVIEW_KEEP) -> dict:
-    """Every previews/ folder under out/particles (sets and emoji reactions) pruned to its newest `keep`: {folders, removed}."""
-    root, n, gone = sets_dir(out), 0, 0
-    for d in root.glob("**/previews"):
-        if d.is_dir():
-            n += 1
-            gone += prune_previews(d, keep)
+    """Every previews/ folder under out/particles (sets and emoji reactions) and out/effects (effect runs) pruned to its newest `keep`: {folders, removed}."""
+    n, gone = 0, 0
+    for root in (sets_dir(out), Path(out) / "effects"):
+        for d in root.glob("**/previews"):
+            if d.is_dir():
+                n += 1
+                gone += prune_previews(d, keep)
     return {"folders": n, "removed": gone}
 
 

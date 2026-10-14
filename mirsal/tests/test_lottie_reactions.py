@@ -220,10 +220,18 @@ class PreviewCacheTests(unittest.TestCase):
             f.write_bytes(b"x")
             os.utime(f, (1000 + i, 1000 + i))
         (rend / "L001.webp").write_bytes(b"keep")
-        self.assertEqual(ps.sweep_previews(out, keep=24), {"folders": 1, "removed": 6})
+        run = out / "effects" / "E001" / "previews"                          # an effect run's previews are the same cache
+        run.mkdir(parents=True)
+        for i in range(30):
+            f = run / f"{i:02d}.webp"
+            f.write_bytes(b"x")
+            os.utime(f, (1000 + i, 1000 + i))
+        self.assertEqual(ps.sweep_previews(out, keep=24), {"folders": 2, "removed": 12})
         left = sorted(f.name for f in prev.iterdir())
         self.assertEqual((len(left), left[0]), (24, "06.webp"), "the 6 oldest went")
         self.assertTrue((rend / "L001.webp").is_file(), "renders are never a cache")
+        left_run = sorted(f.name for f in run.iterdir())
+        self.assertEqual((len(left_run), left_run[0]), (24, "06.webp"), "effect runs are swept too")
 
 if __name__ == "__main__":
     unittest.main()
