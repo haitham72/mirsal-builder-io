@@ -685,7 +685,8 @@ button.logo{border:0;padding:0;cursor:pointer;background:none}button.logo:hover 
 .rx-e:hover{background:var(--wash)}.rx-e.on{background:var(--wash);box-shadow:inset 0 0 0 2px var(--pri)}
 .rx-g{font-size:var(--fs-2xl);line-height:1;transition:opacity .15s var(--ease),transform .15s var(--ease)}
 
-.rx-fx{position:absolute;pointer-events:none;z-index:3}       /* size and place come from rxFxStyle: 64 px, its origin on the tile's right edge */
+.rx-fx{position:absolute;pointer-events:none;z-index:3}
+.cell.rxon{overflow:visible;z-index:4}.cell>.rx-fx{object-fit:contain}       /* a pack sticker playing its emoji's reaction: the burst may leave the tile, never cut by it */       /* size and place come from rxFxStyle: 64 px, its origin on the tile's right edge */
 .rx-tick{position:absolute;right:2px;bottom:2px;display:grid;place-items:center;width:16px;height:16px;border-radius:50%;background:var(--pri);color:#fff}.rx-tick svg{width:11px;height:11px}
 .rx-many{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:10px 12px;border-radius:var(--r-m);background:var(--sf);box-shadow:inset 0 0 0 1px var(--aline)}
 .rx-many-sel{display:flex;align-items:center;gap:8px;min-width:0;flex:1 1 200px}.rx-many-g{font-size:var(--fs-l);letter-spacing:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

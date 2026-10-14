@@ -152,3 +152,19 @@ test('Save preset keeps the editor settings without the emoji; the hover reactio
   assert.match(t, /class=rx-fx src="\/r.webp" style="width:64px;height:64px;left:calc\(100% - 32px\);top:calc\(50% - 6px\)"/,
     "the rain's origin (top centre) sits on the tile's right edge");
 });
+
+test('a pack sticker finds its predefined emoji (the longest match) and asks for the same fit preview as the bank hover', async () => {
+  const r = loadConsole(['reactions.js']);
+  r(`RXS.bank=[{token:'heart',emoji:'❤️'},{token:'heart_on_fire',emoji:'❤️‍🔥'},{token:'laugh',emoji:'🤣'}];RXS.made=[];RXS.presets=[]`);
+  assert.equal(r("rxTokenOf('🤣')"), 'laugh');
+  assert.equal(r("rxTokenOf('❤️‍🔥')"), 'heart_on_fire', 'the longest bank emoji the glyph starts with');
+  assert.equal(r("rxTokenOf('❤')"), 'heart', 'with or without the variation selector');
+  assert.equal(r("rxTokenOf('🐪')"), '', 'not a predefined emoji: no reaction');
+  r("POSTREPLIES.push({ok:true,j:{url:'/l.webp',params:{origin:[0.5,0.5]}}})");
+  const pv = JSON.parse(await r("rxHovPreview('laugh').then(JSON.stringify)"));
+  assert.equal(pv.url, '/l.webp');
+  const [[url, body]] = J(r, 'POSTS');
+  assert.equal(url, '/api/particles/emoji-preview');
+  assert.equal(body.fit, true);
+  assert.equal(r("RXS.pv[rxHovKey('laugh')]"), '/l.webp', 'one cache shared with the Reaction effects tiles');
+});

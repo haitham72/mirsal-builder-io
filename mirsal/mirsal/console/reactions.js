@@ -149,12 +149,28 @@ function rxEdSync(){
 /* ---------- the server ---------- */
 async function rxPlay(t){
  const b=rxFor(t),ed=()=>RXS.ek&&RXS.ek.token===t,fit=!ed(),key=fit?rxHovKey(t):rxKey(b);
+ if(fit){if(await rxHovPreview(t)&&RXS.hover===t)rxTileRedraw(t);return}             /* the hover: the shared fit preview (rxHovPreview) */
  if(!RXS.pv[key]){
-  const r=await post('/api/particles/emoji-preview',{...b,size:RXPX,...(fit?{fit:true}:{})});
+  const r=await post('/api/particles/emoji-preview',{...b,size:RXPX});
   if(!r.ok){if(ed()){RXS.ek.err=r.j.error||'The reaction could not be made.';rxEdRedraw()}return}
   RXS.pv[key]=r.j.url;RXS.par[key]=r.j.params}
  if(ed()){if(fit||key!==rxKey(rxBody(RXS.ek)))return;RXS.ek.own=RXS.par[key];RXS.ek.shown=RXS.pv[key];RXS.ek.err='';rxEdSync()}     /* an older answer than the sliders: ignored */
  else if(RXS.hover===t)rxTileRedraw(t)}
+/* ---------- the same hover reaction anywhere else (Haitham, 2026-10-14: a pack's sticker plays its emoji's reaction when pointed at, the SAME effect
+   as this screen's tiles: the same fit preview, cache and placement). rxFxOn(host, glyph) finds the glyph's bank emoji and puts the .rx-fx image on host. */
+async function rxHovPreview(t){const key=rxHovKey(t);
+ if(!RXS.pv[key]){const r=await post('/api/particles/emoji-preview',{...rxFor(t),size:RXPX,fit:true});if(!r.ok)return null;RXS.pv[key]=r.j.url;RXS.par[key]=r.j.params}
+ return{url:RXS.pv[key],par:RXS.par[key]}}
+async function rxBankEnsure(){if(!RXS.bank){const b=await api('/api/particles/emoji-motions');if(b.ok)RXS.bank=b.j.motions||[]}return RXS.bank||[]}
+/* the bank emoji a sticker's emoji starts with (the longest match: 🧡 before ❤); '' when it is not a predefined emoji */
+function rxTokenOf(glyph){const g=String(glyph||'').replace(/️/g,'');let best=null;
+ if(g)for(const m of RXS.bank||[]){const e=String(m.emoji||'').replace(/️/g,'');if(e&&g.startsWith(e)&&(!best||e.length>best.e.length))best={t:m.token,e}}
+ return best?best.t:''}
+async function rxFxOn(host,glyph){host.dataset.rxon='1';await rxBankEnsure();const t=rxTokenOf(glyph);if(!t)return;
+ const pv=await rxHovPreview(t);if(!pv||host.dataset.rxon!=='1')return;
+ const old=host.querySelector(':scope > .rx-fx');if(old)old.remove();
+ host.classList.add('rxon');host.insertAdjacentHTML('beforeend',`<img class=rx-fx src="${esc(pv.url)}" style="${rxFxStyle(pv.par)}" alt="">`)}
+function rxFxOff(host){host.dataset.rxon='';host.classList.remove('rxon');const i=host.querySelector(':scope > .rx-fx');if(i)i.remove()}
 async function rxLoadMade(){const r=await api('/api/particles/emoji-lottie');RXS.made=r.ok?(r.j.reactions||[]):[];if(route_==='reactions')rxDraw()}
 async function rxLoadPresets(){const r=await api('/api/particles/emoji-presets');RXS.presets=r.ok?(r.j.presets||[]):[];if(route_==='reactions')rxManyRedraw()}
 /* the newest created first */

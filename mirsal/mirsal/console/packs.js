@@ -138,6 +138,11 @@ ACT.pkpreview=()=>{const p=packById(PACK_ID);let b='chat';
  ACT.pvbg=e=>{b=e.dataset.b;draw()};draw()};
 /* drag reorder (HTML5 DnD, delegated) */
 const S_PACK=$('s-pack');
+/* pointing at a sticker whose emoji is a predefined one plays that emoji's reaction over it: the Reaction effects hover itself (reactions.js rxFxOn) */
+S_PACK.addEventListener('mouseover',e=>{const c=e.target.closest&&e.target.closest('#pkgrid .cell[data-id]');if(!c||c.dataset.rxon==='1'||typeof rxFxOn!=='function')return;
+ const s=sOf(c.dataset.id);c.dataset.rxon='1';clearTimeout(c._rxT);c._rxT=setTimeout(()=>{if(c.dataset.rxon==='1')rxFxOn(c,s&&s.emoji)},220)});
+S_PACK.addEventListener('mouseout',e=>{const c=e.target.closest&&e.target.closest('#pkgrid .cell[data-id]');if(!c||(e.relatedTarget&&c.contains(e.relatedTarget)))return;
+ clearTimeout(c._rxT);if(typeof rxFxOff==='function')rxFxOff(c)});
 S_PACK.addEventListener('dragstart',e=>{const c=e.target.closest('.cell[data-id]');if(!c)return;DRAG=c.dataset.id;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',DRAG)});
 S_PACK.addEventListener('dragover',e=>{const c=e.target.closest('.cell[data-id]');if(!c||!DRAG)return;e.preventDefault();S_PACK.querySelectorAll('.over').forEach(x=>x.classList.remove('over'));c.classList.add('over')});
 S_PACK.addEventListener('drop',e=>{const c=e.target.closest('.cell[data-id]');if(!c||!DRAG)return;e.preventDefault();const from=DRAG;DRAG=null;if(from===c.dataset.id)return drawPack();
