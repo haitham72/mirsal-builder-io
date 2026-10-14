@@ -1,5 +1,7 @@
 # UI/UX plan (branch ui/ux-review)
 
+> **Latest source validation:** [uiux_review/revalidation.md](uiux_review/revalidation.md) checks all 36 findings against newer source: 21 retain their source basis; 15 changed scope. Task status is updated in tasks.json. Browser acceptance for the rewritten reaction screen remains unrun.
+
 > **Concurrent implementation notice:** Another LLM changed and committed source while this review ran; checkout advanced from audited `170f26e` to at least `76952eb`. This catalog is a snapshot proposal. Read current `CLAUDE.md` and reconcile every task before execution; skip resolved issues and preserve newer preset/manifest/grid contracts. Grouped issue → proposed fix documents are indexed in [uiux_review/README.md](uiux_review/README.md); [concurrent-work.md](uiux_review/concurrent-work.md) records the drift.
 
 Reviewed 2026-10-14 at source commit170f26e36893a194248eaf5d88449ecba9e9bcd7. This run reviews and plans; implementation belongs to the next executor. This file is self-contained: evidence reports are lookup aids, not required startup reading. It is a searchable task catalog; read summary/ground rules plus the assigned block and needed helper contract, not the whole catalog on every task.

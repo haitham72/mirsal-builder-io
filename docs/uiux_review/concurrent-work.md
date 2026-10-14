@@ -1,5 +1,7 @@
 # Concurrent implementation and review snapshot
 
+> **Latest source validation:** [revalidation.md](revalidation.md) checks all 36 findings against newer source: 21 retain their source basis; 15 changed scope. Task status is updated in tasks.json. Browser acceptance for the rewritten reaction screen remains unrun.
+
 The audit observed source commit `170f26e36893a194248eaf5d88449ecba9e9bcd7` on 2026-10-14. Screenshots, probes, line anchors and size estimates describe that snapshot. During this review another LLM edited and committed the same shared checkout. The checkout reached `76952eb983b2d129d353858d02494c01189c2760` before this packaging check and may continue advancing.
 
 ## What changed while packaging

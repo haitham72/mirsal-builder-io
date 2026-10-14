@@ -23,7 +23,9 @@
       "size": 100,
       "risk": "low",
       "trace": "CT-001",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present",
+      "preserve_current_fix": "vzPreview reads r.j.url; do not revert to src"
     },
     {
       "id": "T-002",
@@ -44,7 +46,8 @@
       "size": 160,
       "risk": "medium",
       "trace": "CT-002",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-003",
@@ -64,7 +67,8 @@
       "size": 80,
       "risk": "low",
       "trace": "CT-003",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-004",
@@ -84,7 +88,8 @@
       "size": 170,
       "risk": "medium",
       "trace": "CT-004",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-005",
@@ -107,7 +112,8 @@
       "size": 230,
       "risk": "medium",
       "trace": "CT-005",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-006",
@@ -129,7 +135,8 @@
       "size": 140,
       "risk": "medium",
       "trace": "CT-006",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-007",
@@ -151,7 +158,9 @@
       "size": 140,
       "risk": "medium",
       "trace": "CT-007",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "still_present",
+      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows"
     },
     {
       "id": "T-008",
@@ -173,7 +182,8 @@
       "size": 140,
       "risk": "medium",
       "trace": "CT-008",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-009",
@@ -195,7 +205,8 @@
       "size": 145,
       "risk": "medium",
       "trace": "CT-009",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-010",
@@ -217,7 +228,8 @@
       "size": 200,
       "risk": "medium",
       "trace": "CT-010",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-011",
@@ -240,7 +252,8 @@
       "size": 230,
       "risk": "medium",
       "trace": "CT-019",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-012",
@@ -263,7 +276,8 @@
       "size": 140,
       "risk": "medium",
       "trace": "CT-020",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-013",
@@ -285,7 +299,8 @@
       "size": 140,
       "risk": "medium",
       "trace": "CT-021",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-014",
@@ -306,7 +321,8 @@
       "size": 160,
       "risk": "medium",
       "trace": "CT-022",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-015",
@@ -328,7 +344,8 @@
       "size": 140,
       "risk": "medium",
       "trace": "CT-023",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-016",
@@ -351,7 +368,8 @@
       "size": 145,
       "risk": "medium",
       "trace": "CT-024",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-017",
@@ -372,7 +390,8 @@
       "size": 200,
       "risk": "medium",
       "trace": "CT-025",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-018",
@@ -394,7 +413,9 @@
       "size": 100,
       "risk": "medium",
       "trace": "CT-026",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed",
+      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows"
     },
     {
       "id": "T-019",
@@ -416,7 +437,8 @@
       "size": 110,
       "risk": "medium",
       "trace": "CT-027",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-020",
@@ -438,7 +460,8 @@
       "size": 110,
       "risk": "medium",
       "trace": "CT-028",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-021",
@@ -460,7 +483,8 @@
       "size": 130,
       "risk": "medium",
       "trace": "CT-029",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-022",
@@ -482,7 +506,8 @@
       "size": 120,
       "risk": "medium",
       "trace": "CT-030",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-023",
@@ -503,7 +528,8 @@
       "size": 200,
       "risk": "medium",
       "trace": "CT-031",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-024",
@@ -526,7 +552,8 @@
       "size": 110,
       "risk": "medium",
       "trace": "CT-032",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-025",
@@ -548,7 +575,9 @@
       "size": 120,
       "risk": "medium",
       "trace": "CT-033",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed",
+      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows"
     },
     {
       "id": "T-026",
@@ -569,7 +598,8 @@
       "size": 160,
       "risk": "low",
       "trace": "CT-037",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-027",
@@ -590,7 +620,8 @@
       "size": 110,
       "risk": "low",
       "trace": "CT-038",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-028",
@@ -611,7 +642,8 @@
       "size": 110,
       "risk": "low",
       "trace": "CT-039",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-029",
@@ -633,7 +665,8 @@
       "size": 80,
       "risk": "low",
       "trace": "CT-040",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-030",
@@ -655,7 +688,8 @@
       "size": 100,
       "risk": "low",
       "trace": "CT-041",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-031",
@@ -677,7 +711,9 @@
       "size": 130,
       "risk": "low",
       "trace": "CT-042",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed",
+      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows"
     },
     {
       "id": "T-032",
@@ -698,7 +734,8 @@
       "size": 240,
       "risk": "high",
       "trace": "CT-043",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-033",
@@ -721,7 +758,8 @@
       "size": 180,
       "risk": "high",
       "trace": "CT-044",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-034",
@@ -743,7 +781,9 @@
       "size": 220,
       "risk": "high",
       "trace": "CT-045",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed",
+      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows"
     },
     {
       "id": "T-035",
@@ -766,7 +806,9 @@
       "size": 145,
       "risk": "medium",
       "trace": "CT-046",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed",
+      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows"
     },
     {
       "id": "T-036",
@@ -789,7 +831,8 @@
       "size": 220,
       "risk": "high",
       "trace": "CT-047",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-037",
@@ -815,7 +858,8 @@
       "size": 260,
       "risk": "medium",
       "trace": "CT-048",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-038",
@@ -837,7 +881,8 @@
       "size": 100,
       "risk": "medium",
       "trace": "CT-049",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-039",
@@ -859,7 +904,8 @@
       "size": 90,
       "risk": "medium",
       "trace": "CT-050",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-040",
@@ -881,7 +927,8 @@
       "size": 140,
       "risk": "medium",
       "trace": "CT-051",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-041",
@@ -904,7 +951,8 @@
       "size": 145,
       "risk": "medium",
       "trace": "CT-052",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-042",
@@ -926,7 +974,8 @@
       "size": 145,
       "risk": "medium",
       "trace": "CT-053",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-043",
@@ -948,7 +997,8 @@
       "size": 180,
       "risk": "medium",
       "trace": "CT-054",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-044",
@@ -970,7 +1020,8 @@
       "size": 180,
       "risk": "medium",
       "trace": "CT-055",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-045",
@@ -992,7 +1043,8 @@
       "size": 140,
       "risk": "medium",
       "trace": "CT-056",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-046",
@@ -1014,7 +1066,8 @@
       "size": 140,
       "risk": "medium",
       "trace": "CT-057",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-047",
@@ -1036,7 +1089,9 @@
       "size": 130,
       "risk": "medium",
       "trace": "CT-058",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "still_present",
+      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows"
     },
     {
       "id": "T-048",
@@ -1057,7 +1112,8 @@
       "size": 180,
       "risk": "medium",
       "trace": "CT-060",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-049",
@@ -1080,7 +1136,8 @@
       "size": 100,
       "risk": "medium",
       "trace": "CT-061",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-050",
@@ -1102,7 +1159,8 @@
       "size": 130,
       "risk": "medium",
       "trace": "CT-062",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-051",
@@ -1125,7 +1183,8 @@
       "size": 145,
       "risk": "medium",
       "trace": "CT-063",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-052",
@@ -1146,7 +1205,8 @@
       "size": 230,
       "risk": "high",
       "trace": "CT-064",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-053",
@@ -1169,7 +1229,8 @@
       "size": 140,
       "risk": "high",
       "trace": "CT-065",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-054",
@@ -1192,7 +1253,8 @@
       "size": 140,
       "risk": "high",
       "trace": "CT-066",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-055",
@@ -1215,7 +1277,8 @@
       "size": 200,
       "risk": "high",
       "trace": "CT-067",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-056",
@@ -1235,7 +1298,8 @@
       "size": 130,
       "risk": "medium",
       "trace": "CT-068",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-057",
@@ -1258,7 +1322,8 @@
       "size": 100,
       "risk": "medium",
       "trace": "CT-069",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-058",
@@ -1282,7 +1347,8 @@
       "size": 190,
       "risk": "medium",
       "trace": "CT-072",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-059",
@@ -1300,7 +1366,8 @@
       "size": 145,
       "risk": "low",
       "trace": "CT-077",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-060",
@@ -1318,7 +1385,8 @@
       "size": 145,
       "risk": "low",
       "trace": "CT-078",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-061",
@@ -1336,7 +1404,8 @@
       "size": 145,
       "risk": "low",
       "trace": "CT-079",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-062",
@@ -1354,7 +1423,9 @@
       "size": 145,
       "risk": "low",
       "trace": "CT-080",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed",
+      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows"
     },
     {
       "id": "T-063",
@@ -1370,7 +1441,8 @@
       "size": 40,
       "risk": "low",
       "trace": "CT-085",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-064",
@@ -1388,7 +1460,8 @@
       "size": 100,
       "risk": "low",
       "trace": "CT-086",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-065",
@@ -1407,7 +1480,8 @@
       "manual": "J3 first cover-card Timeline native pointer click opens #/animate for that same id; Preview/Edit/Cover/Delete remain hit-testable, keyboard and selection unchanged.",
       "size": 25,
       "trace": "UX-01",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-066",
@@ -1432,7 +1506,8 @@
       "manual": "Compare1440 and390px: named controls have≥44×44px clickable rects, no overlapping targets/page horizontal scroll; all overrides stay beside their pictures.",
       "size": 180,
       "trace": "UX-02",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-067",
@@ -1457,7 +1532,8 @@
       "manual": "J1 size preview:≤1 enabled primary in the sheet; Cancel makes zero mutation requests; both themes and390px fit; no screenshot of a spinner counted as a failed preview.",
       "size": 220,
       "trace": "UX-03",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-068",
@@ -1484,7 +1560,8 @@
       "manual": "J1 request→free draft remains3ordinary clicks from rail/tab/prompt; disabled Generate sheet explains provider unavailability; no field/action disappears; no paid call.",
       "size": 280,
       "trace": "UX-04",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-069",
@@ -1510,7 +1587,8 @@
       "manual": "J6 G001 retains picture+plain reason+override forS2/S9 and Take it back forS1/S7; J1 batch hasone stage primary while every recovery remains visible/reversible.",
       "size": 220,
       "trace": "UX-05",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-070",
@@ -1534,7 +1612,9 @@
       "manual": "Current happy→love Shift selects5; every descriptor/default/touched override and body JSON is identical; Reset/preset/version controls work; desktop/390px no overflow; no batch/render pressed.",
       "size": 260,
       "trace": "UX-06",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed",
+      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows"
     },
     {
       "id": "T-071",
@@ -1561,7 +1641,8 @@
       "manual": "J5 openedP010 remains fully manageable; no raw-id unlink wall by default; keyboard exposes the same metadata/menu;48+controls are disclosed without losing any action.",
       "size": 300,
       "trace": "UX-07",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-072",
@@ -1588,7 +1669,8 @@
       "manual": "J8 every visible shortcut scrolls to a real card; Tickets reachable without traversing allTrash; non-LAN0dead Account; fake-LAN/member/admin fixtures preserve privacy.",
       "size": 200,
       "trace": "UX-08",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-073",
@@ -1611,7 +1693,8 @@
       "manual": "Tab reaches issue/queue/FAQ titles and Enter/Space opens the same record; mouse selection unchanged; no support submission/FAQ publish during acceptance.",
       "size": 190,
       "trace": "UX-09",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-074",
@@ -1634,7 +1717,8 @@
       "manual": "Settled One idea slide is readable inboth themes, measured4.5:1 normal/3:1large text; dot hit rect≥44px and no overlap; reduced-motion and Escape still work.",
       "size": 90,
       "trace": "UX-10",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-075",
@@ -1656,7 +1740,8 @@
       "manual": "Angel summary9stickers/1reaction; Batman17/2; old clients still receive byte-identical old fields; no real public share or external call.",
       "size": 280,
       "trace": "UX-11",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-076",
@@ -1678,7 +1763,8 @@
       "manual": "J8 cards agree with their sidebar forAngel9+1 andBatman17+2; nothing is shared/liked/commented by acceptance.",
       "size": 80,
       "trace": "UX-12",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-077",
@@ -1700,7 +1786,8 @@
       "manual": "Home headline count matches the same classification asTrending/Library; films are not replaced by search/resize; no horizontal page scroll.",
       "size": 100,
       "trace": "UX-13",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-078",
@@ -1721,7 +1808,8 @@
       "manual": "At390×844 every tab is pointer/keyboard accessible, .tabs has no unintended text overflow, document has no horizontal scroll, selected content and rail remain visible.",
       "size": 45,
       "trace": "UX-14",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-079",
@@ -1741,7 +1829,8 @@
       "manual": "Both sides of A1D01–D06 resolve to one current dated owner contract; no routes/actions/human verdicts disappear; docs-only0tests.",
       "size": 300,
       "trace": "DOC-01",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-080",
@@ -1765,7 +1854,8 @@
       "manual": "All links resolve; gateway≤1KB; explicit bytes for coldstart vs incremental task path; docs-only0tests.",
       "size": 360,
       "trace": "DOC-02",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-081",
@@ -1785,7 +1875,8 @@
       "manual": "Exact rule meaning matches CLAUDE.md and verify OVERRIDABLE/TECHNICAL references;≤100changed lines/2files; docs-only0tests.",
       "size": 90,
       "trace": "DOC-03",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-082",
@@ -1807,7 +1898,8 @@
       "manual": "No duplicate ids; every moved implementation has an owning contract; no human approval item silently closed; docs-only0tests.",
       "size": 200,
       "trace": "DOC-04",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-083",
@@ -1832,7 +1924,8 @@
       "manual": "Area docs, API index and phase commits describe exactly the implemented state; no stale before/after instructions; docs-only0tests.",
       "size": 280,
       "trace": "DOC-07",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-084",
@@ -1854,7 +1947,8 @@
       "manual": "P2 source and area docs land together; current screen/action/route inventory unchanged;0docs tests.",
       "size": 180,
       "trace": "DOC-06",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-085",
@@ -1876,7 +1970,8 @@
       "manual": "P1 source and owning docs land together; all described states have the task acceptance evidence;0docs tests.",
       "size": 200,
       "trace": "DOC-05",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "changed"
     },
     {
       "id": "T-086",
@@ -1895,7 +1990,8 @@
       "manual": "At390×844 the metadata title area is≥240px wide instead of a word column; all4background choices/browse/Close are native hit targets; viewer/footer can scroll; no page horizontal scroll. Zero new unit tests for this CSS-only layout change.",
       "size": 65,
       "trace": "UX-15",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     },
     {
       "id": "T-087",
@@ -1917,7 +2013,8 @@
       "manual": "Unfiltered Batman group says17stickers/2reactions; filtered3results say3items; every existing item/action remains reachable; current grouped index/order fixtures green.",
       "size": 100,
       "trace": "UX-16",
-      "review_status": "revalidate_before_implementation"
+      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "finding_status": "still_present"
     }
   ],
   "phases": {
@@ -2017,5 +2114,14 @@
       "T-082"
     ]
   },
-  "audit_status": "snapshot proposals; revalidate against current CLAUDE.md and concurrent source before execution"
+  "audit_status": "snapshot proposals; revalidate against current CLAUDE.md and concurrent source before execution",
+  "revalidation": {
+    "head": "94fd14b",
+    "implementation_head": "76952eb",
+    "counts": {
+      "still_present": 21,
+      "changed": 15
+    },
+    "report": "revalidation.md"
+  }
 }

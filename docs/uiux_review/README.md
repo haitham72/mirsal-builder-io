@@ -1,5 +1,7 @@
 # UI/UX review — grouped journeys
 
+> **Latest source validation:** [revalidation.md](revalidation.md) checks all 36 findings against newer source: 21 retain their source basis; 15 changed scope. Task status is updated in tasks.json. Browser acceptance for the rewritten reaction screen remains unrun.
+
 Start with [concurrent-work.md](concurrent-work.md): another LLM edited the shared checkout while this review was running. This folder contains a review and proposed fixes; it did not implement source changes.
 
 Each journey has an overview, detailed **issue → proposed fix** document, and an implementation checklist linking the bounded task catalog. Shared findings intentionally appear in more than one journey; the same finding/task ID means one implementation, not repeated work. Screenshots remain in a single shared shots folder to avoid copies.

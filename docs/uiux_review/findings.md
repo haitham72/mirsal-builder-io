@@ -1,5 +1,7 @@
 # UI/UX findings — 2026-10-14
 
+> **Latest source validation:** [revalidation.md](revalidation.md) checks all 36 findings against newer source: 21 retain their source basis; 15 changed scope. Task status is updated in tasks.json. Browser acceptance for the rewritten reaction screen remains unrun.
+
 > **Concurrent implementation notice:** Evidence belongs to the audited snapshot, while another LLM advanced source during review. Reconcile current CLAUDE.md and [concurrent-work.md](concurrent-work.md) before treating a finding or task as current.
 
 Review of commit `170f26e36893a194248eaf5d88449ecba9e9bcd7` on `ui/ux-review`. No implementation, paid job, provider acceptance, Telegram transfer or collection Send was performed. Existing checkout media/data edits were left untouched. Source line numbers are original anchors; use named functions after reflow.

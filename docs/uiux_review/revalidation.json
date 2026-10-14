@@ -1,0 +1,268 @@
+{
+  "validated_head": "94fd14b",
+  "implementation_head": "76952eb",
+  "method": "current source and diff; no fresh browser",
+  "counts": {
+    "still_present": 21,
+    "changed": 15
+  },
+  "inventoryCounts": {
+    "definitions": 486,
+    "unique": 484,
+    "method": "inventory.py _bodies: all _DEF matches on every line"
+  },
+  "findings": [
+    {
+      "id": "F-01",
+      "title": "Keep approved size bypasses preview",
+      "status": "still_present",
+      "evidence": "studio-core.js still assigns ACT.gkeepsize at858 and901; latter immediate keep_size POST overwrites staged VZ handler. Latest diff only changes preview response src→url.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-02",
+      "title": "Two Apply/Cancel presenters drift",
+      "status": "still_present",
+      "evidence": "egCard and vzCard remain separate; live changes only grid persistence/request construction, no shared testCard extraction.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-03",
+      "title": "Grouped grids repeat presentation",
+      "status": "still_present",
+      "evidence": "library.js and packs.js are unchanged; grouped markup duplication/count labels persist. Added CSS is reaction-only.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-04",
+      "title": "Range controls repeat across distinct reaction contracts",
+      "status": "changed",
+      "evidence": "Descriptor/range overlap survives: reactions.js:16–18 and98–110 still build six Simulation plus four Shape ranges. Hue is intentionally absent; editor is a motion variation, not a saved per-emoji reaction. Preserve the new contract.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-05",
+      "title": "Refresh loops can overlap and redraw twice",
+      "status": "still_present",
+      "evidence": "tick/setInterval(tick,700) remain at913/973; live redraw intervals remain187/193 (both1000ms) and edge sync269(800ms). Grid-only diff does not add serialization.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-06",
+      "title": "Backdrop hides retime without settling its promise",
+      "status": "still_present",
+      "evidence": "packs.js retimeAsk:47 retains RTA resolver; app.js closeDlg:114 only hides/clears dialog. Both files unchanged; no cancellation settlement added.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-07",
+      "title": "Segment builders disagree about semantics",
+      "status": "changed",
+      "evidence": "Other .gseg builders remain unchanged, but old reaction All/Done/Not done segmented filter is gone. Do not migrate its retired markup; scope only current builders.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-08",
+      "title": "Download lifecycle is copied",
+      "status": "changed",
+      "evidence": "Download duplication survives at rxSave:285 and other unchanged helpers. rxdl:286 now exports reaction-presets/{id}.json and rxzip:287 exports reaction-presets.zip with manifest. Never restore old per-emoji exports.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-09",
+      "title": "Preview request lifecycles repeat; endpoints are distinct",
+      "status": "changed",
+      "evidence": "Caches RXS.pv/par/ppv survive at reactions.js:30, rxPlay:157, rxHovPreview:167 and rxCardPreviews:185. Only open motions fetch card previews now: that over-fetching aspect is improved. studio-core.js:841 correctly reads r.j.url instead of r.j.src; retain this fix.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-10",
+      "title": "Feedback markup repeats with different lifetimes",
+      "status": "still_present",
+      "evidence": "app/packs/particles feedback builders are unchanged; durable notification/inline/toast differences remain.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-11",
+      "title": "Long-line scripts make small changes expensive to review",
+      "status": "changed",
+      "evidence": "New lexical scan: 38 top-level JS scripts, 756011 raw UTF-8 bytes (746925 after CRLF normalization), 9195 split lines including terminal-empty entries,263 lines >300chars,290 literal style attributes and59 timer call sites. Old exact totals are superseded; compressed scripts elsewhere remain.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-12",
+      "title": "Range label/output builders repeat in editors",
+      "status": "changed",
+      "evidence": "rxSlider:98 survives, now for ten ranges without Hue. prepare/editor/pack reaction copies remain. Preserve motion grouping and emoji-free slot values while extracting presentation.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-13",
+      "title": "Decision reason boxes need one UI presentation adapter",
+      "status": "still_present",
+      "evidence": "studio-tiles/chat-cards unchanged. Presentation duplication remains. Chat rejected-G012 card parity was never verified and remains a qualified gap.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-14",
+      "title": "Escaping aliases are not unsafe global collisions",
+      "status": "still_present",
+      "evidence": "Scoped escaping policy remains; no new top-level collision claim. This is a qualified low-payoff candidate, not a demonstrated security bug.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-15",
+      "title": "Relative-time helpers use distinct units/policies",
+      "status": "still_present",
+      "evidence": "Time-formatting owners remain unchanged; different units/policies are intentional constraints, not a confirmed functional bug.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-16",
+      "title": "Missing literal buttons do not prove dead actions",
+      "status": "changed",
+      "evidence": "Action set changed; old26 literal-absence candidates are not a current deletion list. Recompute candidates with current inventory and dynamic/keyboard callers before retirement.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-17",
+      "title": "Unmatched CSS scan is a candidate list",
+      "status": "changed",
+      "evidence": "studio.css added reaction row/selection classes. Earlier37 unmatched candidates remain historical; current .rx-motions/.rx-mcol CSS also belongs to an older layout and needs an emission check, not deletion on lexical absence alone.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-18",
+      "title": "Script-order wrappers form implicit extension contracts",
+      "status": "still_present",
+      "evidence": "Existing live/composer/settings/particles/projmap wrappers unchanged. Grid additions do not remove wrapper contracts; old18-file regex SCC is historical, not a recursion proof.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-19",
+      "title": "Presentation bypasses a shared token system",
+      "status": "changed",
+      "evidence": "Literal styling remains: current JS scan still finds290 style literals. New reaction CSS adds fixed20/24px controls and literal colours. Old610-colour aggregate was not regenerated; do not quote it as current.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-20",
+      "title": "History retirement prose contradicts active route",
+      "status": "still_present",
+      "evidence": "history route/script remains and backlog/waiting retirement prose is unchanged. No authorization to delete it or parked React.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-21",
+      "title": "Inventory unique count omits the extra overwrite",
+      "status": "changed",
+      "evidence": "Current inventory heading says479 actions/480 definitions. The exact inventory.py _bodies method (all _DEF matches per line) finds 484 unique/486 definitions. Both ggo and gkeepsize duplicate; heading documents only ggo. The heading/table predate newly added motion/selection actions. Regenerate current inventory and document both overwrites; do not carry old483/481 or heading479/480 into acceptance.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-22",
+      "title": "Tap targets are too small across core journeys",
+      "status": "changed",
+      "evidence": "Old reaction screenshots are obsolete. New studio.css:687 explicitly sets .rx-x24×24 and .rx-vsel20×20: still below requested44px. rxclose remains class=link at reactions.js:107. Studio/Trash/welcome/phone viewer target evidence has unchanged relevant selectors/source; no fresh DOM-size certification.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-23",
+      "title": "Allowed animations lose the readable boundary reason",
+      "status": "still_present",
+      "evidence": "studio-tiles:276 and studio-sheet captions/titles unchanged. Allowed captions still omit the inline boundary reason; blocked/human-dropped states remain distinct.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-24",
+      "title": "Cover badge intercepts Timeline click",
+      "status": "still_present",
+      "evidence": "packs.js badge2/Timeline markup unchanged; no pointer-events fix added in changed CSS. Historical native hit-test finding survives source comparison, not a new browser retest.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-25",
+      "title": "Reaction editor and batch controls compete for space",
+      "status": "changed",
+      "evidence": "PARTIALLY RESOLVED: presets are now collapsed motion rows, with variants fetched only for open motions. Old Done/Not done, Create N/render batches and Presets menu scope is obsolete. Pack spSetCard/unlink/two-Advanced layout is unchanged and still needs cleanup. Current reaction density needs a focused new UI probe, not old scores.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-26",
+      "title": "Local Account shortcut is a no-op",
+      "status": "still_present",
+      "evidence": "settings.js still emits au-me shortcut, auth inserts target only for LAN. Neither file changed; local Account no-op contract persists.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-27",
+      "title": "Tickets have no section shortcut",
+      "status": "still_present",
+      "evidence": "settings navigation still lacks Tickets and tickets wrapper still appends after Trash; both unchanged.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-28",
+      "title": "Help rows are click-only divs",
+      "status": "still_present",
+      "evidence": "support.js click-only row builders unchanged. New reaction native controls do not fix Help keyboard semantics.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-29",
+      "title": "Library/public/Home totals count reactions as stickers",
+      "status": "still_present",
+      "evidence": "home/trending/library count presenters and underlying library count implementation unchanged in source diff. New reaction preset assignments do not repair mixed pack totals; retain items and fix count classification/wording.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-30",
+      "title": "Dark welcome text fades into pale artwork",
+      "status": "still_present",
+      "evidence": "Welcome pale artwork and --ink/--ink2 selectors unchanged; new CSS is reaction-scoped. Settled old contrast evidence remains relevant but is not a new measured ratio.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-31",
+      "title": "Same Reaction effects wording leads to different workflows",
+      "status": "changed",
+      "evidence": "Home still points Try reaction effects to #/effects (home.js:55); +New still routes to #/reactions (app.js:295). The latter is now the preset library, not the old emoji-creation workflow. Wording ambiguity persists with revised product meaning.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-32",
+      "title": "Studio prompt view is dense and exposes an engine inspector",
+      "status": "changed",
+      "evidence": "Composer adds the Grid chip cpgrid:95/114 and preserves engine/model inspector. Prepared match, plan and live sheet now read cpGrid rather than fixed3x3. Density concern remains but old control counts must not be reused; preserve new grid/backend propagation.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-33",
+      "title": "Published screen contracts contradict each other",
+      "status": "changed",
+      "evidence": "Latest reaction/14 supersedes its old screen paragraph; reaction/15 is the current spec. Old design shell and generated inventory introduction still describe two rows/created reactions and conflict with the new library. Other sheet-click/map/tab/startup doc conflicts were not changed by the four source commits.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-34",
+      "title": "Doc organization and tracker IDs raise reading cost",
+      "status": "still_present",
+      "evidence": "Large architecture/export/design docs and duplicate waiting IDs unchanged; CLAUDE routing gained current reaction wording/shared-checkout policy but does not remove document reading-cost issue.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-35",
+      "title": "Phone Library tabs locally exceed their row",
+      "status": "still_present",
+      "evidence": "library.js/tab CSS unchanged; new CSS only scopes .rx-* controls. Historical local overflow remains plausible/unchanged, no fresh phone DOM probe.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    },
+    {
+      "id": "F-36",
+      "title": "Phone viewer header squeezes the title into a word column",
+      "status": "still_present",
+      "evidence": "packs.js lcDraw:177–179 and viewer row CSS unchanged; no phone metadata row split implemented. Historical settled viewer evidence remains relevant.",
+      "verification": "current source + audit-to-HEAD diff; no fresh browser pass"
+    }
+  ]
+}
