@@ -63,11 +63,15 @@ ACT.colopen=async el=>{const k=el.dataset.k,id=el.dataset.id,st=await api('/api/
   <div id=col-res></div><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Close</button><button class="btn pri" data-act=colsend data-k=${k} data-id="${esc(id)}" ${cfg.configured?'':'disabled'}>Send</button></div>`)};
 ACT.colsend=async el=>{const url=el.dataset.k==='pack'?`/api/packs/${encodeURIComponent(el.dataset.id)}/export-collection`:`/api/generations/${encodeURIComponent(el.dataset.id)}/export-collection`,box=$('col-res');
  if(!(($('col-desc')||{}).value||'').trim()){if(box)box.innerHTML='<div class=warn>The collection API needs a short description of the pack.</div>';return}
- el.disabled=true;el.textContent='Sending…';const r=await post(url,{name:(($('col-name')||{}).value||'').trim()||undefined,description:(($('col-desc')||{}).value||'').trim(),retime:(($('col-retime')||{}).value)==='1'});
+ el.disabled=true;el.textContent='Queuing…';const r=await post(url,{name:(($('col-name')||{}).value||'').trim()||undefined,description:(($('col-desc')||{}).value||'').trim(),retime:(($('col-retime')||{}).value)==='1'});
  el.textContent='Send';el.disabled=false;
  if(!r.ok){if(box)box.innerHTML=`<div class=warn>${esc(r.j.error||'Could not send')}</div>`;return}
- if(!r.j.ok){if(box)box.innerHTML=`<div class=warn>The collection API refused it (${r.j.status}): ${esc(r.j.error||'')}</div>`;return}
- closeDlg();toast(`Sent ${r.j.count} sticker${r.j.count===1?'':'s'} as the collection “${r.j.collection}”`)};
+ closeDlg();toast(`Queued “${r.j.collection||'the pack'}”: it is sent in the background, you will be told when it is done`);colWatch(r.j.id)};
+/* an export runs on the server (services/collection.py queue): ask its state until it is done or failed, then say so; the bell keeps the same outcome */
+async function colWatch(id,tries=0){let r={ok:false,status:0,j:{}};try{r=await api('/api/collection/exports/'+encodeURIComponent(id))}catch(e){}
+ if(r.ok&&r.j.state==='done')return toast(`Sent ${r.j.count} sticker${r.j.count===1?'':'s'} as the collection “${r.j.collection}”`);
+ if(r.ok&&r.j.state==='failed')return toast(`Export to collection failed${r.j.status?` (${r.j.status})`:''}: ${r.j.error||'unknown error'}`,1);
+ if(r.status===404||tries>720)return;setTimeout(()=>colWatch(id,tries+1),2500)}
 const sOf=id=>packById(PACK_ID).stickers.find(s=>s.id===id);
 async function pkUpdate(body,msg){const r=await post('/api/packs/'+PACK_ID,body);if(!r.ok)return toast(r.j.error,1);await loadLib();drawPack();if(msg)toast(msg)}
 ACT.pkadd=()=>{Ed.targetPack=PACK_ID;location.hash='#/create'};

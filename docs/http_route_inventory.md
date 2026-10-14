@@ -179,9 +179,10 @@ Auth labels refer to the shared guard above; “owner / own batch/job/chat” in
 | `GET /api/packs/{id}/stickers/{sid}/particles` | — | 200 object (open; operation detail) | member: empty response | no |
 | `GET /api/packs/{id}/particles` | — | 200 {pack_id?:string, sets?:[object (open; operation detail)], bursts?:[object (open; operation detail)], counts?:object (open; operation detail)} | member: empty response | no |
 | `GET /api/packs/{id}/export.zip` | — | 200 application/zip bytes + Content-Disposition | owner | no |
-| `POST /api/packs/{id}/export-collection` | {name?, description?} | 200 {ok, status, collection, count, response, error?}; 503 not set up; 504 no answer | owner (own pack) | no |
-| `POST /api/generations/{id}/export-collection` | {name?, description?} | 200 {ok, status, collection, count, response, error?}; 503 not set up; 504 no answer | owner | no |
+| `POST /api/packs/{id}/export-collection` | {name?, description?, retime?} | 202 {id, state: queued, position}; 400 over a limit; 503 not set up | owner (own pack) | no |
+| `POST /api/generations/{id}/export-collection` | {name?, description?, retime?} | 202 {id, state: queued, position}; 400 over a limit; 503 not set up | owner | no |
 | `GET /api/collection` | — | 200 {configured, url} | owner | no |
+| `GET /api/collection/exports/{xid}` | — | 200 {id, state: queued\|preparing\|sending\|done\|failed, what, collection, by, ok?, status?, count?, response?, result?, error?}; 404 not the sender's | owner (its sender) | no |
 | `GET /api/packs/{id}/telegram.zip` | — | 200 application/zip bytes + Content-Disposition | owner | no |
 | `GET /api/telegram` | — | 200 object (open; operation detail) | owner | no |
 | `POST /api/telegram/config` | {token?:string, user_id?:string} | 200 object (open; operation detail) | owner | no |
@@ -354,6 +355,7 @@ Table: 158 documented operations. Additional static/source routes are enumerated
 - **`POST /api/packs/{id}/export-collection`** — Native FastAPI. Send the pack's Download .zip stickers to the AddCollection API as one collection (services/collection.py)
 - **`POST /api/generations/{id}/export-collection`** — Native FastAPI. The same for one Studio batch
 - **`GET /api/collection`** — Native FastAPI. Where Export to collection sends and whether credentials are set
+- **`GET /api/collection/exports/{xid}`** — Native FastAPI. The state of one queued export (services/collection.py queue)
 - **`GET /api/packs/{id}/export.zip`** — Download the pack: every sticker file (.webm animated, .png / .webp static, the engine's file names) and a manifest.json (application/zip)
 - **`GET /api/packs/{id}/telegram.zip`** — No-credentials fallback: the files for @stickers (application/zip)
 - **`GET /api/telegram`** — Connected or not and which bot (never the token)

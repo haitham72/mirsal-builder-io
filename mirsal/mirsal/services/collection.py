@@ -14,13 +14,21 @@ can never disagree. `emoji_utf` is the asset's first grapheme cluster, `tags` it
 Configuration lives in the environment only (`.env`), never in a file in the repo: `MIRSAL_COLLECTION_API_URL` (default the CMS below) and
 `MIRSAL_COLLECTION_API_CREDENTIALS` (the `sk-...` developer key, sent as `Authorization: Bearer`; a legacy `user:password` or its base64 still sends HTTP Basic).
 The answer is `{Success, Result, ErrorMessages}`: a 200 with `Success: false` is a refusal too; 401 means the key is missing, invalid or expired. Every export, ok or not, is a line in
-`out/collection_exports.jsonl` (who, what, how many, the answer's status), never the credentials. Stdlib only; tests talk to a fake server."""
+`out/collection_exports.jsonl` (who, what, how many, the answer's status), never the credentials. Stdlib only; tests talk to a fake server.
+
+The routes never wait for the CMS (re-encoding and uploading a pack can take minutes): `enqueue` refuses at once what can be refused at once,
+answers an export id `X…`, and ONE worker thread sends the queued exports in order (`queued` -> `preparing` -> `sending` -> `done` | `failed`).
+Each export's state is `out/collection_exports/<id>.json`; one this process no longer runs (the server restarted) reads as failed. Its sender
+gets a notification with the outcome (`flow/notifications`, kind `update`)."""
 from __future__ import annotations
 
 import base64
 import io
 import json
 import os
+import queue
+import re
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -248,3 +256,113 @@ def send(out: Path, what: str, zip_bytes: bytes, name: str | None, description: 
     _log(out, {**row, "ok": ok, "status": r["status"], **({"error": err, "response": res if isinstance(res, dict) else str(res)[:1000]} if err else {})})
     result = res.get("Result", res.get("result")) if isinstance(res, dict) else None          # the created pack's details, as the API returns them
     return {"ok": ok, "status": r["status"], "collection": title, "count": len(items), "response": res, "result": result, **({"error": err} if err else {})}
+
+
+# ---------- the queue: one export at a time in the background; each export's state is a file
+FINAL = ("done", "failed")
+_Q: queue.Queue = queue.Queue()
+_LIVE: set = set()                 # the export ids this process will still run (queued or running)
+_QLOCK = threading.Lock()
+_WORKER: list = []
+
+
+def _state_path(out: Path, xid: str) -> Path:
+    return Path(out) / "collection_exports" / f"{xid}.json"
+
+
+def _save(out: Path, st: dict) -> None:
+    from ..runtime import atomic
+    p = _state_path(out, st["id"])
+    p.parent.mkdir(parents=True, exist_ok=True)
+    atomic.write_text(p, json.dumps(st, ensure_ascii=False, indent=1))
+
+
+def check(name: str | None, description: str = "") -> None:
+    """What is refused before anything is queued: a given name or description over the API's limits, and a missing developer key."""
+    title = " ".join(str(name or "").split())
+    desc = " ".join(str(description or "").split()) or title
+    if len(title) > NAME_MAX:
+        raise CollectionError(f"The collection name is {len(title)} characters; the collection API takes at most {NAME_MAX}. Shorten it and send again.", 400)
+    if len(desc) > DESCRIPTION_MAX:
+        raise CollectionError(f"The description is {len(desc)} characters; the collection API takes at most {DESCRIPTION_MAX}. Shorten it and send again.", 400)
+    if not auth_header():
+        raise CollectionError("The collection API is not set up: put MIRSAL_COLLECTION_API_CREDENTIALS in .env and restart the server", 503)
+
+
+def enqueue(out: Path, what: str, make_zip, name: str | None, description: str = "", by: str = "human") -> dict:
+    """Queue one export; `make_zip()` builds its Download .zip when its turn comes. Answers at once: {id, state: queued, position, …}."""
+    check(name, description)
+    xid = f"X{int(time.time() * 1000):x}{uuid.uuid4().hex[:4]}"
+    st = {"id": xid, "what": what, "collection": " ".join(str(name or "").split()) or None, "by": by, "state": "queued", "at": round(time.time(), 3)}
+    _save(out, st)
+    with _QLOCK:
+        _LIVE.add(xid)
+        position = len(_LIVE)
+        _Q.put((Path(out), xid, make_zip, name, description, by))
+        if not _WORKER or not _WORKER[0].is_alive():
+            _WORKER[:] = [threading.Thread(target=_work, name="collection-export", daemon=True)]
+            _WORKER[0].start()
+    return {**st, "position": position}
+
+
+def export_state(out: Path, xid: str) -> dict | None:
+    """The export's state, None when there is no such export. One an earlier server run left unfinished reads as failed."""
+    if not re.fullmatch(r"X[0-9a-f]+", str(xid or "")):
+        return None
+    try:
+        st = json.loads(_state_path(out, xid).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    with _QLOCK:
+        live = xid in _LIVE
+    if st.get("state") not in FINAL and not live:
+        st.update(state="failed", ok=False, error="The server restarted before this export was sent; send it again")
+    return st
+
+
+def _work() -> None:
+    while True:
+        out, xid, make_zip, name, description, by = _Q.get()
+        st = export_state(out, xid) or {"id": xid, "by": by}
+        try:
+            st["state"] = "preparing"; _save(out, st)
+            data = make_zip()
+            st["state"] = "sending"; _save(out, st)
+            st.update(send(out, st.get("what") or "", data, name, description, by))
+            st["state"] = "done" if st["ok"] else "failed"
+        except CollectionError as e:
+            st.update(state="failed", ok=False, error=str(e), code=e.code)
+        except Exception as e:                                     # never a silent stop: whatever broke is the export's answer
+            st.update(state="failed", ok=False, error=f"The export broke: {e}")
+        st["finished"] = round(time.time(), 3)
+        try:
+            _save(out, st)
+        finally:
+            with _QLOCK:
+                _LIVE.discard(xid)
+        _notify(out, st)
+
+
+def _notify(out: Path, st: dict) -> None:
+    """The outcome in the sender's notifications (once per export)."""
+    if not st.get("by") or st["by"] == "human":
+        return
+    try:
+        from ..flow import notifications as nt
+        name = st.get("collection") or st.get("what") or "the pack"
+        text = (f'Export to collection: "{name}" was sent ({st.get("count")} stickers)' if st["state"] == "done"
+                else f'Export to collection: "{name}" was not sent: {st.get("error") or "unknown error"}')
+        nt.add(out, st["by"], f"collection:{st['id']}", "update", text)
+    except Exception:
+        pass
+
+
+def wait(timeout: float = 60.0) -> bool:
+    """For tests: True once every queued export has finished."""
+    end = time.time() + timeout
+    while time.time() < end:
+        with _QLOCK:
+            if not _LIVE:
+                return True
+        time.sleep(0.05)
+    return False

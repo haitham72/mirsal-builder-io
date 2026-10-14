@@ -85,9 +85,41 @@ class CollectionTests(unittest.TestCase):
         conn.close()
         return result
 
+    def export(self, path, body=b"", token="collection-test-owner"):
+        """POST an export; a queued one (202) is waited for and its final state answered as (200, state), as the page's polling sees it."""
+        s, j = self.req(path, body, token)
+        if s != 202:
+            return s, j
+        self.assertEqual(j["state"], "queued", j)
+        self.assertTrue(col.wait(60), "the export finished")
+        s, st = self.req(f"/api/collection/exports/{j['id']}", token=token, method="GET")
+        self.assertEqual(s, 200, st)
+        self.assertIn(st["state"], col.FINAL)
+        return s, st
+
+    def test_an_export_is_queued_its_state_is_its_senders_and_a_restart_is_a_failure(self):
+        g = f"G{self.gid:03d}"
+        FakeCMS.answer = (200, b'{"Success": true, "Result": {"CollectionId": 9}}', "application/json")
+        s, j = self.req(f"/api/generations/{g}/export-collection", {"name": "Queued pack", "description": "later"})
+        self.assertEqual((s, j["state"], j["collection"]), (202, "queued", "Queued pack"), j)
+        self.assertTrue(col.wait(60))
+        s, st = self.req(f"/api/v1/collection/exports/{j['id']}", method="GET")
+        self.assertEqual((s, st["state"], st["ok"], st["result"]), (200, "done", True, {"CollectionId": 9}), st)
+        self.assertEqual(self.req(f"/api/collection/exports/{j['id']}", token=self.member, method="GET")[0], 404, "only its sender sees it")
+        self.assertEqual(self.req("/api/collection/exports/X0", method="GET")[0], 404)
+        self.assertEqual(self.req("/api/collection/exports/..%2Fsecret", method="GET")[0], 404)
+        p = col._state_path(self.c.out, "Xdead")                             # an export an earlier server run never finished
+        p.write_text(json.dumps({"id": "Xdead", "by": st["by"], "state": "sending"}), encoding="utf-8")
+        s, st2 = self.req("/api/collection/exports/Xdead", method="GET")
+        self.assertEqual((st2["state"], st2["ok"]), ("failed", False))
+        self.assertIn("restarted", st2["error"])
+        from mirsal.flow import notifications as nt
+        texts = [n["text"] for n in nt.listing(self.c.out, st["by"])["notifications"]]
+        self.assertTrue(any('"Queued pack" was sent' in t for t in texts), texts)
+
     def test_a_batch_is_sent_as_the_zip_holds_it_media_paired_with_metadata_by_index(self):
         g = f"G{self.gid:03d}"
-        s, j = self.req(f"/api/generations/{g}/export-collection", {"name": "Blob pack", "description": "made in Mirsal"})
+        s, j = self.export(f"/api/generations/{g}/export-collection", {"name": "Blob pack", "description": "made in Mirsal"})
         self.assertEqual((s, j["ok"], j["collection"], j["response"]["id"]), (200, True, "Blob pack", 7), j)
         sent = FakeCMS.seen[-1]
         self.assertEqual(sent["path"], col.ENDPOINT)
@@ -100,7 +132,7 @@ class CollectionTests(unittest.TestCase):
         self.assertEqual(fields["ContentSubType"].decode(), "png", "stills only: their own type")
         self.assertEqual(col.content_subtype([{"filename": "a.webm"}, {"filename": "b.png"}]), "webm")
         self.assertEqual(col.content_subtype([{"filename": "a.webm"}]), "webm")
-        self.req(f"/api/generations/{g}/export-collection", {"name": "No words"})
+        self.export(f"/api/generations/{g}/export-collection", {"name": "No words"})
         self.assertEqual({n: v for n, f, _, v in form(FakeCMS.seen[-1]) if f is None}["Description"].decode(), "No words")    # never an empty description
         self.assertEqual(len(media), len(meta))
         self.assertEqual(j["count"], len(media))
@@ -130,30 +162,30 @@ class CollectionTests(unittest.TestCase):
         self.assertEqual(s, 200, p)
         for i in ready:
             self.assertEqual(self.req(f"/api/packs/{p['id']}/stickers", {"from_generation": {"id": self.gid, "index": i, "kind": "static"}})[0], 200)
-        s, j = self.req(f"/api/v1/packs/{p['id']}/export-collection", {})
+        s, j = self.export(f"/api/v1/packs/{p['id']}/export-collection", {})
         self.assertEqual((s, j["ok"], j["count"], j["collection"]), (200, True, 2, "Blobs"), j)
         self.assertEqual(len(json.loads({n: v for n, f, _, v in form(FakeCMS.seen[-1]) if f is None}["MediaMetadata"])), 2)
-        self.assertEqual(self.req(f"/api/packs/{p['id']}/export-collection", {}, self.member)[0], 403)
-        self.assertEqual(self.req("/api/packs/P999/export-collection", {})[0], 404)
-        self.assertEqual(self.req("/api/generations/G999/export-collection", {})[0], 404)
-        self.assertEqual(self.req(f"/api/packs/{p['id']}/export-collection", {"surprise": 1})[0], 400)
+        self.assertEqual(self.export(f"/api/packs/{p['id']}/export-collection", {}, self.member)[0], 403)
+        self.assertEqual(self.export("/api/packs/P999/export-collection", {})[0], 404)
+        self.assertEqual(self.export("/api/generations/G999/export-collection", {})[0], 404)
+        self.assertEqual(self.export(f"/api/packs/{p['id']}/export-collection", {"surprise": 1})[0], 400)
 
     def test_a_refusal_is_an_answer_and_a_missing_setup_says_what_to_do(self):
         g = f"G{self.gid:03d}"
         FakeCMS.answer = (400, b'{"message": "MediaMetadata count does not match"}', "application/json")
-        s, j = self.req(f"/api/generations/{g}/export-collection", {})
+        s, j = self.export(f"/api/generations/{g}/export-collection", {})
         self.assertEqual((s, j["ok"], j["status"], j["error"]), (200, False, 400, "MediaMetadata count does not match"))
         FakeCMS.answer = (400, b'{"title": "One or more validation errors occurred.", "errors": {"Description": ["The Description field is required."]}}', "application/problem+json")
-        s, j = self.req(f"/api/generations/{g}/export-collection", {})
+        s, j = self.export(f"/api/generations/{g}/export-collection", {})
         self.assertIn("Description: The Description field is required.", j["error"])
         log = json.loads((self.c.out / "collection_exports.jsonl").read_text(encoding="utf-8").splitlines()[-1])
         self.assertIn("errors", log["response"])                                                     # the refusal is kept to read later
         FakeCMS.answer = (502, b"<html>bad gateway</html>", "text/html")
-        s, j = self.req(f"/api/generations/{g}/export-collection", {})
+        s, j = self.export(f"/api/generations/{g}/export-collection", {})
         self.assertEqual((j["ok"], j["status"], j["response"]), (False, 502, "<html>bad gateway</html>"))
         with patch.dict(os.environ, {"MIRSAL_COLLECTION_API_CREDENTIALS": ""}):
             self.assertEqual(self.req("/api/collection", method="GET")[1]["configured"], False)
-            s, j = self.req(f"/api/generations/{g}/export-collection", {})
+            s, j = self.export(f"/api/generations/{g}/export-collection", {})
             self.assertEqual(s, 503)
             self.assertIn("MIRSAL_COLLECTION_API_CREDENTIALS", j["error"])
         self.assertEqual(col.credentials(), "me@nadi.ae:secret")
@@ -163,7 +195,7 @@ class CollectionTests(unittest.TestCase):
         with patch.dict(os.environ, {"MIRSAL_COLLECTION_API_CREDENTIALS": "sk-test-key-123"}):
             self.assertEqual(col.auth_header(), "Bearer sk-test-key-123")
             FakeCMS.answer = (200, b'{"id": 8, "message": "created"}', "application/json")
-            s, j = self.req(f"/api/generations/{g}/export-collection", {"name": "Bearer pack"})
+            s, j = self.export(f"/api/generations/{g}/export-collection", {"name": "Bearer pack"})
             self.assertEqual((s, j["ok"]), (200, True), j)
             self.assertEqual(FakeCMS.seen[-1]["auth"], "Bearer sk-test-key-123")
 
@@ -171,16 +203,16 @@ class CollectionTests(unittest.TestCase):
         """docs/Api/AddCollection-API .md: 200 {Success: true, Result}; a 200 {Success: false} is a refusal; 400 explains in ErrorMessages; 401 is the key."""
         g = f"G{self.gid:03d}"
         FakeCMS.answer = (200, b'{"Success": true, "Result": {"CollectionId": 42, "Status": "Pending"}, "ErrorMessages": []}', "application/json")
-        s, j = self.req(f"/api/generations/{g}/export-collection", {"name": "Approval pack", "description": "for review"})
+        s, j = self.export(f"/api/generations/{g}/export-collection", {"name": "Approval pack", "description": "for review"})
         self.assertEqual((s, j["ok"], j["result"]), (200, True, {"CollectionId": 42, "Status": "Pending"}), j)
         FakeCMS.answer = (200, b'{"Success": false, "Result": null, "ErrorMessages": ["Collection name already exists"]}', "application/json")
-        s, j = self.req(f"/api/generations/{g}/export-collection", {"name": "Approval pack", "description": "for review"})
+        s, j = self.export(f"/api/generations/{g}/export-collection", {"name": "Approval pack", "description": "for review"})
         self.assertEqual((s, j["ok"], j["error"]), (200, False, "Collection name already exists"), "a 200 that says Success: false is a refusal")
         FakeCMS.answer = (400, b'{"Success": false, "ErrorMessages": ["Description is required", "Media is required"]}', "application/json")
-        j = self.req(f"/api/generations/{g}/export-collection", {"name": "x"})[1]
+        j = self.export(f"/api/generations/{g}/export-collection", {"name": "x"})[1]
         self.assertEqual((j["ok"], j["status"], j["error"]), (False, 400, "Description is required; Media is required"))
         FakeCMS.answer = (401, b"", "application/json")
-        j = self.req(f"/api/generations/{g}/export-collection", {"name": "x"})[1]
+        j = self.export(f"/api/generations/{g}/export-collection", {"name": "x"})[1]
         self.assertEqual((j["ok"], j["status"]), (False, 401))
         self.assertIn("developer key", j["error"])
         self.assertIn("Developer Keys page", j["error"])
@@ -189,14 +221,14 @@ class CollectionTests(unittest.TestCase):
         g = f"G{self.gid:03d}"
         FakeCMS.answer = (200, b'{"Success": true, "Result": {}}', "application/json")
         before = len(FakeCMS.seen)
-        s, j = self.req(f"/api/generations/{g}/export-collection", {"name": "n" * 41})
+        s, j = self.export(f"/api/generations/{g}/export-collection", {"name": "n" * 41})
         self.assertEqual(s, 400)
         self.assertIn("at most 40", j["error"])
-        s, j = self.req(f"/api/generations/{g}/export-collection", {"name": "ok", "description": "d" * 161})
+        s, j = self.export(f"/api/generations/{g}/export-collection", {"name": "ok", "description": "d" * 161})
         self.assertEqual(s, 400)
         self.assertIn("at most 160", j["error"])
         self.assertEqual(len(FakeCMS.seen), before, "nothing was uploaded")
-        self.assertEqual(self.req(f"/api/generations/{g}/export-collection", {"name": "n" * 40, "description": "d" * 160})[1]["ok"], True, "the limits themselves are fine")
+        self.assertEqual(self.export(f"/api/generations/{g}/export-collection", {"name": "n" * 40, "description": "d" * 160})[1]["ok"], True, "the limits themselves are fine")
 
     def test_tags_are_the_action_tokens_without_the_emoji(self):
         self.assertEqual(col.tags_of({"tags": ["laugh", "rofl", "LMAO", "🤣", "eye-roll", "laugh"]}), "laugh_rofl_lmao_eye_roll")
