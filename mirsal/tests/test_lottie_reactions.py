@@ -205,5 +205,25 @@ class FlowAndRouteTests(unittest.TestCase):
             srv.shutdown()
 
 
+
+class PreviewCacheTests(unittest.TestCase):
+    def test_previews_keep_only_the_newest_and_never_touch_renders(self):
+        import os
+        from mirsal.flow import particle_sets as ps
+        out = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, out, True)
+        prev, rend = ps.sets_dir(out) / "emoji" / "happy" / "previews", ps.sets_dir(out) / "emoji" / "happy" / "renders"
+        prev.mkdir(parents=True)
+        rend.mkdir(parents=True)
+        for i in range(30):
+            f = prev / f"{i:02d}.webp"
+            f.write_bytes(b"x")
+            os.utime(f, (1000 + i, 1000 + i))
+        (rend / "L001.webp").write_bytes(b"keep")
+        self.assertEqual(ps.sweep_previews(out, keep=24), {"folders": 1, "removed": 6})
+        left = sorted(f.name for f in prev.iterdir())
+        self.assertEqual((len(left), left[0]), (24, "06.webp"), "the 6 oldest went")
+        self.assertTrue((rend / "L001.webp").is_file(), "renders are never a cache")
+
 if __name__ == "__main__":
     unittest.main()

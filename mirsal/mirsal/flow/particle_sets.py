@@ -73,6 +73,36 @@ def trash_dir(out: Path) -> Path:
     return Path(out) / "trash" / "particles"
 
 
+PREVIEW_KEEP = 24        # a previews/ folder is a cache (nothing stores its paths): only its newest files are kept (Haitham 2026-10-14)
+
+
+def prune_previews(d: Path, keep: int = PREVIEW_KEEP) -> int:
+    """Delete all but the `keep` newest files of one previews/ folder (by modification time); a preview asked again is simply made again.
+    Never touches renders/ or cells/. Returns how many were removed; a file in use or already gone is skipped."""
+    try:
+        files = sorted((f for f in Path(d).iterdir() if f.is_file()), key=lambda f: f.stat().st_mtime, reverse=True)
+    except OSError:
+        return 0
+    gone = 0
+    for f in files[keep:]:
+        try:
+            f.unlink()
+            gone += 1
+        except OSError:
+            pass
+    return gone
+
+
+def sweep_previews(out: Path, keep: int = PREVIEW_KEEP) -> dict:
+    """Every previews/ folder under out/particles (sets and emoji reactions) pruned to its newest `keep`: {folders, removed}."""
+    root, n, gone = sets_dir(out), 0, 0
+    for d in root.glob("**/previews"):
+        if d.is_dir():
+            n += 1
+            gone += prune_previews(d, keep)
+    return {"folders": n, "removed": gone}
+
+
 def _dir(out: Path, pid: str) -> Path:
     pid = str(pid).upper()
     d = sets_dir(out) / pid
@@ -1159,6 +1189,7 @@ def preview(out: Path, lib, pid: str, *, pack_id=None, preset=None, params=None,
         frames = particles.simulate(fx._fit(pcs, px, sc), small)
         f.parent.mkdir(exist_ok=True)
         atomic.write_bytes(f, particles.preview_webp(frames, size=int(size)))
+        prune_previews(f.parent)
     return {"url": f"/out/particles/{s['id']}/previews/{f.name}", "file": f"previews/{f.name}", "params": {**p.to_dict(), "sprite_px": px, "scale": sc}, "preset": name,
             "sprites": len(pcs), "source": source, "pack_id": pack}
 

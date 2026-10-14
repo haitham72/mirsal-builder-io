@@ -16,7 +16,7 @@ import zipfile
 from pathlib import Path
 
 from ..runtime import atomic
-from .particle_sets import SetError, hist, sets_dir
+from .particle_sets import SetError, hist, prune_previews, sets_dir
 
 _LOCK = threading.Lock()
 
@@ -106,6 +106,7 @@ def emoji_preview(out: Path, token, *, preset=None, seed=1, size_in_dur=None, si
     if not f.is_file():
         f.parent.mkdir(parents=True, exist_ok=True)
         atomic.write_bytes(f, _p.preview_webp(_p.simulate([img], p, fit=bool(fit)), size=int(size)))
+        prune_previews(f.parent)                                                 # a cache: only the newest PREVIEW_KEEP stay
     return {"token": t, "emoji": glyph, "preset": name, "params": p.to_dict(), "url": f"/out/particles/emoji/{t}/previews/{f.name}"}
 
 
