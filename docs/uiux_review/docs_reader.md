@@ -1,5 +1,7 @@
 # A1 — documentation review
 
+> **Concurrent implementation notice:** Evidence belongs to the audited snapshot, while another LLM advanced source during review. Reconcile current CLAUDE.md and [concurrent-work.md](concurrent-work.md) before treating a finding or task as current.
+
 2026-10-14; docs-only on ui/ux-review. Reviewed README, CLAUDE, rules, architecture, six split-area indexes, all design sections, redesign, dark-mode, onboarding, reaction files 12–14, backlog, waiting-for-haitham and relevant inventory rows. No code changes/tests. Sizes below measured from disk; behavior remains for browser/code verification.
 
 ## Contradictions (both sides)

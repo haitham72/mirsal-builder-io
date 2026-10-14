@@ -1,5 +1,7 @@
 # Console code review — Phase A2 (2026-10-14; refreshed against HEAD170f26e)
 
+> **Concurrent implementation notice:** Evidence belongs to the audited snapshot, while another LLM advanced source during review. Reconcile current CLAUDE.md and [concurrent-work.md](concurrent-work.md) before treating a finding or task as current.
+
 Paths are relative to mirsal/mirsal/console/ unless stated. Reviewed/scanned all 38 top-level JS files, the three CSS files, index.html and docs/ui_inventory.md; manually inspected implicated functions and narrow JS-test descriptions. No engine code read, no source edited, no providers called and no tests run: this is a docs-only review. Component contracts, per-copy differences, migration order and narrow checks are in duplication_map.md. Static findings use C-ids so the orchestrator can merge them with browser F-ids rather than count them twice.
 
 ## Highest-value evidence

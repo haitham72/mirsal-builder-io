@@ -1,5 +1,7 @@
 # Code executor task catalog (provisional CT identifiers)
 
+> **Concurrent implementation notice:** Evidence belongs to the audited snapshot, while another LLM advanced source during review. Reconcile current CLAUDE.md and [concurrent-work.md](concurrent-work.md) before treating a finding or task as current.
+
 > Final handoff authority: ../uiux_plan.md and tasks.json select and reconcile 87 tasks (50 for 6.1-sol-medium, 37 for luna-6-high). CT identifiers below are a provisional task bank, not an additional execution queue.
 
 Prepared from code_reader.md and duplication_map.md; no source changes, tests or provider calls were made while writing this catalog. The orchestrator selects/ranks these blocks and maps each C-id to the merged findings F-id. All original code line numbers are review-snapshot leads; use the named function/action anchors against current source. Preserve concurrent owner edits.

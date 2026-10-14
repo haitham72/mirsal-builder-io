@@ -1,5 +1,7 @@
 # UI duplication map — measured 2026-10-14
 
+> **Concurrent implementation notice:** Evidence belongs to the audited snapshot, while another LLM advanced source during review. Reconcile current CLAUDE.md and [concurrent-work.md](concurrent-work.md) before treating a finding or task as current.
+
 Scope: console JavaScript, studio.css, agent.css, theme.css, index.html and docs/ui_inventory.md; no engine files. Paths below are relative to mirsal/mirsal/console/ unless stated. **Confirmed** means repeated implementation; **partial** means common presentation with different contracts; a whole-screen merge is not implied. One migration means one consumer, with the narrow named checks green before moving to the next. Run JS checks from the repository root as node --test mirsal/tests/js/NAME.test.js; run the inventory check from mirsal/ as python -m unittest tests.test_ui_inventory. Preserve every ACT name, route, owner gate, string id, server JSON payload, recorded/reversible override and baseline entry.
 
 ## Known suspects: all ten adjudicated
