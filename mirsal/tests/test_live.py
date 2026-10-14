@@ -931,7 +931,8 @@ class LiveConsoleTests(Base):
         one = next(t for t in again2["stickers"] if t["anim_status"] == "READY")
         s, pv = self.req("GET", f"/api/generations/{gid}/anim_preview?index={one['index']}&scale=0.8&keep=0")
         self.assertEqual(s, 200, pv)
-        self.assertTrue(pv["src"].startswith("data:video/webm;base64,"))
+        self.assertRegex(pv["url"], rf"^/out/G{gid:03d}/preview/anim-S{one['index']}\.webm\?v=[0-9a-f]{{12}}$", "a file, never base64")
+        self.assertEqual(self.req("GET", pv["url"].split("?")[0])[0], 200)
         self.assertEqual((pv["index"], pv["scale"], pv["keep"]), (one["index"], 0.8, False))
         self.assertGreater(pv["frames"], 0)
         after = self.req("GET", f"/api/generations/{gid}")[1]

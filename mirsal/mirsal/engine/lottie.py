@@ -15,7 +15,12 @@ from .particles import ParticleParams, hue_rotate, png_bytes, trajectories, trim
 HUE_STEP = 10.0         # Lottie cannot turn an image's hue: each particle's hue is rounded to this step and every step used is one embedded asset
 
 
-def export_lottie(p: ParticleParams, emoji_png, *, size: int = 512) -> dict:
+SLOT_ID = "emoji"          # the one external asset of an emoji-free preset: the chat app supplies the picture (Haitham, 2026-10-14)
+SLOT_FILE = "emoji.png"
+SLOT_PX = 160              # the side the app's emoji picture is assumed to have; particle scales are computed against it
+
+
+def export_lottie(p: ParticleParams, emoji_png=None, *, size: int = 512, slot: bool = False) -> dict:
     """A playable Lottie JSON of one burst (web use only; Telegram stays WebM): the deterministic `trajectories()` mapped onto
     image layers (`ty: 2`) that show the real sprite, so any standard player (lottie-web, the LottieFiles preview) plays the
     picture flying, never a placeholder shape.
@@ -24,7 +29,13 @@ def export_lottie(p: ParticleParams, emoji_png, *, size: int = 512) -> dict:
     base64 data URI asset (`e: 1`) and every particle that shows it references it. With `hue_var` > 0 the particle's hue is
     rounded to HUE_STEP degrees and each distinct (sprite, hue) is one more asset, tinted by hue_rotate(); with `hue_var` 0
     one sprite is exactly one asset. A layer lives only from its particle's birth to its death (`ip`/`op`), with one hold
-    keyframe per frame for position, scale, rotation and opacity. Same params + same PNG bytes -> the same JSON. Pure."""
+    keyframe per frame for position, scale, rotation and opacity. Same params + same PNG bytes -> the same JSON. Pure.
+
+    `slot=True` (an animation preset, Haitham 2026-10-14): NO picture and NO base64 anywhere. Every particle references ONE external image
+    asset `{"id": "emoji", "u": "", "p": "emoji.png", "e": 0}` of SLOT_PX x SLOT_PX that the chat app replaces with the emoji it shows
+    (lottie-web `assetsPath` / an image provider). Hue variation needs the picture, so a slot export has none (`hue_var` is ignored)."""
+    if slot:
+        return _slot_lottie(p, size)
     pngs = [emoji_png] if isinstance(emoji_png, (bytes, bytearray)) else list(emoji_png or [])
     if not pngs:
         raise ValueError("no sprite given")
@@ -86,3 +97,41 @@ def export_lottie(p: ParticleParams, emoji_png, *, size: int = 512) -> dict:
         })
     return {"v": "5.7.4", "fr": fps, "ip": 0, "op": F, "w": W, "h": H, "nm": f"reaction burst ({p.count} particles)",
             "ddd": 0, "assets": assets, "layers": layers}
+
+
+def _layers(p: ParticleParams, tr, W: int, H: int, ref_of) -> list:
+    """The particle layers of one burst: `ref_of(i) -> (asset id, its long side, (h, w))` names the picture each particle shows."""
+    def keys(frames, vals):
+        return {"a": 1, "k": [{"t": f, "s": v, "h": 1} for f, v in zip(frames, vals)]}
+    layers = []
+    for i in tr.draw_order[::-1].tolist():
+        alive = np.flatnonzero(tr.scale[:, i] > 0)
+        if not len(alive):
+            continue
+        ip, op = int(alive[0]), int(alive[-1]) + 1
+        fr = list(range(ip, op))
+        ref, long_side, (img_h, img_w) = ref_of(i)
+        k_scale = 100.0 * float(tr.size_frac[i]) * W / long_side
+        layers.append({
+            "ddd": 0, "ind": len(layers) + 1, "ty": 2, "nm": f"particle {i + 1}", "refId": ref, "sr": 1, "ao": 0, "bm": 0,
+            "ks": {
+                "o": keys(fr, [[round(float(tr.opacity[f, i]) * 100.0, 1)] for f in fr]),
+                "r": keys(fr, [[round(math.degrees(float(tr.angle[f, i])), 1)] for f in fr]),
+                "p": keys(fr, [[round(float(tr.pos[f, i, 0]) * W, 1), round(float(tr.pos[f, i, 1]) * H, 1), 0] for f in fr]),
+                "a": {"a": 0, "k": [img_w / 2.0, img_h / 2.0, 0]},
+                "s": keys(fr, [[round(float(tr.scale[f, i]) * k_scale, 2)] * 2 + [100] for f in fr]),
+            },
+            "ip": ip, "op": op, "st": 0,
+        })
+    return layers
+
+
+def _slot_lottie(p: ParticleParams, size: int) -> dict:
+    """An emoji-free preset: one external asset, every particle referencing it (see export_lottie, slot=True)."""
+    p = p.clamped()
+    W = H = int(size)
+    tr = trajectories(p, 1)
+    layers = _layers(p, tr, W, H, lambda i: (SLOT_ID, SLOT_PX, (SLOT_PX, SLOT_PX)))
+    return {"v": "5.7.4", "fr": float(p.fps), "ip": 0, "op": tr.frames, "w": W, "h": H, "nm": f"reaction preset ({p.count} particles)", "ddd": 0,
+            "assets": [{"id": SLOT_ID, "w": SLOT_PX, "h": SLOT_PX, "u": "", "p": SLOT_FILE, "e": 0}], "layers": layers}
+

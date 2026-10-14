@@ -424,3 +424,194 @@ def export_zip(out: Path, tokens=None) -> tuple[bytes, int]:
     if not rows:
         raise SetError("none of these emojis has a reaction yet", 409)
     return buf.getvalue(), len(rows)
+
+
+# ---------- the animation preset library (Haitham, 2026-10-14: "now it is not 1800+ emojis, it is 10-15 animation presets"). A few presets, each a
+# variation of one motion: id `{motion}_{NN}` (burst_01, burst_02 ...), exported as `{motion}_{NN}.json`, a Lottie with NO picture and NO base64:
+# one external image asset `emoji` the chat app fills with the emoji it shows. Every bank emoji holds one preset (`assign`; unassigned = its own
+# motion's first variation), so the wall's hover plays that style with that emoji. One file: out/particles/emoji/library.json.
+LIB_MOTIONS = ("burst", "fountain", "vortex", "rain", "confetti")
+_VARIATIONS = (("soft", {"magnitude": 0.5, "count": 18, "particle_size": 0.25}), ("normal", {}), ("big", {"magnitude": 1.0, "count": 40, "particle_size": 0.4}))
+LIB_KEYS = tuple(k for k in PRESET_KEYS if k not in ("preset", "hue_var"))      # a preset's settings; its motion is its group, hue needs the picture
+
+
+def _lib_path(out: Path) -> Path:
+    return sets_dir(out) / "emoji" / "library.json"
+
+
+def _seed() -> list[dict]:
+    now = round(time.time(), 3)
+    base = {k: v for k, v in EMOJI_START.items() if k in LIB_KEYS}
+    return [{"id": f"{m}_{n:02d}", "motion": m, "n": n, "name": f"{m.capitalize()} {label}", "settings": {**base, **extra}, "created": now}
+            for m in LIB_MOTIONS for n, (label, extra) in enumerate(_VARIATIONS, 1)]
+
+
+def _lib_read(out: Path) -> dict:
+    f = _lib_path(out)
+    if f.is_file():
+        try:
+            d = json.loads(atomic.read_text(f))
+            if isinstance(d, dict) and isinstance(d.get("presets"), list):
+                d.setdefault("assign", {})
+                return d
+        except (OSError, ValueError):
+            pass
+    d = {"presets": _seed(), "assign": {}}
+    f.parent.mkdir(parents=True, exist_ok=True)
+    atomic.write_text(f, json.dumps(d, ensure_ascii=False, indent=1))
+    return d
+
+
+def _lib_write(out: Path, d: dict) -> None:
+    atomic.write_text(_lib_path(out), json.dumps(d, ensure_ascii=False, indent=1))
+
+
+def library(out: Path) -> dict:
+    """{presets: [{id, motion, n, name, settings, created}] by motion then number, assign: {token: preset id} (only the explicit ones), motions}."""
+    d = _lib_read(out)
+    order = {m: i for i, m in enumerate(LIB_MOTIONS)}
+    return {"presets": sorted(d["presets"], key=lambda p: (order.get(p["motion"], 99), p["n"])), "assign": d["assign"], "motions": list(LIB_MOTIONS)}
+
+
+def _lib_settings(settings) -> dict:
+    if not isinstance(settings, dict):
+        raise SetError("settings must be an object")
+    bad = sorted(set(settings) - set(LIB_KEYS) - {"preset", "hue_var"})
+    if bad:
+        raise SetError(f"unknown preset setting(s): {', '.join(bad)}")
+    return {k: v for k, v in settings.items() if k in LIB_KEYS and v is not None and v != ""}
+
+
+def _lib_check(motion: str, clean: dict) -> None:
+    """A preset that saves always plays: built once on `happy`, in its motion."""
+    emoji_burst("happy", **_kwargs({**clean, "preset": motion}))
+
+
+def lib_preset(out: Path, pid: str) -> dict:
+    p = next((x for x in _lib_read(out)["presets"] if x["id"] == pid), None)
+    if p is None:
+        raise SetError(f"no preset {pid}", 404)
+    return p
+
+
+def add_lib_preset(out: Path, motion: str, settings: dict, *, name=None) -> dict:
+    """A new variation of `motion`: the next number of that motion (burst_04 after burst_03), never a reused one."""
+    if motion not in LIB_MOTIONS:
+        raise SetError(f"motion must be one of {', '.join(LIB_MOTIONS)}")
+    clean = _lib_settings(settings)
+    _lib_check(motion, clean)
+    with _LOCK:
+        d = _lib_read(out)
+        n = max([p["n"] for p in d["presets"] if p["motion"] == motion] + [d.get("last", {}).get(motion, 0)]) + 1
+        if n > 99:
+            raise SetError(f"{motion} already has 99 variations", 409)
+        rec = {"id": f"{motion}_{n:02d}", "motion": motion, "n": n, "name": (str(name).strip()[:40] if name else "") or f"{motion.capitalize()} {n:02d}",
+               "settings": clean, "created": round(time.time(), 3)}
+        d["presets"].append(rec)
+        d.setdefault("last", {})[motion] = n
+        _lib_write(out, d)
+    return rec
+
+
+def update_lib_preset(out: Path, pid: str, *, settings=None, name=None) -> dict:
+    with _LOCK:
+        d = _lib_read(out)
+        rec = next((p for p in d["presets"] if p["id"] == pid), None)
+        if rec is None:
+            raise SetError(f"no preset {pid}", 404)
+        if settings is not None:
+            clean = _lib_settings(settings)
+            _lib_check(rec["motion"], clean)
+            rec["settings"] = clean
+        if name is not None and str(name).strip():
+            rec["name"] = str(name).strip()[:40]
+        rec["updated"] = round(time.time(), 3)
+        _lib_write(out, d)
+    return rec
+
+
+def delete_lib_preset(out: Path, pid: str) -> dict:
+    """Remove a preset; the emojis that held it go back to their motion's first variation. Its number is never reused."""
+    with _LOCK:
+        d = _lib_read(out)
+        rec = next((p for p in d["presets"] if p["id"] == pid), None)
+        if rec is None:
+            raise SetError(f"no preset {pid}", 404)
+        if len(d["presets"]) == 1:
+            raise SetError("the last preset cannot be removed", 409)
+        d["presets"] = [p for p in d["presets"] if p["id"] != pid]
+        d.setdefault("last", {})[rec["motion"]] = max(d["last"].get(rec["motion"], 0), rec["n"])
+        freed = [t for t, v in d["assign"].items() if v == pid]
+        for t in freed:
+            del d["assign"][t]
+        _lib_write(out, d)
+    return {"deleted": pid, "unassigned": len(freed)}
+
+
+def assign_lib(out: Path, tokens=None, preset_id=None) -> dict:
+    """Give emojis a preset: one preset (`preset_id`), or `random` = a random variation of each emoji's OWN motion (any preset when its motion has
+    none). tokens None = every bank emoji. Instant: nothing is rendered. {assigned: n}."""
+    from ..engine import emoji_motion as em
+    d = _lib_read(out)
+    todo = all_tokens() if tokens is None else [emoji_token(t)[0] for t in dict.fromkeys(str(t) for t in (tokens or []))]
+    if not todo:
+        raise SetError("tokens must be a non-empty list, or left out for every emoji")
+    if preset_id != "random" and not any(p["id"] == preset_id for p in d["presets"]):
+        raise SetError(f"no preset {preset_id}", 404)
+    rnd = random.Random("|".join(todo) + str(len(d["presets"])))
+    by = {}
+    for p in d["presets"]:
+        by.setdefault(p["motion"], []).append(p["id"])
+    with _LOCK:
+        d = _lib_read(out)
+        for t in todo:
+            if preset_id == "random":
+                try:
+                    own = em.motion_for_token(t)["preset"]
+                except Exception:
+                    own = None
+                pool = by.get(own) or [p["id"] for p in d["presets"]]
+                d["assign"][t] = rnd.choice(pool)
+            else:
+                d["assign"][t] = preset_id
+        _lib_write(out, d)
+    return {"assigned": len(todo)}
+
+
+def lib_lottie(out: Path, pid: str, size: int = 512) -> bytes:
+    """`{motion}_{NN}.json`: the preset as an emoji-free Lottie (engine.lottie slot export: one external `emoji` asset, no base64). Not stored."""
+    from ..engine import lottie
+    rec = lib_preset(out, pid)
+    p = emoji_burst("happy", **_kwargs({**rec["settings"], "preset": rec["motion"]}), size=int(size))[3]
+    doc = lottie.export_lottie(p, slot=True, size=int(size))
+    doc["nm"] = rec["id"]
+    return json.dumps(doc, separators=(",", ":")).encode("utf-8")
+
+
+def lib_zip(out: Path) -> bytes:
+    """Every preset as `{id}.json` + manifest.json {presets: [{id, motion, variation, name, file}], assign: {token: id} for every bank emoji, slot}."""
+    from ..engine import emoji_motion as em, lottie
+    lib = library(out)
+    first = {}
+    for p in lib["presets"]:
+        first.setdefault(p["motion"], p["id"])
+    assign = {}
+    for t in all_tokens():
+        if t in lib["assign"]:
+            assign[t] = lib["assign"][t]
+            continue
+        try:
+            own = em.motion_for_token(t)["preset"]
+        except Exception:
+            own = None
+        assign[t] = first.get(own) or lib["presets"][0]["id"]
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        for p in lib["presets"]:
+            z.writestr(f"{p['id']}.json", lib_lottie(out, p["id"]))
+        z.writestr("manifest.json", json.dumps({"presets": [{"id": p["id"], "motion": p["motion"], "variation": p["n"], "name": p["name"], "file": f"{p['id']}.json"}
+                                                             for p in lib["presets"]],
+                                                "assign": assign, "slot": {"asset": lottie.SLOT_ID, "file": lottie.SLOT_FILE, "px": lottie.SLOT_PX}},
+                                               ensure_ascii=False, indent=1))
+    return buf.getvalue()
+

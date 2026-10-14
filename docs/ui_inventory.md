@@ -2,7 +2,7 @@
 
 Generated from `console/*.js` on 2026-10-14 (reactions branch: Reaction studio, emoji wall, Lottie export; Reaction effects is its own screen #/reactions in reactions.js: search + two rows of emoji, one editor card, the created reactions as cards). Regenerate when actions move. The wiring is in `docs/architecture.md` §6; the redesign action map remains in `docs/redesign_plan.md` §4.
 
-**482 actions** (483 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 35 scripts; **17 screens** (22 `RENDER` definitions); **171 named server routes**.
+**479 actions** (480 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 35 scripts; **17 screens** (22 `RENDER` definitions); **171 named server routes**.
 
 `tests/data/ui_baseline.json` and `tests/test_ui_inventory.py` prevent actions, screens or routes disappearing without a recorded rename or authorized retirement. The feature split changes no baseline entries.
 
@@ -66,10 +66,10 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `pknew` | 184 | app.js | `/api/packs` |
 | `c2tog` | 300 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
 | `nav` | 302 | animate.js, app.js, auth.js, chat.js, editor.js, home.js, library.js, packs.js, prepare.js, tickets.js | none (browser only) |
-| `railcreate` | 310 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
-| `rme` | 327 | app.js | none (browser only) |
-| `thmtoggle` | 336 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
-| `rtrash` | 368 | app.js | none (browser only) |
+| `railcreate` | 310 | home.js | none (browser only) |
+| `rme` | 325 | app.js | none (browser only) |
+| `thmtoggle` | 334 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `rtrash` | 366 | app.js | none (browser only) |
 
 ### `auth.js` (12)
 
@@ -143,7 +143,7 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `chview` | 86 | chat.js | none (browser only) |
 | `chclear` | 88 | chat.js | none (browser only) |
 
-### `composer.js` (13)
+### `composer.js` (14)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
@@ -151,15 +151,16 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `cpadd` | 76 | composer.js | none (browser only) |
 | `cprefx` | 77 | composer.js | `/api/live/ref` |
 | `cppart` | 89 | composer.js | none (browser only) |
-| `cpactions` | 112 | composer.js | none (browser only) |
-| `cploop` | 113 | composer.js | none (browser only) |
-| `cpai` | 114 | composer.js | `/api/ai` |
-| `cpstroke` | 115 | composer.js | none (browser only) |
-| `cpstrokeset` | 116 | composer.js | none (browser only) |
-| `cpstyles` | 123 | composer.js | none (browser only) |
-| `cpstylepick` | 124 | composer.js | none (browser only) |
-| `ggo` | 131 | (no `data-act` button: called from code, a key, or a form) | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video`<br>`/api/prepared/match` |
-| `gnewlive` | 144 | studio-core.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
+| `cpactions` | 113 | composer.js | none (browser only) |
+| `cpgrid` | 114 | composer.js | none (browser only) |
+| `cploop` | 115 | composer.js | none (browser only) |
+| `cpai` | 116 | composer.js | `/api/ai` |
+| `cpstroke` | 117 | composer.js | none (browser only) |
+| `cpstrokeset` | 118 | composer.js | none (browser only) |
+| `cpstyles` | 125 | composer.js | none (browser only) |
+| `cpstylepick` | 126 | composer.js | none (browser only) |
+| `ggo` | 133 | (no `data-act` button: called from code, a key, or a form) | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video`<br>`/api/prepared/match` |
+| `gnewlive` | 146 | studio-core.js | `/api/jobs`<br>`/api/live/cost`<br>`/api/live/sheet`<br>`/api/live/video` |
 
 ### `editor.js` (27)
 
@@ -285,26 +286,26 @@ Each action row names its source, line, scripts drawing its button and routes it
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `lusage` | 27 | composer.js | `/api/higgsfield`<br>`/api/usage` |
-| `lstyle` | 49 | live.js | none (browser only) |
-| `lmodels` | 53 | composer.js, live.js | none (browser only) |
-| `lmpick` | 66 | live.js | none (browser only) |
-| `lmdone` | 67 | live.js | none (browser only) |
-| `qtoggle` | 158 | live.js | none (browser only) |
-| `qretry` | 163 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
-| `qcopy` | 164 | live.js | none (browser only) |
-| `ljdismiss` | 165 | live.js | `/api/jobs/{}/dismiss` |
-| `egapply` | 255 | live.js | `/api/generations/{}/edge` |
-| `egundo` | 259 | live.js | `/api/generations/{}/edge` |
-| `vlmyes` | 294 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
-| `hunpack` | 322 | live.js, projmap.js | `/api/generations/{}/pack`<br>`/api/generations/{}/particles`<br>`/api/history` |
-| `hopenpack` | 323 | live.js | `/api/generations/{}/particles` |
-| `hleave` | 327 | projmap.js | `/api/generations/{}/leave`<br>`/api/generations/{}/particles`<br>`/api/history` |
-| `gpurge` | 352 | live.js | `/api/generations/removed`<br>`/api/trash/purge`<br>`/api/trash/purges` |
-| `gpurgeall` | 356 | live.js | `/api/trash` |
-| `gpurgeallgo` | 360 | live.js | `/api/generations/removed`<br>`/api/trash/purge_all`<br>`/api/trash/purges` |
-| `grestore` | 362 | live.js | `/api/generations/removed`<br>`/api/generations/{}/particles`<br>`/api/generations/{}/restore`<br>`/api/history` |
-| `hopen` | 373 | composer.js, live.js | `/api/generations/{}/particles`<br>`/api/particles` |
+| `lusage` | 29 | composer.js | `/api/higgsfield`<br>`/api/usage` |
+| `lstyle` | 51 | live.js | none (browser only) |
+| `lmodels` | 55 | composer.js, live.js | none (browser only) |
+| `lmpick` | 68 | live.js | none (browser only) |
+| `lmdone` | 69 | live.js | none (browser only) |
+| `qtoggle` | 160 | live.js | none (browser only) |
+| `qretry` | 165 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `qcopy` | 166 | live.js | none (browser only) |
+| `ljdismiss` | 167 | live.js | `/api/jobs/{}/dismiss` |
+| `egapply` | 257 | live.js | `/api/generations/{}/edge` |
+| `egundo` | 261 | live.js | `/api/generations/{}/edge` |
+| `vlmyes` | 296 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `hunpack` | 324 | live.js, projmap.js | `/api/generations/{}/pack`<br>`/api/generations/{}/particles`<br>`/api/history` |
+| `hopenpack` | 325 | live.js | `/api/generations/{}/particles` |
+| `hleave` | 329 | projmap.js | `/api/generations/{}/leave`<br>`/api/generations/{}/particles`<br>`/api/history` |
+| `gpurge` | 354 | live.js | `/api/generations/removed`<br>`/api/trash/purge`<br>`/api/trash/purges` |
+| `gpurgeall` | 358 | live.js | `/api/trash` |
+| `gpurgeallgo` | 362 | live.js | `/api/generations/removed`<br>`/api/trash/purge_all`<br>`/api/trash/purges` |
+| `grestore` | 364 | live.js | `/api/generations/removed`<br>`/api/generations/{}/particles`<br>`/api/generations/{}/restore`<br>`/api/history` |
+| `hopen` | 375 | composer.js, live.js | `/api/generations/{}/particles`<br>`/api/particles` |
 
 ### `packs.js` (42)
 
@@ -458,29 +459,25 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `pmlist` | 49 | projmap.js | `/api/generations/removed`<br>`/api/history` |
 | `pmopen` | 51 | projmap.js | `/api/generations/removed`<br>`/api/generations/{}/particles`<br>`/api/history` |
 
-### `reactions.js` (19)
+### `reactions.js` (15)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `rxpick` | 284 | reactions.js | `/api/particles/emoji-preview` |
-| `rxfilter` | 292 | reactions.js | `/api/particles/emoji-preview` |
-| `rxmore` | 293 | reactions.js | none (browser only) |
-| `rxmulti` | 296 | reactions.js | `/api/particles/emoji-preview` |
-| `rxselall` | 297 | reactions.js | `/api/particles/emoji-preview` |
-| `rxclear` | 298 | reactions.js | `/api/particles/emoji-preview` |
-| `rxmany` | 300 | reactions.js | `/api/particles/emoji-batches` |
-| `rxbatch` | 305 | reactions.js | `/api/particles/emoji-batches` |
-| `rxbcancel` | 311 | reactions.js | `/api/particles/emoji-batches/{}/cancel` |
-| `rxzip` | 313 | reactions.js | `/api/particles/emoji-lottie.zip` |
-| `rxsave` | 319 | reactions.js | `/api/particles/emoji-presets`<br>`/api/particles/emoji-preview` |
-| `rxpupd` | 324 | reactions.js | `/api/particles/emoji-presets/{}`<br>`/api/particles/emoji-preview` |
-| `rxpload` | 329 | (no `data-act` button: called from code, a key, or a form) | `/api/particles/emoji-preview` |
-| `rxpopen` | 333 | reactions.js | `/api/particles/emoji-preview` |
-| `rxpdel` | 337 | reactions.js | `/api/particles/emoji-presets/{}/delete`<br>`/api/particles/emoji-preview` |
-| `rxclose` | 340 | reactions.js | `/api/particles/emoji-preview` |
-| `rxreset` | 341 | reactions.js | `/api/particles/emoji-preview` |
-| `rxdl` | 342 | reactions.js | none (browser only) |
-| `rxcreate` | 344 | reactions.js | `/api/particles/emoji-lottie`<br>`/api/particles/emoji-preview` |
+| `rxpick` | 209 | reactions.js | `/api/particles/emoji-preview` |
+| `rxmore` | 216 | reactions.js | none (browser only) |
+| `rxmulti` | 219 | reactions.js | `/api/particles/emoji-preview` |
+| `rxselall` | 220 | reactions.js | none (browser only) |
+| `rxclear` | 221 | reactions.js | `/api/particles/emoji-preview` |
+| `rxmany` | 223 | reactions.js | `/api/particles/emoji-preview`<br>`/api/particles/reaction-presets`<br>`/api/particles/reaction-presets/assign` |
+| `rxpopen` | 230 | reactions.js | `/api/particles/emoji-preview` |
+| `rxpadd` | 232 | reactions.js | `/api/particles/emoji-preview` |
+| `rxsave` | 234 | reactions.js | `/api/particles/emoji-preview`<br>`/api/particles/reaction-presets`<br>`/api/particles/reaction-presets/{}` |
+| `rxcreate` | 239 | reactions.js | `/api/particles/emoji-preview`<br>`/api/particles/reaction-presets` |
+| `rxpdel` | 244 | reactions.js | `/api/particles/emoji-preview`<br>`/api/particles/reaction-presets`<br>`/api/particles/reaction-presets/{}/delete` |
+| `rxclose` | 249 | reactions.js | `/api/particles/emoji-preview` |
+| `rxreset` | 250 | reactions.js | `/api/particles/emoji-preview` |
+| `rxdl` | 252 | reactions.js | `/api/particles/reaction-presets/{}` |
+| `rxzip` | 253 | reactions.js | `/api/particles/reaction-presets.zip` |
 
 ### `settings.js` (3)
 

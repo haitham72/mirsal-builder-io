@@ -1219,8 +1219,13 @@ def make_handler(c: Console):
                     raise pl.PipelineError("scale must be a number")
                 webm, meta = gates.anim_preview(c.out, int(path.split("/")[3]), int(q.get("index", ["1"])[0]), c.cfg, scale,
                                                 {"1": True, "0": False}.get(kp))
-                import base64
-                return self._json(200, {**meta, "src": "data:video/webm;base64," + base64.b64encode(webm).decode("ascii")})
+                # a file in the batch's folder (one per sticker, overwritten by the next test), never base64 (Haitham, 2026-10-14)
+                import hashlib
+                gid_ = int(path.split("/")[3])
+                f = pl.gen_dir(c.out, gid_) / "preview" / f"anim-S{meta['index']}.webm"
+                f.parent.mkdir(parents=True, exist_ok=True)
+                f.write_bytes(webm)
+                return self._json(200, {**meta, "url": f"/out/G{gid_:03d}/preview/{f.name}?v={hashlib.sha256(webm).hexdigest()[:12]}"})
             if path.startswith("/api/generations/") and path.endswith("/sheet_preview"):      # the video sheet at a given fill, small and not stored
                 q = parse_qs(urlparse(self.path).query)
                 fill = min(0.92, max(0.5, float(q.get("fill", [c.cfg.slot_fill])[0])))
@@ -1360,6 +1365,13 @@ def make_handler(c: Console):
                         if method == "GET":
                             return self._json(200, {"presets": er.emoji_presets(c.out)})
                         return self._json(201, er.save_emoji_preset(c.out, body.get("settings"), name=body.get("name"), token=body.get("token"), user=self.user["id"]))
+                    if pid == "reaction-presets":
+                        # the animation preset library: GET {presets, assign, motions}; POST {motion, settings, name?} adds the next variation of a motion
+                        if method == "GET":
+                            return self._json(200, er.library(c.out))
+                        return self._json(201, er.add_lib_preset(c.out, str(body.get("motion") or ""), body.get("settings"), name=body.get("name")))
+                    if method == "GET" and pid == "reaction-presets.zip":
+                        return self._send(200, er.lib_zip(c.out), "application/zip")
                     if pid == "emoji-batches":
                         # Reaction effects: batch create in the background; GET the newest runs, POST {tokens? (none = every emoji), mode, preset_id?, only_missing?}
                         if method == "GET":
@@ -1389,6 +1401,15 @@ def make_handler(c: Console):
                     return self._json(200, ps.update(c.out, c.lib, pid, name=body.get("name"), elements=body.get("elements"), packs=body.get("packs"),
                                                      picked=body.get("picked"), motion=body.get("motion"), save=body.get("save") is True, user=self.user["id"]))
                 act = parts[3]
+                if pid == "reaction-presets" and method == "GET" and len(parts) == 4 and act.endswith(".json"):     # {motion}_{NN}.json: the emoji-free Lottie
+                    return self._send(200, er.lib_lottie(c.out, act[:-5]), "application/json")
+                if pid == "reaction-presets" and method == "POST":
+                    if len(parts) == 4 and act == "assign":           # {tokens? (none = every emoji), preset_id: an id or "random"}
+                        return self._json(200, er.assign_lib(c.out, body.get("tokens"), body.get("preset_id")))
+                    if len(parts) == 5 and parts[4] == "delete":
+                        return self._json(200, er.delete_lib_preset(c.out, act))
+                    if len(parts) == 4:
+                        return self._json(200, er.update_lib_preset(c.out, act, settings=body.get("settings"), name=body.get("name")))
                 if pid == "emoji-batches" and method == "GET" and len(parts) == 4:         # one run's state, polled by the screen
                     return self._json(200, er.batch_state(c.out, act))
                 if method != "POST":

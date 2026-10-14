@@ -837,7 +837,8 @@ def anim_preview(out: Path, gid: int, index: int, cfg: EngineConfig, scale=None,
     """ONE sticker's animation as it would be cut with this Video size (`scale`, None = what it has now) and Keep approved size (`keep`, None = the
     batch's), from the stored video: the same process_video, layout, still and animation cache as the real re-cut, but nothing is written to the batch
     (Haitham, 2026-10-14: a size change previews on one thumbnail with Apply / Cancel, instead of re-cutting all nine on every 5% step).
-    Returns (the WebM, {cut_off_frames, frames, scale, size_mode}); the cache means Apply is then instant for this sticker."""
+    Returns (the WebM, {cut_off_frames, frames, scale, size_mode}); the route writes it to the batch's preview/ folder (never base64), and the cache
+    means Apply is then instant for this sticker."""
     from dataclasses import replace
     res = pl.read_result(out, gid)
     v = cut_sheet(res)

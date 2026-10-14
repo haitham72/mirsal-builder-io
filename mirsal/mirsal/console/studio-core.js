@@ -838,7 +838,7 @@ function vzPreview() {
     const r = await api(`/api/generations/${g.number}/anim_preview?${q}`);
     if (n !== VZ.n) return;
     if (!r.ok) { toast(r.j.error || 'Could not preview this size', 1); return vzClear(); }
-    VZ.src = r.j.src; VZ.meta = r.j; vzCard(true);
+    VZ.src = r.j.url; VZ.meta = r.j; vzCard(true);
   }, 250);
 }
 function vzStart(g, i) { if (VZ.g !== g.number || (VZ.i || null) !== (i || null)) { vzClear(); VZ.g = g.number; VZ.i = i || null; } }

@@ -14,7 +14,7 @@
 | AI chat, agent, memory, Redis, vision judge, events, Telegram chat, support agent, manual emoji batches | `docs/agent-and-chat.md` (index) |
 | HTTP contract, accounts, office LAN, Users, Trending, credits, Export to collection | `docs/api.md` (index), every route: `docs/http_route_inventory.md`; the CMS: `docs/Api/AddCollection-API .md` |
 | look of the screens (shell, rail, palette, tiles, Home, rejected-picture overrides §9) — **read before any CSS or markup change** | `docs/design.md` (index), themes `docs/dark-mode.md`, welcome `docs/onboarding.md` |
-| reactions (formerly particles; labels say reaction, routes/storage/code keep `particles`), Reaction effects, Lottie | `docs/reaction.md` (index), `docs/effects.md`, the emoji bank `docs/emoji-bank.md` |
+| reactions (formerly particles; labels say reaction, routes/storage/code keep `particles`), Reaction effects = the animation preset library (`{motion}_{NN}.json`, emoji-free Lottie, no base64; every emoji holds a preset), Lottie | `docs/reaction.md` (index), `docs/effects.md`, the emoji bank `docs/emoji-bank.md` |
 | ZIP exports, emoji bank resolution | `docs/export to team/mirsal-export-architecture.md` |
 | redesign (no action may disappear without a `renamed`/`retired` entry in `mirsal/tests/data/ui_baseline.json`) | `docs/redesign_plan.md`, `docs/ui_inventory.md` |
 | the whole app on one page | `docs/architecture.md` |

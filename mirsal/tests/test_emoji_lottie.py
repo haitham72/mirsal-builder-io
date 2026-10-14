@@ -186,6 +186,42 @@ class EmojiLottieTests(Base):
             self.assertEqual(sorted(n for n in z.namelist() if n != "manifest.json"), ["cry.lottie.json", "kiss.lottie.json", "laugh.lottie.json"])
         self.assertEqual(self.req("GET", "/api/particles/emoji-lottie.zip?tokens=school")[0], 409)
 
+    def test_the_animation_preset_library_is_emoji_free_and_every_emoji_holds_one(self):
+        """Haitham, 2026-10-14: 10-15 animation presets {motion}_{NN} grouped by motion; the Lottie carries no picture and no base64 (one
+        external `emoji` asset the chat app fills); every bank emoji holds one preset (assign; unassigned = its motion's first variation)."""
+        lib = self.req("GET", "/api/particles/reaction-presets")[1]
+        self.assertEqual(len(lib["presets"]), 15, "seeded: 5 motions x 3 variations")
+        self.assertEqual([p["id"] for p in lib["presets"]][:4], ["burst_01", "burst_02", "burst_03", "fountain_01"])
+        code, p = self.req("POST", "/api/particles/reaction-presets", {"motion": "burst", "settings": {"count": 12}})
+        self.assertEqual((code, p["id"], p["settings"]), (201, "burst_04", {"count": 12}))
+        self.assertEqual(self.req("POST", "/api/particles/reaction-presets", {"motion": "spiral", "settings": {}})[0], 400)
+        self.assertEqual(self.req("POST", "/api/particles/reaction-presets", {"motion": "burst", "settings": {"wind": 1}})[0], 400)
+        code, up = self.req("POST", "/api/particles/reaction-presets/burst_04", {"settings": {"count": 20}, "name": "Busy"})
+        self.assertEqual((code, up["settings"], up["name"]), (200, {"count": 20}, "Busy"))
+        code, data = self.req("GET", "/api/particles/reaction-presets/burst_04.json")
+        self.assertEqual(code, 200)
+        doc = data if isinstance(data, dict) else json.loads(data)
+        self.assertEqual(doc["assets"], [{"id": "emoji", "w": 160, "h": 160, "u": "", "p": "emoji.png", "e": 0}])
+        self.assertTrue(all(l["refId"] == "emoji" for l in doc["layers"]))
+        self.assertNotIn("base64", json.dumps(doc), "no picture inside: the chat app supplies the emoji")
+        self.assertEqual(self.req("POST", "/api/particles/reaction-presets/assign", {"tokens": ["laugh", "cry"], "preset_id": "random"})[1], {"assigned": 2})
+        assign = self.req("GET", "/api/particles/reaction-presets")[1]["assign"]
+        self.assertTrue(assign["laugh"].startswith("fountain_") and assign["cry"].startswith("rain_"), "a variation of each emoji's own motion")
+        self.req("POST", "/api/particles/reaction-presets/assign", {"tokens": ["kiss"], "preset_id": "burst_04"})
+        self.assertEqual(self.req("POST", "/api/particles/reaction-presets/burst_04/delete", {})[1], {"deleted": "burst_04", "unassigned": 1})
+        self.assertEqual(self.req("POST", "/api/particles/reaction-presets", {"motion": "burst", "settings": {}})[1]["id"], "burst_05", "numbers are never reused")
+        self.assertEqual(self.req("POST", "/api/particles/reaction-presets/assign", {"tokens": ["kiss"], "preset_id": "nope_01"})[0], 404)
+        code, z = self.req("GET", "/api/particles/reaction-presets.zip")
+        self.assertEqual(code, 200)
+        with zipfile.ZipFile(io.BytesIO(z)) as zz:
+            names = sorted(zz.namelist())
+            self.assertIn("burst_01.json", names)
+            self.assertIn("burst_05.json", names)
+            man = json.loads(zz.read("manifest.json"))
+            self.assertEqual(man["slot"], {"asset": "emoji", "file": "emoji.png", "px": 160})
+            self.assertTrue(man["assign"]["laugh"].startswith("fountain_"))
+            self.assertTrue(all("base64" not in zz.read(n).decode() for n in names if n != "manifest.json"))
+
     def test_unknown_emoji_is_409_and_bad_options_are_400(self):
         for token in ("not-a-token", "", None, "abc"):
             code, j = self.req("POST", "/api/particles/emoji-lottie", {"token": token})
