@@ -4,6 +4,7 @@
 - `CollectionName` (the pack's name, at most 40 characters), `Description` (required, at most 160; the collection's name when none is given),
 - `ContentSubType` (`webm` for animated packs),
 - `Media` repeated once per file (`.webm` animated, `.png` / `.webp` static),
+- `MediaThumbnails` repeated once per file, a PNG paired with `Media` by index (`thumbnail`: a `.png` as it is, a `.webp` converted, a `.webm`'s first frame),
 - `MediaMetadata`: ONE JSON string, an array of `{emoji_utf, tags}` paired with `Media` BY INDEX (never by file name).
 
 What is sent is exactly what Download .zip holds, in the same order: `Library.export_zip` (a pack) and `batches.export_zip` (a batch) choose the
@@ -90,11 +91,37 @@ def items_from_zip(data: bytes) -> tuple[dict, list[dict]]:
             ext = Path(name).suffix.lower()
             if ext not in MIME:
                 raise CollectionError(f"{name}: only .webm, .png and .webp stickers can be sent", 409)
-            items.append({"filename": name, "mime": MIME[ext], "data": z.read(name), "emoji_utf": a.get("emoji") or "🙂",
+            data = z.read(name)
+            items.append({"filename": name, "mime": MIME[ext], "data": data, "thumb": thumbnail(name, data), "emoji_utf": a.get("emoji") or "🙂",
                           "tags": tags_of(a) or tags_of({"tags": [a.get("action")]}) or "sticker"})      # never an empty tags string
     if not items:
         raise CollectionError("nothing to send: no accepted sticker", 409)
     return man.get("pack") or {}, items
+
+
+def thumbnail(name: str, data: bytes) -> bytes:
+    """The sticker as one PNG with its alpha, for `MediaThumbnails`: a `.png` as it is, a `.webp` converted, a `.webm`'s first frame
+    (the animation starts from the approved still, so that frame is its rest pose)."""
+    ext = Path(name).suffix.lower()
+    if ext == ".png":
+        return data
+    try:
+        from PIL import Image
+        if ext == ".webm":
+            import tempfile
+            from ..engine import ffmpeg as ff
+            with tempfile.TemporaryDirectory() as d:
+                f = Path(d) / "clip.webm"
+                f.write_bytes(data)
+                info = ff.probe(f, vp9_native=True)
+                img = Image.fromarray(ff.decode_full(f, info["width"], info["height"], 1, None)[0], "RGBA")
+        else:
+            img = Image.open(io.BytesIO(data)).convert("RGBA")
+        buf = io.BytesIO()
+        img.save(buf, "PNG", optimize=True)
+        return buf.getvalue()
+    except Exception as e:
+        raise CollectionError(f"{name}: its thumbnail could not be made ({e})", 409)
 
 
 def content_subtype(items: list[dict]) -> str:
@@ -104,7 +131,7 @@ def content_subtype(items: list[dict]) -> str:
 
 
 def multipart(name: str, description: str, items: list[dict]) -> tuple[bytes, str]:
-    """The form body and its Content-Type (with the boundary). Media parts in order, then MediaMetadata as one JSON string of the same length."""
+    """The form body and its Content-Type (with the boundary). Media parts in order, MediaThumbnails in the same order, then MediaMetadata as one JSON string of the same length."""
     boundary = "----mirsal" + uuid.uuid4().hex
     buf = io.BytesIO()
 
@@ -119,6 +146,10 @@ def multipart(name: str, description: str, items: list[dict]) -> tuple[bytes, st
         safe = it["filename"].replace('"', "").replace("\r", "").replace("\n", "")
         buf.write(f'--{boundary}\r\nContent-Disposition: form-data; name="Media"; filename="{safe}"\r\nContent-Type: {it["mime"]}\r\n\r\n'.encode("utf-8"))
         buf.write(it["data"] + b"\r\n")
+    for it in items:                                       # the CMS's new field (2026-10-14): one PNG per Media part, by index
+        thumb = Path(it["filename"].replace('"', "").replace("\r", "").replace("\n", "")).stem + ".png"
+        buf.write(f'--{boundary}\r\nContent-Disposition: form-data; name="MediaThumbnails"; filename="{thumb}"\r\nContent-Type: image/png\r\n\r\n'.encode("utf-8"))
+        buf.write(it["thumb"] + b"\r\n")
     field("MediaMetadata", json.dumps([{"emoji_utf": it["emoji_utf"], "tags": it["tags"]} for it in items], ensure_ascii=False))
     buf.write(f"--{boundary}--\r\n".encode())
     return buf.getvalue(), f"multipart/form-data; boundary={boundary}"

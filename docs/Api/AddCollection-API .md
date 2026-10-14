@@ -37,9 +37,10 @@ Content-Type: multipart/form-data
 | `Description` | string | yes | Short description of the pack, **at most 160 characters**. |
 | `ContentSubType` | string | yes | Media sub-type, for example `webm`. |
 | `Media` | file[] | yes | One or more emoji media files; the same field name repeated once per file. |
+| `MediaThumbnails` | file[] | yes | One PNG thumbnail per file in `Media`, **in the same order**; the same field name repeated once per file. |
 | `MediaMetadata` | string (JSON) | yes | A JSON array with one entry per file in `Media`, **in the same order**. Each entry needs `emoji_utf` and `tags`. |
 
-`Media[i]` is paired with `MediaMetadata[i]` **by index**, never by file name: the array's length must equal the number of `Media` parts.
+`Media[i]` is paired with `MediaThumbnails[i]` and `MediaMetadata[i]` **by index**, never by file name: both must have as many entries as there are `Media` parts.
 
 ```bash
 curl -X POST "https://emojicms.devinprocess.com/api/v1/Upload/AddCollection" \
@@ -48,7 +49,7 @@ curl -X POST "https://emojicms.devinprocess.com/api/v1/Upload/AddCollection" \
   -F "Description=A short description" \
   -F "ContentSubType=webm" \
   -F 'MediaMetadata=[{"emoji_utf":"😀","tags":"smile,happy"}]' \
-  -F "Media=@smile.webm"
+  -F "Media=@smile.webm" \n  -F "MediaThumbnails=@smile.png;type=image/png"
 ```
 
 | Status | Meaning |
@@ -62,7 +63,7 @@ More endpoints will be added to the CMS's reference as they become available.
 
 ## How Mirsal calls it
 
-- **What is sent** is exactly what the pack's (or batch's) Download .zip holds, in its order: `Media` once per asset (`.webm` animated, `.png` / `.webp` static), `MediaMetadata` one JSON string `[{emoji_utf, tags}]` of the same length (`emoji_utf` the asset's first grapheme cluster, `tags` its action tokens joined by `_`, never empty), `ContentSubType` `webm` for animated packs (and a mix), else the stills' own type.
+- **What is sent** is exactly what the pack's (or batch's) Download .zip holds, in its order: `Media` once per asset (`.webm` animated, `.png` / `.webp` static), `MediaThumbnails` once per asset in the same order (a PNG named `{stem}.png`: a `.png` sticker as it is, a `.webp` converted, a `.webm`'s first frame with its alpha, which is the approved still the animation starts from), `MediaMetadata` one JSON string `[{emoji_utf, tags}]` of the same length (`emoji_utf` the asset's first grapheme cluster, `tags` its action tokens joined by `_`, never empty), `ContentSubType` `webm` for animated packs (and a mix), else the stills' own type.
 - **Limits are checked before anything is uploaded**: a name over 40 or a description over 160 characters is a 400 with a sentence; the dialog caps both fields, offers a longer pack name cut at a word for you to edit, and asks for the description. An API caller who sends no description gets the collection's name as the description.
 - **Answers**: a 2xx counts as accepted unless its JSON says `Success: false`; the refusal's words come from `ErrorMessages` (a list is joined with `; `), else an older `message` / validation answer, else the status. A 401 says the developer key was not accepted and how to replace it. The created pack's `Result` is returned as `result`.
 - **Configuration** (`mirsal/.env`): `MIRSAL_COLLECTION_API_CREDENTIALS` = the `sk-...` developer key (sent as Bearer; a legacy `user:password` or its base64 still sends HTTP Basic), `MIRSAL_COLLECTION_API_URL` = the CMS (the code's default is `https://emojicms.ehub.ae`; the example above uses `https://emojicms.devinprocess.com`). Every export, ok or not, is a line in `out/collection_exports.jsonl`, never the key.

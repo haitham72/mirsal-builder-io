@@ -111,6 +111,10 @@ class CollectionTests(unittest.TestCase):
             self.assertEqual([v for _, _, v in media], [z.read(a["filename"]) for a in man["assets"]])
             self.assertEqual([m["emoji_utf"] for m in meta], [a["emoji"] for a in man["assets"]])
         self.assertTrue(all(t == "image/png" for _, t, _ in media))
+        thumbs = [(f, t, v) for n, f, t, v in parts if n == "MediaThumbnails"]      # one PNG per Media part, by index; a PNG sticker is its own thumbnail
+        self.assertEqual([f for f, _, _ in thumbs], [Path(f).stem + ".png" for f, _, _ in media])
+        self.assertEqual([v for _, _, v in thumbs], [v for _, _, v in media])
+        self.assertTrue(all(t == "image/png" for _, t, _ in thumbs))
         for m in meta:
             self.assertRegex(m["tags"], r"^[a-z0-9]+(_[a-z0-9]+)*$")
         log = [json.loads(x) for x in (self.c.out / "collection_exports.jsonl").read_text(encoding="utf-8").splitlines()]
@@ -196,6 +200,24 @@ class CollectionTests(unittest.TestCase):
 
     def test_tags_are_the_action_tokens_without_the_emoji(self):
         self.assertEqual(col.tags_of({"tags": ["laugh", "rofl", "LMAO", "🤣", "eye-roll", "laugh"]}), "laugh_rofl_lmao_eye_roll")
+
+    def test_a_thumbnail_is_a_png_with_alpha_from_a_webp_or_a_webm_first_frame(self):
+        import numpy as np
+        from PIL import Image
+        from mirsal.engine import ffmpeg as ff
+        frames = np.zeros((3, 64, 64, 4), np.uint8)
+        frames[:, 16:48, 16:48] = (255, 0, 0, 255)                     # a red square on transparency
+        buf = io.BytesIO(); Image.fromarray(frames[0], "RGBA").save(buf, "WEBP", lossless=True)
+        with tempfile.TemporaryDirectory() as d:
+            ff.encode_webm(frames, 30, 30, Path(d) / "a.webm")
+            webm = (Path(d) / "a.webm").read_bytes()
+        for name, data in (("a.webp", buf.getvalue()), ("a.webm", webm)):
+            img = Image.open(io.BytesIO(col.thumbnail(name, data)))
+            self.assertEqual((img.format, img.mode, img.size), ("PNG", "RGBA", (64, 64)), name)
+            self.assertEqual((img.getpixel((0, 0))[3], img.getpixel((32, 32))[3] > 200), (0, True), name)
+        self.assertEqual(col.thumbnail("a.png", b"same bytes"), b"same bytes")
+        with self.assertRaises(col.CollectionError):
+            col.thumbnail("a.webm", b"not a video")
 
 
 if __name__ == "__main__":
