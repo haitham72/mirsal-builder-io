@@ -14,7 +14,7 @@ no motion presets (burst/fountain/vortex/rain/confetti). Every particle is a Lot
   (`REACTION_SECONDS`), every current slider kept (Speed, Gravity, Swirl, Rotation, Amount, Spread, Fade out start / duration / variation, Size,
   Size variation, Size in / out).
 - **Each particle is its own instance of the Lottie** (its own playhead from its birth), never a raster.
-- **The export embeds the origin Lottie and every morph target every time:** one self-contained JSON; each source becomes a precomp asset
+- **The export embeds every Lottie it uses, every time (several Lotties in one JSON):** the origin and each morph target once each, however many particles and children show them; one self-contained JSON; each source becomes a precomp asset
   (`assets[{id, layers, ...}]`, its own `w/h/ip/op`); each particle is a precomp layer (`ty: 0`, `refId`) with the trajectory keyframes
   (`p`, `s`, `r`, `o`), scale = particle px / source long side, `sr` (time stretch) = 30 / source fps so the source plays at its own speed.
   Asset ids are prefixed per source so two files never collide. No images, no base64 added by us.
@@ -25,7 +25,9 @@ no motion presets (burst/fountain/vortex/rain/confetti). Every particle is a Lot
    origin fades out / target fades in over the crossfade; the target's playhead starts at the morph moment. No target = no morph.
 2. **Morph auxiliary (children, 1 level):** setting `children` (0-12, 0 = off). When a particle's **fade starts** it bursts `children` new
    particles from where it is at that moment, with the **exact same settings** (same physics, fades, size, morph) and its own seeded fan; children
-   never spawn children. Engine: a second pass in `trajectories()` (or a `child_bursts()` beside it) whose origins are the parents' positions at
+   never spawn children. **Child size at birth** (Haitham): relative to the parent's drawn size at that moment, `child_size` (0.1-3x, default
+   **0.5x**, which is what it will be most of the time) and `child_size_var` (a seeded spread per child, so one can be 1x or 3x while most sit
+   near 0.5x); the child's own Size in / out and growth then apply on top. Engine: a second pass in `trajectories()` (or a `child_bursts()` beside it) whose origins are the parents' positions at
    their fade start and whose spawn frames are those frames; children die by `duration - QUIET_TAIL` like everyone. The layer count grows
    (count x (1 + children)): cap the total (e.g. 400) with a clear 400 error.
 3. **Cheap spin:** setting `flip` (turns per second, 0 = off) + `flip_var`: the particle's horizontal scale goes 100% -> -100% -> 100% (cos of
