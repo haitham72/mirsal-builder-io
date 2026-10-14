@@ -27,7 +27,7 @@ const RXPAGE=120;                                /* wall tiles drawn at a time (
    presets are previewed on; ek: the preset in the editor; hover: the emoji pointed at; pv / par: preview url and params per request; ppv: a card's
    preview; multi / sel / anchor: Select; apply: what Assign gives ('random' or a preset id); shown: wall tiles drawn. */
 const RXQ={q:'',f:''};
-const RXS={bank:null,rows:null,start:null,lib:null,sample:'happy',ek:null,hover:'',pv:{},par:{},ppv:{},hT:0,t:0,multi:false,sel:new Set(),anchor:'',apply:'random',shown:RXPAGE};
+const RXS={bank:null,rows:null,start:null,lib:null,sample:'happy',ek:null,hover:'',pv:{},par:{},ppv:{},hT:0,t:0,multi:false,sel:new Set(),anchor:'',apply:'random',shown:RXPAGE,mopen:new Set(),psel:new Set(),panchor:''};
 const rxStart=()=>RXS.start||RXSTART;
 
 /* ---------- values ---------- */
@@ -73,20 +73,28 @@ function rxTile(m){
   `<span class=rx-g>${esc(m.emoji||'?')}</span>${ticked?`<span class=rx-tick>${ic('check')}</span>`:''}${pv?`<img class=rx-fx src="${esc(pv)}" style="${rxFxStyle(RXS.par[key])}" alt="">`:''}</button>`}
 function rxMoreHtml(n){const rest=n-Math.min(n,RXS.shown);
  return rest>0?`<div class=rx-more data-rxmore><button class="btn sm" data-act=rxmore>Load more</button><small class=mut>${Math.min(n,RXS.shown)} of ${n} shown · ${rest} more</small></div>`:'<div data-rxmore></div>'}
-/* the preset library: one column per motion, its variations under it */
+/* the preset library (Haitham, 2026-10-14): one ROW per motion, collapsed until opened; an open motion shows its variations side by side.
+   An x on every motion (it and all its variations) and on every variation; Select (a dragged box, a click, Shift-click, Select all) + Remove. */
 function rxCard(p,used){
- const url=RXS.ppv[p.id+'|'+RXS.sample]||'',open=RXS.ek&&RXS.ek.id===p.id;
- return `<article class="rx-card${open?' on':''}" data-rxcard=${esc(p.id)}><div class=rx-stage>${rxStageHtml(rxRow(RXS.sample).emoji,url,p.id)}${url?'':'<span class=spin></span>'}</div>
-  <div class=rx-meta><span class=rx-mt><b>${esc(p.id)}</b><small class=mut>${esc(p.name)} · ${rxPlural(used||0,'emoji')}</small></span><button class=link data-act=rxpdel data-id="${esc(p.id)}" aria-label="Remove ${esc(p.id)}" title="Remove this preset (its emojis go back to their motion's first variation)">${ic('x')}</button></div>
-  <div class=rx-acts><button class="btn sm${open?' pri':''}" data-act=rxpopen data-id="${esc(p.id)}">Open</button><button class="btn sm" data-act=rxdl data-id="${esc(p.id)}" title="${esc(p.id)}.json: the Lottie, no picture inside (the app fills the 'emoji' asset)">${ic('download')} JSON</button></div></article>`}
+ const url=RXS.ppv[p.id+'|'+RXS.sample]||'',open=RXS.ek&&RXS.ek.id===p.id,sel=RXS.psel.has(p.id);
+ return `<article class="rx-card rx-var${open?' on':''}${sel?' sel':''}" data-rxcard=${esc(p.id)}>`+
+  `<button class=rx-x data-act=rxpdel data-id="${esc(p.id)}" aria-label="Remove ${esc(p.id)}" title="Remove ${esc(p.id)} (its emojis go back to their motion's first variation)">${ic('x')}</button>`+
+  `<button class=rx-vsel data-act=rxpsel data-id="${esc(p.id)}" aria-pressed=${sel} aria-label="Select ${esc(p.id)}">${sel?ic('check'):''}</button>`+
+  `<div class=rx-stage data-act=rxpopen data-id="${esc(p.id)}" title="Open ${esc(p.id)}">${rxStageHtml(rxRow(RXS.sample).emoji,url,p.id)}${url?'':'<span class=spin></span>'}</div>`+
+  `<div class=rx-meta><span class=rx-mt><b>${esc(p.id)}</b><small class=mut>${rxPlural(used||0,'emoji')}</small></span><button class=link data-act=rxdl data-id="${esc(p.id)}" title="${esc(p.id)}.json" aria-label="Download ${esc(p.id)}.json">${ic('download')}</button></div></article>`}
 function rxLibHtml(){
  const ps=rxPresets();if(!RXS.lib)return `<section class=rx-made data-rxlib><div class=sh>Animation presets</div><span class=spin></span></section>`;
- const used=rxUse(),s=rxRow(RXS.sample);
+ const used=rxUse(),s=rxRow(RXS.sample),n=RXS.psel.size;
  return `<section class=rx-made data-rxlib><div class=rx-ph><div class=sh>Animation presets <small class=mut>${ps.length}</small></div>`+
-  `<small class=mut>Previewed on <b>${esc(s.emoji)} ${esc(s.token)}</b>: click any emoji below to preview on it</small><span class=sp></span>`+
+  `<small class=mut>Previewed on <b>${esc(s.emoji)} ${esc(s.token)}</b> · drag a box or click the corner to select</small><span class=sp></span>`+
+  `${n?`<button class=link data-act=rxpclear>Clear (${n})</button><button class="btn sm dng" data-act=rxpremove>${ic('trash')} Remove ${n}</button>`:''}`+
+  `<button class=link data-act=rxpselall>Select all</button>`+
   `<button class="btn sm" data-act=rxzip title="Every preset as {motion}_{NN}.json, plus manifest.json with the preset of every emoji">${ic('download')} Export all (.zip)</button></div>`+
-  `<div class=rx-motions>${RXPRESETS.map(mo=>`<div class=rx-mcol><div class=rx-mh><b>${esc(mo)}</b><button class=link data-act=rxpadd data-m=${mo}>+ Variation</button></div>`+
-   `${ps.filter(p=>p.motion===mo).map(p=>rxCard(p,used[p.id])).join('')||'<small class=mut>No variation yet</small>'}</div>`).join('')}</div></section>`}
+  `<div class=rx-mrows data-rxrows>${RXPRESETS.map(mo=>{const vs=ps.filter(p=>p.motion===mo),open=RXS.mopen.has(mo);
+   return `<div class="rx-mrow${open?' open':''}"><div class=rx-mh><button class=rx-mtog data-act=rxmotion data-m=${mo} aria-expanded=${open}><i class=rx-caret></i><b>${esc(mo)}</b>`+
+    `${open?'':`<span class=rx-mids>${vs.map(p=>esc(p.id)).join(' | ')||'no variation'}</span>`}<small class=mut>${rxPlural(vs.length,'variation')}</small></button>`+
+    `<button class=link data-act=rxpadd data-m=${mo}>+ Variation</button>${vs.length?`<button class=rx-x data-act=rxmdel data-m=${mo} aria-label="Remove ${esc(mo)}" title="Remove ${esc(mo)} and its ${rxPlural(vs.length,'variation')}">${ic('x')}</button>`:''}</div>`+
+    `${open?`<div class=rx-vars>${vs.map(p=>rxCard(p,used[p.id])).join('')||'<small class=mut>No variation yet: + Variation</small>'}</div>`:''}</div>`}).join('')}</div></section>`}
 function rxSlider(k,o){
  const v=rxVal(k,o);
  return `<label class=rx-sl><span class=mut>${o[1]}</span><input type=range min=${o[2]} max=${o[3]} step=${o[4]} value="${v??(o[2]+o[3])/2}" data-rxo=${o[0]} aria-label="${o[1]}"><output>${rxFmt(o,v)}</output></label>`}
@@ -173,10 +181,10 @@ async function rxFxOn(host,glyph){host.dataset.rxon='1';await rxBankEnsure();con
  host.classList.add('rxon');host.insertAdjacentHTML('beforeend',`<img class=rx-fx src="${esc(pv.url)}" style="${rxFxStyle(pv.par)}" alt="">`)}
 function rxFxOff(host){host.dataset.rxon='';host.classList.remove('rxon');const i=host.querySelector(':scope > .rx-fx');if(i)i.remove()}
 async function rxLoadLib(quiet){const r=await api('/api/particles/reaction-presets');RXS.lib=r.ok?{presets:r.j.presets||[],assign:r.j.assign||{}}:{presets:[],assign:{}};if(!quiet&&route_==='reactions')rxDraw()}
-/* each card shows its preset on the sample emoji, at its real size */
+/* each card of an OPEN motion shows its preset on the sample emoji, at its real size (closed motions ask for nothing) */
 async function rxCardPreviews(){
  const t=RXS.sample;
- for(const p of rxPresets()){
+ for(const p of rxPresets().filter(x=>RXS.mopen.has(x.motion))){
   const k=p.id+'|'+t;if(RXS.ppv[k]!==undefined)continue;RXS.ppv[k]='';
   const r=await post('/api/particles/emoji-preview',{...rxBodyOf(t,p.settings,p.motion),size:RXPX});
   RXS.ppv[k]=r.ok?r.j.url:'';
@@ -212,7 +220,7 @@ ACT.rxpick=(el,ev)=>{
   if(ev&&ev.shiftKey&&RXS.anchor&&RXS.anchor!==t){const ts=rxList().map(m=>m.token),a=ts.indexOf(RXS.anchor),b=ts.indexOf(t);
    if(a>=0&&b>=0){ts.slice(Math.min(a,b),Math.max(a,b)+1).forEach(x=>RXS.sel.add(x));RXS.anchor=t;rxGridRedraw();rxManyRedraw();return}}
   if(RXS.sel.has(t))RXS.sel.delete(t);else RXS.sel.add(t);RXS.anchor=t;rxTileRedraw(t);rxManyRedraw();return}
- RXS.sample=t;RXS.ek=rxEdFrom(rxPre(rxPresetOf(t)),t);RXS.hover='';rxDraw();rxPlay(t)};
+ RXS.sample=t;RXS.ek=rxEdFrom(rxPre(rxPresetOf(t)),t);if(RXS.ek.motion)RXS.mopen.add(RXS.ek.motion);RXS.hover='';rxDraw();rxPlay(t)};
 ACT.rxmore=()=>{const list=rxList(),from=RXS.shown;RXS.shown+=RXPAGE;
  const w=document.querySelector&&document.querySelector('[data-rxwall]');if(w)w.insertAdjacentHTML('beforeend',list.slice(from,RXS.shown).map(rxTile).join(''));
  rxSwap('[data-rxmore]',rxMoreHtml(list.length))};
@@ -227,9 +235,9 @@ ACT.rxmany=async()=>{
  await rxLoadLib(true);RXS.sel.clear();RXS.multi=false;rxDraw();
  toast(`${rxPlural(r.j.assigned,'emoji')} now hold ${RXS.apply==='random'?'a variation of their own motion':RXS.apply}`)};
 /* the library */
-ACT.rxpopen=el=>{const p=rxPre(el.dataset.id);if(!p)return;RXS.ek=rxEdFrom(p,RXS.sample);rxDraw();rxPlay(RXS.sample);
+ACT.rxpopen=el=>{const p=rxPre(el.dataset.id);if(!p)return;RXS.mopen.add(p.motion);RXS.ek=rxEdFrom(p,RXS.sample);rxDraw();rxPlay(RXS.sample);
  const ed=document.querySelector&&document.querySelector('[data-rxed]');if(ed&&ed.scrollIntoView)ed.scrollIntoView({block:'nearest',behavior:'smooth'})};
-ACT.rxpadd=el=>{const mo=el.dataset.m,first=rxPresets().find(p=>p.motion===mo);
+ACT.rxpadd=el=>{const mo=el.dataset.m,first=rxPresets().find(p=>p.motion===mo);RXS.mopen.add(mo);
  RXS.ek={...rxEdFrom(first,RXS.sample,mo),id:'',name:''};rxDraw();rxPlay(RXS.sample)};
 ACT.rxsave=async()=>{
  const k=RXS.ek;if(!k||!k.id||k.busy)return;k.busy=true;rxEdRedraw();
@@ -241,11 +249,37 @@ ACT.rxcreate=async()=>{
  const r=await post('/api/particles/reaction-presets',{motion:k.motion,settings:rxSettings(k)});k.busy=false;
  if(!r.ok){k.err=r.j.error||'Could not add the variation';return rxEdRedraw()}
  await rxLoadLib(true);RXS.ek={...k,id:r.j.id,name:r.j.name};rxDraw();toast(`${r.j.id} added`)};
-ACT.rxpdel=async el=>{
- const id=el.dataset.id;
- const r=await post(`/api/particles/reaction-presets/${encodeURIComponent(id)}/delete`,{});if(!r.ok)return toast(r.j.error||'Could not remove it',1);
- if(RXS.ek&&RXS.ek.id===id)RXS.ek=null;if(RXQ.f===id)RXQ.f='';if(RXS.apply===id)RXS.apply='random';
- await rxLoadLib(true);rxDraw();toast(`${id} removed${r.j.unassigned?`; ${rxPlural(r.j.unassigned,'emoji')} went back to their motion's first variation`:''}`)};
+async function rxRemove(ids,what){
+ const r=await post('/api/particles/reaction-presets/delete',{ids});if(!r.ok)return toast(r.j.error||'Could not remove it',1);
+ if(RXS.ek&&ids.includes(RXS.ek.id))RXS.ek=null;if(ids.includes(RXQ.f))RXQ.f='';if(ids.includes(RXS.apply))RXS.apply='random';ids.forEach(x=>RXS.psel.delete(x));
+ await rxLoadLib(true);rxDraw();toast(`${what} removed${r.j.unassigned?`; ${rxPlural(r.j.unassigned,'emoji')} went back to their motion's first variation`:''}`)}
+ACT.rxpdel=el=>rxRemove([el.dataset.id],el.dataset.id);
+ACT.rxmdel=el=>{const mo=el.dataset.m,ids=rxPresets().filter(p=>p.motion===mo).map(p=>p.id);if(!ids.length)return;
+ confirmDlg(`Remove ${mo} and its ${rxPlural(ids.length,'variation')} (${ids.join(', ')})?`,()=>rxRemove(ids,mo))};
+ACT.rxpremove=()=>{const ids=[...RXS.psel];if(!ids.length)return;confirmDlg(`Remove ${rxPlural(ids.length,'preset')} (${ids.join(', ')})?`,()=>rxRemove(ids,rxPlural(ids.length,'preset')))};
+ACT.rxmotion=el=>{const mo=el.dataset.m;if(RXS.mopen.has(mo))RXS.mopen.delete(mo);else RXS.mopen.add(mo);rxSwap('[data-rxlib]',rxLibHtml());rxCardPreviews()};
+/* selecting presets: the corner box ticks one (Shift: the range from the last tick, in library order), Select all, Clear */
+ACT.rxpsel=(el,ev)=>{const id=el.dataset.id,order=rxPresets().map(p=>p.id);
+ if(ev&&ev.shiftKey&&RXS.panchor&&RXS.panchor!==id){const a=order.indexOf(RXS.panchor),b=order.indexOf(id);if(a>=0&&b>=0)order.slice(Math.min(a,b),Math.max(a,b)+1).forEach(x=>RXS.psel.add(x))}
+ else if(RXS.psel.has(id))RXS.psel.delete(id);else RXS.psel.add(id);
+ RXS.panchor=id;rxSwap('[data-rxlib]',rxLibHtml())};
+ACT.rxpselall=()=>{rxPresets().forEach(p=>RXS.psel.add(p.id));rxSwap('[data-rxlib]',rxLibHtml())};
+ACT.rxpclear=()=>{RXS.psel.clear();RXS.panchor='';rxSwap('[data-rxlib]',rxLibHtml())};
+/* a box dragged over the library selects every variation card it touches (Shift adds to the selection) */
+const RXBOX={on:false,x:0,y:0,el:null,add:false};
+document.addEventListener('pointerdown',ev=>{
+ const lib=ev.target&&ev.target.closest&&ev.target.closest('[data-rxrows]');if(!lib||route_!=='reactions'||ev.button!==0)return;
+ if(ev.target.closest('button,a,input,select,.rx-stage'))return;
+ Object.assign(RXBOX,{on:true,x:ev.clientX,y:ev.clientY,add:ev.shiftKey});
+ RXBOX.el=document.createElement('div');RXBOX.el.className='rx-box';document.body.appendChild(RXBOX.el)});
+document.addEventListener('pointermove',ev=>{if(!RXBOX.on)return;
+ const x=Math.min(ev.clientX,RXBOX.x),y=Math.min(ev.clientY,RXBOX.y),w=Math.abs(ev.clientX-RXBOX.x),h=Math.abs(ev.clientY-RXBOX.y);
+ Object.assign(RXBOX.el.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'})});
+document.addEventListener('pointerup',ev=>{if(!RXBOX.on)return;RXBOX.on=false;
+ const r=RXBOX.el.getBoundingClientRect();RXBOX.el.remove();RXBOX.el=null;if(r.width<4&&r.height<4)return;
+ if(!RXBOX.add)RXS.psel.clear();
+ document.querySelectorAll('[data-rxcard]').forEach(c=>{const b=c.getBoundingClientRect();if(b.right>r.left&&b.left<r.right&&b.bottom>r.top&&b.top<r.bottom)RXS.psel.add(c.dataset.rxcard)});
+ rxSwap('[data-rxlib]',rxLibHtml())});
 ACT.rxclose=()=>{RXS.ek=null;rxDraw()};
 ACT.rxreset=el=>{const k=RXS.ek;if(!k)return;const s=rxEdFrom(null,k.token,k.motion);if(el.dataset.g==='sim')k.sim=s.sim;else RXO.forEach(o=>k[o[0]]=s[o[0]]);rxEdRedraw();rxPlay(k.token)};
 const rxSave=(href,name)=>{const a=document.createElement('a');a.href=href;a.download=name;document.body.appendChild(a);a.click();a.remove()};

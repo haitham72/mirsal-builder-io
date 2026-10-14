@@ -1404,6 +1404,8 @@ def make_handler(c: Console):
                 if pid == "reaction-presets" and method == "GET" and len(parts) == 4 and act.endswith(".json"):     # {motion}_{NN}.json: the emoji-free Lottie
                     return self._send(200, er.lib_lottie(c.out, act[:-5]), "application/json")
                 if pid == "reaction-presets" and method == "POST":
+                    if len(parts) == 4 and act == "delete":           # {ids: [...]}: several at once (a motion's x, Select + Remove)
+                        return self._json(200, er.delete_lib_presets(c.out, body.get("ids")))
                     if len(parts) == 4 and act == "assign":           # {tokens? (none = every emoji), preset_id: an id or "random"}
                         return self._json(200, er.assign_lib(c.out, body.get("tokens"), body.get("preset_id")))
                     if len(parts) == 5 and parts[4] == "delete":

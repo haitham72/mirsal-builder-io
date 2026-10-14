@@ -191,6 +191,10 @@ class EmojiLottieTests(Base):
         external `emoji` asset the chat app fills); every bank emoji holds one preset (assign; unassigned = its motion's first variation)."""
         lib = self.req("GET", "/api/particles/reaction-presets")[1]
         self.assertEqual(len(lib["presets"]), 15, "seeded: 5 motions x 3 variations")
+        self.assertEqual(self.req("POST", "/api/particles/reaction-presets/vortex_03/delete", {})[1]["deleted"], "vortex_03", "the first delete on a fresh library (was a 400 'last')")
+        code, j = self.req("POST", "/api/particles/reaction-presets/delete", {"ids": ["confetti_01", "confetti_02", "confetti_03"]})
+        self.assertEqual((code, j["deleted"]), (200, ["confetti_01", "confetti_02", "confetti_03"]), "a whole motion at once")
+        self.assertEqual(self.req("POST", "/api/particles/reaction-presets/delete", {"ids": ["nope_01"]})[0], 404)
         self.assertEqual([p["id"] for p in lib["presets"]][:4], ["burst_01", "burst_02", "burst_03", "fountain_01"])
         code, p = self.req("POST", "/api/particles/reaction-presets", {"motion": "burst", "settings": {"count": 12}})
         self.assertEqual((code, p["id"], p["settings"]), (201, "burst_04", {"count": 12}))

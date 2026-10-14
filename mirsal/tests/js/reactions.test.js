@@ -14,15 +14,36 @@ const screen = () => {
   return r;
 };
 
-test('the library: one column per motion, each preset a card with its id, JSON and Open; Export all', () => {
+test('the library: one row per motion, collapsed (its ids in a line) until opened; an open motion shows its variations, each with an x', () => {
   const r = screen();
-  const h = r('rxHtml()');
+  let h = r('rxHtml()');
   assert.match(h, /Animation presets <small class=mut>3<\/small>/);
-  for (const mo of ['burst', 'fountain', 'vortex', 'rain', 'confetti']) assert.match(h, new RegExp(`<div class=rx-mh><b>${mo}</b><button class=link data-act=rxpadd data-m=${mo}>\\+ Variation`));
-  assert.match(h, /data-rxcard=burst_01[\s\S]*<b>burst_01<\/b><small class=mut>Burst soft · 1 emoji<\/small>/, 'happy holds its motion\'s first variation');
-  assert.match(h, /data-act=rxdl data-id="burst_02"[^>]*>.*JSON/);
+  for (const mo of ['burst', 'fountain', 'vortex', 'rain', 'confetti']) assert.match(h, new RegExp(`data-act=rxmotion data-m=${mo} aria-expanded=false`));
+  assert.match(h, /<b>burst<\/b><span class=rx-mids>burst_01 \| burst_02<\/span><small class=mut>2 variations<\/small>/);
+  assert.match(h, /data-act=rxmdel data-m=burst[^>]*title="Remove burst and its 2 variations"/, 'an x on the motion');
+  assert.doesNotMatch(h, /data-rxcard=/, 'collapsed: no cards, no previews asked');
+  r("ACT.rxmotion({dataset:{m:'burst'}})");
+  h = r('rxLibHtml()');
+  assert.match(h, /data-act=rxmotion data-m=burst aria-expanded=true/);
+  assert.match(h, /data-rxcard=burst_01><button class=rx-x data-act=rxpdel data-id="burst_01"/, 'an x on every variation, no need to open it');
+  assert.match(h, /<b>burst_01<\/b><small class=mut>1 emoji<\/small>/);
+  assert.doesNotMatch(h, /data-rxcard=rain_01/, 'rain stays collapsed');
   assert.match(h, /data-act=rxzip/);
-  assert.doesNotMatch(h, /Your reactions|data-act=rxbatch|Create reaction/, 'the per-emoji reactions and batches are gone');
+});
+
+test('removing: one variation, a whole motion or the selected ones, in ONE request', async () => {
+  const r = screen();
+  r("globalThis.confirmDlg=(t,f)=>{globalThis.CONF=t;f()};POSTREPLIES.push({ok:true,j:{deleted:['burst_01','burst_02'],unassigned:1}});APIREPLIES.push({ok:true,j:" + LIB + "})");
+  await r("ACT.rxmdel({dataset:{m:'burst'}})");
+  assert.deepEqual(J(r, 'POSTS.at(-1)'), ['/api/particles/reaction-presets/delete', { ids: ['burst_01', 'burst_02'] }]);
+  assert.match(r('CONF'), /Remove burst and its 2 variations \(burst_01, burst_02\)\?/);
+  r("ACT.rxpsel({dataset:{id:'burst_01'}},{});ACT.rxpsel({dataset:{id:'rain_01'}},{shiftKey:true})");
+  assert.deepEqual(J(r, '[...RXS.psel]'), ['burst_01', 'burst_02', 'rain_01'], 'Shift ticks the range in library order');
+  assert.match(r('rxLibHtml()'), /data-act=rxpremove>.*Remove 3/);
+  r("POSTREPLIES.push({ok:true,j:{deleted:['burst_01','burst_02','rain_01'],unassigned:0}});APIREPLIES.push({ok:true,j:" + LIB + "})");
+  await r('ACT.rxpremove()');
+  assert.deepEqual(J(r, 'POSTS.at(-1)')[1], { ids: ['burst_01', 'burst_02', 'rain_01'] });
+  assert.equal(r('RXS.psel.size'), 0);
 });
 
 test('each emoji holds a preset: its own, else its motion\'s first variation; the hover plays it with that emoji, without hue', () => {

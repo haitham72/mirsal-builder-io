@@ -530,22 +530,36 @@ def update_lib_preset(out: Path, pid: str, *, settings=None, name=None) -> dict:
     return rec
 
 
-def delete_lib_preset(out: Path, pid: str) -> dict:
-    """Remove a preset; the emojis that held it go back to their motion's first variation. Its number is never reused."""
+def delete_lib_presets(out: Path, ids) -> dict:
+    """Remove several presets at once (a motion's x removes all its variations; Select + Remove): their emojis go back to their motion's first
+    variation; their numbers are never reused. At least one preset stays (409). 404 when an id is unknown."""
+    ids = [str(x) for x in dict.fromkeys(ids or [])]
+    if not ids:
+        raise SetError("ids must be a non-empty list")
     with _LOCK:
         d = _lib_read(out)
-        rec = next((p for p in d["presets"] if p["id"] == pid), None)
-        if rec is None:
-            raise SetError(f"no preset {pid}", 404)
-        if len(d["presets"]) == 1:
-            raise SetError("the last preset cannot be removed", 409)
-        d["presets"] = [p for p in d["presets"] if p["id"] != pid]
-        d.setdefault("last", {})[rec["motion"]] = max(d["last"].get(rec["motion"], 0), rec["n"])
-        freed = [t for t, v in d["assign"].items() if v == pid]
+        have = {p["id"]: p for p in d["presets"]}
+        bad = [x for x in ids if x not in have]
+        if bad:
+            raise SetError(f"no preset {', '.join(bad)}", 404)
+        if len(ids) >= len(d["presets"]):
+            raise SetError("at least one preset must stay", 409)
+        last = d.setdefault("last", {})                    # the highest number each motion ever had, so a number is never reused
+        for x in ids:
+            m = have[x]["motion"]
+            last[m] = max(last.get(m, 0), have[x]["n"])
+        d["presets"] = [p for p in d["presets"] if p["id"] not in ids]
+        freed = [t for t, v in d["assign"].items() if v in ids]
         for t in freed:
             del d["assign"][t]
         _lib_write(out, d)
-    return {"deleted": pid, "unassigned": len(freed)}
+    return {"deleted": ids, "unassigned": len(freed)}
+
+
+def delete_lib_preset(out: Path, pid: str) -> dict:
+    """Remove one preset (see delete_lib_presets)."""
+    r = delete_lib_presets(out, [pid])
+    return {"deleted": pid, "unassigned": r["unassigned"]}
 
 
 def assign_lib(out: Path, tokens=None, preset_id=None) -> dict:

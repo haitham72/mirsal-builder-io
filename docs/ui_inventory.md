@@ -459,25 +459,31 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `pmlist` | 49 | projmap.js | `/api/generations/removed`<br>`/api/history` |
 | `pmopen` | 51 | projmap.js | `/api/generations/removed`<br>`/api/generations/{}/particles`<br>`/api/history` |
 
-### `reactions.js` (15)
+### `reactions.js` (21)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `rxpick` | 209 | reactions.js | `/api/particles/emoji-preview` |
-| `rxmore` | 216 | reactions.js | none (browser only) |
-| `rxmulti` | 219 | reactions.js | `/api/particles/emoji-preview` |
-| `rxselall` | 220 | reactions.js | none (browser only) |
-| `rxclear` | 221 | reactions.js | `/api/particles/emoji-preview` |
-| `rxmany` | 223 | reactions.js | `/api/particles/emoji-preview`<br>`/api/particles/reaction-presets`<br>`/api/particles/reaction-presets/assign` |
-| `rxpopen` | 230 | reactions.js | `/api/particles/emoji-preview` |
-| `rxpadd` | 232 | reactions.js | `/api/particles/emoji-preview` |
-| `rxsave` | 234 | reactions.js | `/api/particles/emoji-preview`<br>`/api/particles/reaction-presets`<br>`/api/particles/reaction-presets/{}` |
-| `rxcreate` | 239 | reactions.js | `/api/particles/emoji-preview`<br>`/api/particles/reaction-presets` |
-| `rxpdel` | 244 | reactions.js | `/api/particles/emoji-preview`<br>`/api/particles/reaction-presets`<br>`/api/particles/reaction-presets/{}/delete` |
-| `rxclose` | 249 | reactions.js | `/api/particles/emoji-preview` |
-| `rxreset` | 250 | reactions.js | `/api/particles/emoji-preview` |
-| `rxdl` | 252 | reactions.js | `/api/particles/reaction-presets/{}` |
-| `rxzip` | 253 | reactions.js | `/api/particles/reaction-presets.zip` |
+| `rxpick` | 217 | reactions.js | `/api/particles/emoji-preview` |
+| `rxmore` | 224 | reactions.js | none (browser only) |
+| `rxmulti` | 227 | reactions.js | `/api/particles/emoji-preview` |
+| `rxselall` | 228 | reactions.js | none (browser only) |
+| `rxclear` | 229 | reactions.js | `/api/particles/emoji-preview` |
+| `rxmany` | 231 | reactions.js | `/api/particles/emoji-preview`<br>`/api/particles/reaction-presets`<br>`/api/particles/reaction-presets/assign` |
+| `rxpopen` | 238 | reactions.js | `/api/particles/emoji-preview` |
+| `rxpadd` | 240 | reactions.js | `/api/particles/emoji-preview` |
+| `rxsave` | 242 | reactions.js | `/api/particles/emoji-preview`<br>`/api/particles/reaction-presets`<br>`/api/particles/reaction-presets/{}` |
+| `rxcreate` | 247 | reactions.js | `/api/particles/emoji-preview`<br>`/api/particles/reaction-presets` |
+| `rxpdel` | 256 | reactions.js | `/api/particles/reaction-presets`<br>`/api/particles/reaction-presets/delete` |
+| `rxmdel` | 257 | reactions.js | `/api/particles/reaction-presets`<br>`/api/particles/reaction-presets/delete` |
+| `rxpremove` | 259 | reactions.js | `/api/particles/reaction-presets`<br>`/api/particles/reaction-presets/delete` |
+| `rxmotion` | 260 | reactions.js | `/api/particles/emoji-preview` |
+| `rxpsel` | 262 | reactions.js | none (browser only) |
+| `rxpselall` | 266 | reactions.js | none (browser only) |
+| `rxpclear` | 267 | reactions.js | none (browser only) |
+| `rxclose` | 283 | reactions.js | `/api/particles/emoji-preview` |
+| `rxreset` | 284 | reactions.js | `/api/particles/emoji-preview` |
+| `rxdl` | 286 | reactions.js | `/api/particles/reaction-presets/{}` |
+| `rxzip` | 287 | reactions.js | `/api/particles/reaction-presets.zip` |
 
 ### `settings.js` (3)
 
