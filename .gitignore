@@ -74,3 +74,5 @@ mirsal/out/profile/
 mirsal/out/cache/
 mirsal/out/reloop-backups/
 mirsal/out/support/index.json
+# preview caches (throwaway WebPs, remade on demand; each previews/ folder keeps its newest PREVIEW_KEEP, particle_sets.prune_previews): never committed
+mirsal/out/**/previews/
