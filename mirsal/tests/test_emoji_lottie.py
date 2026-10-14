@@ -158,6 +158,16 @@ class EmojiLottieTests(Base):
         lottie = self.req("POST", "/api/particles/emoji-lottie", {"token": "cry"})[1]
         self.assertEqual({**lottie["params"], "size": 128}, j["params"], "the preview and the Lottie are the same burst")
 
+    def test_the_hover_preview_is_the_whole_burst_scaled_never_cut(self):
+        code, j = self.req("POST", "/api/particles/emoji-preview", {"token": "laugh", "size": 128, "fit": True})
+        self.assertEqual(code, 200, j)
+        self.assertTrue(j["url"].endswith("-fit.webp"), j["url"])
+        t, g, name, p = er.emoji_burst("laugh", size=128)
+        img = er._glyph(g)
+        cut = lambda a: sum(1 for f in a if f[0].max() > 127 or f[-1].max() > 127 or f[:, 0].max() > 127 or f[:, -1].max() > 127)
+        self.assertGreater(cut(particles.simulate([img], p)[..., 3]), 0, "the plain burst runs past its square")
+        self.assertEqual(cut(particles.simulate([img], p, fit=True)[..., 3]), 0, "fit: nothing reaches the edge")
+
 
 class SetLottieTests(unittest.TestCase):
     def test_sprite_pngs_embed_a_still_and_an_animated_sprites_fullest_frame(self):

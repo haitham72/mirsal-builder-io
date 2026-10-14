@@ -147,7 +147,7 @@ test('Save preset keeps the editor settings without the emoji; the hover reactio
   await r('ACT.rxsave()');
   assert.deepEqual(J(r, 'POSTS'), [['/api/particles/emoji-presets', { settings: { count: 12, particle_size: 1, size_in_dur: 0.4, size_out_dur: 0.4, hue_var: 0, preset: 'rain' } }]]);
   assert.deepEqual(J(r, 'RXS.presets.map(p=>p.name)'), ['Preset 01']);
-  r("RXS.ek=null;RXS.hover='cry';const k=rxKey(rxFor('cry'));RXS.pv[k]='/r.webp';RXS.par[k]={origin:[0.5,0.1]}");
+  r("RXS.ek=null;RXS.hover='cry';const k=rxHovKey('cry');RXS.pv[k]='/r.webp';RXS.par[k]={origin:[0.5,0.1]}");
   const t = r("rxTile(rxRow('cry'))");
   assert.match(t, /class=rx-fx src="\/r.webp" style="width:64px;height:64px;left:calc\(100% - 32px\);top:calc\(50% - 6px\)"/,
     "the rain's origin (top centre) sits on the tile's right edge");

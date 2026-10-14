@@ -59,8 +59,10 @@ function rxAgo(ts){
 /* ---------- views ---------- */
 /* the hover reaction leaves from the tile's right edge, like Telegram's: the burst's own origin (a fountain starts low, rain at the top) sits on that edge */
 function rxFxStyle(par){const [ox,oy]=(par&&par.origin)||[.5,.5];return `width:${RXHOV}px;height:${RXHOV}px;left:calc(100% - ${Math.round(ox*RXHOV)}px);top:calc(50% - ${Math.round(oy*RXHOV)}px)`}
+/* the hover's own preview: the whole burst scaled into its square (fit), never cut at its edges (Haitham, 2026-10-14) */
+const rxHovKey=t=>rxKey(rxFor(t))+'|fit';
 function rxTile(m){
- const key=rxKey(rxFor(m.token)),ticked=RXS.multi&&RXS.sel.has(m.token),on=!RXS.multi&&!!RXS.ek&&RXS.ek.token===m.token;
+ const key=rxHovKey(m.token),ticked=RXS.multi&&RXS.sel.has(m.token),on=!RXS.multi&&!!RXS.ek&&RXS.ek.token===m.token;
  const pv=RXS.hover===m.token&&!on?RXS.pv[key]:'';
  return `<button class="rx-e${on||ticked?' on':''}${pv?' play':''}" data-act=rxpick data-t="${esc(m.token)}" title="${esc(m.token)}" aria-label="${esc(m.token)}" aria-pressed=${on||ticked}>`+
   `<span class=rx-g>${esc(m.emoji||'?')}</span>${ticked?`<span class=rx-tick>${ic('check')}</span>`:''}${pv?`<img class=rx-fx src="${esc(pv)}" style="${rxFxStyle(RXS.par[key])}" alt="">`:''}</button>`}
@@ -146,12 +148,12 @@ function rxEdSync(){
 
 /* ---------- the server ---------- */
 async function rxPlay(t){
- const b=rxFor(t),key=rxKey(b),ed=()=>RXS.ek&&RXS.ek.token===t;
+ const b=rxFor(t),ed=()=>RXS.ek&&RXS.ek.token===t,fit=!ed(),key=fit?rxHovKey(t):rxKey(b);
  if(!RXS.pv[key]){
-  const r=await post('/api/particles/emoji-preview',{...b,size:RXPX});
+  const r=await post('/api/particles/emoji-preview',{...b,size:RXPX,...(fit?{fit:true}:{})});
   if(!r.ok){if(ed()){RXS.ek.err=r.j.error||'The reaction could not be made.';rxEdRedraw()}return}
   RXS.pv[key]=r.j.url;RXS.par[key]=r.j.params}
- if(ed()){if(key!==rxKey(rxBody(RXS.ek)))return;RXS.ek.own=RXS.par[key];RXS.ek.shown=RXS.pv[key];RXS.ek.err='';rxEdSync()}     /* an older answer than the sliders: ignored */
+ if(ed()){if(fit||key!==rxKey(rxBody(RXS.ek)))return;RXS.ek.own=RXS.par[key];RXS.ek.shown=RXS.pv[key];RXS.ek.err='';rxEdSync()}     /* an older answer than the sliders: ignored */
  else if(RXS.hover===t)rxTileRedraw(t)}
 async function rxLoadMade(){const r=await api('/api/particles/emoji-lottie');RXS.made=r.ok?(r.j.reactions||[]):[];if(route_==='reactions')rxDraw()}
 async function rxLoadPresets(){const r=await api('/api/particles/emoji-presets');RXS.presets=r.ok?(r.j.presets||[]):[];if(route_==='reactions')rxManyRedraw()}

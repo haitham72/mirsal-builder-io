@@ -82,9 +82,9 @@ def _glyph(glyph: str):
         raise SetError(str(ex), 503)
 
 
-def emoji_preview(out: Path, token, *, preset=None, seed=1, size_in_dur=None, size_out_dur=None, hue_var=None, particle_size=None, size_var=None, sim=None, size=256) -> dict:
+def emoji_preview(out: Path, token, *, preset=None, seed=1, size_in_dur=None, size_out_dur=None, hue_var=None, particle_size=None, size_var=None, sim=None, size=256, fit=False) -> dict:
     """The emoji's burst as a small looping WebP for the screen, by the same simulator as the Lottie (free). Cached by what it was
-    made from, so the same options are the same file."""
+    made from, so the same options are the same file. `fit` (the bank's hover): the whole burst zoomed to stay inside its square, scaled, never cut."""
     import hashlib
     from ..engine import particles as _p
     if isinstance(size, bool) or not isinstance(size, (int, float)) or not 64 <= size <= 512:
@@ -93,10 +93,10 @@ def emoji_preview(out: Path, token, *, preset=None, seed=1, size_in_dur=None, si
                                   particle_size=particle_size, size_var=size_var, sim=sim, size=int(size))
     img = _glyph(glyph)
     key = hashlib.sha256(json.dumps({"p": p.to_dict(), "glyph": glyph}, sort_keys=True).encode() + img.tobytes()).hexdigest()[:16]
-    f = emoji_dir(out, t) / "previews" / f"{key}-{int(size)}.webp"
+    f = emoji_dir(out, t) / "previews" / f"{key}-{int(size)}{'-fit' if fit else ''}.webp"
     if not f.is_file():
         f.parent.mkdir(parents=True, exist_ok=True)
-        atomic.write_bytes(f, _p.preview_webp(_p.simulate([img], p), size=int(size)))
+        atomic.write_bytes(f, _p.preview_webp(_p.simulate([img], p, fit=bool(fit)), size=int(size)))
     return {"token": t, "emoji": glyph, "preset": name, "params": p.to_dict(), "url": f"/out/particles/emoji/{t}/previews/{f.name}"}
 
 

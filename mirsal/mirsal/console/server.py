@@ -1356,7 +1356,7 @@ def make_handler(c: Console):
                         opts = {k: body.get(k) for k in ("preset", "size_in_dur", "size_out_dur", "hue_var", "particle_size", "size_var")}
                         opts["sim"] = {k: body[k] for k in er.EMOJI_SIM if body.get(k) is not None}
                         if pid == "emoji-preview":
-                            return self._json(200, er.emoji_preview(c.out, body.get("token"), seed=body.get("seed", 1), size=body.get("size", 256), **opts))
+                            return self._json(200, er.emoji_preview(c.out, body.get("token"), seed=body.get("seed", 1), size=body.get("size", 256), fit=body.get("fit") is True, **opts))
                         return self._json(200, er.export_emoji_lottie(c.out, body.get("token"), seed=body.get("seed", 1), size=body.get("size", 512),
                                                                       user=self.user["id"], **opts))
                     if method == "GET":

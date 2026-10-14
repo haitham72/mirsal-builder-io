@@ -418,22 +418,39 @@ def hue_rotate(img: np.ndarray, deg: float) -> np.ndarray:
 
 
 # ---- drawing --------------------------------------------------------------------------------------------------------
-def simulate(sprites: list, p: ParticleParams, on_frame=None) -> np.ndarray:
+def fit_zoom(tr: "Trajectories", origin: tuple) -> float:
+    """The zoom (<= 1) about `origin` that keeps every visible particle, its whole sprite, inside the canvas: the burst SCALED to fit
+    instead of cut at the edges (the hover preview; Haitham, 2026-10-14). 1.0 when it already fits."""
+    vis = tr.visible
+    if not vis.any():
+        return 1.0
+    h = 0.5 * (tr.size_frac[None, :] * tr.scale)[vis] * 1.42          # a rotated sprite's half-diagonal, as a share of the canvas
+    dx, dy = tr.pos[..., 0][vis] - origin[0], tr.pos[..., 1][vis] - origin[1]
+    z = 1.0
+    for room, need in ((origin[0], np.max(h - dx)), (1 - origin[0], np.max(h + dx)), (origin[1], np.max(h - dy)), (1 - origin[1], np.max(h + dy))):
+        if need > 1e-6:
+            z = min(z, max(room, 0.0) / need)
+    return float(max(0.05, z))
+
+
+def simulate(sprites: list, p: ParticleParams, on_frame=None, fit: bool = False) -> np.ndarray:
     """Draw one burst. `sprites` are static RGBA uint8 arrays or AnimatedSprite timelines (trimmed to their union alpha bbox; fully transparent ones are ignored;
     ValueError when none is usable). Returns `(N, size, size, 4) uint8` with N = round(fps * duration) (90 at the defaults) and STRAIGHT
     alpha (composited premultiplied, then un-premultiplied). Frame 0 and the last frames are empty by construction. Pieces may leave the
     canvas. With more particles than sprites every sprite appears; with fewer particles than sprites only `count` of them can.
-    `on_frame(i, n)` is called after each frame is drawn (progress)."""
+    `on_frame(i, n)` is called after each frame is drawn (progress). `fit`: the whole burst is zoomed about its origin until nothing leaves
+    the canvas (`fit_zoom`), the same motion smaller, never cut."""
     p = p.clamped()
     ready = _prepare_all(sprites, p)
     tr = trajectories(p, len(ready))
     S, F = p.size, tr.frames
+    z = fit_zoom(tr, p.origin) if fit else 1.0
     frames = np.zeros((F, S, S, 4), np.uint8)
     canvas = np.zeros((S, S, 4), np.float32)                      # premultiplied, 0..1
-    ox = tr.pos[..., 0] * S - 0.5                                 # pixel-centre convention: the canvas centre is (S - 1) / 2
-    oy = tr.pos[..., 1] * S - 0.5
+    ox = (p.origin[0] + (tr.pos[..., 0] - p.origin[0]) * z) * S - 0.5        # pixel-centre convention: the canvas centre is (S - 1) / 2
+    oy = (p.origin[1] + (tr.pos[..., 1] - p.origin[1]) * z) * S - 0.5
     cos, sin = np.cos(tr.angle), np.sin(tr.angle)
-    length = tr.size_frac[None, :] * S * tr.scale                 # the sprite's longest side in px, per frame
+    length = tr.size_frac[None, :] * S * tr.scale * z             # the sprite's longest side in px, per frame
     sprite_of = tr.sprite.tolist()
     turn = {i: hue_matrix(h) for i, h in enumerate(tr.hue.tolist()) if abs(h) > 1e-9}
     for f in range(F):
