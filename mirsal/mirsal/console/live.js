@@ -190,7 +190,6 @@ setInterval(()=>{document.querySelectorAll('[data-lvt]').forEach(e=>e.textConten
 const _rg=RENDER.generate;
 const showPanel=()=>{typeof composerMount==='function'?composerMount():livePanel();ensureBars();histReload();egSync()};
 RENDER.generate=async function(){await _rg.apply(this,arguments);showPanel();drawLive()};
-setInterval(()=>{if(qRows().some(j=>QACTIVE.includes(j.status)))drawLive()},1000);
 qRefresh();
 async function liveInit(){const [m,h]=await Promise.all([api('/api/models'),api('/api/higgsfield')]);if(m.ok){LIVE.m=m.j;if(!m.j.styles.some(s=>s.id===LIVE.style))LIVE.style=m.j.default_style;lsel('image');lsel('video')}
   if(h.ok)LIVE.hf=h.j;drawChip();if(route_==='generate'){showPanel();drawLive()};liveTick()}

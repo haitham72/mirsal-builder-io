@@ -898,19 +898,14 @@ ACT.gzipdl = async (el) => {
   location.href = `/api/generations/${n}/export.zip?light=${el.dataset.l}${rt ? '&retime=1' : ''}`;
 };
 
-ACT.gkeepsize = async (el) => {
-  const g = GM.get(+el.dataset.g);
-  if (!g) return;
-  const on = g.keep_size === false,
-    redo = (g.stickers || []).some((s) => s.anim_status === 'READY');
-  const r = await post(`/api/generations/${g.number}/keep_size`, { on, reslice: redo });
-  if (!r.ok) return toast(r.j.error || 'Could not change it', 1);
-  toast(`Keep approved size: ${on ? 'on' : 'off'}${r.j.resliced ? ' · cutting the animations again (free)' : ''}`);
-  glast = '';
-  tick(true);
-};
-
+/* one Studio refresh at a time: a concurrent force queues one rerun,
+   interval ticks never overlap, hidden tabs skip interval work */
+let tickBusy=false,tickForce=false;
 async function tick(force) {
+  if (force && tickBusy) { tickForce = true; return; }
+  if (!force && tickBusy) return;
+  if (!force && typeof document !== 'undefined' && document.hidden) return;
+  tickBusy = true;
   try {
     if (route_ !== 'generate' && !MD && VG === null && SV.g === null) return;
     const h = await api('/api/generations');
@@ -967,6 +962,9 @@ async function tick(force) {
   } catch (e) {
     const m = $('msg');
     if (m) m.textContent = 'Something went wrong: ' + e.message;
+  } finally {
+    tickBusy = false;
+    if (tickForce) { tickForce = false; tick(true); }
   }
 }
 

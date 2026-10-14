@@ -106,14 +106,23 @@ document.addEventListener('click', (e) => {
 });
 
 /* ---------- dialogs */
-function dlg(html) {
+/* one active dismissal callback: retimeAsk registers here so every close path
+   (backdrop, Cancel, replacement dialog) settles its promise exactly once */
+let DLG_CB = null;
+function dlg(html, opt) {
+  if (DLG_CB) { const f = DLG_CB; DLG_CB = null; try { f('replaced'); } catch (e) {} }
   $('dlg').innerHTML = `<div class=dbox>${html}</div>`;
   $('dlg').classList.add('on');
+  if (opt && typeof opt.onDismiss === 'function') DLG_CB = opt.onDismiss;
 }
+/* forget the dismissal without firing it: an explicit answer settles its own promise */
+function dlgForget() { DLG_CB = null; }
 
-function closeDlg() {
+function closeDlg(reason) {
+  const f = DLG_CB; DLG_CB = null;
   $('dlg').classList.remove('on');
   $('dlg').innerHTML = '';
+  if (f) { try { f(reason === undefined ? 'dismiss' : reason); } catch (e) {} }
 }
 
 $('dlg').addEventListener('mousedown', (e) => {

@@ -45,12 +45,15 @@ const colOwner=()=>typeof ME==='undefined'||!ME||ME.role==='owner';
    stretch them to 3 s (the same frames, played slower) or keep their length. Resolves true / false, or null when the dialog is closed. */
 let RTA=null;
 function retimeAsk(short,where){if(!short||!short.length)return Promise.resolve(false);
- return new Promise(res=>{RTA=res;dlg(`<h2>${short.length} animation${short.length===1?' is':'s are'} shorter than 3 seconds</h2>
+ return new Promise(res=>{let done=false;
+ const settle=v=>{if(done)return;done=true;RTA=null;try{res(v)}catch(e){}};
+ if(RTA){const prior=RTA;RTA=null;try{prior(null)}catch(e){}}
+ RTA=settle;dlg(`<h2>${short.length} animation${short.length===1?' is':'s are'} shorter than 3 seconds</h2>
   ${where==='telegram'?`<div class=warn>Telegram plays a video sticker for up to <b>3 seconds</b>. These end sooner, so they loop sooner than the rest of the pack.</div>`:''}
   <p class=mut>${short.slice(0,12).map(s=>`${esc(s.emoji||'')} ${esc(s.name||'')} <b>${(+s.seconds).toFixed(1)} s</b>`).join(' · ')}${short.length>12?' …':''}</p>
   <p class=mut>Retime plays the same frames over 3 s (slower motion, nothing added). Your stored animations are not changed.</p>
-  <div class=row style="justify-content:flex-end"><button class=btn data-act=rtans data-v=x>Cancel</button><button class=btn data-act=rtans data-v=0>Keep their length</button><button class="btn pri" data-act=rtans data-v=1>Retime to 3 s</button></div>`)})}
-ACT.rtans=el=>{const r=RTA;RTA=null;closeDlg();r&&r(el.dataset.v==='x'?null:el.dataset.v==='1')};
+  <div class=row style="justify-content:flex-end"><button class=btn data-act=rtans data-v=x>Cancel</button><button class=btn data-act=rtans data-v=0>Keep their length</button><button class="btn pri" data-act=rtans data-v=1>Retime to 3 s</button></div>`,{onDismiss:()=>settle(null)})})}
+ACT.rtans=el=>{const r=RTA;RTA=null;if(typeof dlgForget==='function')dlgForget();closeDlg('answer');r&&r(el.dataset.v==='x'?null:el.dataset.v==='1')};
 const packShort=async id=>{const r=await api(`/api/packs/${encodeURIComponent(id)}/short`);return r.ok?r.j.short:[]};
 const genShort=n=>{const g=GM.get(+n);return g?(g.stickers||[]).filter(s=>s.anim_status==='READY'&&s.webm&&(s.review||{}).anim!=='REJECTED').map(s=>{const m=s.anim_metrics||{};return{name:String(s.key||'').replace(/_/g,' '),emoji:s.emoji,seconds:m.fps?(m.frames_out||m.frames||0)/m.fps:3}}).filter(s=>s.seconds<2.95):[]};
 ACT.pkzip=async el=>{const rt=await retimeAsk(await packShort(PACK_ID),'zip');if(rt===null)return;location.href=`/api/packs/${PACK_ID}/export.zip?light=${el.dataset.l}${rt?'&retime=1':''}`};
