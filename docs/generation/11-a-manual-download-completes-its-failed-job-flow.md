@@ -1,0 +1,5 @@
+# A manual download completes its failed job (`flow/imports.py`)
+
+<sub>Part of [generation.md](../generation.md).</sub>
+
+When a provider download fails after the ticket was paid (J022-J025: the certificate store), the downloaded-by-hand file completes that job instead of starting an unrelated batch. The file links by its provider id (`hf_<date>_<time>_<uuid>`, `imports.job_id_of`), the job picked in Import from Higgsfield, or the dialog's explicit choice ("Is this the result of …?": the person's own failed jobs only, prompt, time and thumbnail; exactly one match links automatically, several ask, import-as-new skips the link). Completing a job sets it `DONE` (`recovered_by: "manual import"`, no second charge): a sheet job's batch is built from the job's own saved plan and carries its external task id (cells, tags, emoji as approved, one human history line "recovered from a manual download of task \<uuid\>"); a video job attaches to the job's own destination batch and sheet. The existing recovery actions (`generation/recovery.py` Check / Continue / Retry) stay for when the provider itself can still download.

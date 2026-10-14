@@ -1,0 +1,5 @@
+# Prompter: templates, slots, tags (`generation/prompter.py`)
+
+<sub>Part of [engine-and-studio.md](../engine-and-studio.md).</sub>
+
+`expand(task, grid)` fills a slot JSON `{subject_description, style_id, mode, cells[{pos, label, tags, emoji}], action_guidance, key_colour}` deterministically and `render_plan(slots, template_id, version)` rebuilds every prompt from the saved template file (`prompts/templates/<id>_v<N>.txt`; `sheet_3x3`, `sheet_2x2`, `single_1x1`, plus `video` for the video prompt). `prompts.json` stores `{template_id, template_version, slots}`; `validate_plan` rebuilds the sheet and video prompts from them, so stored free text never wins over the template. Every cell has 1-5 tags (`[a-z0-9_]+`, unique, the first one is the key) and its prompt ends with the margin clause *"full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"*. A prompts file without `tags` is valid (`tags = [key]`). Phase 2 swaps only the filler (LLM); the templates and `render_plan` stay.

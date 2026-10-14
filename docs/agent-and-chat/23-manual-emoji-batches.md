@@ -1,0 +1,13 @@
+# Manual emoji batches
+
+<sub>Part of [agent-and-chat.md](../agent-and-chat.md).</sub>
+
+Paste exactly nine emojis in AI chat, optionally with a subject or the name of an owned pack. The agent checks repeats against stickers saved in that pack and previous batches of the same chat pack, including batches still in flight. Unrelated packs do not contribute repeats. If a generation belongs to several packs, the agent asks which one to use; it never inherits another generation's pack selection. Choices are stored in the session and survive a restart.
+
+Each repeated emoji offers **Overwrite**, **Add 02** (then 03, etc.) or **Skip / replace**. Skip keeps all nine cells pending until the person supplies an unused emoji; a suggested unused replacement is also offered. Repeats inside the pasted batch require the same decision. Skin-tone variants share a duplicate identity, while the chosen complete Unicode sequence is preserved in prompts and tags. Static and animated copies of one source cell count as one variant. Numbering continues after an earlier variant is removed.
+
+The engine (`generation/emoji_batches.py`) builds the exact nine-cell template plan without a model call. After all decisions, the chat shows its price and waits for confirmation, including when ordinary spending prompts are disabled. It respects the selected Prompt, Stickers, Animation, Telegram or Export stage. Manual batches require live generation; prepared sheets cannot substitute different cells. Automatic requests keep their four-batch limit; additional manual batches can continue the same pack beyond that limit.
+
+The saved plan carries `slots.emoji_batch = {pack_id, entries: [{index, emoji, choice, version}]}`. The target's ownership and newly introduced repeats are checked before submission. Delivery uses that explicit pack: overwrite replaces only the chosen pack's existing sticker, keeps its ID, name, order, cover and particle links, and offers one Undo restoring both media and source metadata. Add saves a separate numbered sticker. Repeated delivery is idempotent, and an animation can upgrade the same numbered static variant. A new-pack batch binds to the newly created empty pack on first delivery. Studio defaults to this explicit destination and refuses an unrelated destination or an emoji change without a new duplicate check.
+
+The predefined queue now draws from the complete bank of more than 1,800 distinct base emojis (`actions.generation_bank`, `next_tokens`, `token_cells`). The named core/social/reactions/daily presets retain their existing 36 cells; extended bank tokens have deterministic descriptive and motion sentences. Checks: `tests/test_manual_batches.py`, `tests/js/manual_batch_action.test.js`, `tests/js/pack_generation.test.js`.

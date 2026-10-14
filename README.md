@@ -129,8 +129,8 @@ ZIP exports resolve the expanded bank of 1,934 tokens (1,898 distinct base glyph
 ## Folders
 
 ```
-README.md  CLAUDE.md                   this file · the rules and routing for LLM sessions
-docs/                                    the documentation (one file per area) · docs/inputs/ (Haitham's inputs and reference)
+README.md  CLAUDE.md                   this file · the short rules and routing every LLM session loads (the full text: docs/rules.md)
+docs/                                    the documentation (one file per area; the big areas are an index docs/<area>.md + one file per section in docs/<area>/) · docs/inputs/ (Haitham's inputs and reference)
 mirsal/                                  the app: requirements.txt, docker-compose.yml, migrations/, tests/, .env.example
   mirsal/                                the Python package, one folder per concern: engine/ (pure engine) · flow/ (the golden path: pipeline, gates) · generation/ (Higgsfield, jobs, prompts, planner) ·
                                          services/ (LLM, embeddings, Telegram) · runtime/ (cache, events, paths, accounts) · media/ (pack library, video projects, cutout) ·

@@ -1,0 +1,31 @@
+# 13. Reaction effects: one emoji, flying as itself, to Lottie (2026-10-13)
+
+<sub>Part of [reaction.md](../reaction.md).</sub>
+
+**The product decision.** Create > + New > **Reaction effects** (`#/reactions`, its own screen and file `console/reactions.js`; `#/effects` stays the Studio's particle editor) is the emoji bank **only**: no packs, no stickers, no Kling, no sheets, no "create from sheet" (all of those stay in the Studio). The one flow: **search → pick an emoji from two rows of small glyphs → its fixed animation plays, flying as the literal emoji → Create reaction → its card, with Download Lottie**. Only created reactions are cards; the bank itself is never a wall of thumbnails ([design.md](../design.md) §4).
+
+**The sprite is the glyph.** `engine/emoji_glyph.render_emoji(glyph, px)` draws the Win+. glyph with the system's colour emoji font (`EMOJI_FONTS`: Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji; a bitmap font is opened at its own strike size) and trims it to its alpha box like `trim_sprite`. Exactly one sprite exists: no picker, no Generate more. Without a text-shaping library a ZWJ sequence draws as its parts side by side. The glyph art belongs to the font's vendor: check its licence before a file leaves the office. A machine with no colour emoji font answers 503.
+
+**The only controls** (strict `ParticleParams` fields, unknown key → `ValueError`):
+
+| field | range | screen default | effect |
+| --- | --- | --- | --- |
+| **Simulation** group: `magnitude` (Speed), `gravity`, `vortex` (Swirl), `spin` (Rotation), `count` (Amount), `spread` | the engine's ranges (clamped) | the motion's own | how they move. Only a moved slider is sent (`sim`, `emoji_reactions.EMOJI_SIM`); the rest keep the motion's values, which the screen shows from the server's last answer (`…` until it answers). Changing Motion or **Reset** drops the tweaks |
+| `particle_size` (**Size**, Shape group) | 0.25–3× | ×1 | how big every emoji looks (the existing engine field) |
+| `size_var` (**Size variation**) | 0–1 | the motion's own | how much the emojis differ: the motion's `size_min`–`size_max` is re-spread around its own average to `mid × (1 ± size_var)` (0 = all one size, 1 = from almost nothing to twice the average); left out, the motion keeps its range exactly. A flow option, not an engine field: the stored params carry the resulting `size_min` / `size_max` |
+| `size_in_dur` | 0–1.5 s, ≤ lifetime/2 | 0.4 | each particle's scale ramps 0 → 100% over this long after birth |
+| `size_out_dur` | 0–1.5 s, ≤ lifetime/2 | 0.4 | … and 100% → 0 over this long before death |
+| `hue_var` | 0–180° | 25 | each particle's colours turn by a seeded hue in [−hue_var, +hue_var] |
+| preset | its own, or one of the five | its own | an override takes that preset's own look (the token's pinned values belong to its own preset) |
+
+The envelope multiplies the pop-in and the flight growth, never replaces them. The hue is one draw per particle from the same `default_rng(seed)` stream, drawn **last**, so every earlier draw (positions, sizes, spin) is unchanged; it is the CSS `hue-rotate()` matrix (a turn about the grey axis: linear, so exact on premultiplied colour; alpha untouched). Hue-shifted emoji are stylised, not the platform glyph; `hue_var` 0 is the glyph's native colours. The dataclass defaults are 0 / 0 / 0, so every older set, preview and render is unchanged; only this screen starts at 0.4 / 0.4 / 25.
+
+**Presets and many at once** (2026-10-13). **Save preset** (beside Create reaction) keeps the editor's settings without the emoji (the motion override if any, the moved Simulation keys, the Shape values) as the next **Preset NN** in `out/particles/emoji/presets.json` (`emoji_reactions.save_emoji_preset`; checked by building one burst, so a preset that saves always applies; ids never reused; **Delete** in the bar). **Select several** turns clicks into ticks (at most 24); one bar applies **Each emoji's own** (its own motion with the screen's defaults) or a preset to all the ticked emojis in one request (`export_many`, `POST /api/particles/emoji-lottie/batch`): a preset without a motion keeps each emoji's own motion; one emoji that fails does not stop the others.
+
+**Pointing at an emoji** plays its reaction from the tile's right edge, as Telegram plays an effect, at 64 px (60% smaller than before): the burst's own origin sits on that edge, and the emoji stays fully visible. The hover preview is the whole burst **scaled** into its square, never cut (`emoji-preview {fit: true}`, `particles.simulate(fit=True)`, `fit_zoom`: the motion is zoomed about its origin until no sprite reaches the edge; Haitham, 2026-10-14: a plain burst left its square in 41-53 of 90 frames, so the small hover looked cropped). The editor preview and the created Lottie keep the plain framing.
+
+**Deterministic.** Same emoji + options + seed → the same params, the same preview file and byte-identical Lottie JSON on the same machine (the glyph comes from that machine's emoji font).
+
+**The contract.** `flow/emoji_reactions.py` (its own module and lock; errors are `particle_sets.SetError`): `emoji_token` (a token name or the glyph, `actions.token_for_emoji`; 409 outside the bank), `emoji_burst` (motion + override + options → `ParticleParams`), `emoji_preview` (cached WebP under `out/particles/emoji/<token>/previews/`), `export_emoji_lottie` (stores `out/particles/emoji/<token>/renders/L###.lottie.json` + `L###.png` + `L###.webp`, the card's loop; appends to that emoji's `emoji.json` with history `LOTTIE`; no `P###` set is made, and the set scans never see the `emoji/` folder). `emoji_lotties` (every created reaction, newest first). Routes: `POST /api/particles/emoji-preview`, `POST /api/particles/emoji-lottie` (create), `GET /api/particles/emoji-lottie` (the created) ([api.md](../api.md)). The screen is `console/reactions.js` ([design.md](../design.md) §4, Create's tabs). Tests: `tests/test_emoji_lottie.py`, `tests/test_emoji_motion.py`, node `reactions`.
+
+**Verified** (2026-10-13): `kiss` (burst, 28 layers, 329 KB), `scared` (vortex, 36 layers, 314 KB) and `celebrate` (confetti, hue 90°, 64 layers, 19 assets, 742 KB) played in lottie-web 5.12.2 (canvas renderer): at frame 30 each frame held 400-840 distinct colours, the glyph itself.
