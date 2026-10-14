@@ -67,9 +67,9 @@ class ParticleParams:
     size_in_dur: float = 0.0        # 0..1.5 s (<= lifetime/2): each particle zooms from nothing to full size over this long after its birth (0 = born full size)
     size_out_dur: float = 0.0       # 0..1.5 s (<= lifetime/2): ... and back to nothing over this long before its death (0 = no zoom out)
     hue_var: float = 0.0            # 0..180 degrees: each particle's colours turn by a seeded hue in [-hue_var, +hue_var] (0 = the sprite's own colours)
-    fade_out: float = 0.0           # 0..1 s: each particle fades to nothing over its last `fade_out` seconds, starting at death - fade_out (0 = the last quarter of its life)
-    fade_var: float = 0.0           # 0..1: each particle's fade is a seeded share in [1 - fade_var, 1] of `fade_out` (0 = all the same)
-    fade_start: float = 0.0         # s from the clip's start: from here EVERY particle fades, all gone by `duration - QUIET_TAIL` whatever its life (0 = off)
+    fade_start: float = 0.0         # Fade out start, s after a particle's birth: its opacity starts dropping from 100% here
+    fade_dur: float = 0.0           # Fade out duration, s: 100% -> 0% takes this long, linearly (0 = off: the old fade over the last quarter of its life)
+    fade_var: float = 0.0           # Fade out variation, s: each particle's start and duration each move by a seeded +-fade_var (never below 0)
 
     @classmethod
     def from_dict(cls, d: dict) -> "ParticleParams":
@@ -140,9 +140,9 @@ class ParticleParams:
             size_in_dur=lim(num("size_in_dur", self.size_in_dur), 0.0, envelope),
             size_out_dur=lim(num("size_out_dur", self.size_out_dur), 0.0, envelope),
             hue_var=lim(num("hue_var", self.hue_var), 0.0, 180.0),
-            fade_out=lim(num("fade_out", self.fade_out), 0.0, 1.0),
-            fade_var=lim(num("fade_var", self.fade_var), 0.0, 1.0),
             fade_start=lim(num("fade_start", self.fade_start), 0.0, duration),
+            fade_dur=lim(num("fade_dur", self.fade_dur), 0.0, duration),
+            fade_var=lim(num("fade_var", self.fade_var), 0.0, 1.0),
         )
 
 
@@ -176,7 +176,7 @@ class Trajectories:
     pos: np.ndarray          # (F, N, 2) canvas fractions of the particle centre (the origin until it spawns)
     scale: np.ndarray        # (F, N) pop-in x flight growth, 0 before spawn
     angle: np.ndarray        # (F, N) radians
-    opacity: np.ndarray      # (F, N) 0..1: 1 while flying, fades to 0 over its last `fade_out` (x its fade_var share) seconds, else the last quarter of the life; x the clip fade from `fade_start`
+    opacity: np.ndarray      # (F, N) 0..1: 1 while flying, with fade_dur: 1 until fade_start (+-fade_var) after birth, then linearly to 0 over fade_dur (+-fade_var), done by its death at the latest; else fades over the last quarter of the life
     visible: np.ndarray      # (F, N) bool: spawned, not dead, scale and opacity worth drawing
     size_frac: np.ndarray    # (N,) sprite's longest side as a fraction of the canvas at scale 1
     sprite: np.ndarray       # (N,) which sprite each particle shows
@@ -223,7 +223,7 @@ def trajectories(p: ParticleParams, n_sprites: int = 1) -> Trajectories:
     theta0 = p.spin * rng.uniform(-0.6, 0.6, n)
     jitter = rng.uniform(0.8, 1.0, n)
     hue = rng.uniform(-1.0, 1.0, n) * p.hue_var                     # drawn after every older draw: an older burst is unchanged
-    fade_k = rng.uniform(1.0 - p.fade_var, 1.0, n)                   # drawn LAST, for the same reason
+    fade_k = rng.uniform(-1.0, 1.0, (2, n)) * p.fade_var             # drawn LAST, for the same reason: +- seconds on (start, duration)
     life = np.minimum(p.lifetime * jitter, (p.duration - QUIET_TAIL) - spawn * dt)          # dead before duration - 0.2 s
     life = np.maximum(life, 4 * dt)
 
@@ -265,13 +265,14 @@ def trajectories(p: ParticleParams, n_sprites: int = 1) -> Trajectories:
     if p.size_out_dur > 0:
         envelope *= np.clip((life[None, :] - a) / p.size_out_dur, 0.0, 1.0)
     scale = np.where(alive, pop_scale * (1.0 + GROWTH * a / life[None, :]) * envelope, 0.0)
-    fade = np.minimum(p.fade_out * fade_k, life) if p.fade_out > 0 else FADE_SHARE * life     # Fade out: starts at death - fade (per particle)
-    x = np.clip((life[None, :] - a) / np.maximum(fade, dt)[None, :], 0.0, 1.0)
-    opacity = np.where(alive, x * x * (3.0 - 2.0 * x), 0.0)
-    if p.fade_start > 0:                                             # Fade start: the clip's own fade, on top of each particle's
-        end = p.duration - QUIET_TAIL
-        g = np.clip((end - frame_idx * dt) / max(end - p.fade_start, dt), 0.0, 1.0)
-        opacity = opacity * (g * g * (3.0 - 2.0 * g))
+    if p.fade_dur > 0:                                               # Fade out: start and duration in seconds, per particle, linear 100% -> 0%
+        f_end = np.minimum(np.maximum(p.fade_start + fade_k[0], 0.0) + np.maximum(p.fade_dur + fade_k[1], dt), life)     # 0% by its death at the latest
+        f_start = np.minimum(np.maximum(p.fade_start + fade_k[0], 0.0), f_end - dt)
+        x = np.clip((f_end[None, :] - a) / (f_end - f_start)[None, :], 0.0, 1.0)
+        opacity = np.where(alive, x, 0.0)
+    else:
+        x = np.clip((life[None, :] - a) / (FADE_SHARE * life[None, :]), 0.0, 1.0)
+        opacity = np.where(alive, x * x * (3.0 - 2.0 * x), 0.0)
     angle = theta0[None, :] + omega[None, :] * a
     visible = alive & (scale > 0.02) & (opacity > 0.004)
     return Trajectories(P, scale, angle, opacity, visible, size_frac, sprite, hue, spawn, life,

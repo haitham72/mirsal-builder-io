@@ -21,12 +21,12 @@ from .particle_sets import SetError, hist, sets_dir
 _LOCK = threading.Lock()
 
 EMOJI_OPTIONS = {"size_in_dur": 0.4, "size_out_dur": 0.4, "hue_var": 25.0}    # the screen's defaults; 0 / 0 / 0 is the plain look
-EMOJI_SIM = ("magnitude", "gravity", "vortex", "spin", "count", "spread", "fade_out", "fade_var", "fade_start")    # the Simulation group: ..., Fade out, Fade variation, Fade start
+EMOJI_SIM = ("magnitude", "gravity", "vortex", "spin", "count", "spread", "fade_start", "fade_dur", "fade_var")    # the Simulation group: ..., Fade out start, Fade out duration, Fade out variation
 REACTION_SECONDS = 2.0                                                          # every reaction is 2 s and empty at its end, whatever the settings (Haitham, 2026-10-14)
 # Where every emoji starts (Haitham, 2026-10-14: "use these start settings as default"): the editor's first values, Reset's target, and the look
 # a batch gives an emoji with no preset. The motion stays the emoji's own; only these values are normalised. GET emoji-motions hands them to the screen.
 EMOJI_START = {"magnitude": 0.7, "gravity": 1.0, "vortex": 0.0, "spin": 1.0, "count": 28, "spread": 360.0,
-               "particle_size": 0.3, "size_var": 0.38, "size_in_dur": 0.4, "size_out_dur": 0.4, "hue_var": 25.0, "fade_out": 0.0, "fade_var": 0.0, "fade_start": 0.0}
+               "particle_size": 0.3, "size_var": 0.38, "size_in_dur": 0.4, "size_out_dur": 0.4, "hue_var": 25.0, "fade_start": 0.0, "fade_dur": 0.0, "fade_var": 0.0}
 EMOJI_PX = 160                                                                  # the glyph's longest side: sharp at the biggest a particle is drawn on 512
 
 
@@ -52,7 +52,7 @@ def emoji_burst(token, *, preset=None, seed=1, size_in_dur=None, size_out_dur=No
     options on top (None = the screen's default). `particle_size` is how big every emoji looks (0.25-3, None = the motion's own, 1);
     `size_var` is how much the emojis differ in size (0 = all the same, 1 = from almost nothing to twice the average; None = the
     motion's own range): the motion's size range is re-spread around its own average. `sim` overrides the motion's own simulation
-    (EMOJI_SIM: magnitude, gravity, vortex, spin, count, spread, fade_out, fade_var, fade_start; a key left out keeps the motion's value; the engine clamps). Deterministic: same emoji + options + seed
+    (EMOJI_SIM: magnitude, gravity, vortex, spin, count, spread, fade_start, fade_dur, fade_var; a key left out keeps the motion's value; the engine clamps). Deterministic: same emoji + options + seed
     -> the same params. 400 for a bad option."""
     from ..engine import emoji_motion as em, particles as _p
     t, glyph = emoji_token(token)

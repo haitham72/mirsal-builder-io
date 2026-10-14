@@ -132,37 +132,24 @@ class EnvelopeAndHueTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             p.ParticleParams.from_dict({"hue": 10})
 
-    def test_fade_out_is_per_particle_with_variation(self):
+    def test_fade_out_start_duration_and_variation(self):
         d = p.ParticleParams().to_dict()
-        self.assertEqual((d["fade_out"], d["fade_var"]), (0.0, 0.0), "off by default: an old burst keeps its bytes")
-        q = p.ParticleParams(fade_out=9, fade_var=-1).clamped()
-        self.assertEqual((q.fade_out, q.fade_var), (1.0, 0.0))
-        base = p.trajectories(p.preset("burst", seed=3, count=12))
-        for fv in (0.0, 0.8):
-            t = p.trajectories(p.preset("burst", seed=3, count=12, fade_out=0.8, fade_var=fv))
-            np.testing.assert_array_equal(base.pos, t.pos, "the fade never moves a particle")
-            starts = []
-            for i in range(12):
-                k = np.arange(t.frames) - int(t.spawn[i])
-                alive = (k >= 0) & (k / t.p.fps < float(t.life[i]))
-                full = np.flatnonzero(alive & (t.opacity[:, i] > 0.999))
-                last = np.flatnonzero(alive)[-1]
-                starts.append((last - full[-1]) / t.p.fps)          # how long before its death the particle starts to fade
-            starts = np.array(starts)
-            self.assertTrue((starts <= 0.8 + 2 / t.p.fps).all(), starts)
-            if fv == 0:
-                self.assertTrue((starts >= 0.8 - 2 / t.p.fps).all(), "every particle starts fading 0.8 s before its death")
-            else:
-                self.assertGreater(starts.max() - starts.min(), 0.2, "variation: the particles start fading at different times")
-
-    def test_fade_start_fades_the_whole_clip_out_by_its_end(self):
-        self.assertEqual(p.ParticleParams().to_dict()["fade_start"], 0.0, "off by default")
-        a = p.trajectories(p.preset("confetti", seed=2, duration=2.0))
-        b = p.trajectories(p.preset("confetti", seed=2, duration=2.0, fade_start=1.0))
-        np.testing.assert_array_equal(a.pos, b.pos)
-        np.testing.assert_array_equal(a.opacity[:31], b.opacity[:31], "untouched until fade_start")
-        self.assertTrue((b.opacity <= a.opacity + 1e-12).all())
-        self.assertEqual(float(b.opacity[int(1.8 * 30):].max()), 0.0, "all gone by duration - 0.2 s")
+        self.assertEqual((d["fade_start"], d["fade_dur"], d["fade_var"]), (0.0, 0.0, 0.0), "off by default: an old burst keeps its bytes")
+        q = p.ParticleParams(fade_start=-1, fade_dur=9, fade_var=5, duration=2).clamped()
+        self.assertEqual((q.fade_start, q.fade_dur, q.fade_var), (0.0, 2.0, 1.0))
+        fps = 30
+        t = p.trajectories(p.preset("burst", seed=3, count=12, duration=2.0, fade_start=0.4, fade_dur=0.5))
+        for i in range(12):
+            s0 = int(t.spawn[i])
+            self.assertEqual(float(t.opacity[s0 + 12, i]), 1.0, "100% until 0.4 s after birth")
+            self.assertAlmostEqual(float(t.opacity[s0 + 12 + 6, i]), 0.6, places=6, msg="linear: 0.2 s into a 0.5 s fade = 60%")
+            self.assertEqual(float(t.opacity[s0 + 12 + 15, i]), 0.0, "0% after 0.5 s")
+        v = p.trajectories(p.preset("burst", seed=3, count=12, duration=2.0, fade_start=0.4, fade_dur=0.5, fade_var=0.3))
+        np.testing.assert_array_equal(t.pos, v.pos, "the fade never moves a particle")
+        gone = [int(np.flatnonzero(v.opacity[:, i] > 0)[-1] - v.spawn[i]) for i in range(12)]
+        self.assertGreater(max(gone) - min(gone), 5, "variation: the particles fade at different times")
+        late = p.trajectories(p.preset("burst", seed=3, count=12, duration=2.0, fade_start=1.5, fade_dur=2.0))
+        self.assertEqual(float(late.opacity[int(1.8 * fps):].max()), 0.0, "always gone by the end, however late the fade is set")
 
     def test_envelope_zooms_in_from_nothing_and_out_to_nothing(self):
         base = p.preset("burst", count=12, seed=4, lifetime=2.0)
