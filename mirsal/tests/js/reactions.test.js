@@ -117,3 +117,17 @@ test('a pack sticker finds its predefined emoji (the longest match) and asks for
   assert.equal(body.fit, true);
   assert.equal(r("RXS.pv[rxHovKey('laugh')]"), '/l.webp', 'one cache shared with the Reaction effects tiles');
 });
+
+test('the wall draws one page at a time (Load more), and Select all ticks the whole list without drawing it', () => {
+  const r = loadConsole(['reactions.js']);
+  r("RXS.bank=Array.from({length:250},(_,i)=>({token:'e'+i,emoji:'🙂',preset:'burst',motion:''}));RXS.made=[];RXS.presets=[]");
+  const h = r('rxHtml()');
+  assert.equal((h.match(/class="rx-e/g) || []).length, 120, 'one page, not 250');
+  assert.match(h, /data-act=rxmore>Load more<\/button><small class=mut>120 of 250 shown · 130 more/);
+  r('ACT.rxmore()');
+  assert.equal(r('RXS.shown'), 240);
+  r('RXS.multi=true;ACT.rxselall()');
+  assert.equal(r('RXS.sel.size'), 250, 'every emoji of the list, drawn or not');
+  r("RXQ.q='e1';ACT.rxfilter({dataset:{f:'all'}})");
+  assert.equal(r('RXS.shown'), 120, 'a new search or filter starts at the first page again');
+});

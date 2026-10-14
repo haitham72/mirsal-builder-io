@@ -2,7 +2,7 @@
 
 Generated from `console/*.js` on 2026-10-14 (reactions branch: Reaction studio, emoji wall, Lottie export; Reaction effects is its own screen #/reactions in reactions.js: search + two rows of emoji, one editor card, the created reactions as cards). Regenerate when actions move. The wiring is in `docs/architecture.md` §6; the redesign action map remains in `docs/redesign_plan.md` §4.
 
-**481 actions** (482 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 35 scripts; **17 screens** (22 `RENDER` definitions); **171 named server routes**.
+**482 actions** (483 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 35 scripts; **17 screens** (22 `RENDER` definitions); **171 named server routes**.
 
 `tests/data/ui_baseline.json` and `tests/test_ui_inventory.py` prevent actions, screens or routes disappearing without a recorded rename or authorized retirement. The feature split changes no baseline entries.
 
@@ -458,28 +458,29 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `pmlist` | 49 | projmap.js | `/api/generations/removed`<br>`/api/history` |
 | `pmopen` | 51 | projmap.js | `/api/generations/removed`<br>`/api/generations/{}/particles`<br>`/api/history` |
 
-### `reactions.js` (18)
+### `reactions.js` (19)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
-| `rxpick` | 279 | reactions.js | `/api/particles/emoji-preview` |
-| `rxfilter` | 287 | reactions.js | `/api/particles/emoji-preview` |
-| `rxmulti` | 288 | reactions.js | `/api/particles/emoji-preview` |
-| `rxselall` | 289 | reactions.js | `/api/particles/emoji-preview` |
-| `rxclear` | 290 | reactions.js | `/api/particles/emoji-preview` |
-| `rxmany` | 292 | reactions.js | `/api/particles/emoji-batches` |
-| `rxbatch` | 297 | reactions.js | `/api/particles/emoji-batches` |
-| `rxbcancel` | 303 | reactions.js | `/api/particles/emoji-batches/{}/cancel` |
-| `rxzip` | 305 | reactions.js | `/api/particles/emoji-lottie.zip` |
-| `rxsave` | 311 | reactions.js | `/api/particles/emoji-presets`<br>`/api/particles/emoji-preview` |
-| `rxpupd` | 316 | reactions.js | `/api/particles/emoji-presets/{}`<br>`/api/particles/emoji-preview` |
-| `rxpload` | 321 | (no `data-act` button: called from code, a key, or a form) | `/api/particles/emoji-preview` |
-| `rxpopen` | 325 | reactions.js | `/api/particles/emoji-preview` |
-| `rxpdel` | 329 | reactions.js | `/api/particles/emoji-presets/{}/delete`<br>`/api/particles/emoji-preview` |
-| `rxclose` | 332 | reactions.js | `/api/particles/emoji-preview` |
-| `rxreset` | 333 | reactions.js | `/api/particles/emoji-preview` |
-| `rxdl` | 334 | reactions.js | none (browser only) |
-| `rxcreate` | 336 | reactions.js | `/api/particles/emoji-lottie`<br>`/api/particles/emoji-preview` |
+| `rxpick` | 284 | reactions.js | `/api/particles/emoji-preview` |
+| `rxfilter` | 292 | reactions.js | `/api/particles/emoji-preview` |
+| `rxmore` | 293 | reactions.js | none (browser only) |
+| `rxmulti` | 296 | reactions.js | `/api/particles/emoji-preview` |
+| `rxselall` | 297 | reactions.js | `/api/particles/emoji-preview` |
+| `rxclear` | 298 | reactions.js | `/api/particles/emoji-preview` |
+| `rxmany` | 300 | reactions.js | `/api/particles/emoji-batches` |
+| `rxbatch` | 305 | reactions.js | `/api/particles/emoji-batches` |
+| `rxbcancel` | 311 | reactions.js | `/api/particles/emoji-batches/{}/cancel` |
+| `rxzip` | 313 | reactions.js | `/api/particles/emoji-lottie.zip` |
+| `rxsave` | 319 | reactions.js | `/api/particles/emoji-presets`<br>`/api/particles/emoji-preview` |
+| `rxpupd` | 324 | reactions.js | `/api/particles/emoji-presets/{}`<br>`/api/particles/emoji-preview` |
+| `rxpload` | 329 | (no `data-act` button: called from code, a key, or a form) | `/api/particles/emoji-preview` |
+| `rxpopen` | 333 | reactions.js | `/api/particles/emoji-preview` |
+| `rxpdel` | 337 | reactions.js | `/api/particles/emoji-presets/{}/delete`<br>`/api/particles/emoji-preview` |
+| `rxclose` | 340 | reactions.js | `/api/particles/emoji-preview` |
+| `rxreset` | 341 | reactions.js | `/api/particles/emoji-preview` |
+| `rxdl` | 342 | reactions.js | none (browser only) |
+| `rxcreate` | 344 | reactions.js | `/api/particles/emoji-lottie`<br>`/api/particles/emoji-preview` |
 
 ### `settings.js` (3)
 

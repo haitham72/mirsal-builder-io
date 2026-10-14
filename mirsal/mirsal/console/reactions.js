@@ -20,6 +20,7 @@ const RXO=[['particle_size','Size',.25,3,.05,'×'],['size_var','Size variation',
 const RXSTART={magnitude:.7,gravity:1,vortex:0,spin:1,count:28,spread:360,particle_size:.3,size_var:.38,size_in_dur:.4,size_out_dur:.4,hue_var:25};
 const RXPX=256;                                  /* a reaction loop's side: sharp at the 220 CSS px it is shown at */
 const RXHOV=64;                                  /* the hover reaction's side: 60% smaller than the 160 px it was (Haitham, 2026-10-13) */
+const RXPAGE=120;                                /* tiles drawn at a time: Load more adds the next page (Haitham, 2026-10-14: all 1800 at once slowed the page) */
 const RXPOLL=1500;                               /* a background run is asked for its progress this often */
 
 /* ---------- state ----------
@@ -28,7 +29,7 @@ const RXPOLL=1500;                               /* a background run is asked fo
    multi: Select is on; sel: the ticked emojis; anchor: the last ticked (Shift-click ticks from there); presets: the saved presets (server);
    apply: what Create N uses ('' = the start look, '*random', or a preset id); run: the background run being watched. */
 const RXQ={q:'',f:'all'};
-const RXS={bank:null,start:null,made:null,ek:null,hover:'',pv:{},par:{},ppv:{},hT:0,t:0,multi:false,sel:new Set(),anchor:'',presets:null,apply:'',run:null,runT:0,done:null};
+const RXS={bank:null,start:null,made:null,ek:null,hover:'',pv:{},par:{},ppv:{},hT:0,t:0,multi:false,sel:new Set(),anchor:'',presets:null,apply:'',run:null,runT:0,done:null,shown:RXPAGE};
 const rxStart=()=>RXS.start||RXSTART;
 /* one emoji in the editor: its motion override, the Simulation values (sim), the Shape values, the server's last answer (own), the saved version
    it was opened from (ver) and the preset it was loaded from (presetId) */
@@ -101,14 +102,17 @@ function rxPick(){
   `<button class="btn sm${RXS.multi?' pri':''}" data-act=rxmulti aria-pressed=${RXS.multi}>${ic('check')} Select</button>`+
   `<span class=rx-exp><span class=mut>Export</span><button class="btn sm" data-act=rxzip data-w=all ${d?'':'disabled'} title="The newest Lottie of every emoji that has one, in one zip">${ic('download')} All</button>`+
   `<button class="btn sm" data-act=rxzip data-w=sel ${n?'':'disabled'} title="The newest Lottie of each selected emoji">Selected${n?' ('+n+')':''}</button></span></div>`+
-  `${rxRunHtml()}<div class=rx-grid data-rxwall>${list.map(rxTile).join('')||'<span class=mut>No match.</span>'}</div>${rxMany()}</section>`}
+  `${rxRunHtml()}<div class=rx-grid data-rxwall>${list.slice(0,RXS.shown).map(rxTile).join('')||'<span class=mut>No match.</span>'}</div>${rxMoreHtml(list.length)}${rxMany()}</section>`}
+/* Load more: the next page of the wall, appended (never the whole list redrawn) */
+function rxMoreHtml(n){const rest=n-Math.min(n,RXS.shown);
+ return rest>0?`<div class=rx-more data-rxmore><button class="btn sm" data-act=rxmore>Load more</button><small class=mut>${Math.min(n,RXS.shown)} of ${n} shown · ${rest} more</small></div>`:'<div data-rxmore></div>'}
 /* Select: the ticked emojis and one way to create them all (the start look, a random preset of each one's own motion, or one preset) */
 function rxMany(){
  if(!RXS.multi)return '<div data-rxmany></div>';
  const n=RXS.sel.size,ps=RXS.presets||[],busy=!!(RXS.run&&RXS.run.state==='running');
  const glyphs=[...RXS.sel].slice(0,40).map(t=>esc(rxRow(t).emoji)).join('');
  return `<div class=rx-many data-rxmany><span class=rx-many-sel>${n?`<b>${n}</b> <span class=rx-many-g>${glyphs}${n>40?'…':''}</span>`:'<span class=mut>Click to tick, Shift-click ticks the range</span>'}</span>`+
-  `<button class=link data-act=rxselall>Select all shown</button>${n?'<button class=link data-act=rxclear>Clear</button>':''}`+
+  `<button class=link data-act=rxselall>Select all${(()=>{const n=rxList().length;return n?' ('+n+')':''})()}</button>${n?'<button class=link data-act=rxclear>Clear</button>':''}`+
   `<label class=rx-pre><span class=mut>Look</span><select data-rxapply aria-label="Look for the ticked emojis"><option value=""${RXS.apply?'':' selected'}>The start look</option>`+
   `<option value="*random"${RXS.apply==='*random'?' selected':''} ${ps.length?'':'disabled'}>A random preset of its own motion</option>`+
   `${ps.map(p=>`<option value="${esc(p.id)}"${p.id===RXS.apply?' selected':''}>${esc(p.name)} · ${esc(p.motion||'')}</option>`).join('')}</select></label>`+
@@ -179,7 +183,8 @@ function rxDraw(){
  if(q){const i=el.querySelector('[data-rxq]');if(i){i.focus();try{i.setSelectionRange(i.value.length,i.value.length)}catch(e){}}}
  rxPresetPreviews()}
 const rxSwap=(sel,html)=>{const el=document.querySelector&&document.querySelector(sel);if(el)el.outerHTML=html;else rxDraw()};
-function rxGridRedraw(){const w=document.querySelector&&document.querySelector('[data-rxwall]');if(!w)return;w.innerHTML=rxList().map(rxTile).join('')||'<span class=mut>No match.</span>'}
+function rxGridRedraw(){const w=document.querySelector&&document.querySelector('[data-rxwall]');if(!w)return;const list=rxList();
+ w.innerHTML=list.slice(0,RXS.shown).map(rxTile).join('')||'<span class=mut>No match.</span>';rxSwap('[data-rxmore]',rxMoreHtml(list.length))}
 function rxTileRedraw(t){const el=document.querySelector&&document.querySelector(`.rx-e[data-t="${t}"]`);if(el)el.outerHTML=rxTile(rxRow(t))}
 function rxManyRedraw(){rxSwap('[data-rxmany]',rxMany())}
 function rxRunRedraw(){rxSwap('[data-rxrun]',rxRunHtml())}
@@ -253,7 +258,7 @@ RENDER.reactions=async()=>{
 /* ---------- events ---------- */
 document.addEventListener('input',ev=>{
  const t=ev.target;if(!t||!t.dataset)return;
- if(t.dataset.rxq!==undefined){RXQ.q=t.value;clearTimeout(RXS.t);RXS.t=setTimeout(rxGridRedraw,150);return}
+ if(t.dataset.rxq!==undefined){RXQ.q=t.value;RXS.shown=RXPAGE;clearTimeout(RXS.t);RXS.t=setTimeout(rxGridRedraw,150);return}
  if(!t.dataset.rxo||!RXS.ek)return;
  const o=rxOpt(t.dataset.rxo);if(rxIsSim(o[0]))RXS.ek.sim[o[0]]=+t.value;else RXS.ek[o[0]]=+t.value;
  const out=t.parentNode&&t.parentNode.querySelector('output');if(out)out.textContent=rxFmt(o,t.value);
@@ -284,7 +289,10 @@ ACT.rxpick=(el,ev)=>{
   if(RXS.sel.has(t))RXS.sel.delete(t);else RXS.sel.add(t);RXS.anchor=t;rxTileRedraw(t);rxManyRedraw();rxPresetsRedraw();return}
  if(RXS.ek&&RXS.ek.token===t)return;
  const r=rxSaved(t)[0];RXS.ek=r?rxFromRec(r):rxNew(t);RXS.hover='';rxDraw();rxPlay(t)};
-ACT.rxfilter=el=>{RXQ.f=el.dataset.f||'all';rxDraw()};
+ACT.rxfilter=el=>{RXQ.f=el.dataset.f||'all';RXS.shown=RXPAGE;rxDraw()};
+ACT.rxmore=()=>{const list=rxList(),from=RXS.shown;RXS.shown+=RXPAGE;
+ const w=document.querySelector&&document.querySelector('[data-rxwall]');if(w)w.insertAdjacentHTML('beforeend',list.slice(from,RXS.shown).map(rxTile).join(''));
+ rxSwap('[data-rxmore]',rxMoreHtml(list.length))};
 ACT.rxmulti=()=>{RXS.multi=!RXS.multi;RXS.sel.clear();RXS.anchor='';if(RXS.multi)RXS.ek=null;rxDraw()};
 ACT.rxselall=()=>{rxList().forEach(m=>RXS.sel.add(m.token));rxGridRedraw();rxManyRedraw();rxPresetsRedraw()};
 ACT.rxclear=()=>{RXS.sel.clear();RXS.anchor='';rxDraw()};

@@ -682,6 +682,7 @@ button.logo{border:0;padding:0;cursor:pointer;background:none}button.logo:hover 
 .rx-pick{display:flex;flex-direction:column;gap:8px}.rx-top{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap}.rx-top input{width:min(100%,320px)}
 .rx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:2px;max-height:min(46vh,520px);overflow:auto;overscroll-behavior:contain;padding:2px}
 .rx-top .sp{flex:1}.rx-f button{font-size:var(--fs-s)}.rx-exp{display:inline-flex;align-items:center;gap:6px}
+.rx-more{display:flex;align-items:center;gap:10px;justify-content:center;padding:4px 0}
 .rx-dot{position:absolute;right:5px;bottom:5px;width:7px;height:7px;border-radius:50%;background:var(--ok,#16a34a);box-shadow:0 0 0 2px var(--sf)}
 .rx-run{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--r-m);background:var(--wash);font-size:var(--fs-s)}
 .rx-ver{display:inline-flex;align-items:center;gap:6px;font-size:var(--fs-s)}.rx-ver select{padding:3px 6px;border-radius:var(--r-s);border:1px solid var(--bd);background:var(--sf);color:var(--ink);font-size:var(--fs-s)}
