@@ -1,0 +1,2021 @@
+{
+  "reviewed_commit": "170f26e36893a194248eaf5d88449ecba9e9bcd7",
+  "models": {
+    "6.1-sol-medium": 50,
+    "luna-6-high": 37
+  },
+  "tasks": [
+    {
+      "id": "T-001",
+      "title": "Restore staged Keep approved size",
+      "model": "6.1-sol-medium",
+      "finding": "F-01",
+      "files": [
+        "mirsal/mirsal/console/studio-core.js",
+        "mirsal/tests/js/size_preview.test.js"
+      ],
+      "deps": [],
+      "doText": "Delete only the late ACT.gkeepsize assignment originally at901–911; retain the858 staged implementation and all other ACT names. Test with stubbed API/GM and the existing console_vm/source helpers: click changes VZ.keep and reads anim_preview; no keep_size/video_size POST until Apply. Cancel makes zero mutation calls; Apply sends the original {on,reslice} body once; technical failures retain the preview.",
+      "accept": [
+        "size_preview",
+        "anim_create"
+      ],
+      "size": 100,
+      "risk": "low",
+      "trace": "CT-001",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-002",
+      "title": "Settle retime on every dialog cancellation",
+      "model": "luna-6-high",
+      "finding": "F-06",
+      "files": [
+        "mirsal/mirsal/console/app.js",
+        "mirsal/mirsal/console/packs.js",
+        "mirsal/tests/js/dialog_cancel.test.js"
+      ],
+      "deps": [],
+      "doText": "Extend dlg(html,{onDismiss}={}) and closeDlg(reason='dismiss') with one active dismissal callback cleared before invocation. retimeAsk registers a callback that captures its own resolver and resolves null exactly once; ACT.rtans clears RTA/callback before closing and returns only true/false/null. Opening a replacement dialog cancels the prior request. Preserve dlg(html) callers; backdrop and ACT.dlgx use the same close path. Do not add Escape handling until dialog lifecycle task.",
+      "accept": [
+        "dialog_cancel",
+        "pack_delete"
+      ],
+      "size": 160,
+      "risk": "medium",
+      "trace": "CT-002",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-003",
+      "title": "Coalesce duplicate queue clock redraws",
+      "model": "6.1-sol-medium",
+      "finding": "F-05",
+      "files": [
+        "mirsal/mirsal/console/live.js",
+        "mirsal/tests/js/queue_clock.test.js"
+      ],
+      "deps": [],
+      "doText": "Remove only the second1000-ms interval at live.js:191. Retain the first interval at185 byte-for-byte, including data-lvt updates and its original active/run predicate. Add a stub-clock test proving one queue1000-ms interval registration and one drawLive call per clock tick for REQUESTED/CLAIMED work. Preserve qRefresh/qtoggle, all queue ACT names and saved QO; incremental DOM rendering is a separate design task.",
+      "accept": [
+        "queue_clock",
+        "job_recovery"
+      ],
+      "size": 80,
+      "risk": "low",
+      "trace": "CT-003",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-004",
+      "title": "Serialize Studio refreshes and retain force requests",
+      "model": "luna-6-high",
+      "finding": "F-05",
+      "files": [
+        "mirsal/mirsal/console/studio-core.js",
+        "mirsal/tests/js/studio_poll.test.js"
+      ],
+      "deps": [],
+      "doText": "Add a tick in-flight flag and one pending-force flag. Concurrent tick(true) must queue one force refresh after the current read completes; intervals may not overlap. Release both flags on every failure via finally. Skip interval work while document.hidden, but explicit force requests and required open-modal refreshes retain current behavior. Read each original URL/body and preserve glast/typing guard/404 session cleanup. Use fake slow reads and hidden-state tests; do not change server polling cadence here.",
+      "accept": [
+        "studio_poll",
+        "prompt_tab"
+      ],
+      "size": 170,
+      "risk": "medium",
+      "trace": "CT-004",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-005",
+      "title": "Introduce resource watcher lifecycle",
+      "model": "luna-6-high",
+      "finding": "F-05",
+      "files": [
+        "mirsal/mirsal/console/ui-watch.js",
+        "mirsal/mirsal/console/index.html",
+        "mirsal/tests/js/ui_watch.test.js",
+        "mirsal/tests/js/console_vm.js"
+      ],
+      "deps": [
+        "T-004"
+      ],
+      "doText": "Implement watchResource({key,intervalMs,enabled,read,onValue,onError,isTerminal,signature,visibility}) -> {start,stop,refresh}. Exactly one read at a time; refresh(true) retains one pending force; next timeout begins after settle. Terminal/stop disposes timers; failure calls onError then reschedules while enabled. visibility is explicit 'visible'|'always'; no default policy guessing. Export pure/testable helper with no DOM reads at module load. Include once after app.js and before consumers. Update console_vm loadConsole to load this helper once before its actual consumer scripts in VM tests (deduplicate resolved filenames); standalone statement-extraction fixtures inject its export explicitly in their one consumer test. Preserve original console_source canonicalization and do not change grouping of unrelated files. enabled=false skips reads and continues only cheap enabled checks until explicit stop/terminal; caller route transitions do not create parallel instances. Visibility policy skips read while hidden without marking a running job terminal. Cover disable/re-enable without manual new watcher.",
+      "accept": [
+        "ui_watch"
+      ],
+      "size": 230,
+      "risk": "medium",
+      "trace": "CT-005",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-006",
+      "title": "Migrate collection export watcher",
+      "model": "6.1-sol-medium",
+      "finding": "F-05",
+      "files": [
+        "mirsal/mirsal/console/packs.js",
+        "mirsal/tests/js/collection_watch.test.js"
+      ],
+      "deps": [
+        "T-005"
+      ],
+      "doText": "Replace only colWatch scheduling with watchResource; keep its public colWatch(id,tries=0). Policy:2500ms, always visible/offscreen, stop on404, done, failed or tries>720; preserve done/failed toast wording and no duplicate terminal toast. read remains GET collection/exports/{encoded id}; never initiate an export in tests. Exact failed-read/retry-limit fixtures.",
+      "accept": [
+        "collection_watch",
+        "pack_delete"
+      ],
+      "size": 140,
+      "risk": "medium",
+      "trace": "CT-006",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-007",
+      "title": "Migrate reaction batch watcher",
+      "model": "6.1-sol-medium",
+      "finding": "F-05",
+      "files": [
+        "mirsal/mirsal/console/reactions.js",
+        "mirsal/tests/js/reactions.test.js"
+      ],
+      "deps": [
+        "T-005"
+      ],
+      "doText": "Adapt rxWatch/rxRun's runT scheduling to watchResource at RXPOLL1500. Preserve original reaction batch id capture, running/terminal decisions, fresh-token progress, RXS.done reset and redraw points. Off-route background batches keep original continuation policy; no new batch request. Extend existing reactions tests with terminal-once, failure recovery and stopped watcher fixtures.",
+      "accept": [
+        "reactions",
+        "ui_watch"
+      ],
+      "size": 140,
+      "risk": "medium",
+      "trace": "CT-007",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-008",
+      "title": "Migrate effect-run watcher",
+      "model": "6.1-sol-medium",
+      "finding": "F-05",
+      "files": [
+        "mirsal/mirsal/console/effects.js",
+        "mirsal/tests/js/effects_core.test.js"
+      ],
+      "deps": [
+        "T-005"
+      ],
+      "doText": "Replace fxPoll's timeout with one watcher per X.who/eid at2200ms; enabled=original fxBusy(X)&&X.alive(). read uses fxLoad(X), which retains original state-token guard. Keep fxSig and X.last redraw check; stop/dispose on fxReset and eid switch. Do not share FX/SP state or merge their screens.",
+      "accept": [
+        "effects_core",
+        "ui_watch"
+      ],
+      "size": 140,
+      "risk": "medium",
+      "trace": "CT-008",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-009",
+      "title": "Migrate saved-set drawing watcher",
+      "model": "6.1-sol-medium",
+      "finding": "F-05",
+      "files": [
+        "mirsal/mirsal/console/particles.js",
+        "mirsal/tests/js/particle_editor.test.js"
+      ],
+      "deps": [
+        "T-005"
+      ],
+      "doText": "Replace only spPoll with a2500-ms watcher. While original busy predicate is true, reproduce route-specific reads exactly: Library particles calls spLibSync(true); Pack calls ptCounts(PACK_ID) and conditional spLibSync(true); off-route wakes may continue without reads. Preserve SPL.busy, cached cells invalidation and terminal behavior. Do not migrate search/slider timers.",
+      "accept": [
+        "particle_editor",
+        "ui_watch"
+      ],
+      "size": 145,
+      "risk": "medium",
+      "trace": "CT-009",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-010",
+      "title": "Migrate background job reads",
+      "model": "luna-6-high",
+      "finding": "F-05",
+      "files": [
+        "mirsal/mirsal/console/live.js",
+        "mirsal/tests/js/live_watch.test.js"
+      ],
+      "deps": [
+        "T-005"
+      ],
+      "doText": "Move liveTick2500-ms registration to watcher with visibility:'always'; preserve LTB, completion/session mutations, dismissal handling, lsave and qRefresh. read/commit split must reproduce existing call/order; a force tick during a read may coalesce but cannot lose completion. Fake all network operations and assert exact session/ANIM/LIVE outcomes for completed sheet/video and failed job.",
+      "accept": [
+        "live_watch",
+        "job_recovery"
+      ],
+      "size": 200,
+      "risk": "medium",
+      "trace": "CT-010",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-011",
+      "title": "Introduce shared test-card presenter",
+      "model": "luna-6-high",
+      "finding": "F-02",
+      "files": [
+        "mirsal/mirsal/console/ui-testcard.js",
+        "mirsal/mirsal/console/index.html",
+        "mirsal/tests/js/ui_testcard.test.js",
+        "mirsal/tests/js/console_vm.js"
+      ],
+      "deps": [
+        "T-001"
+      ],
+      "doText": "Implement testCard({id,media:{kind,src,alt},caption,anchor,loading,busy,applyAct,cancelAct}) -> {update,close}. Reuse existing egcimg/egbadge/egccap/egcbtn classes and exact labels/ids; support image or autoplay loop muted playsinline video. Width min(300,innerWidth-24); same12px horizontal clamp and70px/min(innerHeight-width-110,anchor.bottom+8 or90) top clamp. Only owned DOM, no API/policy. Include once after app.js. Update console_vm loadConsole to load this helper once before its actual consumer scripts in VM tests (deduplicate resolved filenames); standalone statement-extraction fixtures inject its export explicitly in their one consumer test. Preserve original console_source canonicalization and do not change grouping of unrelated files.",
+      "accept": [
+        "ui_testcard"
+      ],
+      "size": 230,
+      "risk": "medium",
+      "trace": "CT-019",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-012",
+      "title": "Migrate video-size test card",
+      "model": "6.1-sol-medium",
+      "finding": "F-02",
+      "files": [
+        "mirsal/mirsal/console/studio-core.js",
+        "mirsal/tests/js/size_preview.test.js"
+      ],
+      "deps": [
+        "T-011",
+        "T-001"
+      ],
+      "doText": "Replace only vzCard DOM construction/update/position with testCard. Adapter computes existing target/caption, source/spinner, busy state and anchor expression; preserve #vzcard, gvsize/gkeepsize anchor choices and vzapply/vzcancel. Scroll/resize still update placement. Do not change VZ.n, endpoints or tick calls.",
+      "accept": [
+        "size_preview",
+        "ui_testcard"
+      ],
+      "size": 140,
+      "risk": "medium",
+      "trace": "CT-020",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-013",
+      "title": "Migrate edge test card",
+      "model": "6.1-sol-medium",
+      "finding": "F-02",
+      "files": [
+        "mirsal/mirsal/console/live.js",
+        "mirsal/tests/js/edge_preview.test.js"
+      ],
+      "deps": [
+        "T-011"
+      ],
+      "doText": "Replace only egCard DOM construction/update/position with testCard. Preserve #egcard image/caption and egapply/egundo. Keep modal-overlay route, egDirty/egClear, 40-ms debounce and stored-snapshot undo semantics. Set busy from EG.busy without changing eligibility; test dirty-cancel is zero POST while committed undo retains original body.",
+      "accept": [
+        "edge_preview",
+        "ui_testcard"
+      ],
+      "size": 140,
+      "risk": "medium",
+      "trace": "CT-021",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-014",
+      "title": "Introduce grouped-grid presentation helper",
+      "model": "luna-6-high",
+      "finding": "F-03",
+      "files": [
+        "mirsal/mirsal/console/ui-grouped-grid.js",
+        "mirsal/mirsal/console/index.html",
+        "mirsal/tests/js/grouped_grid.test.js",
+        "mirsal/tests/js/console_vm.js"
+      ],
+      "deps": [],
+      "doText": "Implement groupedGridHtml({groups,rootAttrs,groupAttrs,headerHtml,cellHtml}) -> string. Emit one outer container and section+header+grid per group, preserving caller-provided attributes/markup; headerHtml(group), cellHtml(item,index,group) use original caller indices carried in items. No grouping/sorting/selection mutations inside helper. Include once after app.js; test flat index/order, labels and emitted root/group/cell attributes. Update console_vm loadConsole to load this helper once before its actual consumer scripts in VM tests (deduplicate resolved filenames); standalone statement-extraction fixtures inject its export explicitly in their one consumer test. Preserve original console_source canonicalization and do not change grouping of unrelated files.",
+      "accept": [
+        "grouped_grid"
+      ],
+      "size": 160,
+      "risk": "medium",
+      "trace": "CT-022",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-015",
+      "title": "Migrate Library grouped grid",
+      "model": "6.1-sol-medium",
+      "finding": "F-03",
+      "files": [
+        "mirsal/mirsal/console/library.js",
+        "mirsal/tests/js/grouped_grid.test.js"
+      ],
+      "deps": [
+        "T-014"
+      ],
+      "doText": "Use groupedGridHtml inside libByPackHtml only. Retain its Map-by-pack algorithm, [sticker,globalIndex] pairs, SEL/selKey checks, lcopen/lsel/openpack attributes, lib-bypack/lib-pk/lib-pkh classes and empty sentence. Snapshot representative two-pack HTML before extraction, assert byte equality after migration including cap escaping and global LCL index.",
+      "accept": [
+        "grouped_grid",
+        "packs_column"
+      ],
+      "size": 140,
+      "risk": "medium",
+      "trace": "CT-023",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-016",
+      "title": "Migrate Pack grouped grid",
+      "model": "6.1-sol-medium",
+      "finding": "F-03",
+      "files": [
+        "mirsal/mirsal/console/packs.js",
+        "mirsal/tests/js/grouped_grid.test.js"
+      ],
+      "deps": [
+        "T-014"
+      ],
+      "doText": "Replace only drawPack's pk-bybatch section/grid iteration. Keep pkGroups/pkGroupHead outputs, non-Studio last group, original sticker order, all drag/cover/reaction/hover/name/selection attributes and disabled owner actions. Snapshot exact representative HTML before extraction and compare unchanged output; no change to reaction tab markup.",
+      "accept": [
+        "grouped_grid",
+        "pack_delete",
+        "manual_batch_action"
+      ],
+      "size": 145,
+      "risk": "medium",
+      "trace": "CT-024",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-017",
+      "title": "Introduce semantic segmented presenter",
+      "model": "luna-6-high",
+      "finding": "F-07",
+      "files": [
+        "mirsal/mirsal/console/ui-segment.js",
+        "mirsal/mirsal/console/index.html",
+        "mirsal/tests/js/segmented.test.js",
+        "mirsal/tests/js/console_vm.js"
+      ],
+      "deps": [],
+      "doText": "Implement segmentedHtml({label,mode,items,selected,className}) -> string. choice: role=group plus button aria-pressed; tabs: role=tablist/buttons role=tab + aria-selected + roving tabindex; navigation: nav aria-label with aria-current=page on selected. Keep data attributes supplied in items.attrs and ACT names verbatim; no state/persistence logic. Escape labels and values. Include once after app.js. Provide delegated keyboard handling restricted to role=tab within helper-emitted tablists: Left/Right wrap focus and call the target button.click(), Home/End select first/last; do not intercept text inputs or choice/navigation groups. Export the handler for stub-DOM tests and install one guarded listener in browser mode. Update console_vm loadConsole to load this helper once before its actual consumer scripts in VM tests (deduplicate resolved filenames); standalone statement-extraction fixtures inject its export explicitly in their one consumer test. Preserve original console_source canonicalization and do not change grouping of unrelated files.",
+      "accept": [
+        "segmented"
+      ],
+      "size": 200,
+      "risk": "medium",
+      "trace": "CT-025",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-018",
+      "title": "Migrate reaction filter segment",
+      "model": "6.1-sol-medium",
+      "finding": "F-07",
+      "files": [
+        "mirsal/mirsal/console/reactions.js",
+        "mirsal/tests/js/reactions.test.js"
+      ],
+      "deps": [
+        "T-017"
+      ],
+      "doText": "Replace only rxPick's All/Done/Not done segment with mode:'choice'; preserve gseg rx-f, data-act=rxfilter/data-f all|done|todo and RXQ.f. Keep counts, wall, selection, batch actions untouched. Exact selected states for each of three values and unchanged action names.",
+      "accept": [
+        "reactions",
+        "segmented"
+      ],
+      "size": 100,
+      "risk": "medium",
+      "trace": "CT-026",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-019",
+      "title": "Migrate composer source segment",
+      "model": "6.1-sol-medium",
+      "finding": "F-07",
+      "files": [
+        "mirsal/mirsal/console/composer.js",
+        "mirsal/tests/js/prompt_step.test.js"
+      ],
+      "deps": [
+        "T-017"
+      ],
+      "doText": "Replace only cpDrawBar Creative/Predefined gseg cp-act with choice mode. Preserve cpactions/data-v creative|predefined, current Creative selection whenever actions!='predefined', both tooltips and model/prompt behavior. Assert both states and original ACT.cpactions persistence/body.",
+      "accept": [
+        "prompt_step",
+        "segmented"
+      ],
+      "size": 110,
+      "risk": "medium",
+      "trace": "CT-027",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-020",
+      "title": "Migrate Studio view segment",
+      "model": "6.1-sol-medium",
+      "finding": "F-07",
+      "files": [
+        "mirsal/mirsal/console/studio-core.js",
+        "mirsal/tests/js/studio_menu.test.js"
+      ],
+      "deps": [
+        "T-017"
+      ],
+      "doText": "Replace only gview What to show segment with choice mode, using stickers|sheet|both, data-act=gvmode/data-v and exact tooltip strings. Preserve saved view fallback and emitted content for each state; never change tabs or routes. Extend exact marker-based VM fixture rather than test text line formatting.",
+      "accept": [
+        "studio_menu",
+        "segmented"
+      ],
+      "size": 110,
+      "risk": "medium",
+      "trace": "CT-028",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-021",
+      "title": "Migrate Pack tabs segment",
+      "model": "6.1-sol-medium",
+      "finding": "F-07",
+      "files": [
+        "mirsal/mirsal/console/packs.js",
+        "mirsal/tests/js/pack_delete.test.js"
+      ],
+      "deps": [
+        "T-017"
+      ],
+      "doText": "Replace only gseg pk-tabs with mode:'tabs', keys stickers|particles, ACT.pktab/data-t unchanged. Use aria-selected and roving tabindex rather than aria-pressed; wire Left/Right/Home/End to focus/select only these two tab buttons using shared helper callback (helper keyboard support must be pinned in foundation before this task). Preserve PKTAB and rendering.",
+      "accept": [
+        "pack_delete",
+        "segmented"
+      ],
+      "size": 130,
+      "risk": "medium",
+      "trace": "CT-029",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-022",
+      "title": "Migrate Settings section navigation",
+      "model": "6.1-sol-medium",
+      "finding": "F-07",
+      "files": [
+        "mirsal/mirsal/console/settings.js",
+        "mirsal/tests/js/theme.test.js"
+      ],
+      "deps": [
+        "T-017"
+      ],
+      "doText": "Replace only Settings section nav using mode:'navigation'. Keep ordered IDs set-appear,au-me,set-health,staff set-prep,set-ai,set-tg,trx-box and existing setjump attributes/actions. This control scrolls to anchors, not a content tablist; preserve role/access and staff gating. Do not invent a selected pane if no state currently tracks it; navigation selected:null yields no aria-current.",
+      "accept": [
+        "theme",
+        "segmented"
+      ],
+      "size": 120,
+      "risk": "medium",
+      "trace": "CT-030",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-023",
+      "title": "Introduce range-field presenter",
+      "model": "luna-6-high",
+      "finding": "F-04",
+      "files": [
+        "mirsal/mirsal/console/ui-range.js",
+        "mirsal/mirsal/console/index.html",
+        "mirsal/tests/js/range_field.test.js",
+        "mirsal/tests/js/console_vm.js"
+      ],
+      "deps": [],
+      "doText": "Implement rangeFieldHtml({label,min,max,step,value,attrs,formatValue,pairedInput,className}). pairedInput='output'|'number'|'none'; emit supplied namespace attributes unchanged on range and number only; output formatting is caller-supplied; no default/range/rounding policy. Support fx-sl label/span/output wrapper and fld/srow wrapper via explicit layout:'label-output'|'field-pair'. Include once after app.js; pin output escaping and two-input value attributes. Update console_vm loadConsole to load this helper once before its actual consumer scripts in VM tests (deduplicate resolved filenames); standalone statement-extraction fixtures inject its export explicitly in their one consumer test. Preserve original console_source canonicalization and do not change grouping of unrelated files.",
+      "accept": [
+        "range_field"
+      ],
+      "size": 200,
+      "risk": "medium",
+      "trace": "CT-031",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-024",
+      "title": "Migrate saved-set burst sliders",
+      "model": "6.1-sol-medium",
+      "finding": "F-04",
+      "files": [
+        "mirsal/mirsal/console/particles.js",
+        "mirsal/tests/js/particle_editor.test.js"
+      ],
+      "deps": [
+        "T-023"
+      ],
+      "doText": "Replace only spBSlider. Use original FXSL lookup, par override then shown fallback and blank-null behavior; label-output mode, class fx-sl, data-psbp and data-id exact. Do not move FXSL/default/clean parameter decisions into helper. Pin each six descriptors and focused-input handling remains outside helper.",
+      "accept": [
+        "particle_editor",
+        "pack_studio",
+        "range_field"
+      ],
+      "size": 110,
+      "risk": "medium",
+      "trace": "CT-032",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-025",
+      "title": "Migrate emoji reaction sliders",
+      "model": "6.1-sol-medium",
+      "finding": "F-04",
+      "files": [
+        "mirsal/mirsal/console/reactions.js",
+        "mirsal/tests/js/reactions.test.js"
+      ],
+      "deps": [
+        "T-023"
+      ],
+      "doText": "Replace only rxSlider. Retain rxVal/rxFmt and each original RXSIM/RXO min/max/step/unit/label; attrs data-rxo, existing classes/label references and preview events unchanged. Preserve sim versus extra payload keys and percent display. Pin all descriptors, nullable fallback and byte-identical rxBody JSON.",
+      "accept": [
+        "reactions",
+        "range_field"
+      ],
+      "size": 120,
+      "risk": "medium",
+      "trace": "CT-033",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-026",
+      "title": "Introduce URL/blob download utility",
+      "model": "luna-6-high",
+      "finding": "F-08",
+      "files": [
+        "mirsal/mirsal/console/ui-download.js",
+        "mirsal/mirsal/console/index.html",
+        "mirsal/tests/js/ui_download.test.js",
+        "mirsal/tests/js/console_vm.js"
+      ],
+      "deps": [],
+      "doText": "Implement downloadFile({url,blob,filename,revokeAfterMs=4000}) with exactly one source. Append anchor, assign href/download, click, remove in finally; create object URL only for blob and revoke only helper-owned URL after specified delay. Existing URL/data-URL must never be revoked. No fetch or Telegram launch in helper. Include once after app.js; stub document/URL/timers. Update console_vm loadConsole to load this helper once before its actual consumer scripts in VM tests (deduplicate resolved filenames); standalone statement-extraction fixtures inject its export explicitly in their one consumer test. Preserve original console_source canonicalization and do not change grouping of unrelated files.",
+      "accept": [
+        "ui_download"
+      ],
+      "size": 160,
+      "risk": "low",
+      "trace": "CT-037",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-027",
+      "title": "Migrate Timeline blob download",
+      "model": "6.1-sol-medium",
+      "finding": "F-08",
+      "files": [
+        "mirsal/mirsal/console/animate.js",
+        "mirsal/tests/js/ui_download.test.js"
+      ],
+      "deps": [
+        "T-026"
+      ],
+      "doText": "Replace only anCall's response blob/createObjectURL/anchor/remove/revoke sequence with downloadFile({blob,filename: original sanitized A.st.name+'.'+A.fmt}). Preserve fetch/body, busy state, original4000ms cleanup timing and save branch. Extend fixture proving filename/source ownership and zero new network requests.",
+      "accept": [
+        "ui_download"
+      ],
+      "size": 110,
+      "risk": "low",
+      "trace": "CT-038",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-028",
+      "title": "Migrate video-editor blob download",
+      "model": "6.1-sol-medium",
+      "finding": "F-08",
+      "files": [
+        "mirsal/mirsal/console/prepare.js",
+        "mirsal/tests/js/ui_download.test.js"
+      ],
+      "deps": [
+        "T-026"
+      ],
+      "doText": "Replace only prCall's response-blob download sequence with downloadFile; preserve (e.name||P.p.name).replace(/[^\\w-]+/g,'_')+'.'+e.format exactly, original4000ms cleanup, encoding request/body and save branches. No change to project persistence/timing/canvas.",
+      "accept": [
+        "ui_download"
+      ],
+      "size": 110,
+      "risk": "low",
+      "trace": "CT-039",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-029",
+      "title": "Migrate still-editor PNG download",
+      "model": "6.1-sol-medium",
+      "finding": "F-08",
+      "files": [
+        "mirsal/mirsal/console/editor.js",
+        "mirsal/tests/js/ui_download.test.js"
+      ],
+      "deps": [
+        "T-026"
+      ],
+      "doText": "Replace only ACT.xdl anchor construction with downloadFile({url:E.dataUrl,filename: original sanitized (E.name||'sticker')+'.png'}). Keep action name and data URL; do not fetch/revoke it. Pin fallback/special-character filenames.",
+      "accept": [
+        "ui_download",
+        "ai_editor"
+      ],
+      "size": 80,
+      "risk": "low",
+      "trace": "CT-040",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-030",
+      "title": "Migrate particle Lottie download",
+      "model": "6.1-sol-medium",
+      "finding": "F-08",
+      "files": [
+        "mirsal/mirsal/console/particles.js",
+        "mirsal/tests/js/particle_editor.test.js"
+      ],
+      "deps": [
+        "T-026"
+      ],
+      "doText": "Replace only ACT.psblottie success-path anchor download with downloadFile({url: original server URL,filename: original name}). Preserve original export-lottie POST, touched-only params/scale, busy button recovery and filename wording. Test fake response, never render or call a model.",
+      "accept": [
+        "particle_editor",
+        "ui_download"
+      ],
+      "size": 100,
+      "risk": "low",
+      "trace": "CT-041",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-031",
+      "title": "Migrate reaction ZIP and Lottie downloads",
+      "model": "6.1-sol-medium",
+      "finding": "F-08",
+      "files": [
+        "mirsal/mirsal/console/reactions.js",
+        "mirsal/tests/js/reactions.test.js"
+      ],
+      "deps": [
+        "T-026"
+      ],
+      "doText": "Replace only rxzip and rxdl anchor creation with downloadFile; preserve zip URL query for selected tokens, encoded join order, filename reactions.zip and individual token/id .lottie.json filename. Keep all download controls/data attributes, no fetch added. Test selected/full and individual versions.",
+      "accept": [
+        "reactions",
+        "ui_download"
+      ],
+      "size": 130,
+      "risk": "low",
+      "trace": "CT-042",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-032",
+      "title": "Introduce latest-result preview session",
+      "model": "luna-6-high",
+      "finding": "F-09",
+      "files": [
+        "mirsal/mirsal/console/ui-preview.js",
+        "mirsal/mirsal/console/index.html",
+        "mirsal/tests/js/preview_session.test.js",
+        "mirsal/tests/js/console_vm.js"
+      ],
+      "deps": [],
+      "doText": "Implement previewSession({keyFor,request,commit,onError,maxEntries=64,debounceMs}) -> {schedule,refresh,clear,dispose}. Unique monotonic generation per request; stale responses never commit; allow one in-flight read and retain only latest queued key. Cache response metadata by exact caller key with64-entry LRU; no media blobs/artwork generated or URL rewriting. Clear/dispose cancels scheduled work and invalidates late replies. Errors release busy state. Include once after app.js. Update console_vm loadConsole to load this helper once before its actual consumer scripts in VM tests (deduplicate resolved filenames); standalone statement-extraction fixtures inject its export explicitly in their one consumer test. Preserve original console_source canonicalization and do not change grouping of unrelated files.",
+      "accept": [
+        "preview_session"
+      ],
+      "size": 240,
+      "risk": "high",
+      "trace": "CT-043",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-033",
+      "title": "Migrate size preview request lifecycle",
+      "model": "luna-6-high",
+      "finding": "F-09",
+      "files": [
+        "mirsal/mirsal/console/studio-core.js",
+        "mirsal/tests/js/size_preview.test.js"
+      ],
+      "deps": [
+        "T-032",
+        "T-012"
+      ],
+      "doText": "Replace only VZ.t/VZ.n orchestration in vzPreview with previewSession debounce250/cache policy exact query key. Keep generation/index/scale/keep query serialization, initial clear/spinner, api anim_preview GET, metadata/caption and error toast/vzClear. VZ change/clear must invalidate prior requests; no automatic Apply. Preserve currently selected generation and test delayed old responses after target switch/Cancel.",
+      "accept": [
+        "size_preview",
+        "preview_session"
+      ],
+      "size": 180,
+      "risk": "high",
+      "trace": "CT-044",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-034",
+      "title": "Migrate emoji editor and hover preview lifecycle",
+      "model": "luna-6-high",
+      "finding": "F-09",
+      "files": [
+        "mirsal/mirsal/console/reactions.js",
+        "mirsal/tests/js/reactions.test.js"
+      ],
+      "deps": [
+        "T-032"
+      ],
+      "doText": "Move only rxPlay/rxHovPreview request ownership and RXS.pv response cache into previewSession adapters. Exact existing rxKey(rxBody(k)) and hover '|fit' keys; editor and hover channels remain separate so hovering cannot cancel editor work. Preserve size256, fit behavior, sim/extras payload, displayed ghost and error wording. Existing300/220ms debounce semantics remain. Test stale editor/hover replies and64-entry eviction with fakes.",
+      "accept": [
+        "reactions",
+        "preview_session"
+      ],
+      "size": 220,
+      "risk": "high",
+      "trace": "CT-045",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-035",
+      "title": "Migrate preset-card preview cache",
+      "model": "6.1-sol-medium",
+      "finding": "F-09",
+      "files": [
+        "mirsal/mirsal/console/reactions.js",
+        "mirsal/tests/js/reactions.test.js"
+      ],
+      "deps": [
+        "T-032",
+        "T-034"
+      ],
+      "doText": "Adapt only rxPresetPreviews/RXS.ppv using separate preview channel, key preset id+token+exact JSON settings, size RXPX and fit:true. Preserve ordering/throttled serial iteration and redraw behavior; do not replace editor/hover cache or batch watcher. Invalidated preset changes may not reuse old metadata;64-entry cap is explicit.",
+      "accept": [
+        "reactions",
+        "preview_session"
+      ],
+      "size": 145,
+      "risk": "medium",
+      "trace": "CT-046",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-036",
+      "title": "Migrate saved-set burst preview lifecycle",
+      "model": "luna-6-high",
+      "finding": "F-09",
+      "files": [
+        "mirsal/mirsal/console/particles.js",
+        "mirsal/tests/js/pack_studio.test.js"
+      ],
+      "deps": [
+        "T-032"
+      ],
+      "doText": "Replace only spBurstPreview busy/again/request signature/debounce lifecycle with previewSession keyed by existing spBurstPreviewKey. Preserve pack_id omission, optional preset, fxClean touched-only params + spBurstSize, size256, server shown params and never overwrite focused input. A slider during a request queues latest key; target/preset changes cannot apply stale response. No mutation/render endpoints.",
+      "accept": [
+        "pack_studio",
+        "particle_editor",
+        "preview_session"
+      ],
+      "size": 220,
+      "risk": "high",
+      "trace": "CT-047",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-037",
+      "title": "Introduce dialog frame and focus lifecycle",
+      "model": "luna-6-high",
+      "finding": "F-06",
+      "files": [
+        "mirsal/mirsal/console/ui-dialog.js",
+        "mirsal/mirsal/console/app.js",
+        "mirsal/mirsal/console/index.html",
+        "mirsal/tests/js/dialog_frame.test.js",
+        "mirsal/tests/js/console_vm.js"
+      ],
+      "deps": [
+        "T-002"
+      ],
+      "doText": "Implement dialogFrameHtml({title,bodyHtml,footerHtml,labelId}) -> string using shared escaped title/body/footer slots. Keep dlg(html,{onDismiss})/closeDlg adapters; add role=dialog/aria-modal/title association on dbox, save initiating focus, focus first input/button and trap Tab within active box; Escape/outside/ACT.dlgx settle dismissal once and return focus when initiating element still exists. Preserve ASK/PK callbacks and explicit rtans response. Include once after app.js; no endpoint changes. Update console_vm loadConsole to load this helper once before its actual consumer scripts in VM tests (deduplicate resolved filenames); standalone statement-extraction fixtures inject its export explicitly in their one consumer test. Preserve original console_source canonicalization and do not change grouping of unrelated files.",
+      "accept": [
+        "dialog_frame",
+        "dialog_cancel",
+        "avatar"
+      ],
+      "size": 260,
+      "risk": "medium",
+      "trace": "CT-048",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-038",
+      "title": "Migrate text prompt dialog frame",
+      "model": "6.1-sol-medium",
+      "finding": "F-06",
+      "files": [
+        "mirsal/mirsal/console/app.js",
+        "mirsal/tests/js/dialog_frame.test.js"
+      ],
+      "deps": [
+        "T-037"
+      ],
+      "doText": "Use dialogFrameHtml only inside askText, preserving #askv/title/value, Cancel data-act=dlgx, Save askok, selection/focus and Enter behavior. Keep ASK result callback and ignored empty text exactly. Do not migrate confirmDlg/pickPack here.",
+      "accept": [
+        "dialog_frame",
+        "avatar"
+      ],
+      "size": 100,
+      "risk": "medium",
+      "trace": "CT-049",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-039",
+      "title": "Migrate confirmation dialog frame",
+      "model": "6.1-sol-medium",
+      "finding": "F-06",
+      "files": [
+        "mirsal/mirsal/console/app.js",
+        "mirsal/tests/js/dialog_frame.test.js"
+      ],
+      "deps": [
+        "T-037"
+      ],
+      "doText": "Use dialogFrameHtml only in confirmDlg; title stays escaped exactly once, Cancel data-act=dlgx and confirm data-act=cfok with original ok label. Preserve ASK callback/owner callers and no invocation on outside/Escape. Extend exact malicious-text/callback fixtures.",
+      "accept": [
+        "dialog_frame",
+        "pack_delete"
+      ],
+      "size": 90,
+      "risk": "medium",
+      "trace": "CT-050",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-040",
+      "title": "Migrate pack-picker dialog frame",
+      "model": "6.1-sol-medium",
+      "finding": "F-06",
+      "files": [
+        "mirsal/mirsal/console/app.js",
+        "mirsal/tests/js/dialog_frame.test.js"
+      ],
+      "deps": [
+        "T-037"
+      ],
+      "doText": "Use dialogFrameHtml only in pickPack. Preserve await loadLib, PK callback, pl rows, coverMedia, data-act=pk/data-id, #npn, pknew Create and Cancel. Keep original pack ordering and new-pack POST body outside presenter. Preserve empty sentence and string ids.",
+      "accept": [
+        "dialog_frame",
+        "manual_batch_action"
+      ],
+      "size": 140,
+      "risk": "medium",
+      "trace": "CT-051",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-041",
+      "title": "Migrate retime dialog frame",
+      "model": "6.1-sol-medium",
+      "finding": "F-06",
+      "files": [
+        "mirsal/mirsal/console/packs.js",
+        "mirsal/tests/js/dialog_cancel.test.js"
+      ],
+      "deps": [
+        "T-037",
+        "T-002"
+      ],
+      "doText": "Use dialogFrameHtml only in retimeAsk; keep one Promise/result true|false|null,3 actions/data-v x|0|1 and explanatory sentences. Preserve12-item short-list cap, Telegram-only warning and default choice. Do not change backend retime flags or downloaded file URL. Cancellation tests cover replacement/backdrop/Escape/button.",
+      "accept": [
+        "dialog_cancel",
+        "dialog_frame"
+      ],
+      "size": 145,
+      "risk": "medium",
+      "trace": "CT-052",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-042",
+      "title": "Migrate collection dialog frame",
+      "model": "6.1-sol-medium",
+      "finding": "F-06",
+      "files": [
+        "mirsal/mirsal/console/packs.js",
+        "mirsal/tests/js/collection_dialog.test.js"
+      ],
+      "deps": [
+        "T-037"
+      ],
+      "doText": "Use dialogFrameHtml only in ACT.colopen. Preserve #col-name maxlength40; #col-desc maxlength160 and required; optional #col-retime values1|0; #col-light Full0 selected/Light1; #col-res; Close data-act=dlgx and colsend kind/id/config-disabled. Preserve owner gate, configured notice and read-only status/short reads. No Send in test/browser acceptance.",
+      "accept": [
+        "collection_dialog",
+        "dialog_frame"
+      ],
+      "size": 145,
+      "risk": "medium",
+      "trace": "CT-053",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-043",
+      "title": "Migrate Telegram connection/status frames",
+      "model": "luna-6-high",
+      "finding": "F-06",
+      "files": [
+        "mirsal/mirsal/console/telegram.js",
+        "mirsal/tests/js/telegram_dialog.test.js"
+      ],
+      "deps": [
+        "T-037"
+      ],
+      "doText": "Migrate only tgFlow's final send/confirmation dlg to dialogFrameHtml, retaining every existing branch/form field/action, owner restriction and short-animation retime handling. Do not change tgConnectForm/tgSettingsCard/tgDone or launch tg://. Test local fixtures for configured/unconfigured/status/error flows; assert no external send on open/cancel.",
+      "accept": [
+        "telegram_dialog",
+        "dialog_frame"
+      ],
+      "size": 180,
+      "risk": "medium",
+      "trace": "CT-054",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-044",
+      "title": "Introduce details-menu presenter",
+      "model": "luna-6-high",
+      "finding": "F-06",
+      "files": [
+        "mirsal/mirsal/console/ui-menu.js",
+        "mirsal/mirsal/console/index.html",
+        "mirsal/tests/js/more_menu.test.js",
+        "mirsal/tests/js/console_vm.js"
+      ],
+      "deps": [],
+      "doText": "Implement moreMenuHtml({label,itemsHtml,className,summaryAttrs,popClass,summaryHtml}) -> string. Emit details + summary + role=menu popover, exact caller classes and trusted prebuilt items; escape label attrs. Support gh-more/gh-pop and pm-menu existing wrapper variants; keep native details behavior and app.js outside/pick closing. Include once after app.js; test classes/menu labels and unchanged action markup. Update console_vm loadConsole to load this helper once before its actual consumer scripts in VM tests (deduplicate resolved filenames); standalone statement-extraction fixtures inject its export explicitly in their one consumer test. Preserve original console_source canonicalization and do not change grouping of unrelated files.",
+      "accept": [
+        "more_menu",
+        "avatar"
+      ],
+      "size": 180,
+      "risk": "medium",
+      "trace": "CT-055",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-045",
+      "title": "Migrate Pack more menu",
+      "model": "6.1-sol-medium",
+      "finding": "F-06",
+      "files": [
+        "mirsal/mirsal/console/packs.js",
+        "mirsal/tests/js/pack_delete.test.js"
+      ],
+      "deps": [
+        "T-044"
+      ],
+      "doText": "Replace only drawPack's gh-more menu wrapper with moreMenuHtml; reuse identical items string in same order Rename/Public/Collection/Preview/full ZIP/chat/add/delete. Preserve conditional owner/export and disabled flags, summary btn class/title and label More for this pack. No menu action disappears.",
+      "accept": [
+        "pack_delete",
+        "more_menu"
+      ],
+      "size": 140,
+      "risk": "medium",
+      "trace": "CT-056",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-046",
+      "title": "Migrate Studio toolbar more menu",
+      "model": "6.1-sol-medium",
+      "finding": "F-06",
+      "files": [
+        "mirsal/mirsal/console/studio-core.js",
+        "mirsal/tests/js/studio_menu.test.js"
+      ],
+      "deps": [
+        "T-044"
+      ],
+      "doText": "Replace only gview gh-more toolbar wrapper; retain identical item expressions/order and summary btn sm/title More for this batch. Do not migrate project-map menus or any action body. Canonical emitted menu HTML is byte-identical except intentional accessibility label normalization from foundation.",
+      "accept": [
+        "studio_menu",
+        "more_menu"
+      ],
+      "size": 140,
+      "risk": "medium",
+      "trace": "CT-057",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-047",
+      "title": "Migrate reaction preset menu",
+      "model": "6.1-sol-medium",
+      "finding": "F-06",
+      "files": [
+        "mirsal/mirsal/console/reactions.js",
+        "mirsal/tests/js/reactions.test.js"
+      ],
+      "deps": [
+        "T-044"
+      ],
+      "doText": "Replace only rxPresetMenu(k) details/summary/pop wrapper using gh-more rx-pmenu and gh-pop. Preserve current Save as new, picked-preset Update/Remove actions, empty sentence Pick a preset to update or remove it, data-id and rxpdel dng style. Keep rxPresetChips outside this menu unchanged: chips own loading and motion-first ordering. Never recreate the old Load/Remove submenu from stale assets.",
+      "accept": [
+        "reactions",
+        "more_menu"
+      ],
+      "size": 130,
+      "risk": "medium",
+      "trace": "CT-058",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-048",
+      "title": "Introduce durable inline status presenter",
+      "model": "luna-6-high",
+      "finding": "F-10",
+      "files": [
+        "mirsal/mirsal/console/ui-feedback.js",
+        "mirsal/mirsal/console/index.html",
+        "mirsal/tests/js/feedback_message.test.js",
+        "mirsal/tests/js/console_vm.js"
+      ],
+      "deps": [],
+      "doText": "Implement statusMessageHtml({kind,text,bodyHtml,actionsHtml,live='off',className}) -> string with exactly one of escaped text or explicitly trusted prebuilt bodyHtml, plus supplied trusted action markup. Use existing warn/mut/bad classes to preserve visuals; warning/error can use explicit role/status/live mode without altering persistence. Keep toast() transient and /api/notifications persistent; no new transport or eligibility logic. Include once after app.js. Update console_vm loadConsole to load this helper once before its actual consumer scripts in VM tests (deduplicate resolved filenames); standalone statement-extraction fixtures inject its export explicitly in their one consumer test. Preserve original console_source canonicalization and do not change grouping of unrelated files.",
+      "accept": [
+        "feedback_message"
+      ],
+      "size": 180,
+      "risk": "medium",
+      "trace": "CT-060",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-049",
+      "title": "Migrate collection inline validation",
+      "model": "6.1-sol-medium",
+      "finding": "F-10",
+      "files": [
+        "mirsal/mirsal/console/packs.js",
+        "mirsal/tests/js/collection_dialog.test.js"
+      ],
+      "deps": [
+        "T-048",
+        "T-042"
+      ],
+      "doText": "Use statusMessageHtml only for empty-description and failed-post #col-res warnings in ACT.colsend. Keep exact sentences, busy/reset behavior and original input/body fields; kind error, live polite. Preserve background terminal toast and notifications; no popup/toast substitute for validation.",
+      "accept": [
+        "collection_dialog",
+        "feedback_message"
+      ],
+      "size": 100,
+      "risk": "medium",
+      "trace": "CT-061",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-050",
+      "title": "Migrate burst warning presentation",
+      "model": "6.1-sol-medium",
+      "finding": "F-10",
+      "files": [
+        "mirsal/mirsal/console/particles.js",
+        "mirsal/tests/js/pack_studio.test.js"
+      ],
+      "deps": [
+        "T-048"
+      ],
+      "doText": "Use statusMessageHtml for spBurstCard blocks/warnings only. Keep fxWords mapping, original block/warning order, file/no-file media, disabled/add eligibility, Use it anyway label and backend-written statuses. Preserve original fx-w/bad class variants through className adapter; no technical block becomes overridable.",
+      "accept": [
+        "pack_studio",
+        "feedback_message"
+      ],
+      "size": 130,
+      "risk": "medium",
+      "trace": "CT-062",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-051",
+      "title": "Migrate Studio inline stale/health warnings",
+      "model": "6.1-sol-medium",
+      "finding": "F-10",
+      "files": [
+        "mirsal/mirsal/console/studio-core.js",
+        "mirsal/tests/js/studio_poll.test.js"
+      ],
+      "deps": [
+        "T-048",
+        "T-004"
+      ],
+      "doText": "Use statusMessageHtml only in tick's #ghealth stale-server and no-VP9 notices, with exact existing trusted code fragments as caller body/action slots; use text escape for dynamic errors. Preserve condition/order, system-health diagnostics and current message refresh behavior. Do not convert rejected-picture warnings or generic say() here.",
+      "accept": [
+        "studio_poll",
+        "feedback_message"
+      ],
+      "size": 145,
+      "risk": "medium",
+      "trace": "CT-063",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-052",
+      "title": "Introduce decision-status presentation adapter",
+      "model": "luna-6-high",
+      "finding": "F-13",
+      "files": [
+        "mirsal/mirsal/console/ui-decision.js",
+        "mirsal/mirsal/console/index.html",
+        "mirsal/tests/js/decision_status.test.js",
+        "mirsal/tests/js/console_vm.js"
+      ],
+      "deps": [],
+      "doText": "Implement decisionStatusHtml({reason,eligible,allowed,actionAttrs,labels,context}) -> string. reason is escaped; eligible/allowed are supplied from current server-backed adapters, never inferred here. Preserve variants context='studio-box'|'studio-overlay'|'chat-tile' and caller's button class/data-* strings, label and technical-block explanation. Helper returns status/action markup only; picture/bulk control remain owned by callers. Pin identical representative allowed/blocked/technical fragments and one-time VM helper loading.",
+      "accept": [
+        "decision_status"
+      ],
+      "size": 230,
+      "risk": "high",
+      "trace": "CT-064",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-053",
+      "title": "Migrate blocked still/animation reason box",
+      "model": "6.1-sol-medium",
+      "finding": "F-13",
+      "files": [
+        "mirsal/mirsal/console/studio-tiles.js",
+        "mirsal/tests/js/allow_tiles.test.js"
+      ],
+      "deps": [
+        "T-052"
+      ],
+      "doText": "Replace only blockedBox's status/action construction with decisionStatusHtml; retain A=ALW result, reason fallback and A.can eligibility, still/anim labels and exact cellAct attributes. Preserve gBad/gbadmsg wrappers, adjacent picture and title. Extend existing fixtures for blocked overridable, blocked technical, already allowed and missing allow data; no new decision code.",
+      "accept": [
+        "allow_tiles",
+        "cell_op",
+        "decision_status"
+      ],
+      "size": 140,
+      "risk": "high",
+      "trace": "CT-065",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-054",
+      "title": "Migrate blocked animation overlay",
+      "model": "6.1-sol-medium",
+      "finding": "F-13",
+      "files": [
+        "mirsal/mirsal/console/studio-tiles.js",
+        "mirsal/tests/js/allow_tiles.test.js"
+      ],
+      "deps": [
+        "T-052"
+      ],
+      "doText": "Replace only blockedAnimOverlay reason/button construction; retain gblockover wrapper, A.why/ANIMWHY fallback, original cellAct animation attributes and technical no-button case. Do not hide/replace the blocked picture. Pin byte-identical representative fragment plus reason/override adjacency.",
+      "accept": [
+        "allow_tiles",
+        "cell_op",
+        "decision_status"
+      ],
+      "size": 140,
+      "risk": "high",
+      "trace": "CT-066",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-055",
+      "title": "Migrate chat rejected tile status",
+      "model": "luna-6-high",
+      "finding": "F-13",
+      "files": [
+        "mirsal/mirsal/console/chat-cards.js",
+        "mirsal/tests/js/chat_allow.test.js"
+      ],
+      "deps": [
+        "T-052"
+      ],
+      "doText": "Replace only tileHTML's rejected/allowed status/action markup with decisionStatusHtml; chat allow object and its current can/undo/reason values remain authoritative. Preserve picture, red marks, agallow attrs/data-kind/data-i/data-g/data-allow, unchanged key/id/title handling and carousel links. No Studio GM dependency in Chat. Pin rule10 blocked technical/override/take-back snapshots.",
+      "accept": [
+        "chat_allow",
+        "sticker_id",
+        "decision_status"
+      ],
+      "size": 200,
+      "risk": "high",
+      "trace": "CT-067",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-056",
+      "title": "Define semantic UI spacing/type/status tokens",
+      "model": "luna-6-high",
+      "finding": "F-19",
+      "files": [
+        "mirsal/mirsal/console/studio.css",
+        "mirsal/mirsal/console/theme.css",
+        "mirsal/tests/js/theme.test.js"
+      ],
+      "deps": [],
+      "doText": "Add spacing tokens --space-1..6 as8/16/24/32/40/48px; type tokens --type-large-title32px,--type-title24px,--type-headline18px,--type-body16px,--type-footnote13px. Add status tokens --status-bounds #f97316,--status-key #a855f7,--status-loop #eab308,--status-look #ec4899,--status-spec #3b82f6,--status-bad #ef4444,--status-on-accent #fff,--status-on-loop #422006 with same light/dark values initially. Keep existing --fs-* aliases unchanged and all current selectors using them until each surface task. Add .ui-footnote font-size:var(--type-footnote). Pin dark/light token availability and old token values; no palette redesign here. Also define --surface-card:var(--sf), --surface-group:var(--fill), --material-bar:var(--glass), --material-sheet:var(--glass), --border-ui:var(--bd), --focus-ui:var(--pri), --control-min-size:44px, --control-gap:8px, --icon-stroke:1.6, --motion-duration:200ms and --motion-easing:cubic-bezier(0.2,0,0,1). These are semantic aliases/units, not new palette decisions; existing selectors remain unchanged until their surface task.",
+      "accept": [
+        "theme"
+      ],
+      "size": 130,
+      "risk": "medium",
+      "trace": "CT-068",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-057",
+      "title": "Tokenize diagnostic categories without recoloring",
+      "model": "6.1-sol-medium",
+      "finding": "F-19",
+      "files": [
+        "mirsal/mirsal/console/studio-tiles.js",
+        "mirsal/tests/js/cell_op.test.js"
+      ],
+      "deps": [
+        "T-056"
+      ],
+      "doText": "Replace only CAT color tuple literals at file start with CSS var strings for the exact status tokens, keeping category order/labels. White foreground -> --status-on-accent, loop #422006 -> --status-on-loop. Ensure all consumers are CSS/SVG presentation and never canvas before substitution; if a canvas use is found, leave that literal and record it for bounded follow-up. Pin issue markup vars and compare computed colors in light/dark screenshot fixtures.",
+      "accept": [
+        "cell_op",
+        "allow_tiles",
+        "theme"
+      ],
+      "size": 100,
+      "risk": "medium",
+      "trace": "CT-069",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-058",
+      "title": "Replace unconditional edge synchronization clock",
+      "model": "luna-6-high",
+      "finding": "F-05",
+      "files": [
+        "mirsal/mirsal/console/live.js",
+        "mirsal/mirsal/console/studio-core.js",
+        "mirsal/tests/js/edge_preview.test.js"
+      ],
+      "deps": [
+        "T-013",
+        "T-004"
+      ],
+      "doText": "Remove only live.js800-ms egSync/applyEdgePreview interval. At tick's existing successful generation-key-change/force redraw point, call egSync before existing applyEdgePreview; retain showPanel/input/change/pointerup/scroll/resize calls. No synchronization when no relevant view exists. Pin updated committed outline/trim and active slider preservation after fake generation refresh; preview cancel/apply unchanged. Do not treat this DOM synchronization as server polling.",
+      "accept": [
+        "edge_preview",
+        "studio_poll"
+      ],
+      "size": 190,
+      "risk": "medium",
+      "trace": "CT-072",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-059",
+      "title": "Reflow packs.js bounded helpers",
+      "model": "6.1-sol-medium",
+      "finding": "F-11",
+      "files": [
+        "mirsal/mirsal/console/packs.js"
+      ],
+      "deps": [],
+      "doText": "Reflow only named helper bodies pkGroups and pkGroupHead; split statements/indent blocks outside template/string/regex literals. Preserve every literal token, template text, comment wording, ACT name and payload. At most150 changed lines; do not format the whole file or any other function. Capture file bytes before edit and compare canonical(before)===canonical(after) with existing tests/js/console_source.js (vendored Acorn); literal/template tokens must be byte-identical. This is formatting only.",
+      "accept": [
+        "pack_delete"
+      ],
+      "size": 145,
+      "risk": "low",
+      "trace": "CT-077",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-060",
+      "title": "Reflow live.js bounded helpers",
+      "model": "6.1-sol-medium",
+      "finding": "F-11",
+      "files": [
+        "mirsal/mirsal/console/live.js"
+      ],
+      "deps": [],
+      "doText": "Reflow only named helper bodies egCard and egCommitted; split statements/indent blocks outside template/string/regex literals. Preserve every literal token, template text, comment wording, ACT name and payload. At most150 changed lines; do not format the whole file or any other function. Capture file bytes before edit and compare canonical(before)===canonical(after) with existing tests/js/console_source.js (vendored Acorn); literal/template tokens must be byte-identical. This is formatting only.",
+      "accept": [
+        "history_card"
+      ],
+      "size": 145,
+      "risk": "low",
+      "trace": "CT-078",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-061",
+      "title": "Reflow particles.js bounded helpers",
+      "model": "6.1-sol-medium",
+      "finding": "F-11",
+      "files": [
+        "mirsal/mirsal/console/particles.js"
+      ],
+      "deps": [],
+      "doText": "Reflow only named helper bodies spBurstState and spBSlider; split statements/indent blocks outside template/string/regex literals. Preserve every literal token, template text, comment wording, ACT name and payload. At most150 changed lines; do not format the whole file or any other function. Capture file bytes before edit and compare canonical(before)===canonical(after) with existing tests/js/console_source.js (vendored Acorn); literal/template tokens must be byte-identical. This is formatting only.",
+      "accept": [
+        "particle_editor"
+      ],
+      "size": 145,
+      "risk": "low",
+      "trace": "CT-079",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-062",
+      "title": "Reflow reactions.js bounded helpers",
+      "model": "6.1-sol-medium",
+      "finding": "F-11",
+      "files": [
+        "mirsal/mirsal/console/reactions.js"
+      ],
+      "deps": [],
+      "doText": "Reflow only named helper bodies rxBody and rxFields; split statements/indent blocks outside template/string/regex literals. Preserve every literal token, template text, comment wording, ACT name and payload. At most150 changed lines; do not format the whole file or any other function. Capture file bytes before edit and compare canonical(before)===canonical(after) with existing tests/js/console_source.js (vendored Acorn); literal/template tokens must be byte-identical. This is formatting only.",
+      "accept": [
+        "reactions"
+      ],
+      "size": 145,
+      "risk": "low",
+      "trace": "CT-080",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-063",
+      "title": "Correct retired-History wording",
+      "model": "6.1-sol-medium",
+      "finding": "F-20",
+      "files": [
+        "docs/waiting-for-haitham.md"
+      ],
+      "deps": [],
+      "doText": "In item34 only, replace fact 'nothing in rail opens it'/'retired' with current owner-avatar Watch folders route #/history, loaded history.js and active /api/watch refresh. Retain the owner's keep/delete decision as unanswered; recommendation may say keep until the active owner workflow has an approved replacement and recorded baseline retirement. Do not delete code or decide W33 React removal.",
+      "accept": [],
+      "size": 40,
+      "risk": "low",
+      "trace": "CT-085",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-064",
+      "title": "Refresh generated inventory counts after repairs",
+      "model": "6.1-sol-medium",
+      "finding": "F-21",
+      "files": [
+        "docs/ui_inventory.md"
+      ],
+      "deps": [
+        "T-001"
+      ],
+      "doText": "Regenerate/read console inventory using python -m mirsal.console.inventory from mirsal/ in measure-only mode; update this doc's heading/table from current actual definitions and unique ACT names. Confirm ggo remains intentional override and gkeepsize has one definition. Preserve baseline data/routes; current review snapshot was481 unique/483 definitions, after CT-001 expected481/482 unless an authorized concurrent change exists. Record current measured values, never hard-code the stale482 unique.",
+      "accept": [],
+      "size": 100,
+      "risk": "low",
+      "trace": "CT-086",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-065",
+      "title": "Clear the cover badge hit area",
+      "model": "6.1-sol-medium",
+      "finding": "F-24",
+      "risk": "low",
+      "files": [
+        "mirsal/mirsal/console/studio.css"
+      ],
+      "deps": [],
+      "doText": "Add pointer-events:none only to the decorative .badge2 cover overlay inside #pkgrid .cell. Keep badge position, text, z-order and every hover button. Do not use force clicks or disable the cell dispatcher.",
+      "accept": [
+        "pack_delete"
+      ],
+      "manual": "J3 first cover-card Timeline native pointer click opens #/animate for that same id; Preview/Edit/Cover/Delete remain hit-testable, keyboard and selection unchanged.",
+      "size": 25,
+      "trace": "UX-01",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-066",
+      "title": "Apply44px targets through semantic control tokens",
+      "model": "luna-6-high",
+      "finding": "F-22",
+      "risk": "medium",
+      "files": [
+        "mirsal/mirsal/console/studio.css",
+        "mirsal/mirsal/console/agent.css",
+        "mirsal/mirsal/console/theme.css"
+      ],
+      "deps": [
+        "T-056"
+      ],
+      "doText": "Use the control44 token for .btn.sm, .gseg button, .set-nav button, .rx-h [data-act=rxclose], .rx-gh .link and non-inline icon actions; enlarge actual hit areas with padding/min-size, not a visual glyph. Separate repeated secondary/destructive controls by8px; keep inline sentence links and media-overlay cell geometry intentional. Bound changes to shared controls and J1/J3/J4/J5/J8/J11; retain rail width, sidebar geometry and all data-act. Decide bounded wrapping at390px while preserving all controls.",
+      "accept": [
+        "theme",
+        "studio_menu",
+        "reactions"
+      ],
+      "manual": "Compare1440 and390px: named controls have≥44×44px clickable rects, no overlapping targets/page horizontal scroll; all overrides stay beside their pictures.",
+      "size": 180,
+      "trace": "UX-02",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-067",
+      "title": "Present Apply/Cancel tests as responsive sheets",
+      "model": "luna-6-high",
+      "finding": "F-02",
+      "risk": "medium",
+      "files": [
+        "mirsal/mirsal/console/ui-testcard.js",
+        "mirsal/mirsal/console/studio.css",
+        "mirsal/tests/js/ui_testcard.test.js"
+      ],
+      "deps": [
+        "T-012",
+        "T-013"
+      ],
+      "doText": "Keep testCard media/loading/busy/action API. Atdesktop use a centred bounded panel; below760px use a bottom sheet with safe-area padding,44px actions and max-height allowing content scroll. Apply/Cancel remain visible while preview loads; focus returns to the exact opener on Cancel. Preserve request eligibility and deferred mutation semantics. Use material only for this sheet and bars.",
+      "accept": [
+        "ui_testcard",
+        "size_preview"
+      ],
+      "manual": "J1 size preview:≤1 enabled primary in the sheet; Cancel makes zero mutation requests; both themes and390px fit; no screenshot of a spinner counted as a failed preview.",
+      "size": 220,
+      "trace": "UX-03",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-068",
+      "title": "Group Studio composer and prompt metadata",
+      "model": "luna-6-high",
+      "finding": "F-32",
+      "risk": "medium",
+      "files": [
+        "mirsal/mirsal/console/composer.js",
+        "mirsal/mirsal/console/studio-prompt.js",
+        "mirsal/mirsal/console/studio-core.js",
+        "mirsal/mirsal/console/studio.css",
+        "mirsal/tests/js/prompt_step.test.js"
+      ],
+      "deps": [
+        "T-056",
+        "T-066"
+      ],
+      "doText": "Keep request/model/style/stroke and free Generate prompt discoverable. Put backend Auto/Local/Cloud diagnostics under a clearly labelled Connection details section, preserving every existing control. In the draft keep editable sheet prompt, plan status and price/unavailable explanation together; place long per-sticker metadata and later video prompt in collapsed sections. Existing exact API/control values remain read by their backends. Preserve Prompt draft/Discard and journey navigation. Use the five-type scale and8px spacing, no new inline colours.",
+      "accept": [
+        "prompt_step",
+        "prompt_tab"
+      ],
+      "manual": "J1 request→free draft remains3ordinary clicks from rail/tab/prompt; disabled Generate sheet explains provider unavailability; no field/action disappears; no paid call.",
+      "size": 280,
+      "trace": "UX-04",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-069",
+      "title": "Clarify Studio primary versus recovery actions",
+      "model": "luna-6-high",
+      "finding": "F-22",
+      "risk": "medium",
+      "files": [
+        "mirsal/mirsal/console/studio-core.js",
+        "mirsal/mirsal/console/studio-tiles.js",
+        "mirsal/mirsal/console/studio.css",
+        "mirsal/tests/js/allow_tiles.test.js"
+      ],
+      "deps": [
+        "T-053",
+        "T-066"
+      ],
+      "doText": "Keep exactly one principal stage action visually primary in the batch view; make per-picture Use it anyway/Take it back and bulk recovery clear tinted/secondary actions without moving or hiding them. Preserve stage-specific disabled reasons and eligibility from API. Group batch tools separately from tile sizing/approval. Apply shared spacing/type/status tokens; do not reduce the scope/count of any bulk action.",
+      "accept": [
+        "allow_tiles",
+        "cell_op"
+      ],
+      "manual": "J6 G001 retains picture+plain reason+override forS2/S9 and Take it back forS1/S7; J1 batch hasone stage primary while every recovery remains visible/reversible.",
+      "size": 220,
+      "trace": "UX-05",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-070",
+      "title": "Disclose advanced emoji motion and group batch actions",
+      "model": "luna-6-high",
+      "finding": "F-25",
+      "risk": "medium",
+      "files": [
+        "mirsal/mirsal/console/reactions.js",
+        "mirsal/mirsal/console/studio.css",
+        "mirsal/tests/js/reactions.test.js"
+      ],
+      "deps": [
+        "T-025",
+        "T-066"
+      ],
+      "doText": "Keep the current scrolling/load-more wall, search and Done/Not done filters. Group basic motion/speed/gravity and size as named inset sections; move rotation/spread/variation/hue into one collapsed Advanced summary that includes current values. Keep selected preset chips and current Presets Update/Remove ownership. Put selection count/look/Create selected together, separate from random-motion All/Not done actions; preserve Select all over the full filtered1898-bank, Shift range, exports and run Cancel. Onphone keep preview and44px primary footer visible without hiding the remaining sliders.",
+      "accept": [
+        "reactions"
+      ],
+      "manual": "Current happy→love Shift selects5; every descriptor/default/touched override and body JSON is identical; Reset/preset/version controls work; desktop/390px no overflow; no batch/render pressed.",
+      "size": 260,
+      "trace": "UX-06",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-071",
+      "title": "Apply the already-tracked saved-set disclosure cleanup",
+      "model": "luna-6-high",
+      "finding": "F-25",
+      "risk": "medium",
+      "files": [
+        "mirsal/mirsal/console/particles.js",
+        "mirsal/mirsal/console/packs.js",
+        "mirsal/mirsal/console/studio.css",
+        "mirsal/tests/js/particle_editor.test.js"
+      ],
+      "deps": [
+        "T-024",
+        "T-066"
+      ],
+      "doText": "Implement plan.md UIcleanup1–4: set-card cell/picked/made-for metadata onhover/focus, cost only when spent; Duplicate/Rename/Delete in the existing more-menu pattern; unlink list behind Manage stickers with Attached toN summary; show selected motion preset and Change; one Advanced summary for reaction count/spin/resolution. Preserve preview/name/open/attach/add, exact ids, assign/unlink eligibility and every parameter/backend action. Keep burst downloads and pack reaction/sticker separation. Do not implement plan.md no-tabs, new save workflow or erosion feature.",
+      "accept": [
+        "particle_editor",
+        "particle_scope",
+        "pack_particles"
+      ],
+      "manual": "J5 openedP010 remains fully manageable; no raw-id unlink wall by default; keyboard exposes the same metadata/menu;48+controls are disclosed without losing any action.",
+      "size": 300,
+      "trace": "UX-07",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-072",
+      "title": "Build Settings shortcuts from mounted cards",
+      "model": "luna-6-high",
+      "finding": "F-26",
+      "risk": "medium",
+      "files": [
+        "mirsal/mirsal/console/settings.js",
+        "mirsal/mirsal/console/auth.js",
+        "mirsal/mirsal/console/tickets.js",
+        "mirsal/tests/js/auth.test.js",
+        "mirsal/tests/js/tickets.test.js"
+      ],
+      "deps": [
+        "T-022"
+      ],
+      "doText": "Add a settings-section registry containing existing ids/labels including Tickets, then filter by actually mounted cards only after the current render wrappers finish. Rebuild the bar when auth/tickets cards mount; avoid recursion and preserve existing wrapper order. Non-LAN must not emit Account when au-me is absent; LAN keeps Account. Add Tickets only for roles that mount its card; keep all section ids/ACT.setgo and current backend routes. Do not invent Spending controls.",
+      "accept": [
+        "auth",
+        "tickets",
+        "theme"
+      ],
+      "manual": "J8 every visible shortcut scrolls to a real card; Tickets reachable without traversing allTrash; non-LAN0dead Account; fake-LAN/member/admin fixtures preserve privacy.",
+      "size": 200,
+      "trace": "UX-08",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-073",
+      "title": "Make Help list titles native keyboard controls",
+      "model": "luna-6-high",
+      "finding": "F-28",
+      "risk": "medium",
+      "files": [
+        "mirsal/mirsal/console/support.js",
+        "mirsal/mirsal/console/studio.css",
+        "mirsal/tests/js/support.test.js"
+      ],
+      "deps": [
+        "T-066"
+      ],
+      "doText": "Replace click-only conversation/queue/FAQ title regions with native button elements retaining suopen/suq/sufaq and data ids. Keep sibling delete/menu actions outside buttons to avoid invalid nested buttons. Add visible focus and full-width44px hit areas using current row classes. Preserve selected/scroll/filter state, source chips, owner/staff visibility and existing conversations/FAQ backend behavior.",
+      "accept": [
+        "support"
+      ],
+      "manual": "Tab reaches issue/queue/FAQ titles and Enter/Space opens the same record; mouse selection unchanged; no support submission/FAQ publish during acceptance.",
+      "size": 190,
+      "trace": "UX-09",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-074",
+      "title": "Give welcome slides their own readable surface palette",
+      "model": "luna-6-high",
+      "finding": "F-30",
+      "risk": "low",
+      "files": [
+        "mirsal/mirsal/console/studio.css",
+        "mirsal/mirsal/console/theme.css"
+      ],
+      "deps": [
+        "T-056"
+      ],
+      "doText": "Define --wl-ink:#123546 and --wl-ink2:#345969 for the existing pale slide text region in both themes, with a solid/light backing only if artwork pixel contrast still fails. Replace only .wl-meta title/body general ink uses; keep artwork, film, cards and media pixels unchanged. Expand .wl-d hit regions to44px while leaving dot glyphs small; preserve selected tabs/Skip/opt-out and animation behavior.",
+      "accept": [
+        "welcome",
+        "theme"
+      ],
+      "manual": "Settled One idea slide is readable inboth themes, measured4.5:1 normal/3:1large text; dot hit rect≥44px and no overlap; reduced-motion and Escape still work.",
+      "size": 90,
+      "trace": "UX-10",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-075",
+      "title": "Expose additive public-pack sticker/reaction counts",
+      "model": "luna-6-high",
+      "finding": "F-29",
+      "risk": "high",
+      "files": [
+        "mirsal/mirsal/media/library.py",
+        "mirsal/mirsal/flow/trending.py",
+        "mirsal/mirsal/console/app.py",
+        "mirsal/tests/test_trending.py",
+        "mirsal/tests/test_library.py",
+        "docs/api-parts/pack-counts.md"
+      ],
+      "deps": [],
+      "doText": "Inspect the existing Library serialization and public Trending summary builders and native/legacy adapter first. Introduce one backend pack_counts helper under media/library.py using the documented source.particle_set distinction after existing visibility filtering; expose additive sticker_count/reaction_count on both personal library and public summaries. Public summary delegates to the same count owner. Retain every existing JSON field/value, route, total and permission filter. If app.py delegates transparently, avoid duplicate logic there. No count decision moves into JS. Test static-only/mixed/reaction-only and owner/member visibility; document additive fields/absent-field compatibility.",
+      "acceptPython": "tests.test_trending tests.test_library tests.test_ui_inventory",
+      "manual": "Angel summary9stickers/1reaction; Batman17/2; old clients still receive byte-identical old fields; no real public share or external call.",
+      "size": 280,
+      "trace": "UX-11",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-076",
+      "title": "Use public summary counts in Trending labels",
+      "model": "6.1-sol-medium",
+      "finding": "F-29",
+      "risk": "low",
+      "files": [
+        "mirsal/mirsal/console/trending.js",
+        "mirsal/tests/js/imports_trending.test.js"
+      ],
+      "deps": [
+        "T-075"
+      ],
+      "doText": "Render sticker_count with the word stickers and an optional separate reaction_count label. When additive fields are absent, keep the previous label exactly; never infer by subtracting unknown arrays. Preserve likes/comments/use/delete/share controls and ids, request URLs and role checks.",
+      "accept": [
+        "imports_trending"
+      ],
+      "manual": "J8 cards agree with their sidebar forAngel9+1 andBatman17+2; nothing is shared/liked/commented by acceptance.",
+      "size": 80,
+      "trace": "UX-12",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-077",
+      "title": "Keep Home totals consistent with the backend",
+      "model": "6.1-sol-medium",
+      "finding": "F-29",
+      "risk": "low",
+      "files": [
+        "mirsal/mirsal/console/home.js",
+        "mirsal/tests/js/home.test.js"
+      ],
+      "deps": [
+        "T-075"
+      ],
+      "doText": "Use additive backend sticker/reaction totals for Home summary only when present; retain old field fallback and current showcase filtering. Preserve gallery media nodes onsearch/resize, routes, all shortcuts and per-person/owner rules. Do not change the ambiguous reaction shortcut destination withoutQ1.",
+      "accept": [
+        "home"
+      ],
+      "manual": "Home headline count matches the same classification asTrending/Library; films are not replaced by search/resize; no horizontal page scroll.",
+      "size": 100,
+      "trace": "UX-13",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-078",
+      "title": "Expose all four Library choices at phone width",
+      "model": "6.1-sol-medium",
+      "finding": "F-35",
+      "risk": "low",
+      "files": [
+        "mirsal/mirsal/console/studio.css"
+      ],
+      "deps": [
+        "T-066"
+      ],
+      "doText": "At≤760px only, make #s-library .tabs a two-column equal-widthgrid with min-width:0 and8px gaps. Preserve Recent/My Stickers/Reactions/Trending order, text/actions and pressed state. Keep desktop layout unchanged; use inherited44px targets. Do not widen the document or hide a tab.",
+      "accept": [
+        "theme"
+      ],
+      "manual": "At390×844 every tab is pointer/keyboard accessible, .tabs has no unintended text overflow, document has no horizontal scroll, selected content and rail remain visible.",
+      "size": 45,
+      "trace": "UX-14",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-079",
+      "title": "Reconcile current UI screen contracts",
+      "model": "luna-6-high",
+      "finding": "F-33",
+      "risk": "low",
+      "files": [
+        "docs/design/04-4-the-shell-rules-that-hold-on-every-screen.md",
+        "docs/design/11-ui-ux-pass-of-2026-10-03-what-a-click-means.md",
+        "docs/reaction/14-13-reaction-effects-one-emoji-flying-as-itself-t.md",
+        "docs/redesign_plan.md"
+      ],
+      "deps": [],
+      "doText": "Replace stale two-row/Your reactions prose with current wall/Done/load-more/preset contract, marking historical proposals historical. Reconcile sheet-cell click semantics against the retained action map and rule10; keep current two pack tabs untilQ2 has an owner answer. State that project map/journey is built and which older proposal paragraphs are superseded. Put reaction behavior in its owner section and link from shell. Do not implement or decide Q1/Q2.",
+      "accept": [],
+      "manual": "Both sides of A1D01–D06 resolve to one current dated owner contract; no routes/actions/human verdicts disappear; docs-only0tests.",
+      "size": 300,
+      "trace": "DOC-01",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-080",
+      "title": "Create a cheap UI reading gateway and wiring appendix",
+      "model": "luna-6-high",
+      "finding": "F-34",
+      "risk": "low",
+      "files": [
+        "CLAUDE.md",
+        "README.md",
+        "docs/design.md",
+        "docs/architecture.md",
+        "docs/ui_gateway.md",
+        "docs/architecture-ui-wiring.md"
+      ],
+      "deps": [
+        "T-079"
+      ],
+      "doText": "Add docs/ui_gateway.md under1KB linking shell/tokens/recovery/currentscreen owners and test map. Extract UI wiring from architecture into a bounded appendix and link it; leave Python/module inventory out of the UI task path. Compress repeated startup/history/routing prose in CLAUDE to≤4KB while preserving all13constraints, tests/git/server authorization and scope links to full rules; do not weaken any rule. Design/README route UI tasks to the gateway. Total gateway+sharedshell/foundation+needed recovery passage must be≤8KB before code, counting inherited CLAUDE separately and reporting both totals.",
+      "accept": [],
+      "manual": "All links resolve; gateway≤1KB; explicit bytes for coldstart vs incremental task path; docs-only0tests.",
+      "size": 360,
+      "trace": "DOC-02",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-081",
+      "title": "Correct contradictory final-block and startup wording",
+      "model": "6.1-sol-medium",
+      "finding": "F-33",
+      "risk": "low",
+      "files": [
+        "docs/rules.md",
+        "docs/agent-and-chat.md"
+      ],
+      "deps": [
+        "T-079"
+      ],
+      "doText": "Replace the blanket Python BLOCK verdicts are final wording with the current CLAUDE rule10 distinction: only Telegram technical/no-cut failures final; every other check visibly recorded/reversible. Replace upfront read-every-tracker startup with current lean task-index/needed-section rule; trackers/devnotes/testing read only when touched. Keep historical notes explicitly historical, never change engine decision tables or user authorization.",
+      "accept": [],
+      "manual": "Exact rule meaning matches CLAUDE.md and verify OVERRIDABLE/TECHNICAL references;≤100changed lines/2files; docs-only0tests.",
+      "size": 90,
+      "trace": "DOC-03",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-082",
+      "title": "Merge tracked work and disambiguate tracker IDs",
+      "model": "luna-6-high",
+      "finding": "F-34",
+      "risk": "low",
+      "files": [
+        "docs/backlog.md",
+        "docs/waiting-for-haitham.md",
+        "plan.md"
+      ],
+      "deps": [
+        "T-071",
+        "T-079"
+      ],
+      "doText": "Map implemented UXtasks to existing W1/W4/W16/W18/W19/W20/W22/W23/W33/W34/Help items before adding any tracker row. Remove only actually completed machine items from plan/backlog and write their area contract; retain pending human verdicts, paid work, Spending and held retirements. Assign the two W49 entries unique stable ids only after classifying every reference in both trackers, preserving their original dates/history and routing ambiguous references explicitly. Refresh max-id/branch metadata. Keep plan.md pack no-tabs/newsave/erosion open unless independently implemented and authorized.",
+      "accept": [],
+      "manual": "No duplicate ids; every moved implementation has an owning contract; no human approval item silently closed; docs-only0tests.",
+      "size": 200,
+      "trace": "DOC-04",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-083",
+      "title": "Record P3 screen changes and API compatibility",
+      "model": "luna-6-high",
+      "finding": "F-19",
+      "risk": "low",
+      "files": [
+        "docs/design/03-3-foundations.md",
+        "docs/design/05-5-per-screen.md",
+        "docs/design/09-9-every-rejected-picture-carries-its-own-overrid.md",
+        "docs/reaction/14-13-reaction-effects-one-emoji-flying-as-itself-t.md",
+        "docs/api.md",
+        "docs/api-parts/pack-counts.md"
+      ],
+      "deps": [
+        "T-070",
+        "T-075"
+      ],
+      "doText": "After P3 implementations, update the matching screen owner paragraphs with actual grouped-controls/sheet behavior and the additive count contract. Link pack-counts from the API index; preserve old payload semantics. Record fixture-backed picture/reason/action parity and remaining phone/paid/LAN limits; never claim unexecuted acceptance. Keep held product alternatives and advance human trackers only on an actual verdict. Commit these area changes in the same P3 phase as the source.",
+      "accept": [],
+      "manual": "Area docs, API index and phase commits describe exactly the implemented state; no stale before/after instructions; docs-only0tests.",
+      "size": 280,
+      "trace": "DOC-07",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-084",
+      "title": "Document P2 component APIs and caller order",
+      "model": "luna-6-high",
+      "finding": "F-03",
+      "risk": "low",
+      "files": [
+        "docs/architecture.md",
+        "docs/design/03-3-foundations.md",
+        "docs/design/09-9-every-rejected-picture-carries-its-own-overrid.md"
+      ],
+      "deps": [
+        "T-055",
+        "T-058"
+      ],
+      "doText": "Before the P2 commit, document the actual ui-* helper file names, presenter/watch/preview signatures, script load order and one-consumer migration adapters. Keep all API/backend semantics in their existing owners; state that shared UI components only present server decisions. Record bounded cache/no-overlap/cancel/focus contracts proven by narrow tests; no blanket claim that all timers or endpoints were unified. Remove superseded duplicate explanations and link one owner.",
+      "accept": [],
+      "manual": "P2 source and area docs land together; current screen/action/route inventory unchanged;0docs tests.",
+      "size": 180,
+      "trace": "DOC-06",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-085",
+      "title": "Document P1 repairs and token ownership",
+      "model": "luna-6-high",
+      "finding": "F-19",
+      "risk": "low",
+      "files": [
+        "docs/design/03-3-foundations.md",
+        "docs/architecture.md",
+        "docs/engine-and-studio/13-12-ui-observer.md"
+      ],
+      "deps": [
+        "T-004",
+        "T-056"
+      ],
+      "doText": "Before the P1 commit, record the exact new spacing/type/status/control token names and staged-preview/cancellation invariants in the existing UI foundations and wiring owner paragraphs. Locate the Studio observer owner section through its index; use its existing section file if the listed observer filename has moved, with an exact-path preparation task before editing rather than silently broadening scope. Record non-overlapping refresh/forced-read behavior, not measured latency claims. Reflow changes require only a note that emitted markup/JSON/token streams remain identical. No new engine behavior, models or approval semantics.",
+      "accept": [],
+      "manual": "P1 source and owning docs land together; all described states have the task acceptance evidence;0docs tests.",
+      "size": 200,
+      "trace": "DOC-05",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-086",
+      "title": "Give the phone viewer metadata a full-width row",
+      "model": "6.1-sol-medium",
+      "finding": "F-36",
+      "risk": "low",
+      "files": [
+        "mirsal/mirsal/console/studio.css"
+      ],
+      "deps": [
+        "T-066"
+      ],
+      "doText": "Only at≤760px: set #modal .mbox>.mrow to grid columns44px minmax(0,1fr)44px with8px gaps. Its div:nth-child(2) metadata spans columns1–2 on row1; [data-act=lcclose] is column3,row1. [data-act=lcprev] is column1,row2; .toggles is column2,row2 with a two-column equal-widthgrid and8px gaps; [data-act=lcnext] is column3,row2. Metadata uses normal wrapping/min-width:0. Keep .mbox max-height:calc(100dvh - 24px) and overflow-y:auto so existing actions remain reachable. Desktop layout, media pixels, labels, ordering/data-act and requests remain unchanged.",
+      "accept": [],
+      "manual": "At390×844 the metadata title area is≥240px wide instead of a word column; all4background choices/browse/Close are native hit targets; viewer/footer can scroll; no page horizontal scroll. Zero new unit tests for this CSS-only layout change.",
+      "size": 65,
+      "trace": "UX-15",
+      "review_status": "revalidate_before_implementation"
+    },
+    {
+      "id": "T-087",
+      "title": "Label grouped Library counts without calling reactions stickers",
+      "model": "6.1-sol-medium",
+      "finding": "F-29",
+      "risk": "low",
+      "files": [
+        "mirsal/mirsal/console/library.js",
+        "mirsal/tests/js/packs_column.test.js"
+      ],
+      "deps": [
+        "T-075"
+      ],
+      "doText": "In libByPackHtml group-header wording only, when LIBQ is empty and the matching backend pack summary supplies sticker_count/reaction_count, render the two explicit labels. With a filtered subset or absent additive fields, label xs.length as items rather than stickers. Preserve all items, global carousel indices, cell HTML, Open pack, selection handlers and request payloads. Do not infer classification/counts in JS or silently hide reaction thumbnails.",
+      "accept": [
+        "packs_column"
+      ],
+      "manual": "Unfiltered Batman group says17stickers/2reactions; filtered3results say3items; every existing item/action remains reachable; current grouped index/order fixtures green.",
+      "size": 100,
+      "trace": "UX-16",
+      "review_status": "revalidate_before_implementation"
+    }
+  ],
+  "phases": {
+    "P1": [
+      "T-001",
+      "T-002",
+      "T-003",
+      "T-004",
+      "T-056",
+      "T-059",
+      "T-060",
+      "T-061",
+      "T-062",
+      "T-065",
+      "T-085"
+    ],
+    "P2": [
+      "T-005",
+      "T-006",
+      "T-007",
+      "T-008",
+      "T-009",
+      "T-010",
+      "T-011",
+      "T-012",
+      "T-013",
+      "T-014",
+      "T-015",
+      "T-016",
+      "T-017",
+      "T-018",
+      "T-019",
+      "T-020",
+      "T-021",
+      "T-022",
+      "T-023",
+      "T-024",
+      "T-025",
+      "T-026",
+      "T-027",
+      "T-028",
+      "T-029",
+      "T-030",
+      "T-031",
+      "T-032",
+      "T-033",
+      "T-034",
+      "T-035",
+      "T-036",
+      "T-037",
+      "T-038",
+      "T-039",
+      "T-040",
+      "T-041",
+      "T-042",
+      "T-043",
+      "T-044",
+      "T-045",
+      "T-046",
+      "T-047",
+      "T-048",
+      "T-049",
+      "T-050",
+      "T-051",
+      "T-052",
+      "T-053",
+      "T-054",
+      "T-055",
+      "T-057",
+      "T-058",
+      "T-084"
+    ],
+    "P3": [
+      "T-066",
+      "T-067",
+      "T-068",
+      "T-069",
+      "T-070",
+      "T-071",
+      "T-072",
+      "T-073",
+      "T-074",
+      "T-075",
+      "T-076",
+      "T-077",
+      "T-078",
+      "T-086",
+      "T-087",
+      "T-083"
+    ],
+    "P4": [
+      "T-063",
+      "T-064",
+      "T-079",
+      "T-080",
+      "T-081",
+      "T-082"
+    ]
+  },
+  "audit_status": "snapshot proposals; revalidate against current CLAUDE.md and concurrent source before execution"
+}
