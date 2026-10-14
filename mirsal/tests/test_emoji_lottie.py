@@ -1,9 +1,12 @@
 """Reaction effects (Create > New): one bank emoji -> its fixed motion flying as the literal glyph -> a playable Lottie file.
 Over the real HTTP server, a temporary out/, no provider. Numbers and JSON only: no media file is judged by eye (rule 9)."""
 import http.client
+import io
 import json
 import threading
+import time
 import unittest
+import zipfile
 from unittest import mock
 
 import numpy as np
@@ -135,6 +138,53 @@ class EmojiLottieTests(Base):
         self.assertEqual(self.req("POST", "/api/particles/emoji-lottie/batch", {"tokens": []})[0], 400)
         self.assertEqual(self.req("POST", "/api/particles/emoji-lottie/batch", {"tokens": ["cry"] * 25})[0], 400)
         self.assertEqual(self.req("POST", "/api/particles/emoji-presets/preset99/delete", {})[0], 404)
+
+    def _run(self, body):
+        code, st = self.req("POST", "/api/particles/emoji-batches", body)
+        self.assertEqual(code, 202, st)
+        for _ in range(600):
+            st = self.req("GET", f"/api/particles/emoji-batches/{st['id']}")[1]
+            if st["state"] != "running":
+                return st
+            time.sleep(0.05)
+        self.fail("the batch did not finish")
+
+    def test_the_wall_works_toward_every_emoji_presets_by_motion_batches_in_the_background_and_one_zip(self):
+        """Haitham, 2026-10-14: the start look, a reaction reopens with its own settings, presets filed by motion, batch create in the background
+        (start / one preset / a random preset of each emoji's own motion, only the missing ones), Export All | Selected."""
+        start = self.req("GET", "/api/particles/emoji-motions")[1]["start"]
+        self.assertEqual((start["magnitude"], start["count"], start["particle_size"], start["size_var"], start["hue_var"]), (0.7, 28, 0.3, 0.38, 25.0))
+        made = self.req("POST", "/api/particles/emoji-lottie", {"token": "cry", "count": 12, "hue_var": 0})[1]
+        self.assertEqual(made["settings"], {"count": 12, "hue_var": 0})
+        self.assertEqual(self.req("GET", "/api/particles/emoji-lottie")[1]["reactions"][0]["settings"], {"count": 12, "hue_var": 0}, "kept to reopen it exactly")
+        p1 = self.req("POST", "/api/particles/emoji-presets", {"settings": {"count": 9}, "token": "cry"})[1]
+        self.assertEqual((p1["motion"], p1["token"]), ("rain", "cry"), "filed under the motion of the emoji it was made on")
+        p2 = self.req("POST", "/api/particles/emoji-presets", {"settings": {"preset": "vortex"}, "token": "cry"})[1]
+        self.assertEqual(p2["motion"], "vortex", "an override files it under that motion")
+        code, up = self.req("POST", f"/api/particles/emoji-presets/{p1['id']}", {"settings": {"count": 15}, "name": "Soft rain"})
+        self.assertEqual((code, up["name"], up["settings"], up["motion"]), (200, "Soft rain", {"count": 15}, "rain"))
+        self.assertEqual(self.req("POST", "/api/particles/emoji-presets/preset99", {"name": "x"})[0], 404)
+        st = self._run({"tokens": ["cry", "kiss"], "mode": "random"})
+        self.assertEqual((st["state"], st["done"], st["total"]), ("done", 2, 2), st)
+        picks = {m["token"]: m["preset_id"] for m in st["made"]}
+        self.assertEqual(picks["cry"], p1["id"], "a random preset of cry's own motion (rain): only Soft rain")
+        self.assertIsNone(picks["kiss"], "no preset of kiss's own motion: the start look")
+        st = self._run({"tokens": ["cry", "kiss", "laugh"], "mode": "start", "only_missing": True})
+        self.assertEqual([m["token"] for m in st["made"]], ["laugh"], "only the ones without a reaction")
+        self.assertEqual(self.req("POST", "/api/particles/emoji-batches", {"tokens": ["cry"], "mode": "start", "only_missing": True})[0], 409)
+        self.assertEqual(self.req("POST", "/api/particles/emoji-batches", {"tokens": ["cry"], "mode": "preset", "preset_id": "preset99"})[0], 404)
+        self.assertEqual(self.req("POST", "/api/particles/emoji-batches", {"tokens": ["cry"], "mode": "fast"})[0], 400)
+        self.assertEqual(self.req("GET", "/api/particles/emoji-batches")[1]["batches"][0]["id"], st["id"])
+        self.assertEqual(self.req("GET", "/api/particles/emoji-batches/Bnope")[0], 404)
+        code, data = self.req("GET", "/api/particles/emoji-lottie.zip?tokens=cry,school")
+        self.assertEqual(code, 200)
+        with zipfile.ZipFile(io.BytesIO(data)) as z:
+            man = json.loads(z.read("manifest.json"))
+            self.assertEqual(([r["token"] for r in man["reactions"]], man["missing"]), (["cry"], ["school"]))
+            self.assertEqual(json.loads(z.read("cry.lottie.json"))["v"] is not None, True)
+        with zipfile.ZipFile(io.BytesIO(self.req("GET", "/api/particles/emoji-lottie.zip")[1])) as z:
+            self.assertEqual(sorted(n for n in z.namelist() if n != "manifest.json"), ["cry.lottie.json", "kiss.lottie.json", "laugh.lottie.json"])
+        self.assertEqual(self.req("GET", "/api/particles/emoji-lottie.zip?tokens=school")[0], 409)
 
     def test_unknown_emoji_is_409_and_bad_options_are_400(self):
         for token in ("not-a-token", "", None, "abc"):

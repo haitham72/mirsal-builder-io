@@ -6,9 +6,13 @@ emoji.json (lottie[], history). docs/reaction.md section 13. Errors are particle
 """
 from __future__ import annotations
 
+import io
 import json
+import random
 import threading
 import time
+import uuid
+import zipfile
 from pathlib import Path
 
 from ..runtime import atomic
@@ -18,6 +22,10 @@ _LOCK = threading.Lock()
 
 EMOJI_OPTIONS = {"size_in_dur": 0.4, "size_out_dur": 0.4, "hue_var": 25.0}    # the screen's defaults; 0 / 0 / 0 is the plain look
 EMOJI_SIM = ("magnitude", "gravity", "vortex", "spin", "count", "spread")    # the Simulation group: Speed, Gravity, Swirl, Rotation, Amount, Spread
+# Where every emoji starts (Haitham, 2026-10-14: "use these start settings as default"): the editor's first values, Reset's target, and the look
+# a batch gives an emoji with no preset. The motion stays the emoji's own; only these values are normalised. GET emoji-motions hands them to the screen.
+EMOJI_START = {"magnitude": 0.7, "gravity": 1.0, "vortex": 0.0, "spin": 1.0, "count": 28, "spread": 360.0,
+               "particle_size": 0.3, "size_var": 0.38, "size_in_dur": 0.4, "size_out_dur": 0.4, "hue_var": 25.0}
 EMOJI_PX = 160                                                                  # the glyph's longest side: sharp at the biggest a particle is drawn on 512
 
 
@@ -110,6 +118,8 @@ def export_emoji_lottie(out: Path, token, *, preset=None, seed=1, size_in_dur=No
         raise SetError("size must be a whole number from 128 to 1024")
     t, glyph, name, p = emoji_burst(token, preset=preset, seed=seed, size_in_dur=size_in_dur, size_out_dur=size_out_dur, hue_var=hue_var,
                                   particle_size=particle_size, size_var=size_var, sim=sim, size=int(size))
+    settings = {k: v for k, v in (("preset", preset), ("particle_size", particle_size), ("size_var", size_var), ("size_in_dur", size_in_dur),
+                                  ("size_out_dur", size_out_dur), ("hue_var", hue_var), *((sim or {}).items())) if v is not None and v != ""}
     img = _glyph(glyph)
     png = _p.png_bytes(img)
     doc = lottie.export_lottie(p, png, size=p.size)
@@ -126,11 +136,11 @@ def export_emoji_lottie(out: Path, token, *, preset=None, seed=1, size_in_dur=No
         atomic.write_text(d / f"renders/{rid}.lottie.json", data)
         atomic.write_bytes(d / f"renders/{rid}.png", png)
         atomic.write_bytes(d / f"renders/{rid}.webp", loop)
-        rec.setdefault("lottie", []).append({"id": rid, "preset": name, "params": p.to_dict(), "file": f"renders/{rid}.lottie.json",
+        rec.setdefault("lottie", []).append({"id": rid, "preset": name, "params": p.to_dict(), "settings": settings, "file": f"renders/{rid}.lottie.json",
                                              "glyph": f"renders/{rid}.png", "preview": f"renders/{rid}.webp", "bytes": len(data), "created": round(time.time(), 3)})
         hist(rec, user, "LOTTIE", f"exported {rid} as Lottie ({name})", {"preset": name, "seed": p.seed})
         atomic.write_text(rec_f, json.dumps(rec, ensure_ascii=False, indent=1))
-    return {"id": rid, "token": t, "emoji": glyph, "preset": name, "params": p.to_dict(), "file": f"renders/{rid}.lottie.json",
+    return {"id": rid, "token": t, "emoji": glyph, "preset": name, "params": p.to_dict(), "settings": settings, "file": f"renders/{rid}.lottie.json",
             "url": f"/out/particles/emoji/{t}/renders/{rid}.lottie.json", "preview": f"/out/particles/emoji/{t}/renders/{rid}.webp",
             "layers": len(doc["layers"]), "assets": len(doc["assets"]), "bytes": len(data)}
 
@@ -148,6 +158,7 @@ def emoji_lotties(out: Path) -> list[dict]:
         for x in rec.get("lottie") or []:
             pv = x.get("preview")
             rows.append({"id": x.get("id"), "token": t, "emoji": rec.get("emoji", ""), "preset": x.get("preset"), "params": x.get("params") or {},
+                         "settings": x.get("settings"),
                          "url": base + x["file"], "preview": base + pv if pv and (rec_f.parent / pv).is_file() else None,
                          "bytes": x.get("bytes"), "created": x.get("created")})
     rows.sort(key=lambda r: (r.get("created") or 0, r["token"], r["id"] or ""), reverse=True)
@@ -177,29 +188,60 @@ def _kwargs(settings: dict) -> dict:
     return {**{k: s[k] for k in PRESET_KEYS if k in s and k not in EMOJI_SIM}, "sim": {k: s[k] for k in EMOJI_SIM if s.get(k) is not None}}
 
 
+def _motion_of(settings: dict, token: str | None) -> str:
+    """The motion a preset belongs to: its own override, else the motion of the emoji it was made on (presets are filed by motion, Haitham 2026-10-14)."""
+    try:
+        return emoji_burst(token or "happy", **_kwargs(settings))[2]
+    except SetError:
+        return str(settings.get("preset") or "")
+
+
 def emoji_presets(out: Path) -> list[dict]:
-    """The saved presets, oldest first: [{id, name, settings, created}]. Read-only, free."""
-    return list(_read_presets(out)["presets"])
+    """The saved presets, oldest first: [{id, name, motion, token, settings, created}]; one saved before presets were filed by motion gets its motion
+    from its settings (or `happy`'s). Read-only, free."""
+    return [{**p, "motion": p.get("motion") or _motion_of(p.get("settings") or {}, p.get("token"))} for p in _read_presets(out)["presets"]]
 
 
-def save_emoji_preset(out: Path, settings: dict, *, name=None, user: str = "local") -> dict:
-    """Save the editor's settings as the next preset (Preset 01, Preset 02 ...). Strict: an unknown key or a bad value is a 400, checked by
-    building the burst once (for the core `happy`), so a preset that saves always applies."""
+def _clean_settings(settings) -> dict:
     if not isinstance(settings, dict):
         raise SetError("settings must be an object")
     bad = sorted(set(settings) - set(PRESET_KEYS))
     if bad:
         raise SetError(f"unknown preset setting(s): {', '.join(bad)}")
-    clean = {k: v for k, v in settings.items() if v is not None and v != ""}
-    emoji_burst("happy", **_kwargs(clean))
+    return {k: v for k, v in settings.items() if v is not None and v != ""}
+
+
+def save_emoji_preset(out: Path, settings: dict, *, name=None, token=None, user: str = "local") -> dict:
+    """Save the editor's settings as the next preset (Preset 01, Preset 02 ...), filed under its motion (the override, else `token`'s own). Strict:
+    an unknown key or a bad value is a 400, checked by building the burst once, so a preset that saves always applies."""
+    clean = _clean_settings(settings)
+    t = emoji_token(token)[0] if token else None
+    motion = emoji_burst(t or "happy", **_kwargs(clean))[2]
     with _LOCK:
         data = _read_presets(out)
         n = int(data.get("next") or 1)
-        rec = {"id": f"preset{n:02d}", "name": (str(name).strip()[:40] if name else "") or f"Preset {n:02d}", "settings": clean,
-               "created": round(time.time(), 3), "user": user}
+        rec = {"id": f"preset{n:02d}", "name": (str(name).strip()[:40] if name else "") or f"Preset {n:02d}", "motion": motion, "token": t,
+               "settings": clean, "created": round(time.time(), 3), "user": user}
         data["presets"].append(rec)
         data["next"] = n + 1
         _presets_file(out).parent.mkdir(parents=True, exist_ok=True)
+        atomic.write_text(_presets_file(out), json.dumps(data, ensure_ascii=False, indent=1))
+    return rec
+
+
+def update_emoji_preset(out: Path, pid: str, *, settings=None, name=None, token=None) -> dict:
+    """Change one preset in place (Presets > Update, or a new name): its settings and so its motion, and/or its name. 404 for an unknown id."""
+    clean = _clean_settings(settings) if settings is not None else None
+    with _LOCK:
+        data = _read_presets(out)
+        rec = next((p for p in data["presets"] if p["id"] == pid), None)
+        if rec is None:
+            raise SetError(f"no preset {pid}", 404)
+        if clean is not None:
+            t = emoji_token(token)[0] if token else rec.get("token")
+            rec.update(settings=clean, token=t, motion=emoji_burst(t or "happy", **_kwargs(clean))[2], updated=round(time.time(), 3))
+        if name is not None and str(name).strip():
+            rec["name"] = str(name).strip()[:40]
         atomic.write_text(_presets_file(out), json.dumps(data, ensure_ascii=False, indent=1))
     return rec
 
@@ -231,7 +273,154 @@ def export_many(out: Path, tokens, *, preset_id=None, user: str = "local") -> di
     made, errors = [], []
     for token in dict.fromkeys(str(t) for t in tokens):                    # order kept, repeats dropped
         try:
-            made.append(export_emoji_lottie(out, token, user=user, **_kwargs(settings)))
+            made.append(export_emoji_lottie(out, token, user=user, **_kwargs(settings or EMOJI_START)))
         except SetError as ex:
             errors.append({"token": token, "error": str(ex)})
     return {"reactions": made, "errors": errors, "preset": preset_id or None}
+
+
+# ---------- batch create in the background (Haitham, 2026-10-14: "reaching 1800 emojis done somehow"): one run at a time, its state a file,
+# progress and the tokens made so far readable while it runs, Cancel between two emojis. mode: "start" (each emoji's own motion from EMOJI_START),
+# "preset" (one preset for all), "random" (each emoji gets a random preset of ITS OWN motion; none of that motion = the start look).
+MODES = ("start", "preset", "random")
+_BLIVE: dict = {}                       # run id -> {"cancel": bool} for the run this process is doing
+
+
+def _batch_path(out: Path, bid: str) -> Path:
+    return sets_dir(out) / "emoji" / "batches" / f"{bid}.json"
+
+
+def _bsave(out: Path, st: dict) -> None:
+    p = _batch_path(out, st["id"])
+    p.parent.mkdir(parents=True, exist_ok=True)
+    atomic.write_text(p, json.dumps(st, ensure_ascii=False))
+
+
+def all_tokens() -> list[str]:
+    from ..generation import actions as bank
+    return list(bank.generation_bank())
+
+
+def start_batch(out: Path, tokens=None, *, mode: str = "start", preset_id=None, only_missing: bool = False, user: str = "local") -> dict:
+    """Queue one batch create and answer its state at once ({id, state: running, total, done: 0, ...}). `tokens` None = the whole bank;
+    `only_missing` drops the emojis that already have a reaction. 409 while another run is going."""
+    if mode not in MODES:
+        raise SetError(f"mode must be one of {', '.join(MODES)}")
+    presets = emoji_presets(out)
+    if mode == "preset" and not any(p["id"] == preset_id for p in presets):
+        raise SetError(f"no preset {preset_id}", 404)
+    if mode == "random" and not presets:
+        raise SetError("there is no saved preset to pick from", 409)
+    if tokens is None:
+        todo = all_tokens()
+    elif isinstance(tokens, list) and tokens:
+        todo = [emoji_token(t)[0] for t in dict.fromkeys(str(t) for t in tokens)]
+    else:
+        raise SetError("tokens must be a non-empty list, or left out for every emoji")
+    if only_missing:
+        have = {r["token"] for r in emoji_lotties(out)}
+        todo = [t for t in todo if t not in have]
+    if not todo:
+        raise SetError("nothing to create: every chosen emoji already has a reaction", 409)
+    with _LOCK:
+        if _BLIVE:
+            raise SetError("a batch create is already running: wait for it or cancel it", 409)
+        bid = f"B{int(time.time() * 1000):x}{uuid.uuid4().hex[:4]}"
+        _BLIVE[bid] = {"cancel": False}
+    st = {"id": bid, "state": "running", "mode": mode, "preset_id": preset_id, "total": len(todo), "done": 0, "made": [], "errors": [],
+          "user": user, "started": round(time.time(), 3)}
+    _bsave(out, st)
+    threading.Thread(target=_brun, args=(Path(out), st, todo, presets), name="emoji-batch", daemon=True).start()
+    return st
+
+
+def _brun(out: Path, st: dict, todo: list, presets: list) -> None:
+    rnd = random.Random(st["id"])                                             # the same run picks the same way
+    by_motion: dict = {}
+    for p in presets:
+        by_motion.setdefault(p["motion"], []).append(p)
+    one = next((p for p in presets if p["id"] == st.get("preset_id")), None)
+    try:
+        for t in todo:
+            if _BLIVE.get(st["id"], {}).get("cancel"):
+                st["state"] = "cancelled"
+                break
+            try:
+                if st["mode"] == "preset":
+                    settings, pick = one["settings"], one["id"]
+                elif st["mode"] == "random":
+                    own = emoji_burst(t, **_kwargs(EMOJI_START))[2]
+                    cand = by_motion.get(own) or []
+                    p = rnd.choice(cand) if cand else None
+                    settings, pick = (p["settings"], p["id"]) if p else (EMOJI_START, None)
+                else:
+                    settings, pick = EMOJI_START, None
+                r = export_emoji_lottie(out, t, user=st["user"], **_kwargs(settings))
+                st["made"].append({"token": t, "id": r["id"], "preset_id": pick})
+            except Exception as ex:                                          # one emoji never stops the others
+                st["errors"].append({"token": t, "error": str(ex)[:200]})
+            st["done"] += 1
+            _bsave(out, st)
+        if st["state"] == "running":
+            st["state"] = "done"
+    finally:
+        st["finished"] = round(time.time(), 3)
+        _bsave(out, st)
+        with _LOCK:
+            _BLIVE.pop(st["id"], None)
+
+
+def batch_state(out: Path, bid: str) -> dict:
+    """One run's state; a run this process is not doing any more (the server restarted) reads as stopped. 404 for an unknown id."""
+    import re
+    if not re.fullmatch(r"B[0-9a-f]+", str(bid or "")):
+        raise SetError(f"no batch {bid}", 404)
+    try:
+        st = json.loads(atomic.read_text(_batch_path(out, bid)))
+    except (OSError, ValueError):
+        raise SetError(f"no batch {bid}", 404)
+    if st.get("state") == "running" and bid not in _BLIVE:
+        st["state"] = "stopped"
+        st["note"] = "The server restarted during this run; what was made is kept, start again for the rest"
+    return st
+
+
+def batches(out: Path, limit: int = 5) -> list[dict]:
+    """The newest runs first (without their long made / errors lists), so a reloaded screen finds a run still going."""
+    d = sets_dir(out) / "emoji" / "batches"
+    rows = []
+    for f in sorted(d.glob("B*.json"), key=lambda p: p.stat().st_mtime, reverse=True)[:limit] if d.is_dir() else []:
+        st = batch_state(out, f.stem)
+        rows.append({k: v for k, v in st.items() if k not in ("made", "errors")} | {"errors": len(st.get("errors") or [])})
+    return rows
+
+
+def cancel_batch(out: Path, bid: str) -> dict:
+    st = batch_state(out, bid)
+    if bid in _BLIVE:
+        _BLIVE[bid]["cancel"] = True
+        st["cancelling"] = True
+    return st
+
+
+def export_zip(out: Path, tokens=None) -> tuple[bytes, int]:
+    """Export: All | Selected. The newest Lottie of every chosen emoji (None = every emoji that has one) in one zip, `<token>.lottie.json`, plus
+    manifest.json [{token, emoji, id, preset, file}] and the emojis asked for that have none (`missing`). (zip bytes, how many)."""
+    newest: dict = {}
+    for r in emoji_lotties(out):                                              # newest first: the first seen per token is its newest
+        newest.setdefault(r["token"], r)
+    want = list(newest) if tokens is None else [str(t) for t in dict.fromkeys(tokens)]
+    rows, missing, buf = [], [], io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        for t in want:
+            r = newest.get(t)
+            f = emoji_dir(out, t) / "renders" / f"{r['id']}.lottie.json" if r else None
+            if not f or not f.is_file():
+                missing.append(t)
+                continue
+            z.writestr(f"{t}.lottie.json", f.read_bytes())
+            rows.append({"token": t, "emoji": r["emoji"], "id": r["id"], "preset": r["preset"], "file": f"{t}.lottie.json"})
+        z.writestr("manifest.json", json.dumps({"reactions": rows, "missing": missing}, ensure_ascii=False, indent=1))
+    if not rows:
+        raise SetError("none of these emojis has a reaction yet", 409)
+    return buf.getvalue(), len(rows)

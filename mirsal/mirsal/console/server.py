@@ -1350,7 +1350,7 @@ def make_handler(c: Console):
                         return self._json(200, {"sets": ps.list_deleted(c.out, c.lib)})
                     if method == "GET" and pid in ("emoji-motions", "reactions"):
                         # the generic 1800 wall (read-only emoji:animation map)
-                        return self._json(200, {"motions": ps.emoji_motions(c.out, c.lib)})
+                        return self._json(200, {"motions": ps.emoji_motions(c.out, c.lib), "start": er.EMOJI_START})
                     if method == "GET" and pid == "bank":
                         # the bank with build state for Library > Reactions > Create (finished/unclaimed per token)
                         return self._json(200, {"bank": ps.bank_states(c.out, c.lib)})
@@ -1358,7 +1358,19 @@ def make_handler(c: Console):
                         # Reaction effects: the saved presets ("Save preset"); GET lists, POST {settings, name?} saves the next one
                         if method == "GET":
                             return self._json(200, {"presets": er.emoji_presets(c.out)})
-                        return self._json(201, er.save_emoji_preset(c.out, body.get("settings"), name=body.get("name"), user=self.user["id"]))
+                        return self._json(201, er.save_emoji_preset(c.out, body.get("settings"), name=body.get("name"), token=body.get("token"), user=self.user["id"]))
+                    if pid == "emoji-batches":
+                        # Reaction effects: batch create in the background; GET the newest runs, POST {tokens? (none = every emoji), mode, preset_id?, only_missing?}
+                        if method == "GET":
+                            return self._json(200, {"batches": er.batches(c.out)})
+                        return self._json(202, er.start_batch(c.out, body.get("tokens"), mode=str(body.get("mode") or "start"), preset_id=body.get("preset_id"),
+                                                              only_missing=body.get("only_missing") is True, user=self.user["id"]))
+                    if method == "GET" and pid == "emoji-lottie.zip":
+                        # Reaction effects: Export All | Selected (?tokens=a,b), the newest Lottie of each in one zip
+                        q = parse_qs(urlparse(self.path).query)
+                        toks = [t for t in (q.get("tokens", [""])[0]).split(",") if t] or None
+                        data, _n = er.export_zip(c.out, toks)
+                        return self._send(200, data, "application/zip")
                     if method == "GET" and pid == "emoji-lottie":
                         # Reaction effects: every created reaction, newest first (one per Lottie export), for its cards
                         return self._json(200, {"reactions": er.emoji_lotties(c.out)})
@@ -1376,11 +1388,17 @@ def make_handler(c: Console):
                     return self._json(200, ps.update(c.out, c.lib, pid, name=body.get("name"), elements=body.get("elements"), packs=body.get("packs"),
                                                      picked=body.get("picked"), motion=body.get("motion"), save=body.get("save") is True, user=self.user["id"]))
                 act = parts[3]
+                if pid == "emoji-batches" and method == "GET" and len(parts) == 4:         # one run's state, polled by the screen
+                    return self._json(200, er.batch_state(c.out, act))
                 if method != "POST":
                     raise pl.PipelineError(NO_ROUTE, 404)
-                if pid == "emoji-presets":                         # /api/particles/emoji-presets/{preset id}/delete
+                if pid == "emoji-batches" and len(parts) == 5 and parts[4] == "cancel":
+                    return self._json(200, er.cancel_batch(c.out, act))
+                if pid == "emoji-presets":                         # /api/particles/emoji-presets/{preset id}/delete, or POST {settings?, name?, token?} to update it
                     if len(parts) == 5 and parts[4] == "delete":
                         return self._json(200, er.delete_emoji_preset(c.out, act))
+                    if len(parts) == 4:
+                        return self._json(200, er.update_emoji_preset(c.out, act, settings=body.get("settings"), name=body.get("name"), token=body.get("token")))
                     raise pl.PipelineError(NO_ROUTE, 404)
                 if pid == "emoji-lottie" and act == "batch":        # Reaction effects: many emojis, one preset (or each emoji's own), one request
                     return self._json(200, er.export_many(c.out, body.get("tokens"), preset_id=body.get("preset_id"), user=self.user["id"]))

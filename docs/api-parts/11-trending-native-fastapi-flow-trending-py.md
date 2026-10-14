@@ -1,0 +1,7 @@
+# Trending (native FastAPI; `flow/trending.py`)
+
+<sub>Part of [api.md](../api.md).</sub>
+
+Public packs everyone signed in and approved can open, like, comment on and copy (state in `out/trending.json`, git-ignored). `GET /api/trending?order=trending|new|liked` returns `{packs, can_share}`; cards include `by` (maker name), `mine`, `views`, `uses`, likes, comments and score. The maker makes their pack public with `POST /api/trending/{pid}/share` and private with `/unshare`; the owner or an admin can also unshare any public pack. `GET /api/trending/{pid}` includes stickers and comments; `/file/{sid}` serves only public files. `POST .../like | unlike`, `/comments {text}`, and `/comments/{cid}/delete` keep the existing permissions. `POST .../use` returns `201 {copied: {pack_id, name}}` for every caller: files are copied into a new pack owned by that caller, `source.shared_from` records the source, and a use is counted. No provider call is made.
+
+Opening a public pack posts `/api/trending/{pid}/view`: at most one per viewer per UTC day, never its maker. Trending score = 3 × faded likes + 2 × faded undeleted comments + 4 × faded uses + 2 × view index. Each event has a five-day half-life; view index is this pack's faded views divided by the average faded views of existing public packs (zero when none have views). New sorts by share time; Most liked by likes then score. Every person's Library has Recent, My Stickers and Trending; pack pages offer a Public toggle, and members have no Telegram-send control.

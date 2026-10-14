@@ -680,7 +680,14 @@ button.logo{border:0;padding:0;cursor:pointer;background:none}button.logo:hover 
 /* Reaction effects (#/reactions, effects.js fxEkHtml): search + two rows of small emojis, one editor card for the picked one, then the created reactions as simple cards */
 .page.rx{display:flex;flex-direction:column;gap:18px;max-width:1040px}
 .rx-pick{display:flex;flex-direction:column;gap:8px}.rx-top{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap}.rx-top input{width:min(100%,320px)}
-.rx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:2px}
+.rx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:2px;max-height:min(46vh,520px);overflow:auto;overscroll-behavior:contain;padding:2px}
+.rx-top .sp{flex:1}.rx-f button{font-size:var(--fs-s)}.rx-exp{display:inline-flex;align-items:center;gap:6px}
+.rx-dot{position:absolute;right:5px;bottom:5px;width:7px;height:7px;border-radius:50%;background:var(--ok,#16a34a);box-shadow:0 0 0 2px var(--sf)}
+.rx-run{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:var(--r-m);background:var(--wash);font-size:var(--fs-s)}
+.rx-ver{display:inline-flex;align-items:center;gap:6px;font-size:var(--fs-s)}.rx-ver select{padding:3px 6px;border-radius:var(--r-s);border:1px solid var(--bd);background:var(--sf);color:var(--ink);font-size:var(--fs-s)}
+.rx-foot .sp{flex:1}.rx-pmenu .gh-pop{min-width:230px;max-height:50vh;overflow:auto}.rx-pm-h{font-size:var(--fs-xs);color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin:8px 4px 2px}
+.rx-ph{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;margin-bottom:10px}.rx-ph .sh{margin:0}.rx-rnd{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px;margin-left:auto;font-size:var(--fs-s)}
+.rx-pg{margin-bottom:14px}.rx-pg>b{display:block;margin:0 0 8px;font-size:var(--fs-s);color:var(--mut);text-transform:capitalize}.rx-meta .link{margin-left:auto}
 .rx-e{position:relative;height:44px;padding:0;border:0;border-radius:var(--r-s);background:none;display:grid;place-items:center;cursor:pointer}
 .rx-e:hover{background:var(--wash)}.rx-e.on{background:var(--wash);box-shadow:inset 0 0 0 2px var(--pri)}
 .rx-g{font-size:var(--fs-2xl);line-height:1;transition:opacity .15s var(--ease),transform .15s var(--ease)}
