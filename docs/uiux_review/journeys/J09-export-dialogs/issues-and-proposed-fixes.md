@@ -33,6 +33,8 @@ Use44px logical targets, consistent8px gaps and secondary/tinted controls; retai
 
 ## F-06 — Backdrop hides retime without settling its promise
 
+**Implemented 2026-10-14 (branch `uiux-fixes`, T-002):** `dlg(html,{onDismiss})` + `closeDlg(reason)` carry one active dismissal callback; `retimeAsk` settles exactly once (answer true/false, backdrop/Cancel/replacement null); `ACT.rtans` forgets the dismissal before closing. No Escape handling added. Test `mirsal/tests/js/dialog_cancel.test.js` (4 pass, behavioral).
+
 ### Issue
 
 packs.js:47–53 retimeAsk/RTA; app.js:114–121 closeDlg/backdrop. Actual backdrop click leaves typeof RTA==function; explicit Cancel clears it. Applies to ZIP and Telegram retime callers.

@@ -37,18 +37,18 @@ The composer uses the shared surface and tokens. Style presets are 84px wrapping
 
 ### Pack (built)
 
-The header’s “…” menu is anchored to the action row, with its width bounded by that row. It opens within the main column when the header wraps, keeping Delete pack clear of the Packs sidebar.
+The header’s “…” menu is anchored to the action row, with its width bounded by that row. It opens within the main column when the header wraps, keeping Delete pack clear of the Packs sidebar. The decorative cover badge (`#pkgrid .cell .badge2`) never intercepts a click (`pointer-events:none`); position, text and z-order are unchanged. On a phone (≤760px) the sticker viewer's header gives the title/metadata its own full-width wrapping row, with prev/toggles/next on row two as 44px targets; desktop layout is unchanged.
 
 ### Chat (built)
 - Rail and second column per §4. The conversation keeps AI's gradients and hover/selection; the header matches every other screen's header.
 
 ### Settings (built)
 
-`settings.js` renders Appearance immediately, before awaiting system APIs. Its Dark / Light buttons persist only a browser preference and retain keyboard focus when switched. The completed page adds a sticky section bar: Appearance · Account · System health · Prepared sheets (staff) · AI · Telegram · Trash. Each item scrolls to its card. People are managed in Users; Settings keeps the signed-in account and a staff link to Users. The prepared-sheet preference remains subordinate to `MIRSAL_PREFER_PREPARED` when set.
+`settings.js` renders Appearance immediately, before awaiting system APIs. Its Dark / Light buttons persist only a browser preference and retain keyboard focus when switched. The completed page adds a sticky section bar built from a registry (`SET_SECTIONS`) and rebuilt after the auth/tickets/trash wrappers mount their cards, so it only offers mounted sections: Appearance · Account (LAN only) · System health · Prepared sheets (staff) · AI · Telegram · Tickets (where its card mounted) · Trash. Each item scrolls to its card. People are managed in Users; Settings keeps the signed-in account and a staff link to Users. The prepared-sheet preference remains subordinate to `MIRSAL_PREFER_PREPARED` when set.
 
 ### Help (built 2026-10-05, `support.js`, `.su-*`)
 - **Its own section at the end of the rail** (icon `help`). A red dot (`.rdot`) shows on it while a notification is unread. Everyone has it.
-- **The second column** is the person's issues (title, a state chip, time) and, below them, their notifications. A new question is the `+` in the header. Staff get three tabs at the top: My issues, Queue and FAQ review.
+- **The second column** is the person's issues (title, a state chip, time) and, below them, their notifications. A new question is the `+` in the header. Staff get three tabs at the top: My issues, Queue and FAQ review. Issue, queue and FAQ titles are native `button.crow` controls (full-width, 44px, visible focus), keeping their `suopen`/`suq`/`sufaq` actions and ids.
 - **The stage** is one conversation: the person's messages on the right and the agent's and admin's on the left (the Chat's bubbles; an agent bubble in `--glass` / `--aline`, an admin bubble in `--pri-l`).
   - Under an answer sit the help entries it read, as small chips; an FAQ chip opens the entry.
   - Then one bar that says what can be done now: "Did this solve it?" Yes / No, Send to support, Attach a screenshot, Waiting for support, Support replied, or Resolved + Reopen.

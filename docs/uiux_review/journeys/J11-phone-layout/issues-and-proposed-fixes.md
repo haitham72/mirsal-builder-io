@@ -62,6 +62,8 @@ Introduce semantic spacing/type/status/material/control tokens; convert one boun
 
 ## F-36 — Phone viewer header squeezes the title into a word column
 
+**Implemented 2026-10-14 (branch `uiux-fixes`, T-086):** at max-760px `#modal .mbox>.mrow` is a `44px minmax(0,1fr) 44px` grid (metadata spans cols 1-2 row 1 with normal wrapping; close/prev/toggles/next placed per spec; `max-height:calc(100dvh - 24px)` kept). Desktop untouched. Covered by `surface_fixes.test.js`.
+
 ### Issue
 
 packs.js:177–179 lcDraw puts previous, metadata, four background choices, next and Close in one flex .mrow. At390px metadata shrinks to a few words per line and consumes most of the header height. The settled viewer screenshot proves the legibility/layout failure even though overflowing=0. Pending preview media is not scored as missing.

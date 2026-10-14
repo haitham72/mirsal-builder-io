@@ -95,6 +95,8 @@ segmentedHtml has choice/tabs/navigation modes; do not turn navigation into a pr
 
 ## F-24 — Cover badge intercepts Timeline click
 
+**Implemented 2026-10-14 (branch `uiux-fixes`, T-065):** `#pkgrid .cell .badge2{pointer-events:none}`; badge position, text, z-order, hover buttons and the cell dispatcher unchanged. Covered by `mirsal/tests/js/surface_fixes.test.js`.
+
 ### Issue
 
 packs.js:33 badge2 cover overlay and :34 hover buttons; native click on first card stanim fails with span.badge2 intercepting pointer events. The next sticker Timeline button opens #/animate/9ebb180c/fc6b6fcf.

@@ -62,6 +62,8 @@ Introduce semantic spacing/type/status/material/control tokens; convert one boun
 
 ## F-01 — Keep approved size bypasses preview
 
+**Implemented 2026-10-14 (branch `uiux-fixes`, T-001):** the late immediate `ACT.gkeepsize` POST assignment is deleted; the staged handler (flip `VZ.keep`, on-the-fly `vzPreview`, POST only on Apply, zero calls on Cancel) is the single definition. Side effect: `test_an_action_is_not_silently_replaced_by_a_later_script` now passes. Test `mirsal/tests/js/size_preview.test.js` (2 pass).
+
 ### Issue
 
 studio-core.js:858,901; loaded ACT.gkeepsize.toString() POSTs keep_size immediately. Video-size +/- opens #vzcard while Keep uses the overwritten handler.
@@ -84,6 +86,8 @@ Restore the staged handler before extracting testCard; zero mutations before App
 **Preserve:** routes, ACT names, UI baseline, existing JSON and engine authority; per-picture reason/override and owner-only send/export boundaries. No paid calls in acceptance.
 
 ## F-05 — Refresh loops can overlap and redraw twice
+
+**Implemented 2026-10-14 (branch `uiux-fixes`, T-003/T-004):** the duplicate bare 1000-ms queue redraw in `live.js` is removed (the `data-lvt` + active/run interval stays byte for byte); Studio `tick()` serializes with `tickBusy`/`tickForce` flags, hidden-tab interval skip (force still runs) and `finally` release + one queued rerun; 700-ms cadence unchanged. Tests `queue_clock.test.js`, `studio_poll.test.js` pass. Broader watcher migration (T-005+) intentionally deferred.
 
 ### Issue
 

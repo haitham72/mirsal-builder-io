@@ -40,8 +40,22 @@ test('the staff views: a ticket offers reply and resolve, an FAQ proposal shows 
  assert.doesNotMatch(S.faqEdit({id:'F003',status:'archived',question:'q',answer:'a'}),/data-act=sufpub/,'an archived entry cannot be published');
 });
 
+test('conversation, queue and FAQ titles are native keyboard buttons with the same actions',()=>{
+  const conv=S.convRow({id:'C007',title:'sizes',status:'answered',updated:1790000000},false);
+  assert.match(conv,/<button type=button class="crow" data-act=suopen data-id="C007">/);
+  const q=S.queueRow({id:'T009',title:'uploads fail',status:'open'},false);
+  assert.match(q,/<button type=button class="crow" data-act=suq data-id="T009">/);
+  const f=S.faqRow({id:'F009',title:'Telegram refuses a pack',status:'published'},false);
+  assert.match(f,/<button type=button class="crow" data-act=sufaq data-id="F009">/);
+  for(const h of [conv,q,f]){
+    const opens=(h.match(/<button/g)||[]).length, closes=(h.match(/<\/button>/g)||[]).length;
+    assert.equal(opens,closes,'no nested or unclosed buttons inside the title rows');
+  }
+  assert.doesNotMatch(conv,/<div class="crow" data-act=suopen/,'no click-only conversation div remains');
+});
+
 test('a private message is masked until revealed, and an action opens the batch it cited',()=>{
- const m={id:'m4',role:'admin',private:true,text:'123:SECRET'};
+  const m={id:'m4',role:'admin',private:true,text:'123:SECRET'};
  const hidden=S.msg(m,false,false),shown=S.msg(m,false,true);
  assert.doesNotMatch(hidden,/SECRET/);assert.match(hidden,/data-act=supriv/);assert.match(hidden,/I saved it, forget it/);
  assert.match(shown,/123:SECRET/);

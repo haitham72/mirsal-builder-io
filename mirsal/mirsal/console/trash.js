@@ -64,6 +64,6 @@ if(typeof document!=='undefined'){
   const trxOrig=RENDER.settings;
   RENDER.settings=async(...a)=>{const r=await trxOrig(...a);const page=document.querySelector('#s-settings .page');
     if(page&&!document.getElementById('trx-box')){const c=document.createElement('div');c.className='card';c.style.marginTop='16px';
-      c.innerHTML='<div class=row style="justify-content:space-between"><h2 style="margin:0">Trash</h2><button class="btn sm" data-act=trrefresh>Refresh</button></div><div id=trx-box></div>';page.appendChild(c);trxData=null;trxDraw();trxLoad()}
+      c.innerHTML='<div class=row style="justify-content:space-between"><h2 style="margin:0">Trash</h2><button class="btn sm" data-act=trrefresh>Refresh</button></div><div id=trx-box></div>';page.appendChild(c);trxData=null;trxDraw();trxLoad();if(typeof setNavSync==='function')setNavSync();}
     return r};
 }

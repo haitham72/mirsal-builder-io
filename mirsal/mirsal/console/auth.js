@@ -82,6 +82,7 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
     if(page&&!document.getElementById('au-me')){const c=document.createElement('div');c.className='card';c.id='au-me';c.style.marginTop='16px';c.innerHTML=AUV.me(AU.me);if(c.innerHTML)page.insertBefore(c,page.firstChild)}
     if(page&&!document.getElementById('au-users')&&(!AU.me||['owner','admin'].includes(AU.me.role))){const c=document.createElement('div');c.className='card';c.id='au-users';c.style.marginTop='16px';   /* People moved to its own section (users.js) */
       c.innerHTML='<div class=row style="justify-content:space-between"><span><b>People</b> <span class=mut>accounts, approvals, credits and what each person made: in Users</span></span><button class="btn sm" data-act=nav data-to=users>Open Users</button></div>';page.appendChild(c)}
+    if(typeof setNavSync==='function')setNavSync();
     return r};
   auCheck();
 }

@@ -4,6 +4,19 @@ function settingsAppearance() {
   return `<div class=card id=set-appear style="margin-top:12px"><h2>Appearance</h2><div class=row style="justify-content:space-between"><span>Theme <span class=mut>(this browser only)</span></span><div class=ai-seg role=group aria-label="Theme">${['dark', 'light'].map((v) => `<button type=button data-act=thmset data-v=${v} class="${(v === 'dark') === dark ? 'on' : ''}" aria-pressed=${(v === 'dark') === dark}>${v === 'dark' ? 'Dark' : 'Light'}</button>`).join('')}</div></div></div>`;
 }
 
+/* the section bar of Settings (redesign phase 9): a registry of every section,
+   rebuilt after the render wrappers mount their cards so it only offers sections
+   that are actually on the page (Account only on the LAN, Tickets only where
+   its card mounted). Rebuilding never renders: no recursion, wrapper order kept. */
+let SET_SECTIONS = [];
+function setNavHtml(sections) {
+  return `<nav class="gseg set-nav" aria-label="Settings sections">${sections.map(([id, l]) => `<button type=button data-act=setgo data-id=${id}>${l}</button>`).join('')}</nav>`;
+}
+function setNavSync() {
+  const nav = document.querySelector('#s-settings .set-nav');
+  if (!nav) return;
+  nav.outerHTML = setNavHtml(SET_SECTIONS.filter(([id]) => document.getElementById(id)));
+}
 RENDER.settings = async () => {
   $('s-settings').innerHTML =
     `<div class="page set-page"><div class=ph><h1>Settings</h1></div>${settingsAppearance()}<p class=mut role=status>Loading system settings…</p></div>`;
@@ -16,7 +29,7 @@ RENDER.settings = async () => {
     prep = await api('/api/prepared/setting'),
     pp = prep.ok && prep.j.prefer;
   $('s-settings').innerHTML = `<div class="page set-page"><div class=ph><h1>Settings</h1></div>
-  <nav class="gseg set-nav" aria-label="Settings sections">${[['set-appear', 'Appearance'], ['au-me', 'Account'], ['set-health', 'System health'], ...(staff ? [['set-prep', 'Prepared sheets']] : []), ['set-ai', 'AI'], ['set-tg', 'Telegram'], ['trx-box', 'Trash']].map(([id, l]) => `<button type=button data-act=setgo data-id=${id}>${l}</button>`).join('')}</nav>
+  <nav class="gseg set-nav" aria-label="Settings sections">${(SET_SECTIONS = [['set-appear', 'Appearance'], ['au-me', 'Account'], ['set-health', 'System health'], ...(staff ? [['set-prep', 'Prepared sheets']] : []), ['set-ai', 'AI'], ['set-tg', 'Telegram'], ['tk-box', 'Tickets'], ['trx-box', 'Trash']]).map(([id, l]) => `<button type=button data-act=setgo data-id=${id}>${l}</button>`).join('')}</nav>
   ${settingsAppearance()}
   <div class=card id=set-health style="margin-top:12px"><h2>System health</h2><div class=kv>
   <span>watch folder (read-only)</span><span>${esc(p.input)}</span><span>output</span><span>${esc(p.out)}</span>${
@@ -37,7 +50,7 @@ RENDER.settings = async () => {
     });
 };
 
-/* the section bar of Settings (redesign phase 9): each button brings its card into view (Account and Trash are added by auth.js and trash.js after the page draws) */
+/* each section button brings its card into view; the bar only offers mounted cards (setNavSync, rebuilt by the auth/tickets/trash wrappers after they mount) */
 ACT.setgo = (el) => {
   const c = $(el.dataset.id);
   if (c) (c.closest('.card') || c).scrollIntoView({ behavior: 'smooth', block: 'start' });

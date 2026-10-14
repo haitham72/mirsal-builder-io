@@ -95,6 +95,8 @@ segmentedHtml has choice/tabs/navigation modes; do not turn navigation into a pr
 
 ## F-28 — Help rows are click-only divs
 
+**Implemented 2026-10-14 (branch `uiux-fixes`, T-073):** conversation/queue/FAQ title rows are native `button.crow` (same `suopen`/`suq`/`sufaq` + ids, no nested buttons; full-width 44px + existing focus-visible). Extended `support.test.js` (6 pass).
+
 ### Issue
 
 support.js:14,46,55 emit conversation/queue/FAQ data-act rows without native button roles/focus. FAQ titles appear as text in accessibility snapshot.
@@ -149,6 +151,8 @@ Define additive backend sticker_count/reaction_count, preserving existing fields
 
 ## F-26 — Local Account shortcut is a no-op
 
+**Implemented 2026-10-14 (branch `uiux-fixes`, T-072):** the bar is built from `SET_SECTIONS` and rebuilt by the auth/tickets/trash wrappers after mounting (`setNavSync`), so it only offers mounted cards: no Account off the LAN, Tickets only where `tk-box` mounted. `ACT.setgo`, ids and routes unchanged. Test `settings_nav.test.js` (3 pass).
+
 ### Issue
 
 settings.js:19 emits Account→au-me; :41 ignores missing target; auth.js:82 only adds Account for LAN. Non-LAN DOM #au-me count0 while button remains.
@@ -171,6 +175,8 @@ Derive section shortcuts from mounted cards after wrappers; retain LAN Account e
 **Preserve:** routes, ACT names, UI baseline, existing JSON and engine authority; per-picture reason/override and owner-only send/export boundaries. No paid calls in acceptance.
 
 ## F-27 — Tickets have no section shortcut
+
+**Implemented 2026-10-14 (branch `uiux-fixes`, T-072):** `tk-box`/`Tickets` is in the registry; presence-filtered like Account (non-owner cards carry no `tk-box`, so no shortcut there). Same tests as F-26.
 
 ### Issue
 

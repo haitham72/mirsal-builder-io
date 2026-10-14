@@ -37,6 +37,8 @@ Introduce semantic spacing/type/status/material/control tokens; convert one boun
 
 ## F-30 — Dark welcome text fades into pale artwork
 
+**Implemented 2026-10-14 (branch `uiux-fixes`, T-074):** `--wl-ink:#123546` / `--wl-ink2:#345969` in both themes (same pale artwork); only `.wl-t h2/p` use them; `.wl-d` dots are 44px targets with the 5px glyph centered. Artwork, film, cards unchanged. Covered by `surface_fixes.test.js`.
+
 ### Issue
 
 studio.css:583–584 use general --ink/--ink2 over fixed pale slide art; theme.css:7 dark ink is pale. Settled One idea slide title/body almost disappear in dark and are legible in light. Welcome dots18px remain small.

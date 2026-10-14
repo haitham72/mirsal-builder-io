@@ -11,7 +11,7 @@ const SUV=(()=>{
     open:'Open',replied:'Replied',fixed:'Resolved',wont_fix:'Closed',pending:'Waiting for review',draft:'Draft',published:'Published',archived:'Archived',
     problem:'Problem',feature:'Feature request',access:'Access request',report:'Report'};
   const chip=s=>`<span class="su-st ${esc(s)}">${esc(STATE[s]||s)}</span>`;
-  const convRow=(c,on)=>`<div class="crow${on?' on':''}" data-act=suopen data-id="${esc(c.id)}"><div style="min-width:0;flex:1"><b class=su-t>${esc(c.title||'Question')}</b><small>${chip(c.status)} ${esc(when(c.updated))}</small></div></div>`;
+  const convRow=(c,on)=>`<button type=button class="crow${on?' on':''}" data-act=suopen data-id="${esc(c.id)}"><div style="min-width:0;flex:1"><b class=su-t>${esc(c.title||'Question')}</b><small>${chip(c.status)} ${esc(when(c.updated))}</small></div></button>`;
   const noteRow=n=>`<div class="crow su-note${n.read?'':' unread'}" data-act=sunote data-c="${esc(n.conversation||'')}" data-t="${esc(n.ticket||'')}"><div style="min-width:0"><b>${n.kind==='resolved'?'Resolved':n.kind==='update'?'Update':'Support answered'}</b><small>${esc(n.text)}</small></div><span class=meta>${esc(when(n.at))}</span></div>`;
   const short=c=>{const t=String(c.title||'').split(' › ').pop().replace(/\s*\([^)]*`[^)]*\)/g,'').replace(/`/g,'').trim();return t||c.title};
   const cites=m=>(m.cites||[]).length?`<div class=su-cites><span class=mut>From the help:</span>${m.cites.map(c=>c.kind==='faq'?`<button class=su-cite data-act=sucite data-id="${esc(c.id)}">${esc(c.title)}</button>`
@@ -43,7 +43,7 @@ const SUV=(()=>{
     <div class=su-msgs id=su-msgs>${(cv.messages||[]).map(m=>msg(m,staff,(cv._rev||{})[m.id])).join('')}</div>${next(cv,busy)}${composer(cv,img)}</div>`;
   const fresh=(img,busy,pending)=>`<div class=su-conv><div class=su-head><h2>How can we help?</h2></div><p class=mut>The help answers first; if it does not know, a person takes over and you are notified here.</p>${pending?`<div class=su-msgs>${msg({role:'user',text:pending},false)}</div>`:''}${busy?`<div class=su-bar><span class=spin></span> Looking for an answer…</div>`:''}${busy?'':composer(null,img)}</div>`;
   /* staff */
-  const queueRow=(t,on)=>`<div class="crow${on?' on':''}" data-act=suq data-id="${esc(t.id)}"><div style="min-width:0;flex:1"><b class=su-t>${esc(t.title||t.summary||t.id)}</b><small>${chip(t.status==='answered'?'open':t.status)}${t.kind&&t.kind!=='problem'?chip(t.kind):''} ${esc(t.name||t.user||'')} · ${esc(t.id)}${t.pinged?'':' · not pinged yet'}</small></div></div>`;
+  const queueRow=(t,on)=>`<button type=button class="crow${on?' on':''}" data-act=suq data-id="${esc(t.id)}"><div style="min-width:0;flex:1"><b class=su-t>${esc(t.title||t.summary||t.id)}</b><small>${chip(t.status==='answered'?'open':t.status)}${t.kind&&t.kind!=='problem'?chip(t.kind):''} ${esc(t.name||t.user||'')} · ${esc(t.id)}${t.pinged?'':' · not pinged yet'}</small></div></button>`;
   const ticket=(d)=>{const t=d.ticket,cv=d.conversation;
     const kind=(t.context||{}).kind;
     return`<div class=su-conv><div class=su-head><h2>${esc(t.summary||t.intent||t.id)}</h2>${chip(t.status==='answered'?'open':t.status)}${kind&&kind!=='problem'?chip(kind):''}</div>
@@ -52,7 +52,7 @@ const SUV=(()=>{
       <div class=su-in><textarea id=su-reply rows=3 placeholder="Your answer to the person"></textarea><label class=su-pchk><input type=checkbox id=su-private> Private: a token or a password (only this person sees it; never in the ticket, the notification or the FAQ)</label>
       <div class=row style="justify-content:flex-end"><button class=btn data-act=sureply data-id="${esc(t.id)}">Reply</button><button class="btn pri" data-act=suresolve data-id="${esc(t.id)}">${t.status==='fixed'?'Resolved':'Reply and resolve'}</button></div>
       <small class=mut>Reply keeps the issue open. Resolve closes it, notifies the person and proposes an FAQ entry for review.</small></div></div>`};
-  const faqRow=(f,on)=>`<div class="crow${on?' on':''}" data-act=sufaq data-id="${esc(f.id)}"><div style="min-width:0;flex:1"><b class=su-t>${esc(f.title||f.question)}</b><small>${chip(f.pending?'pending':f.status)} ${esc(f.category||'')} ${esc(f.id)}</small></div></div>`;
+  const faqRow=(f,on)=>`<button type=button class="crow${on?' on':''}" data-act=sufaq data-id="${esc(f.id)}"><div style="min-width:0;flex:1"><b class=su-t>${esc(f.title||f.question)}</b><small>${chip(f.pending?'pending':f.status)} ${esc(f.category||'')} ${esc(f.id)}</small></div></button>`;
   const faqEdit=f=>{const p=f.pending,src=p||f;
     return`<div class=su-conv><div class=su-head><h2>${esc(f.id)} · ${p?'proposed revision':f.status}</h2>${chip(p?'pending':f.status)}</div>
       ${p&&f.status==='published'?`<div class=su-was><b>Published now (revision ${esc(f.revision)})</b><div>${esc(f.question)}</div><div class=mut>${esc(f.answer)}</div></div>`:''}
