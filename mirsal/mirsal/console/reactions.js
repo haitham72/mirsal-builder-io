@@ -19,6 +19,7 @@ const RXO=[['particle_size','Size',.25,3,.05,'×'],['size_var','Size variation',
 /* where a new variation starts; the server's EMOJI_START (GET emoji-motions `start`) replaces this copy as soon as the bank is read */
 const RXSTART={magnitude:.7,gravity:1,vortex:0,spin:1,count:28,spread:360,fade_out:0,fade_var:0,particle_size:.3,size_var:.38,size_in_dur:.4,size_out_dur:.4};
 const RXPX=256;                                  /* a preview loop's side */
+const RXED=512;                                  /* the editor's viewer: the export's own 512 x 512 canvas, 1:1 */
 const RXHOV=64;                                  /* the hover reaction's side */
 const RXPAGE=120;                                /* wall tiles drawn at a time (Load more adds the next page) */
 
@@ -27,7 +28,7 @@ const RXPAGE=120;                                /* wall tiles drawn at a time (
    presets are previewed on; ek: the preset in the editor; hover: the emoji pointed at; pv / par: preview url and params per request; ppv: a card's
    preview; multi / sel / anchor: Select; apply: what Assign gives ('random' or a preset id); shown: wall tiles drawn. */
 const RXQ={q:'',f:''};
-const RXS={bank:null,rows:null,start:null,lib:null,sample:'happy',ek:null,hover:'',pv:{},par:{},ppv:{},hT:0,t:0,multi:false,sel:new Set(),anchor:'',apply:'random',hpo:'',hpm:'',hp:null,shown:RXPAGE,mopen:new Set(),psel:new Set(),panchor:''};
+const RXS={bank:null,rows:null,start:null,lib:null,sample:'happy',ek:null,hover:'',pv:{},par:{},ppv:{},hT:0,t:0,multi:false,sel:new Set(),anchor:'',apply:'random',hpo:'',hpm:'',hp:null,shown:RXPAGE,mopen:new Set(),psel:new Set(),panchor:'',ppar:{},dbg:(()=>{try{return localStorage.getItem('rx.debug')==='1'}catch(e){return false}})()};
 const rxStart=()=>RXS.start||RXSTART;
 
 /* ---------- values ---------- */
@@ -78,7 +79,10 @@ function rxHpHtml(){
 function rxFxStyle(par){const [ox,oy]=(par&&par.origin)||[.5,.5];return `width:${RXHOV}px;height:${RXHOV}px;left:calc(90% - ${Math.round(ox*RXHOV)}px);top:calc(90% - ${Math.round(oy*RXHOV)}px)`}
 /* the hover's own preview: the whole burst scaled into its square (fit), never cut at its edges */
 const rxHovKey=t=>rxKey(rxFor(t))+'|fit';
-const rxStageHtml=(emoji,url,alt)=>`<span class=rx-ghost aria-hidden=true>${esc(emoji)}</span>${url?`<img src="${esc(url)}" alt="${esc(alt)}" loading=lazy>`:''}`;
+/* Border (debug): the canvas edge as a square line and a + on the burst's origin (its params' fractions of the canvas) */
+const rxDbgHtml=o=>RXS.dbg&&o?`<span class=rx-dbg aria-hidden=true><i style="left:${(o[0]*100).toFixed(2)}%;top:${(o[1]*100).toFixed(2)}%">+</i></span>`:'';
+const rxDbgToggle=()=>`<label class=rx-dbgt title="Draw the 512 x 512 canvas border and a + on the origin"><input type=checkbox data-rxdbg ${RXS.dbg?'checked':''}> Border</label>`;
+const rxStageHtml=(emoji,url,alt,origin)=>`<span class=rx-ghost aria-hidden=true>${esc(emoji)}</span>${url?`<img src="${esc(url)}" alt="${esc(alt)}" loading=lazy>`:''}${url?rxDbgHtml(origin):''}`;
 function rxTile(m){
  const key=rxHovKey(m.token),ticked=RXS.multi&&RXS.sel.has(m.token),on=!RXS.multi&&!!RXS.ek&&RXS.ek.token===m.token,pid=rxPresetOf(m.token);
  const pv=RXS.hover===m.token&&!on?RXS.pv[key]:'';
@@ -94,7 +98,7 @@ function rxCard(p,used){
  return `<article class="rx-card rx-var${open?' on':''}${sel?' sel':''}" data-rxcard=${esc(p.id)}>`+
   `<button class=rx-x data-act=rxpdel data-id="${esc(p.id)}" aria-label="Remove ${esc(p.id)}" title="Remove ${esc(p.id)} (its emojis go back to their motion's first variation)">${ic('x')}</button>`+
   `<button class=rx-vsel data-act=rxpsel data-id="${esc(p.id)}" aria-pressed=${sel} aria-label="Select ${esc(p.id)}">${sel?ic('check'):''}</button>`+
-  `<div class=rx-stage data-act=rxpopen data-id="${esc(p.id)}" title="Open ${esc(p.id)}">${rxStageHtml(rxRow(RXS.sample).emoji,url,p.id)}${url?'':'<span class=spin></span>'}</div>`+
+  `<div class=rx-stage data-act=rxpopen data-id="${esc(p.id)}" title="Open ${esc(p.id)}">${rxStageHtml(rxRow(RXS.sample).emoji,url,p.id,(RXS.ppar[p.id+'|'+RXS.sample]||{}).origin)}${url?'':'<span class=spin></span>'}</div>`+
   `<div class=rx-meta><span class=rx-mt><b>${esc(p.id)}</b><small class=mut>${rxPlural(used||0,'emoji')}</small></span><button class=link data-act=rxdl data-id="${esc(p.id)}" title="${esc(p.id)}.json" aria-label="Download ${esc(p.id)}.json">${ic('download')}</button></div></article>`}
 function rxLibHtml(){
  const ps=rxPresets();if(!RXS.lib)return `<section class=rx-made data-rxlib><div class=sh>Animation presets</div><span class=spin></span></section>`;
@@ -102,7 +106,7 @@ function rxLibHtml(){
  return `<section class=rx-made data-rxlib><div class=rx-ph><div class=sh>Animation presets <small class=mut>${ps.length}</small></div>`+
   `<small class=mut>Previewed on <b>${esc(s.emoji)} ${esc(s.token)}</b> · drag a box or click the corner to select</small><span class=sp></span>`+
   `${n?`<button class=link data-act=rxpclear>Clear (${n})</button><button class="btn sm dng" data-act=rxpremove>${ic('trash')} Remove ${n}</button>`:''}`+
-  `<button class=link data-act=rxpselall>Select all</button>`+
+  `${rxDbgToggle()}<button class=link data-act=rxpselall>Select all</button>`+
   `<button class="btn sm" data-act=rxzip title="Every preset as {motion}_{NN}.json, plus manifest.json with the preset of every emoji">${ic('download')} Export all (.zip)</button></div>`+
   `<div class=rx-mrows data-rxrows>${RXPRESETS.map(mo=>{const vs=ps.filter(p=>p.motion===mo),open=RXS.mopen.has(mo);
    return `<div class="rx-mrow${open?' open':''}"><div class=rx-mh><button class=rx-mtog data-act=rxmotion data-m=${mo} aria-expanded=${open}><i class=rx-caret></i><b>${esc(mo)}</b>`+
@@ -114,11 +118,11 @@ function rxSlider(k,o){
  return `<label class=rx-sl><span class=mut>${o[1]}</span><input type=range min=${o[2]} max=${o[3]} step=${o[4]} value="${v??(o[2]+o[3])/2}" data-rxo=${o[0]} aria-label="${o[1]}"><output>${rxFmt(o,v)}</output></label>`}
 function rxGroup(title,g,body){
  return `<div class=rx-grp><div class=rx-gh><b>${title}</b><button class=link data-act=rxreset data-g=${g}>Reset</button></div>${body}</div>`}
-function rxStage(k){const url=RXS.pv[rxKey(rxBody(k))]||k.shown;return rxStageHtml(rxRow(k.token).emoji,url,(k.id||k.motion)+' preview')+(url||k.err?'':'<span class=spin></span>')}
+function rxStage(k){const url=RXS.pv[rxKey(rxBody(k))]||k.shown;return rxStageHtml(rxRow(k.token).emoji,url,(k.id||k.motion)+' preview',(k.own||{}).origin)+(url||k.err?'':'<span class=spin></span>')}
 function rxEditor(){
  const k=RXS.ek;if(!k)return '<div data-rxed></div>';const m=rxRow(k.token);
  return `<section class=rx-ed data-rxed><div class=rx-stage data-rxstage>${rxStage(k)}</div><div class=rx-ctl>
-  <div class=rx-h><b>${esc(k.id||'new '+k.motion+' variation')}</b><span class=fx-chip>${esc(k.motion)}</span><small class=mut>${esc(k.name||'')} · on ${esc(m.emoji)} ${esc(m.token)}</small><button class=link data-act=rxclose aria-label="Close">${ic('x')}</button></div>
+  <div class=rx-h><b>${esc(k.id||'new '+k.motion+' variation')}</b><span class=fx-chip>${esc(k.motion)}</span><small class=mut>${esc(k.name||'')} · on ${esc(m.emoji)} ${esc(m.token)}</small>${rxDbgToggle()}<button class=link data-act=rxclose aria-label="Close">${ic('x')}</button></div>
   <div class=rx-groups>
    ${rxGroup('Simulation','sim',RXSIM.map(o=>rxSlider(k,o)).join(''))}
    ${rxGroup('Shape','shape',RXO.map(o=>rxSlider(k,o)).join('')+'<small class=mut>The chat app shows the emoji in its own colours: a preset carries no picture.</small>')}
@@ -175,7 +179,7 @@ async function rxPlay(t){
  if(!ed()){if(await rxHovPreview(t)&&RXS.hover===t)rxTileRedraw(t);return}
  const b=rxBody(RXS.ek),key=rxKey(b);
  if(!RXS.pv[key]){
-  const r=await post('/api/particles/emoji-preview',{...b,size:RXPX});
+  const r=await post('/api/particles/emoji-preview',{...b,size:RXED});
   if(!r.ok){if(ed()){RXS.ek.err=r.j.error||'The preview could not be made.';rxEdRedraw()}return}
   RXS.pv[key]=r.j.url;RXS.par[key]=r.j.params}
  if(ed()&&key===rxKey(rxBody(RXS.ek))){RXS.ek.own=RXS.par[key];RXS.ek.shown=RXS.pv[key];RXS.ek.err='';rxEdSync()}}
@@ -203,7 +207,7 @@ async function rxCardPreviews(){
  for(const p of rxPresets().filter(x=>RXS.mopen.has(x.motion))){
   const k=p.id+'|'+t;if(RXS.ppv[k]!==undefined)continue;RXS.ppv[k]='';
   const r=await post('/api/particles/emoji-preview',{...rxBodyOf(t,p.settings,p.motion),size:RXPX});
-  RXS.ppv[k]=r.ok?r.j.url:'';
+  RXS.ppv[k]=r.ok?r.j.url:'';if(r.ok)RXS.ppar[k]=r.j.params;
   if(r.ok&&route_==='reactions'&&RXS.sample===t){const el=document.querySelector&&document.querySelector(`[data-rxcard="${p.id}"]`);if(el)el.outerHTML=rxCard(p,rxUse()[p.id])}}}
 RENDER.reactions=async()=>{rxDraw();if(!RXS.bank||!RXS.lib){await rxBankEnsure();if(route_==='reactions')rxDraw()}};
 
@@ -220,7 +224,8 @@ document.addEventListener('change',ev=>{
  if(t.dataset.rxapply!==undefined){RXS.apply=t.value||'random';return}
  if(t.dataset.rxf!==undefined){RXQ.f=t.value||'';RXS.shown=RXPAGE;rxGridRedraw();rxManyRedraw()}
  if(t.dataset.rxhpo!==undefined){RXS.hpo=t.value||'';return}
- if(t.dataset.rxhpm!==undefined){RXS.hpm=t.value||'';return}});
+ if(t.dataset.rxhpm!==undefined){RXS.hpm=t.value||'';return}
+ if(t.dataset.rxdbg!==undefined){RXS.dbg=!!t.checked;try{localStorage.setItem('rx.debug',RXS.dbg?'1':'0')}catch(e){}rxDraw()}});
 document.addEventListener('mouseover',ev=>{
  const b=ev.target&&ev.target.closest&&ev.target.closest('.rx-e');if(!b||route_!=='reactions')return;
  const t=b.dataset.t;if(RXS.hover===t)return;
