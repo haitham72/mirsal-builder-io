@@ -658,18 +658,18 @@ def lib_zip(out: Path) -> bytes:
     return buf.getvalue()
 
 
-# ---------- handpicked Lottie files (Haitham drop zone: <repo>/lottie/*.json) ----------
+# ---------- handpicked Lottie files (Haitham drop zone: mirsal/lottie/*.json) ----------
 # The dashboard lists them; Select + Assign gives emojis an origin file and an optional
 # morph file ({tokens, origin, morph?}). Stored in library.json `handpicked[token]`. Files are
 # referenced, never rendered: assigning is instant. The zip carries the used files as
 # handpicked/<file> and the manifest maps them; the chat app plays origin, then morph.
 def handpicked_dir() -> Path:
-    """The drop zone: <repo>/lottie, or MIRSAL_LOTTIE_DIR. Missing = empty list, never an error."""
+    """The drop zone: mirsal/lottie, or MIRSAL_LOTTIE_DIR. Missing = empty list, never an error."""
     import os
     env = os.environ.get("MIRSAL_LOTTIE_DIR", "").strip()
     if env:
         return Path(env)
-    return Path(__file__).resolve().parents[3] / "lottie"
+    return Path(__file__).resolve().parents[2] / "lottie"
 
 
 def handpicked_files(lottie_dir=None) -> list:

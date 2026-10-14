@@ -1371,7 +1371,7 @@ def make_handler(c: Console):
                             return self._json(200, er.library(c.out))
                         return self._json(201, er.add_lib_preset(c.out, str(body.get("motion") or ""), body.get("settings"), name=body.get("name")))
                     if pid == "reaction-handpicked":
-                        # Haitham drop zone (<repo>/lottie/*.json): GET the files with their sizes and frame counts
+                        # Haitham drop zone (mirsal/lottie/*.json): GET the files with their sizes and frame counts
                         if method == "GET":
                             return self._json(200, {"files": er.handpicked_files()})
                     if method == "GET" and pid == "reaction-presets.zip":

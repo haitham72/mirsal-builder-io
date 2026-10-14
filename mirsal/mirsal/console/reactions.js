@@ -71,9 +71,9 @@ const rxHpHold=t=>{const h=rxHpOf(t);return h?`${rxHpShort(h.origin)}${h.morph?`
 function rxHpHtml(){
  const fs=rxHpFiles();
  return `<section class=rx-hp data-rxhp><div class=rx-ph><div class=sh>Handpicked Lottie files <small class=mut>${fs.length}</small></div>`+
-  `<small class=mut>Drop .json files into <code>lottie/</code>, then Select emojis and give them an origin and a morph below</small></div>`+
+  `<small class=mut>Drop .json files into <code>mirsal/lottie/</code>, then Select emojis and give them an origin and a morph below</small></div>`+
   (fs.length?`<div class=rx-hplist>${fs.map(f=>`<div class=row><b>${esc(rxHpShort(f.file))}</b><span class=mut>${Math.round(f.bytes/1024)} KB · ${f.w}×${f.h} · ${f.fps} fps · ${f.frames} frames · ${f.layers} layers${f.images?` · ${f.images} image${f.images===1?"":"s"}`:""}${f.base64?" · has base64":""}</span><span class=sp></span><a class=link href="${rxHpUrl(f.file)}" download="${esc(f.file)}">Download</a></div>`).join("")}`:
-  `<div class=mut>No files yet: drop Lottie .json files into the <code>lottie/</code> folder.</div>`)+`</section>`}
+  `<div class=mut>No files yet: drop Lottie .json files into the <code>mirsal/lottie/</code> folder.</div>`)+`</section>`}
 /* the hover reaction plays as Telegram plays one: the burst's own origin sits on the sticker's bottom-right, 90% across and 90% down */
 function rxFxStyle(par){const [ox,oy]=(par&&par.origin)||[.5,.5];return `width:${RXHOV}px;height:${RXHOV}px;left:calc(90% - ${Math.round(ox*RXHOV)}px);top:calc(90% - ${Math.round(oy*RXHOV)}px)`}
 /* the hover's own preview: the whole burst scaled into its square (fit), never cut at its edges */

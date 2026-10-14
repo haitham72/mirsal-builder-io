@@ -1,4 +1,4 @@
-// Handpicked Lottie files (Haitham drop zone lottie/*.json): the dashboard lists
+// Handpicked Lottie files (Haitham drop zone mirsal/lottie/*.json): the dashboard lists
 // them with sizes and frame counts; Select + Assign gives emojis an origin file
 // and an optional morph file; the wall shows what each emoji holds.
 const test = require('node:test');
@@ -22,7 +22,7 @@ test('the Handpicked section lists every dropped file with its size and shape', 
   assert.match(h, /href="\/api\/particles\/reaction-handpicked\/Sad%20Emoji.json" download="Sad Emoji.json">Download<\/a>/);
   const r = loadConsole(['reactions.js']);
   r(`RXS.bank=${BANK};RXS.lib=${LIB};RXS.hp=[]`);
-  assert.match(r('rxHpHtml()'), /No files yet: drop Lottie .json files into the <code>lottie\/<\/code> folder\./);
+  assert.match(r('rxHpHtml()'), /No files yet: drop Lottie .json files into the <code>mirsal\/lottie\/<\/code> folder\./);
 });
 
 test('the wall shows origin then morph after the preset an emoji holds', () => {
