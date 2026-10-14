@@ -220,6 +220,8 @@ class EmojiLottieTests(Base):
             man = json.loads(zz.read("manifest.json"))
             self.assertEqual(man["slot"], {"asset": "emoji", "file": "emoji.png", "px": 160})
             self.assertTrue(man["assign"]["laugh"].startswith("fountain_"))
+            self.assertEqual(man["unicode"]["1f923"], man["assign"]["laugh"], "the app's key: hex code points, no fe0f")
+            self.assertEqual(er.unicode_key("❤️"), "2764")
             self.assertTrue(all("base64" not in zz.read(n).decode() for n in names if n != "manifest.json"))
 
     def test_unknown_emoji_is_409_and_bad_options_are_400(self):

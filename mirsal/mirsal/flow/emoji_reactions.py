@@ -588,6 +588,18 @@ def lib_lottie(out: Path, pid: str, size: int = 512) -> bytes:
     return json.dumps(doc, separators=(",", ":")).encode("utf-8")
 
 
+def unicode_key(glyph: str) -> str:
+    """The app's key for an emoji: lowercase hex code points joined by '-', without U+FE0F (so ❤️ and ❤ are the same key): 🤣 -> 1f923."""
+    return "-".join(f"{ord(ch):x}" for ch in str(glyph) if ord(ch) != 0xFE0F)
+
+
+def _by_unicode(assign: dict) -> dict:
+    """{unicode key: preset id} for every bank emoji (manifest.json `unicode`, what a chat app looks up)."""
+    from ..generation import actions as bank
+    gen = bank.generation_bank()
+    return {unicode_key(gen[t]["emoji"]): pid for t, pid in assign.items() if t in gen and gen[t].get("emoji")}
+
+
 def lib_zip(out: Path) -> bytes:
     """Every preset as `{id}.json` + manifest.json {presets: [{id, motion, variation, name, file}], assign: {token: id} for every bank emoji, slot}."""
     from ..engine import emoji_motion as em, lottie
@@ -611,7 +623,8 @@ def lib_zip(out: Path) -> bytes:
             z.writestr(f"{p['id']}.json", lib_lottie(out, p["id"]))
         z.writestr("manifest.json", json.dumps({"presets": [{"id": p["id"], "motion": p["motion"], "variation": p["n"], "name": p["name"], "file": f"{p['id']}.json"}
                                                              for p in lib["presets"]],
-                                                "assign": assign, "slot": {"asset": lottie.SLOT_ID, "file": lottie.SLOT_FILE, "px": lottie.SLOT_PX}},
+                                                "assign": assign, "unicode": _by_unicode(assign),
+                                                "slot": {"asset": lottie.SLOT_ID, "file": lottie.SLOT_FILE, "px": lottie.SLOT_PX}},
                                                ensure_ascii=False, indent=1))
     return buf.getvalue()
 
