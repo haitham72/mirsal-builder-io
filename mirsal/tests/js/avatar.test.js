@@ -39,3 +39,24 @@ test('redrawing the clicked avatar keeps its menu open until a genuine outside c
   assert.equal(ctx.RME, false, 'selecting the current route also closes the menu');
   assert.equal(ctx.location.hash, '#/settings');
 });
+
+test("the rail's Create is a new, empty start: the Studio forgets the last session's batches, the chat starts a new conversation", () => {
+  const stored = {};
+  let routed = 0, agnew = 0;
+  const ctx = vm.createContext({
+    ACT: {agnew: () => { agnew++; ctx.location.hash = '#/agent'; }}, location: {hash: '#/library'}, route_: 'library', CTAB: 'generate',
+    SES: {prompt: 'old', gens: [146], off: [3], pack: 'P1'}, glast: 'x',
+    saveSes: () => { stored.ses = JSON.stringify(ctx.SES); }, route: () => routed++,
+  });
+  vm.runInContext(statement(source, 'ACT.railcreate ='), ctx);
+  vm.runInContext('ACT.railcreate()', ctx);
+  assert.deepEqual(JSON.parse(stored.ses), {prompt: '', gens: [], off: [], pack: ''});
+  assert.equal(ctx.location.hash, '#/studio');
+  ctx.location.hash = '#/studio';
+  vm.runInContext('ACT.railcreate()', ctx);
+  assert.equal(routed, 1, 'already on the Studio: drawn again, empty');
+  ctx.CTAB = 'agent';
+  vm.runInContext('ACT.railcreate()', ctx);
+  assert.equal(agnew, 1);
+  assert.equal(routed, 2, 'from another screen the chat is opened after New chat');
+});

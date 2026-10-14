@@ -2,7 +2,7 @@
 
 Generated from `console/*.js` on 2026-10-14 (reactions branch: Reaction studio, emoji wall, Lottie export; Reaction effects is its own screen #/reactions in reactions.js: search + two rows of emoji, one editor card, the created reactions as cards). Regenerate when actions move. The wiring is in `docs/architecture.md` §6; the redesign action map remains in `docs/redesign_plan.md` §4.
 
-**480 actions** (481 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 35 scripts; **17 screens** (22 `RENDER` definitions); **171 named server routes**.
+**481 actions** (482 definitions; `ggo` in studio-core.js is deliberately replaced by composer.js), in 35 scripts; **17 screens** (22 `RENDER` definitions); **171 named server routes**.
 
 `tests/data/ui_baseline.json` and `tests/test_ui_inventory.py` prevent actions, screens or routes disappearing without a recorded rename or authorized retirement. The feature split changes no baseline entries.
 
@@ -54,7 +54,7 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `anexport` | 70 | animate.js | `/api/packs/{}/stickers/{}/animate` |
 | `ansave` | 70 | animate.js | `/api/packs/{}/stickers/{}/animate` |
 
-### `app.js` (11)
+### `app.js` (12)
 
 | action | line | button drawn in | server routes (its code + its helpers, 2 deep) |
 |---|---|---|---|
@@ -66,9 +66,10 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `pknew` | 184 | app.js | `/api/packs` |
 | `c2tog` | 300 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
 | `nav` | 302 | animate.js, app.js, auth.js, chat.js, editor.js, home.js, library.js, packs.js, prepare.js, tickets.js | none (browser only) |
-| `rme` | 307 | app.js | none (browser only) |
-| `thmtoggle` | 316 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
-| `rtrash` | 348 | app.js | none (browser only) |
+| `railcreate` | 310 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `rme` | 327 | app.js | none (browser only) |
+| `thmtoggle` | 336 | (no `data-act` button: called from code, a key, or a form) | none (browser only) |
+| `rtrash` | 368 | app.js | none (browser only) |
 
 ### `auth.js` (12)
 
@@ -313,44 +314,44 @@ Each action row names its source, line, scripts drawing its button and routes it
 | `rtans` | 53 | packs.js | none (browser only) |
 | `pkzip` | 56 | packs.js | `/api/packs/{}/export.zip`<br>`/api/packs/{}/short` |
 | `colopen` | 60 | packs.js | `/api/collection`<br>`/api/packs/{}/short` |
-| `colsend` | 68 | packs.js | `/api/collection/exports`<br>`/api/generations/{}/export-collection`<br>`/api/packs/{}/export-collection` |
-| `pkstudio` | 95 | packs.js | `/api/generations` |
-| `pkgstudio` | 96 | packs.js | `/api/generations` |
-| `pkgdel` | 97 | packs.js | `/api/stickers/delete` |
-| `pkadd` | 102 | packs.js | none (browser only) |
-| `pkrename` | 103 | packs.js | `/api/packs` |
-| `pkdel` | 108 | packs.js | `/api/packs/{}/delete` |
-| `stanim` | 109 | packs.js | none (browser only) |
-| `stcover` | 110 | packs.js | `/api/packs` |
-| `stdel` | 111 | packs.js | `/api/packs/{}/stickers/{}/delete` |
-| `stedit` | 112 | packs.js | `/api/generations`<br>`/api/generations/{}/studio_edit`<br>`/api/projects/from_sticker` |
-| `stview` | 114 | packs.js | none (browser only) |
-| `stname` | 115 | packs.js | none (browser only) |
-| `strep` | 120 | packs.js | `/api/packs/{}/stickers/{}/replace` |
-| `strepone` | 129 | packs.js | `/api/packs/{}/stickers/{}/replace` |
-| `strepall` | 131 | packs.js | `/api/packs/{}/stickers/{}/replace` |
-| `strepundo` | 133 | packs.js | `/api/packs/{}/stickers/{}/replace` |
-| `stsave` | 134 | packs.js | `/api/packs/{}/stickers/{}` |
-| `pkpreview` | 135 | packs.js | none (browser only) |
-| `pvbg` | 138 | packs.js | none (browser only) |
-| `lcsend` | 185 | packs.js | none (browser only) |
-| `lcopen` | 186 | library.js | none (browser only) |
-| `lcclose` | 186 | packs.js | none (browser only) |
-| `lcprev` | 186 | packs.js | none (browser only) |
-| `lcnext` | 186 | packs.js | none (browser only) |
-| `lcgo` | 187 | packs.js | none (browser only) |
-| `lcbg` | 187 | packs.js | none (browser only) |
-| `lcpack` | 188 | packs.js | none (browser only) |
-| `lcedit` | 189 | packs.js | `/api/projects/from_sticker` |
-| `lctimeline` | 190 | packs.js | none (browser only) |
-| `lcmove` | 191 | packs.js | `/api/packs/{}/stickers/{}/move` |
-| `ptmake` | 248 | packs.js | none (browser only) |
-| `ptrunsim` | 249 | packs.js | `/api/effects`<br>`/api/effects/{}/estimate`<br>`/api/effects/{}/particles_estimate`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
-| `ptopen` | 250 | packs.js | none (browser only) |
-| `ptsaved` | 251 | packs.js | none (browser only) |
-| `ptadd` | 252 | packs.js | `/api/effects/{}/add`<br>`/api/generations/{}/particles`<br>`/api/packs/{}/stickers/{}/particles` |
-| `psshow` | 289 | packs.js | `/api/particles`<br>`/api/particles/{}/preview` |
-| `psscope` | 292 | packs.js | `/api/packs/{}/reactions`<br>`/api/particles/emoji-motions` |
+| `colsend` | 69 | packs.js | `/api/collection/exports`<br>`/api/generations/{}/export-collection`<br>`/api/packs/{}/export-collection` |
+| `pkstudio` | 96 | packs.js | `/api/generations` |
+| `pkgstudio` | 97 | packs.js | `/api/generations` |
+| `pkgdel` | 98 | packs.js | `/api/stickers/delete` |
+| `pkadd` | 103 | packs.js | none (browser only) |
+| `pkrename` | 104 | packs.js | `/api/packs` |
+| `pkdel` | 109 | packs.js | `/api/packs/{}/delete` |
+| `stanim` | 110 | packs.js | none (browser only) |
+| `stcover` | 111 | packs.js | `/api/packs` |
+| `stdel` | 112 | packs.js | `/api/packs/{}/stickers/{}/delete` |
+| `stedit` | 113 | packs.js | `/api/generations`<br>`/api/generations/{}/studio_edit`<br>`/api/projects/from_sticker` |
+| `stview` | 115 | packs.js | none (browser only) |
+| `stname` | 116 | packs.js | none (browser only) |
+| `strep` | 121 | packs.js | `/api/packs/{}/stickers/{}/replace` |
+| `strepone` | 130 | packs.js | `/api/packs/{}/stickers/{}/replace` |
+| `strepall` | 132 | packs.js | `/api/packs/{}/stickers/{}/replace` |
+| `strepundo` | 134 | packs.js | `/api/packs/{}/stickers/{}/replace` |
+| `stsave` | 135 | packs.js | `/api/packs/{}/stickers/{}` |
+| `pkpreview` | 136 | packs.js | none (browser only) |
+| `pvbg` | 139 | packs.js | none (browser only) |
+| `lcsend` | 186 | packs.js | none (browser only) |
+| `lcopen` | 187 | library.js | none (browser only) |
+| `lcclose` | 187 | packs.js | none (browser only) |
+| `lcprev` | 187 | packs.js | none (browser only) |
+| `lcnext` | 187 | packs.js | none (browser only) |
+| `lcgo` | 188 | packs.js | none (browser only) |
+| `lcbg` | 188 | packs.js | none (browser only) |
+| `lcpack` | 189 | packs.js | none (browser only) |
+| `lcedit` | 190 | packs.js | `/api/projects/from_sticker` |
+| `lctimeline` | 191 | packs.js | none (browser only) |
+| `lcmove` | 192 | packs.js | `/api/packs/{}/stickers/{}/move` |
+| `ptmake` | 249 | packs.js | none (browser only) |
+| `ptrunsim` | 250 | packs.js | `/api/effects`<br>`/api/effects/{}/estimate`<br>`/api/effects/{}/particles_estimate`<br>`/api/generations`<br>`/api/jobs`<br>`/api/particles` |
+| `ptopen` | 251 | packs.js | none (browser only) |
+| `ptsaved` | 252 | packs.js | none (browser only) |
+| `ptadd` | 253 | packs.js | `/api/effects/{}/add`<br>`/api/generations/{}/particles`<br>`/api/packs/{}/stickers/{}/particles` |
+| `psshow` | 290 | packs.js | `/api/particles`<br>`/api/particles/{}/preview` |
+| `psscope` | 293 | packs.js | `/api/packs/{}/reactions`<br>`/api/particles/emoji-motions` |
 
 ### `particles.js` (64)
 
