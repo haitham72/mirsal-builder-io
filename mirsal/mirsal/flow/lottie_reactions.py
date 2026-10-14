@@ -24,11 +24,11 @@ SIZE = 512                                                                      
 # The sliders, in the editor's order; every one is a ParticleParams field except size_var (re-spreads size_min / size_max around their middle).
 SETTINGS = ("magnitude", "speed_var", "speed_pulse", "pulse_hz", "gravity", "vortex", "spin", "flip", "flip_var", "count", "spread",
             "particle_size", "size_var", "size_in_dur", "size_out_dur", "fade_start", "fade_dur", "fade_var",
-            "morph_at", "morph_var", "children", "child_size", "child_size_var", "seed")
+            "morph_at", "morph_var", "morph_burst", "children", "child_size", "child_size_var", "seed")
 # The neutral start (Haitham: "just pure default", no vortex / confetti / motion preset): the engine's own defaults.
 START = {"magnitude": 1.0, "speed_var": 0.0, "speed_pulse": 0.0, "pulse_hz": 2.0, "gravity": 1.0, "vortex": 0.0, "spin": 1.0, "flip": 0.0, "flip_var": 0.0,
          "count": 28, "spread": 360.0, "particle_size": 1.0, "size_var": 0.375, "size_in_dur": 0.0, "size_out_dur": 0.0,
-         "fade_start": 0.0, "fade_dur": 0.0, "fade_var": 0.0, "morph_at": 0.0, "morph_var": 0.0, "children": 0, "child_size": 0.5, "child_size_var": 0.0, "seed": 1}
+         "fade_start": 0.0, "fade_dur": 0.0, "fade_var": 0.0, "morph_at": 0.0, "morph_var": 0.0, "morph_burst": 0, "children": 0, "child_size": 0.5, "child_size_var": 0.0, "seed": 1}
 _SIZE_MID = 0.16                                                                # the middle of the engine's default size range (0.10 .. 0.22)
 
 

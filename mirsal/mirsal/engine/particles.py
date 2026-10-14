@@ -40,6 +40,7 @@ SPAWN_WINDOW = 0.35     # particles are born staggered over a 0.35 s window (sho
 LEAD_FRAMES = 3         # ... that opens after this many empty frames: the first 3 frames are empty BY CONSTRUCTION (frame 0 certainly)
 QUIET_TAIL = 0.2        # every particle is dead this long before the clip ends (last frames empty BY CONSTRUCTION)
 MIN_LIFE = 0.3
+MORPH_XFADE = 0.15      # seconds a particle crossfades at its morph (into its target, or out into its children)
 ALPHA_TRIM = 4          # a sprite's alpha at or below this is haze, not subject: ignored when trimming
 _POS_LIMIT = 50.0       # canvas units: positions are clipped here so nothing can overflow
 
@@ -77,9 +78,10 @@ class ParticleParams:
     flip_var: float = 0.0           # 0..1: each particle's flip rate +- this share
     morph_at: float = 0.0           # 0..2 s after birth: when a particle turns from its origin into a morph target (0 = no morph; Lottie style)
     morph_var: float = 0.0          # 0..1 s: +- per particle on morph_at
-    children: int = 0               # 0..12: Morph auxiliary, each particle bursts this many children (same settings, one level) when its fade starts
+    children: int = 0               # 0..12: Morph auxiliary, each particle bursts this many children (same settings, one level) at its morph (its fade start with no morph)
     child_size: float = 0.5         # 0.1..3: a child's size at birth, x its parent's drawn size at that moment
     child_size_var: float = 0.0     # 0..1: a seeded log spread per child around child_size (most stay near it, a few reach 1x or 3x)
+    morph_burst: int = 0            # 0 = at its morph a particle turns into its target (1:1); 1 = it bursts into its children (it fades out, they fly the target)
 
     @classmethod
     def from_dict(cls, d: dict) -> "ParticleParams":
@@ -163,6 +165,7 @@ class ParticleParams:
             children=int(lim(round(num("children", self.children)), 0, 12)),
             child_size=lim(num("child_size", self.child_size), 0.1, 3.0),
             child_size_var=lim(num("child_size_var", self.child_size_var), 0.0, 1.0),
+            morph_burst=1 if num("morph_burst", self.morph_burst) >= 0.5 else 0,
         )
 
 
@@ -222,7 +225,7 @@ def _ease_out_back(t: np.ndarray, c1: float = 1.2) -> np.ndarray:
 
 def trajectories(p: ParticleParams, n_sprites: int = 1) -> Trajectories:
     """The deterministic physics of one burst: seeded, vectorised, one semi-implicit Euler step per frame. With `children` > 0 every root
-    particle bursts that many children (same settings, one level) from where it is when its fade starts; they follow the roots in every array."""
+    particle bursts that many children (same settings, one level) from where it is at its morph (its fade start without one); they follow the roots in every array."""
     p = p.clamped()
     if n_sprites < 1:
         raise ValueError("n_sprites must be at least 1")
@@ -255,10 +258,19 @@ def trajectories(p: ParticleParams, n_sprites: int = 1) -> Trajectories:
     v0 = np.stack([np.cos(ang), np.sin(ang)], 1) * speed[:, None]
     P = _fly(p, F, dt, spawn, origin, v0, extra)
     scale, opacity, a, alive = _look(p, F, dt, spawn, life, fade_k)
+    morphs = p.morph_at > 0
+    m_at = np.maximum(p.morph_at + extra.morph_k, dt)                # seconds after birth each root morphs (when morphs)
+    if morphs and p.morph_burst and p.children > 0:                  # Bursts into: the root fades out over MORPH_XFADE at its morph, its children take over
+        cut = m_at[None, :] + MORPH_XFADE
+        alive = alive & (a < cut)
+        opacity = np.where(alive, opacity * np.clip((cut - a) / MORPH_XFADE, 0.0, 1.0), 0.0)
+        scale = np.where(alive, scale, 0.0)
+        life = np.minimum(life, m_at + MORPH_XFADE)
 
     parent = np.full(n, -1, dtype=np.int64)
     if p.children > 0:                                               # Morph auxiliary: one level of child bursts, every child drawn after the roots
-        f_start = spawn + np.rint(_fade_start_s(p, life, fade_k) * p.fps).astype(np.int64)
+        when = m_at if morphs else _fade_start_s(p, life, fade_k)    # the morph starts the children (Haitham 2026-10-14); no morph = the fade start
+        f_start = spawn + np.rint(when * p.fps).astype(np.int64)
         f_last = int(round((p.duration - QUIET_TAIL) * p.fps)) - 4
         k = p.children
         par = np.repeat(np.arange(n), k)
@@ -297,7 +309,8 @@ def trajectories(p: ParticleParams, n_sprites: int = 1) -> Trajectories:
     angle = theta0[None, :] + omega[None, :] * a
     flipx = np.where(alive, np.cos(2 * math.pi * extra.flip_rate[None, :] * a), 1.0) if p.flip > 0 else np.ones_like(a)
     visible = alive & (scale > 0.02) & (opacity > 0.004)
-    morph = np.maximum(p.morph_at + extra.morph_k, dt) if p.morph_at > 0 else np.full(len(spawn), np.inf)
+    morph = np.maximum(p.morph_at + extra.morph_k, dt) if morphs else np.full(len(spawn), np.inf)
+    morph[parent >= 0] = np.inf                                      # a child is born as the target: it never morphs again
     return Trajectories(P, scale, angle, opacity, visible, size_frac, sprite, hue, spawn, life,
                         np.argsort(size_frac, kind="stable"), p, flipx, morph, extra.pick, parent)
 

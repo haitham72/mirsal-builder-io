@@ -12,7 +12,7 @@ const LSG=[
  ['Shape',[['particle_size','Size',.25,3,.05,'×'],['size_var','Size variation',0,1,.05,'%'],['size_in_dur','Size in',0,1.5,.05,'s'],['size_out_dur','Size out',0,1.5,.05,'s']]],
  ['Fade out',[['fade_start','Fade out start',0,2,.05,'s'],['fade_dur','Fade out duration',0,2,.05,'s'],['fade_var','Fade out variation',0,1,.05,'s']]],
  ['Morph',[['morph_at','Morph at',0,2,.05,'s'],['morph_var','Morph variation',0,1,.05,'s']]],
- ['Children',[['children','Children',0,12,1,''],['child_size','Child size',.1,3,.05,'×'],['child_size_var','Child size variation',0,1,.05,'%']]]];
+ ['Children (born at the morph)',[['children','Children',0,12,1,''],['child_size','Child size',.1,3,.05,'×'],['child_size_var','Child size variation',0,1,.05,'%']]]];
 const LSO=LSG.flatMap(g=>g[1]);
 const LS={files:null,start:null,sel:'',ed:null,doc:null,anim:null,t:0,err:'',busy:false,seq:0,lib:null};
 const rxStyle=()=>{try{return localStorage.getItem('rx.style')==='lottie'?'lottie':'emoji'}catch(e){return 'emoji'}};
@@ -28,15 +28,20 @@ function lsHtml(){
  return `${lsEditor()}<section class=rx-made data-lsfiles><div class=rx-ph><div class=sh>Lottie files <small class=mut>${LS.files.length}</small></div>`+
   `<small class=mut>Every <code>.json</code> in <code>mirsal/lottie/</code>; click one to make it a reaction</small><span class=sp></span>`+
   `<button class="btn sm" data-act=lszip title="Every file with its saved settings, one self-contained Lottie each, plus manifest.json">${ic('download')} Export all (.zip)</button></div>`+
-  (LS.files.length?`<div class=ls-files>${LS.files.map(f=>`<button class="ls-f${LS.sel===f.file?' on':''}" data-act=lspick data-f="${esc(f.file)}" aria-pressed=${LS.sel===f.file}>`+
-   `<b>${esc(f.name)}</b><small class=mut>${f.w}×${f.h} · ${f.fps} fps · ${f.frames} fr${f.saved?' · saved':''}</small></button>`).join('')}</div>`
+  (LS.files.length?`<div class=ls-files>${LS.files.map(f=>`<button class="ls-f${LS.sel===f.file?' on':''}" data-act=lspick data-f="${esc(f.file)}" aria-pressed=${LS.sel===f.file} title="${esc(f.name)} · ${f.w}×${f.h} · ${f.fps} fps · ${f.frames} frames">`+
+   `${lsThumb(f.file)}<b>${esc(f.name)}</b><small class=mut>${Math.round(f.frames/(f.fps||30)*10)/10} s${f.saved?' · saved':''}</small></button>`).join('')}</div>`
    :`<div class=mut>No files yet: drop Lottie .json files into <code>mirsal/lottie/</code>.</div>`)+`</section>`}
 function lsSlider(o){const v=LS.ed.settings[o[0]];
  return `<label class=rx-sl><span class=mut>${o[1]}</span><input type=range min=${o[2]} max=${o[3]} step=${o[4]} value="${v}" data-lso=${o[0]} aria-label="${o[1]}"><output>${rxFmt(o,v)}</output></label>`}
-function lsTargets(){const others=(LS.files||[]).filter(f=>f.file!==LS.sel);
- if(!others.length)return '<small class=mut>Drop a second file to morph into it.</small>';
- return `<div class=ls-tg>${others.map(f=>`<label class=rx-dbgt><input type=checkbox data-lst="${esc(f.file)}" ${LS.ed.morph_targets.includes(f.file)?'checked':''}> ${esc(f.name)}</label>`).join('')}</div>`+
-  `<small class=mut>Each particle turns into one of the ticked files at Morph at (0 = no morph).</small>`}
+/* a file's own animation as a small tile picture: lottie-web, still on its middle frame, playing while pointed at (lsThumbs mounts them) */
+const lsThumb=f=>`<span class=ls-th data-lsthumb="${esc(f)}" aria-hidden=true></span>`;
+function lsTargets(){const others=(LS.files||[]).filter(f=>f.file!==LS.sel),b=+LS.ed.settings.morph_burst?1:0;
+ const mode=`<div class=tabs role=tablist aria-label="At the morph"><button class="tab ${b?'':'on'}" data-act=lsmode data-v=0 aria-selected=${!b}>Turns into (1:1)</button>`+
+  `<button class="tab ${b?'on':''}" data-act=lsmode data-v=1 aria-selected=${!!b}>Bursts into children</button></div>`;
+ if(!others.length)return mode+'<small class=mut>Drop a second file to morph into it.</small>';
+ return mode+`<div class=ls-tg>${others.map(f=>{const on=LS.ed.morph_targets.includes(f.file);
+   return `<button class="ls-f sm${on?' on':''}" data-act=lstg data-f="${esc(f.file)}" aria-pressed=${on} title="${esc(f.name)}">${lsThumb(f.file)}<b>${esc(f.name)}</b></button>`}).join('')}</div>`+
+  `<small class=mut>${b?'At Morph at each particle fades out and its Children burst out as one of the picked files.':'At Morph at each particle turns into one of the picked files; Children (if any) burst out of it there.'} Morph at 0 = no morph.</small>`}
 const lsStage=()=>`<div class=ls-player data-lsplayer></div>${LS.doc?rxDbgHtml([.5,.5]):''}${LS.doc||LS.err?'':'<span class=spin></span>'}`;
 function lsEditor(){
  if(!LS.ed)return '<div data-lsed></div>';
@@ -50,6 +55,18 @@ function lsEditor(){
 
 /* ---------- the player (lottie-web, bundled: no CDN) ---------- */
 let lsLib=null;
+LS.raw={};LS.th=[];
+async function lsThumbs(){
+ LS.th.forEach(a=>{try{a.destroy()}catch(e){}});LS.th=[];
+ const boxes=[...(document.querySelectorAll?document.querySelectorAll('[data-lsthumb]'):[])];if(!boxes.length)return;
+ const L=await lsLottie().catch(()=>null);if(!L)return;
+ for(const box of boxes){const f=box.dataset.lsthumb;
+  if(!LS.raw[f]){const r=await api(rxHpUrl(f));LS.raw[f]=r.ok?r.j:null}
+  if(!LS.raw[f]||!box.isConnected||box.firstChild)continue;
+  const a=L.loadAnimation({container:box,renderer:'svg',loop:true,autoplay:false,animationData:JSON.parse(JSON.stringify(LS.raw[f]))});
+  const mid=()=>a.goToAndStop(Math.floor((a.totalFrames||2)/2),true);
+  a.addEventListener('DOMLoaded',mid);LS.th.push(a);
+  const host=box.closest('button')||box;host.addEventListener('mouseenter',()=>a.play());host.addEventListener('mouseleave',mid)}}
 function lsLottie(){if(window.lottie)return Promise.resolve(window.lottie);
  if(!lsLib)lsLib=new Promise((ok,no)=>{const s=document.createElement('script');s.src='/ui/vendor/lottie-5.12.2.min.js';s.onload=()=>ok(window.lottie);s.onerror=no;document.head.appendChild(s)});
  return lsLib}
@@ -83,6 +100,8 @@ function lsOpen(file){const f=lsFile(file);if(!f)return;
 /* ---------- actions ---------- */
 ACT.rxstyle=el=>{try{localStorage.setItem('rx.style',el.dataset.s==='lottie'?'lottie':'emoji')}catch(e){}RENDER.reactions()};
 ACT.lspick=el=>lsOpen(el.dataset.f);
+ACT.lstg=el=>{if(!LS.ed)return;const f=el.dataset.f,m=LS.ed.morph_targets.filter(x=>x!==f);if(!LS.ed.morph_targets.includes(f))m.push(f);LS.ed.morph_targets=m;rxDraw();lsPreview()};
+ACT.lsmode=el=>{if(!LS.ed)return;LS.ed.settings.morph_burst=+el.dataset.v?1:0;rxDraw();lsPreview()};
 ACT.lsclose=()=>{LS.sel='';LS.ed=null;LS.doc=null;if(LS.anim){try{LS.anim.destroy()}catch(e){}LS.anim=null}rxDraw()};
 ACT.lsreset=()=>{if(!LS.ed)return;LS.ed.settings={...(LS.start||{})};LS.ed.morph_targets=[];rxDraw();lsPreview()};
 ACT.lssave=async()=>{if(!LS.ed||LS.busy)return;LS.busy=true;
@@ -95,5 +114,3 @@ ACT.lszip=()=>{const a=document.createElement('a');a.href='/api/particles/lottie
 document.addEventListener('input',ev=>{const t=ev.target;if(!t||!t.dataset||t.dataset.lso===undefined||!LS.ed)return;
  const o=LSO.find(x=>x[0]===t.dataset.lso);if(!o)return;LS.ed.settings[o[0]]=+t.value;
  const out=t.parentNode.querySelector('output');if(out)out.textContent=rxFmt(o,+t.value);lsSoon()});
-document.addEventListener('change',ev=>{const t=ev.target;if(!t||!t.dataset||t.dataset.lst===undefined||!LS.ed)return;
- const f=t.dataset.lst,m=LS.ed.morph_targets.filter(x=>x!==f);if(t.checked)m.push(f);LS.ed.morph_targets=m;lsPreview()});

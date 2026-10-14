@@ -159,7 +159,7 @@ function rxDraw(){
  el.innerHTML=rxHtml();
  const w2=el.querySelector&&el.querySelector('[data-rxwall]');if(w2)w2.scrollTop=top;
  if(q){const i=el.querySelector('[data-rxq]');if(i){i.focus();try{i.setSelectionRange(i.value.length,i.value.length)}catch(e){}}}
- if(rxStyle()==='lottie')return lsMount();
+ if(rxStyle()==='lottie'){lsThumbs();return lsMount()}
  rxCardPreviews()}
 const rxSwap=(sel,html)=>{const el=document.querySelector&&document.querySelector(sel);if(el)el.outerHTML=html;else rxDraw()};
 function rxGridRedraw(){const w=document.querySelector&&document.querySelector('[data-rxwall]');if(!w)return;const list=rxList();

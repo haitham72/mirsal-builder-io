@@ -71,6 +71,23 @@ class EngineTests(unittest.TestCase):
         rel = spread.size_frac[spread.parent >= 0]
         self.assertGreater(rel.max() / rel.min(), 3, "size variation: children differ a lot")
 
+    def test_the_morph_starts_the_children_and_bursts_replace_the_parent(self):
+        for burst in (0, 1):
+            q = p.ParticleParams(seed=5, count=8, children=2, morph_at=0.5, morph_burst=burst, duration=2.0)
+            t = p.trajectories(q)
+            kids = np.flatnonzero(t.parent >= 0)
+            self.assertEqual(len(kids), 16)
+            for c in kids:
+                par = int(t.parent[c])
+                self.assertEqual(int(t.spawn[c]), int(t.spawn[par]) + 15, "born at the parent's morph (0.5 s)")
+                self.assertTrue(np.isinf(t.morph[c]), "a child never morphs again")
+            roots = np.flatnonzero(t.parent < 0)
+            after = [float(t.opacity[int(t.spawn[r]) + 15 + 6:, r].max()) for r in roots]
+            if burst:
+                self.assertEqual(max(after), 0.0, "Bursts into children: the parent is gone after the crossfade")
+            else:
+                self.assertGreater(max(after), 0.5, "Turns into (1:1): the parent goes on as its target")
+
     def test_old_bursts_keep_their_bytes(self):
         a = p.trajectories(p.preset("confetti", seed=9))
         b = p.trajectories(p.preset("confetti", seed=9, flip_var=0.5, morph_var=0.5))
@@ -105,6 +122,14 @@ class ExportTests(unittest.TestCase):
         births = sorted(int(s) for s in t.spawn)
         self.assertEqual(sorted(L["ip"] for L in targets), [b + 15 for b in births], "the target starts 0.5 s after birth")
         self.assertTrue(all(L["st"] == L["ip"] for L in targets), "its playhead starts there")
+
+    def test_children_fly_the_target_and_a_burst_parent_has_no_target_layer(self):
+        q = p.ParticleParams(seed=2, count=5, children=2, morph_at=0.4, morph_burst=1, duration=2.0)
+        d = lottie.export_lottie_burst(q, tiny("o", op=200), [tiny("t", op=200)])
+        t = p.trajectories(q)
+        roots, kids = int((t.parent < 0).sum()), int((t.parent >= 0).sum())
+        refs = [L["refId"] for L in d["layers"]]
+        self.assertEqual((refs.count("L0"), refs.count("L1")), (roots, kids), "roots fly the origin only, every child is the target")
 
     def test_a_burst_too_big_is_refused(self):
         with self.assertRaises(ValueError):

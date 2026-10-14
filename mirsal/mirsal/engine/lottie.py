@@ -10,7 +10,7 @@ import math
 import numpy as np
 from PIL import Image
 
-from .particles import ParticleParams, hue_rotate, png_bytes, trajectories, trim_sprite
+from .particles import MORPH_XFADE, ParticleParams, hue_rotate, png_bytes, trajectories, trim_sprite
 
 HUE_STEP = 10.0         # Lottie cannot turn an image's hue: each particle's hue is rounded to this step and every step used is one embedded asset
 
@@ -137,7 +137,6 @@ def _slot_lottie(p: ParticleParams, size: int) -> dict:
 
 
 # ---- Lottie style (Haitham, 2026-10-14): every particle is a whole Lottie animation ----------------------------------------------------------------
-MORPH_XFADE = 0.15         # seconds a particle crossfades from its origin Lottie into its morph target
 MAX_PARTICLES = 400        # roots + children: a bigger burst is refused (each particle is a precomp layer, a morph adds one more)
 
 
@@ -171,7 +170,8 @@ def _embed(doc: dict, k: int) -> tuple[list, dict]:
 def export_lottie_burst(p: ParticleParams, origin: dict, targets: list | None = None, *, size: int = 512, name: str = "lottie reaction") -> dict:
     """A Lottie-style burst: `origin` (a Lottie document) flying as every particle, each its own instance (its own playhead from its birth), never a
     raster. `targets` (Lottie documents) are the morph targets: with `morph_at` > 0 each particle picks one (seeded) and crossfades into it
-    MORPH_XFADE s long at its morph time, the target playing from that moment. Children (`children` > 0) fly the origin. The result embeds the origin
+    MORPH_XFADE s long at its morph time, the target playing from that moment. Children (`children` > 0) burst at the morph and fly a picked target
+    (the origin with none); with `morph_burst` the root fades out into them instead of turning (1:1). The result embeds the origin
     and every target ONCE each as precomp assets (`L0`, `L1`, ...; their own assets renamed `L<k>_...`), however many particles show them; each source
     plays at its own frame rate (`sr`) and ends when it ends (no loop). Same params + same documents -> the same JSON. Pure."""
     if not isinstance(origin, dict) or not isinstance(origin.get("layers"), list):
@@ -226,9 +226,15 @@ def export_lottie_burst(p: ParticleParams, origin: dict, targets: list | None = 
             continue
         ip, op = int(alive[0]), int(alive[-1]) + 1
         birth = int(tr.spawn[i])
-        m = birth + int(round(float(tr.morph[i]) * fps)) if targets and math.isfinite(float(tr.morph[i])) else None
+        k_pick = 1 + min(len(targets) - 1, int(float(tr.pick[i]) * len(targets))) if targets else 0
+        if int(tr.parent[i]) >= 0:                                   # a child is born as a target (the origin with no target), never morphs again
+            L = layer(i, k_pick, ip, op, birth, lambda f: 1.0)
+            if L:
+                layers.append(L)
+            continue
+        m = birth + int(round(float(tr.morph[i]) * fps)) if targets and math.isfinite(float(tr.morph[i])) and not (p.morph_burst and p.children > 0) else None
         if m is not None and ip < m < op:
-            k = 1 + min(len(targets) - 1, int(float(tr.pick[i]) * len(targets)))
+            k = k_pick
             out_ = layer(i, 0, ip, min(op, m + xf), birth, lambda f, m=m: min(1.0, max(0.0, (m + xf - f) / xf)))
             in_ = layer(i, k, m, op, m, lambda f, m=m: min(1.0, max(0.0, (f - m + 1) / xf)))
             layers.extend(L for L in (in_, out_) if L)
