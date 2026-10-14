@@ -453,6 +453,7 @@ def _lib_read(out: Path) -> dict:
             d = json.loads(atomic.read_text(f))
             if isinstance(d, dict) and isinstance(d.get("presets"), list):
                 d.setdefault("assign", {})
+                d.setdefault("handpicked", {})
                 return d
         except (OSError, ValueError):
             pass
@@ -470,7 +471,7 @@ def library(out: Path) -> dict:
     """{presets: [{id, motion, n, name, settings, created}] by motion then number, assign: {token: preset id} (only the explicit ones), motions}."""
     d = _lib_read(out)
     order = {m: i for i, m in enumerate(LIB_MOTIONS)}
-    return {"presets": sorted(d["presets"], key=lambda p: (order.get(p["motion"], 99), p["n"])), "assign": d["assign"], "motions": list(LIB_MOTIONS)}
+    return {"presets": sorted(d["presets"], key=lambda p: (order.get(p["motion"], 99), p["n"])), "assign": d["assign"], "motions": list(LIB_MOTIONS), "handpicked": d["handpicked"]}
 
 
 def _lib_settings(settings) -> dict:
@@ -631,14 +632,123 @@ def lib_zip(out: Path) -> bytes:
         except Exception:
             own = None
         assign[t] = first.get(own) or lib["presets"][0]["id"]
+    hp = {t: v for t, v in (lib.get("handpicked") or {}).items() if isinstance(v, dict) and v.get("origin")}
+    used = sorted({v["origin"] for v in hp.values()} | {v["morph"] for v in hp.values() if v.get("morph")})
+    blobs = {}
+    base = handpicked_dir()
+    for name in used:
+        f = base / name
+        try:
+            if f.is_file() and f.stat().st_size <= 2 * 1024 * 1024:
+                blobs[name] = f.read_bytes()
+        except OSError:
+            pass
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
         for p in lib["presets"]:
             z.writestr(f"{p['id']}.json", lib_lottie(out, p["id"]))
+        for name, blob in blobs.items():
+            z.writestr(f"handpicked/{name}", blob)
         z.writestr("manifest.json", json.dumps({"presets": [{"id": p["id"], "motion": p["motion"], "variation": p["n"], "name": p["name"], "file": f"{p['id']}.json"}
                                                              for p in lib["presets"]],
                                                 "assign": assign, "unicode": _by_unicode(assign),
-                                                "slot": {"asset": lottie.SLOT_ID, "file": lottie.SLOT_FILE, "px": lottie.SLOT_PX}},
+                                                "slot": {"asset": lottie.SLOT_ID, "file": lottie.SLOT_FILE, "px": lottie.SLOT_PX},
+                                                 "handpicked": hp},
                                                ensure_ascii=False, indent=1))
     return buf.getvalue()
 
+
+# ---------- handpicked Lottie files (Haitham drop zone: <repo>/lottie/*.json) ----------
+# The dashboard lists them; Select + Assign gives emojis an origin file and an optional
+# morph file ({tokens, origin, morph?}). Stored in library.json `handpicked[token]`. Files are
+# referenced, never rendered: assigning is instant. The zip carries the used files as
+# handpicked/<file> and the manifest maps them; the chat app plays origin, then morph.
+def handpicked_dir() -> Path:
+    """The drop zone: <repo>/lottie, or MIRSAL_LOTTIE_DIR. Missing = empty list, never an error."""
+    import os
+    env = os.environ.get("MIRSAL_LOTTIE_DIR", "").strip()
+    if env:
+        return Path(env)
+    return Path(__file__).resolve().parents[3] / "lottie"
+
+
+def handpicked_files(lottie_dir=None) -> list:
+    """Every *.json directly inside the drop zone that parses as a Lottie (a dict with a layers list):
+    {file, name, bytes, w, h, fps, frames, layers, images, base64} sorted by name. Unreadable,
+    oversized (>2 MB) or non-Lottie files are skipped, never an error."""
+    d = Path(lottie_dir) if lottie_dir is not None else handpicked_dir()
+    out = []
+    if not d.is_dir():
+        return out
+    for f in sorted(d.glob("*.json")):
+        try:
+            if not f.is_file() or f.stat().st_size > 2 * 1024 * 1024:
+                continue
+            raw = f.read_text(encoding="utf-8")
+            doc = json.loads(raw)
+        except (OSError, ValueError, UnicodeError):
+            continue
+        if not isinstance(doc, dict) or not isinstance(doc.get("layers"), list):
+            continue
+        assets = doc.get("assets") if isinstance(doc.get("assets"), list) else []
+        images = sum(1 for a in assets if isinstance(a, dict) and (str(a.get("p", "")).lower().endswith((".png", ".jpg", ".jpeg", ".webp")) or str(a.get("p", "")).startswith("data:")))
+        try:
+            frames = int(doc.get("op", 0)) - int(doc.get("ip", 0))
+        except (TypeError, ValueError):
+            frames = 0
+        out.append({"file": f.name, "name": f.stem, "bytes": f.stat().st_size,
+                    "w": doc.get("w", 0), "h": doc.get("h", 0), "fps": doc.get("fr", 0), "frames": frames,
+                    "layers": len(doc["layers"]), "images": images, "base64": "data:" in raw})
+    return out
+
+
+def handpicked_names(lottie_dir=None) -> set:
+    return {x["file"] for x in handpicked_files(lottie_dir)}
+
+
+def handpicked_blob(name: str, *, lottie_dir=None) -> bytes:
+    """The raw bytes of one dropped file. Unknown names, escapes and oversized files are a 404, never a read outside the zone."""
+    clean = str(name or "")
+    if not clean or clean in (".", "..") or "/" in clean or chr(92) in clean:
+        raise SetError(f"no handpicked file {clean}", 404)
+    if clean not in handpicked_names(lottie_dir):
+        raise SetError(f"no handpicked file {clean}", 404)
+    d = Path(lottie_dir) if lottie_dir is not None else handpicked_dir()
+    f = d / clean
+    try:
+        if not f.is_file() or f.stat().st_size > 2 * 1024 * 1024:
+            raise SetError(f"no handpicked file {clean}", 404)
+        return f.read_bytes()
+    except OSError:
+        raise SetError(f"no handpicked file {clean}", 404)
+
+
+def assign_handpicked(out: Path, tokens, origin, morph=None, *, lottie_dir=None) -> dict:
+    """Give emojis a handpicked origin file and an optional morph file: {tokens (required, explicit: never every emoji),
+    origin (a dropped file; "" clears the entry), morph (a dropped file; None/""/missing = none)}. {assigned, cleared}."""
+    files = handpicked_names(lottie_dir)
+    todo = [emoji_token(t)[0] for t in dict.fromkeys(str(t) for t in (tokens or []))]
+    if not todo:
+        raise SetError("tokens must be a non-empty list (handpicked files are assigned deliberately, never to every emoji)")
+    origin = (origin or "").strip()
+    morph = (morph or "").strip() or None
+    for name, label in ((origin, "origin"), (morph, "morph")):
+        if name and name not in files:
+            raise SetError(f"no handpicked file {name} for {label}", 404)
+    with _LOCK:
+        d = _lib_read(out)
+        hp = d.setdefault("handpicked", {})
+        assigned, cleared = 0, 0
+        for t in todo:
+            if not origin:
+                if t in hp:
+                    del hp[t]
+                    cleared += 1
+                continue
+            rec = {"origin": origin}
+            if morph:
+                rec["morph"] = morph
+            hp[t] = rec
+            assigned += 1
+        _lib_write(out, d)
+    return {"assigned": assigned, "cleared": cleared}

@@ -1370,6 +1370,10 @@ def make_handler(c: Console):
                         if method == "GET":
                             return self._json(200, er.library(c.out))
                         return self._json(201, er.add_lib_preset(c.out, str(body.get("motion") or ""), body.get("settings"), name=body.get("name")))
+                    if pid == "reaction-handpicked":
+                        # Haitham drop zone (<repo>/lottie/*.json): GET the files with their sizes and frame counts
+                        if method == "GET":
+                            return self._json(200, {"files": er.handpicked_files()})
                     if method == "GET" and pid == "reaction-presets.zip":
                         return self._send(200, er.lib_zip(c.out), "application/zip")
                     if pid == "emoji-batches":
@@ -1403,6 +1407,8 @@ def make_handler(c: Console):
                 act = parts[3]
                 if pid == "reaction-presets" and method == "GET" and len(parts) == 4 and act.endswith(".json"):     # {motion}_{NN}.json: the emoji-free Lottie
                     return self._send(200, er.lib_lottie(c.out, act[:-5]), "application/json")
+                if pid == "reaction-handpicked" and method == "GET" and len(parts) == 4 and act.endswith(".json"):  # a dropped file, raw bytes
+                    return self._send(200, er.handpicked_blob(act), "application/json")
                 if pid == "reaction-presets" and method == "POST":
                     if len(parts) == 4 and act == "delete":           # {ids: [...]}: several at once (a motion's x, Select + Remove)
                         return self._json(200, er.delete_lib_presets(c.out, body.get("ids")))
@@ -1412,6 +1418,8 @@ def make_handler(c: Console):
                         return self._json(200, er.delete_lib_preset(c.out, act))
                     if len(parts) == 4:
                         return self._json(200, er.update_lib_preset(c.out, act, settings=body.get("settings"), name=body.get("name")))
+                if pid == "reaction-handpicked" and method == "POST" and len(parts) == 4 and act == "assign":  # {tokens (required), origin (""/null clears), morph?}
+                    return self._json(200, er.assign_handpicked(c.out, body.get("tokens"), body.get("origin"), body.get("morph")))
                 if pid == "emoji-batches" and method == "GET" and len(parts) == 4:         # one run's state, polled by the screen
                     return self._json(200, er.batch_state(c.out, act))
                 if method != "POST":

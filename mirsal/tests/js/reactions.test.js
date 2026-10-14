@@ -80,7 +80,7 @@ test('Select: Shift-click ticks the range, Assign gives a random variation of ea
   const r = screen();
   r("ACT.rxmulti();ACT.rxpick({dataset:{t:'kiss'}},{});ACT.rxpick({dataset:{t:'happy'}},{shiftKey:true})");
   assert.deepEqual(J(r, '[...RXS.sel]'), ['kiss', 'cry', 'happy']);
-  r("POSTREPLIES.push({ok:true,j:{assigned:3}});APIREPLIES.push({ok:true,j:" + LIB + "})");
+  r("POSTREPLIES.push({ok:true,j:{assigned:3}});POSTREPLIES.push({ok:true,j:{assigned:0,cleared:0}});APIREPLIES.push({ok:true,j:" + LIB + "})");
   await r('ACT.rxmany()');
   assert.deepEqual(J(r, "POSTS.find(p=>p[0]==='/api/particles/reaction-presets/assign')"), ['/api/particles/reaction-presets/assign', { tokens: ['kiss', 'cry', 'happy'], preset_id: 'random' }]);
   r("RXQ.f='burst_02'");

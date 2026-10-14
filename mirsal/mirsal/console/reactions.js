@@ -8,7 +8,7 @@
      plays its preset with it (Telegram-like, from its bottom-right); clicking opens its preset on it; Select (Shift-click ranges, Select all) and
      Assign one preset or a random variation of each emoji's own motion. Nothing is rendered per emoji: assigning is instant.
    Everything is the server's (flow/emoji_reactions.py): GET /api/particles/emoji-motions (the bank + start), POST emoji-preview (a looping WebP),
-   /api/particles/reaction-presets (list, add, update, delete, assign, {id}.json, .zip). */
+   /api/particles/reaction-presets (list, add, update, delete, assign, {id}.json, .zip) + reaction-handpicked (files, {file}.json, assign). */
 'use strict';
 
 /* ---------- settings: [key, label, min, max, step, unit] ---------- */
@@ -27,7 +27,7 @@ const RXPAGE=120;                                /* wall tiles drawn at a time (
    presets are previewed on; ek: the preset in the editor; hover: the emoji pointed at; pv / par: preview url and params per request; ppv: a card's
    preview; multi / sel / anchor: Select; apply: what Assign gives ('random' or a preset id); shown: wall tiles drawn. */
 const RXQ={q:'',f:''};
-const RXS={bank:null,rows:null,start:null,lib:null,sample:'happy',ek:null,hover:'',pv:{},par:{},ppv:{},hT:0,t:0,multi:false,sel:new Set(),anchor:'',apply:'random',shown:RXPAGE,mopen:new Set(),psel:new Set(),panchor:''};
+const RXS={bank:null,rows:null,start:null,lib:null,sample:'happy',ek:null,hover:'',pv:{},par:{},ppv:{},hT:0,t:0,multi:false,sel:new Set(),anchor:'',apply:'random',hpo:'',hpm:'',hp:null,shown:RXPAGE,mopen:new Set(),psel:new Set(),panchor:''};
 const rxStart=()=>RXS.start||RXSTART;
 
 /* ---------- values ---------- */
@@ -61,6 +61,19 @@ function rxList(){
 function rxUse(){const n={};for(const m of RXS.bank||[]){const id=rxPresetOf(m.token);n[id]=(n[id]||0)+1}return n}
 
 /* ---------- views ---------- */
+/* handpicked files (Haitham drop zone lottie/*.json): what an emoji plays first (origin) and what it becomes (morph, optional) */
+const rxHpFiles=()=>RXS.hp||[];
+const rxHpOf=t=>(RXS.lib&&RXS.lib.handpicked&&RXS.lib.handpicked[t])||null;
+const rxHpShort=f=>String(f||"").replace(/\.json$/,"");
+const rxHpUrl=f=>`/api/particles/reaction-handpicked/${encodeURIComponent(f)}`;
+const rxHpOpts=sel=>rxHpFiles().map(f=>`<option value="${esc(f.file)}"${f.file===sel?' selected':''}>${esc(rxHpShort(f.file))} · ${Math.round(f.bytes/1024)} KB · ${f.frames}f</option>`).join("");
+const rxHpHold=t=>{const h=rxHpOf(t);return h?`${rxHpShort(h.origin)}${h.morph?` → ${rxHpShort(h.morph)}`:""}`:""};
+function rxHpHtml(){
+ const fs=rxHpFiles();
+ return `<section class=rx-hp data-rxhp><div class=rx-ph><div class=sh>Handpicked Lottie files <small class=mut>${fs.length}</small></div>`+
+  `<small class=mut>Drop .json files into <code>lottie/</code>, then Select emojis and give them an origin and a morph below</small></div>`+
+  (fs.length?`<div class=rx-hplist>${fs.map(f=>`<div class=row><b>${esc(rxHpShort(f.file))}</b><span class=mut>${Math.round(f.bytes/1024)} KB · ${f.w}×${f.h} · ${f.fps} fps · ${f.frames} frames · ${f.layers} layers${f.images?` · ${f.images} image${f.images===1?"":"s"}`:""}${f.base64?" · has base64":""}</span><span class=sp></span><a class=link href="${rxHpUrl(f.file)}" download="${esc(f.file)}">Download</a></div>`).join("")}`:
+  `<div class=mut>No files yet: drop Lottie .json files into the <code>lottie/</code> folder.</div>`)+`</section>`}
 /* the hover reaction plays as Telegram plays one: the burst's own origin sits on the sticker's bottom-right, 90% across and 90% down */
 function rxFxStyle(par){const [ox,oy]=(par&&par.origin)||[.5,.5];return `width:${RXHOV}px;height:${RXHOV}px;left:calc(90% - ${Math.round(ox*RXHOV)}px);top:calc(90% - ${Math.round(oy*RXHOV)}px)`}
 /* the hover's own preview: the whole burst scaled into its square (fit), never cut at its edges */
@@ -69,7 +82,8 @@ const rxStageHtml=(emoji,url,alt)=>`<span class=rx-ghost aria-hidden=true>${esc(
 function rxTile(m){
  const key=rxHovKey(m.token),ticked=RXS.multi&&RXS.sel.has(m.token),on=!RXS.multi&&!!RXS.ek&&RXS.ek.token===m.token,pid=rxPresetOf(m.token);
  const pv=RXS.hover===m.token&&!on?RXS.pv[key]:'';
- return `<button class="rx-e${on||ticked?' on':''}${pv?' play':''}" data-act=rxpick data-t="${esc(m.token)}" title="${esc(m.token)} · ${esc(pid)}" aria-label="${esc(m.token)}, ${esc(pid)}" aria-pressed=${on||ticked}>`+
+ const hold=rxHpHold(m.token);
+ return `<button class="rx-e${on||ticked?' on':''}${pv?' play':''}" data-act=rxpick data-t="${esc(m.token)}" title="${esc(m.token)} · ${esc(pid)}${hold?` · ${esc(hold)}`:""}" aria-label="${esc(m.token)}, ${esc(pid)}${hold?`, ${esc(hold)}`:""}" aria-pressed=${on||ticked}>`+
   `<span class=rx-g>${esc(m.emoji||'?')}</span>${ticked?`<span class=rx-tick>${ic('check')}</span>`:''}${pv?`<img class=rx-fx src="${esc(pv)}" style="${rxFxStyle(RXS.par[key])}" alt="">`:''}</button>`}
 function rxMoreHtml(n){const rest=n-Math.min(n,RXS.shown);
  return rest>0?`<div class=rx-more data-rxmore><button class="btn sm" data-act=rxmore>Load more</button><small class=mut>${Math.min(n,RXS.shown)} of ${n} shown · ${rest} more</small></div>`:'<div data-rxmore></div>'}
@@ -119,6 +133,8 @@ function rxMany(){
   `<button class=link data-act=rxselall>Select all (${all})</button>${n?'<button class=link data-act=rxclear>Clear</button>':''}`+
   `<label class=rx-pre><span class=mut>Give them</span><select data-rxapply aria-label="Preset to assign"><option value=random${RXS.apply==='random'?' selected':''}>a random variation of its own motion</option>`+
   `${ps.map(p=>`<option value="${esc(p.id)}"${p.id===RXS.apply?' selected':''}>${esc(p.id)} · ${esc(p.name)}</option>`).join('')}</select></label>`+
+  `<label class=rx-pre><span class=mut>Origin</span><select data-rxhpo aria-label="Handpicked origin file"><option value="">none (preset only)</option>${rxHpOpts(RXS.hpo)}</select></label>`+
+  `<label class=rx-pre><span class=mut>Morph</span><select data-rxhpm aria-label="Handpicked morph file"><option value="">none</option>${rxHpOpts(RXS.hpm)}</select></label>`+
   `<button class="btn pri" data-act=rxmany ${n?'':'disabled'}>Assign to ${n||''}</button></div>`}
 function rxPick(){
  const list=rxList(),total=(RXS.bank||[]).length,ps=rxPresets();
@@ -128,7 +144,7 @@ function rxPick(){
   `<div class=rx-grid data-rxwall>${list.slice(0,RXS.shown).map(rxTile).join('')||'<span class=mut>No match.</span>'}</div>${rxMoreHtml(list.length)}${rxMany()}</section>`}
 function rxHtml(){
  if(!RXS.bank)return `<div class="page rx"><div class=fx-job><span class=spin></span> <span class=mut>Reading the emoji bank…</span></div></div>`;
- return `<div class="page rx">${rxLibHtml()}${rxEditor()}${rxPick()}</div>`}
+ return `<div class="page rx">${rxLibHtml()}${rxEditor()}${rxPick()}${rxHpHtml()}</div>`}
 
 /* ---------- page updates: repaint only what changed ---------- */
 function rxDraw(){
@@ -180,7 +196,7 @@ async function rxFxOn(host,glyph){host.dataset.rxon='1';await rxBankEnsure();con
  const old=host.querySelector(':scope > .rx-fx');if(old)old.remove();
  host.classList.add('rxon');host.insertAdjacentHTML('beforeend',`<img class=rx-fx src="${esc(pv.url)}" style="${rxFxStyle(pv.par)}" alt="">`)}
 function rxFxOff(host){host.dataset.rxon='';host.classList.remove('rxon');const i=host.querySelector(':scope > .rx-fx');if(i)i.remove()}
-async function rxLoadLib(quiet){const r=await api('/api/particles/reaction-presets');RXS.lib=r.ok?{presets:r.j.presets||[],assign:r.j.assign||{}}:{presets:[],assign:{}};if(!quiet&&route_==='reactions')rxDraw()}
+async function rxLoadLib(quiet){const r=await api('/api/particles/reaction-presets');RXS.lib=r.ok?{presets:r.j.presets||[],assign:r.j.assign||{},handpicked:r.j.handpicked||{}}:{presets:[],assign:{},handpicked:{}};const h=await api('/api/particles/reaction-handpicked');RXS.hp=h.ok?h.j.files||[]:[];if(!quiet&&route_==='reactions')rxDraw()}
 /* each card of an OPEN motion shows its preset on the sample emoji, at its real size (closed motions ask for nothing) */
 async function rxCardPreviews(){
  const t=RXS.sample;
@@ -202,7 +218,9 @@ document.addEventListener('input',ev=>{
 document.addEventListener('change',ev=>{
  const t=ev.target;if(!t||!t.dataset)return;
  if(t.dataset.rxapply!==undefined){RXS.apply=t.value||'random';return}
- if(t.dataset.rxf!==undefined){RXQ.f=t.value||'';RXS.shown=RXPAGE;rxGridRedraw();rxManyRedraw()}});
+ if(t.dataset.rxf!==undefined){RXQ.f=t.value||'';RXS.shown=RXPAGE;rxGridRedraw();rxManyRedraw()}
+ if(t.dataset.rxhpo!==undefined){RXS.hpo=t.value||'';return}
+ if(t.dataset.rxhpm!==undefined){RXS.hpm=t.value||'';return}});
 document.addEventListener('mouseover',ev=>{
  const b=ev.target&&ev.target.closest&&ev.target.closest('.rx-e');if(!b||route_!=='reactions')return;
  const t=b.dataset.t;if(RXS.hover===t)return;
@@ -232,8 +250,11 @@ ACT.rxmany=async()=>{
  const tokens=[...RXS.sel];if(!tokens.length)return;
  const r=await post('/api/particles/reaction-presets/assign',{tokens,preset_id:RXS.apply||'random'});
  if(!r.ok)return toast(r.j.error||'Could not assign',1);
+ const h=await post('/api/particles/reaction-handpicked/assign',{tokens,origin:RXS.hpo||'',morph:RXS.hpm||null});
+ if(!h.ok)return toast(h.j.error||'Could not assign the files',1);
+ const hpmsg=RXS.hpo?` · ${rxHpShort(RXS.hpo)}${RXS.hpm?` → ${rxHpShort(RXS.hpm)}`:''}`:(h.j.cleared?` · ${rxPlural(h.j.cleared,'file')} cleared`:'');
  await rxLoadLib(true);RXS.sel.clear();RXS.multi=false;rxDraw();
- toast(`${rxPlural(r.j.assigned,'emoji')} now hold ${RXS.apply==='random'?'a variation of their own motion':RXS.apply}`)};
+ toast(`${rxPlural(r.j.assigned,'emoji')} now hold ${RXS.apply==='random'?'a variation of their own motion':RXS.apply}${hpmsg}`)};
 /* the library */
 ACT.rxpopen=el=>{const p=rxPre(el.dataset.id);if(!p)return;RXS.mopen.add(p.motion);RXS.ek=rxEdFrom(p,RXS.sample);rxDraw();rxPlay(RXS.sample);
  const ed=document.querySelector&&document.querySelector('[data-rxed]');if(ed&&ed.scrollIntoView)ed.scrollIntoView({block:'nearest',behavior:'smooth'})};
