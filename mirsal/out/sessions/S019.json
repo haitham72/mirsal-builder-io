@@ -3,7 +3,7 @@
  "user": "local",
  "title": "generic emojis",
  "created": 1791956510.26,
- "updated": 1791958525.839,
+ "updated": 1791965375.008,
  "settings": {
   "grid": "2x2",
   "style_id": "glossy_3d",
@@ -36,12 +36,12 @@
      "parent": null,
      "created": 1791956522.927,
      "ready": 4,
-     "approved": 0,
+     "approved": 4,
      "rejected": 0,
      "liked": [],
      "disliked": [],
      "note": "",
-     "stage": "sliced",
+     "stage": "video_sliced",
      "error": null
     }
    ]
@@ -139,6 +139,50 @@
     "spent_estimate": 0.0
    },
    "generation_id": "G152"
+  },
+  {
+   "seq": 5,
+   "ts": 1791965350.909,
+   "user": "animate it",
+   "assistant": "I'll animate the 4 stickers of **Generic emojis** (the price is shown when it is sent; about 8 credits for a 3×3 sheet). Go ahead?",
+   "intents": [
+    "ANIMATE"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": "G152",
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G152"
+  },
+  {
+   "seq": 6,
+   "ts": 1791965375.007,
+   "user": "confirm",
+   "assistant": "I couldn't start the animation: A1 is SLICED: approve the video sheet (G3) first, a human decides before anything is sent to be animated (a sheet that already has its video sliced cannot be animated again).",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
   }
  ],
  "messages": [
@@ -479,6 +523,116 @@
     }
    ],
    "ts": 1791958521.176,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m11",
+   "role": "user",
+   "text": "animate it",
+   "cards": [],
+   "steps": [],
+   "ts": 1791965346.637
+  },
+  {
+   "id": "m12",
+   "role": "assistant",
+   "text": "I'll animate the 4 stickers of **Generic emojis** (the price is shown when it is sent; about 8 credits for a 3×3 sheet). Go ahead?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "animating Generic emojis",
+     "detail": null,
+     "status": "running",
+     "ts": 1791965350.774
+    },
+    {
+     "kind": "step",
+     "label": "understood: an animation",
+     "detail": null,
+     "status": "done",
+     "ts": 1791965350.805
+    },
+    {
+     "kind": "step",
+     "label": "working in Generic emojis",
+     "detail": null,
+     "status": "done",
+     "ts": 1791965350.817
+    },
+    {
+     "kind": "step",
+     "label": "4 stickers ready to move",
+     "detail": null,
+     "status": "done",
+     "ts": 1791965350.822
+    },
+    {
+     "kind": "final",
+     "label": "ready",
+     "detail": null,
+     "status": "done",
+     "ts": 1791965350.903
+    }
+   ],
+   "ts": 1791965346.637,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Animate",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m13",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791965374.854
+  },
+  {
+   "id": "m14",
+   "role": "assistant",
+   "text": "I couldn't start the animation: A1 is SLICED: approve the video sheet (G3) first, a human decides before anything is sent to be animated (a sheet that already has its video sliced cannot be animated again).",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "animating Generic emojis",
+     "detail": null,
+     "status": "running",
+     "ts": 1791965374.86
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791965374.865
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: animate",
+     "detail": null,
+     "status": "done",
+     "ts": 1791965374.899
+    },
+    {
+     "kind": "final",
+     "label": "not started",
+     "detail": null,
+     "status": "error",
+     "ts": 1791965375.002
+    }
+   ],
+   "ts": 1791965374.854,
    "status": "done",
    "chips": []
   }

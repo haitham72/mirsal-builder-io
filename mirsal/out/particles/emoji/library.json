@@ -7,112 +7,18 @@
    "name": "Burst soft",
    "settings": {
     "magnitude": 0.5,
-    "gravity": 1.0,
-    "vortex": 0.0,
-    "spin": 1.0,
+    "gravity": 1,
+    "vortex": 0,
+    "spin": 1,
     "count": 18,
-    "spread": 360.0,
-    "particle_size": 0.25,
+    "spread": 360,
+    "particle_size": 0.5,
     "size_var": 0.38,
     "size_in_dur": 0.4,
     "size_out_dur": 0.4
    },
-   "created": 1791960517.928
-  },
-  {
-   "id": "burst_02",
-   "motion": "burst",
-   "n": 2,
-   "name": "Burst normal",
-   "settings": {
-    "magnitude": 0.7,
-    "gravity": 1.0,
-    "vortex": 0.0,
-    "spin": 1.0,
-    "count": 28,
-    "spread": 360.0,
-    "particle_size": 0.3,
-    "size_var": 0.38,
-    "size_in_dur": 0.4,
-    "size_out_dur": 0.4
-   },
-   "created": 1791960517.928
-  },
-  {
-   "id": "burst_03",
-   "motion": "burst",
-   "n": 3,
-   "name": "Burst big",
-   "settings": {
-    "magnitude": 1.0,
-    "gravity": 1.0,
-    "vortex": 0.0,
-    "spin": 1.0,
-    "count": 40,
-    "spread": 360.0,
-    "particle_size": 0.4,
-    "size_var": 0.38,
-    "size_in_dur": 0.4,
-    "size_out_dur": 0.4
-   },
-   "created": 1791960517.928
-  },
-  {
-   "id": "fountain_01",
-   "motion": "fountain",
-   "n": 1,
-   "name": "Fountain soft",
-   "settings": {
-    "magnitude": 0.5,
-    "gravity": 1.0,
-    "vortex": 0.0,
-    "spin": 1.0,
-    "count": 18,
-    "spread": 360.0,
-    "particle_size": 0.25,
-    "size_var": 0.38,
-    "size_in_dur": 0.4,
-    "size_out_dur": 0.4
-   },
-   "created": 1791960517.928
-  },
-  {
-   "id": "fountain_02",
-   "motion": "fountain",
-   "n": 2,
-   "name": "Fountain normal",
-   "settings": {
-    "magnitude": 0.7,
-    "gravity": 1.0,
-    "vortex": 0.0,
-    "spin": 1.0,
-    "count": 28,
-    "spread": 360.0,
-    "particle_size": 0.3,
-    "size_var": 0.38,
-    "size_in_dur": 0.4,
-    "size_out_dur": 0.4
-   },
-   "created": 1791960517.928
-  },
-  {
-   "id": "fountain_03",
-   "motion": "fountain",
-   "n": 3,
-   "name": "Fountain big",
-   "settings": {
-    "magnitude": 1.0,
-    "gravity": 1.0,
-    "vortex": 0.0,
-    "spin": 1.0,
-    "count": 40,
-    "spread": 360.0,
-    "particle_size": 0.4,
-    "size_var": 0.38,
-    "size_in_dur": 0.4,
-    "size_out_dur": 0.4
-   },
-   "created": 1791960517.928
+   "created": 1791960517.928,
+   "updated": 1791966074.229
   },
   {
    "id": "vortex_01",
@@ -120,171 +26,122 @@
    "n": 1,
    "name": "Vortex soft",
    "settings": {
-    "magnitude": 0.5,
-    "gravity": 1.0,
-    "vortex": 0.0,
-    "spin": 1.0,
-    "count": 18,
-    "spread": 360.0,
-    "particle_size": 0.25,
-    "size_var": 0.38,
+    "magnitude": 0.8,
+    "gravity": 1.35,
+    "vortex": -0.7,
+    "spin": 1,
+    "count": 10,
+    "spread": 135,
+    "fade_start": 1.1,
+    "fade_dur": 0.6,
+    "fade_var": 0,
+    "particle_size": 1.2,
+    "size_var": 0.5,
     "size_in_dur": 0.4,
-    "size_out_dur": 0.4
+    "size_out_dur": 0.75
    },
-   "created": 1791960517.928
+   "created": 1791960517.928,
+   "updated": 1791975842.501
   },
   {
-   "id": "vortex_02",
-   "motion": "vortex",
-   "n": 2,
-   "name": "Vortex normal",
-   "settings": {
-    "magnitude": 0.7,
-    "gravity": 1.0,
-    "vortex": 0.0,
-    "spin": 1.0,
-    "count": 28,
-    "spread": 360.0,
-    "particle_size": 0.3,
-    "size_var": 0.38,
-    "size_in_dur": 0.4,
-    "size_out_dur": 0.4
-   },
-   "created": 1791960517.928
-  },
-  {
-   "id": "vortex_03",
-   "motion": "vortex",
-   "n": 3,
-   "name": "Vortex big",
-   "settings": {
-    "magnitude": 1.0,
-    "gravity": 1.0,
-    "vortex": 0.0,
-    "spin": 1.0,
-    "count": 40,
-    "spread": 360.0,
-    "particle_size": 0.4,
-    "size_var": 0.38,
-    "size_in_dur": 0.4,
-    "size_out_dur": 0.4
-   },
-   "created": 1791960517.928
-  },
-  {
-   "id": "rain_01",
-   "motion": "rain",
-   "n": 1,
-   "name": "Rain soft",
-   "settings": {
-    "magnitude": 0.5,
-    "gravity": 1.0,
-    "vortex": 0.0,
-    "spin": 1.0,
-    "count": 18,
-    "spread": 360.0,
-    "particle_size": 0.25,
-    "size_var": 0.38,
-    "size_in_dur": 0.4,
-    "size_out_dur": 0.4
-   },
-   "created": 1791960517.928
-  },
-  {
-   "id": "rain_02",
-   "motion": "rain",
-   "n": 2,
-   "name": "Rain normal",
-   "settings": {
-    "magnitude": 0.7,
-    "gravity": 1.0,
-    "vortex": 0.0,
-    "spin": 1.0,
-    "count": 28,
-    "spread": 360.0,
-    "particle_size": 0.3,
-    "size_var": 0.38,
-    "size_in_dur": 0.4,
-    "size_out_dur": 0.4
-   },
-   "created": 1791960517.928
-  },
-  {
-   "id": "rain_03",
-   "motion": "rain",
-   "n": 3,
-   "name": "Rain big",
-   "settings": {
-    "magnitude": 1.0,
-    "gravity": 1.0,
-    "vortex": 0.0,
-    "spin": 1.0,
-    "count": 40,
-    "spread": 360.0,
-    "particle_size": 0.4,
-    "size_var": 0.38,
-    "size_in_dur": 0.4,
-    "size_out_dur": 0.4
-   },
-   "created": 1791960517.928
-  },
-  {
-   "id": "confetti_01",
+   "id": "confetti_05",
    "motion": "confetti",
-   "n": 1,
-   "name": "Confetti soft",
+   "n": 5,
+   "name": "Confetti 05",
+   "settings": {
+    "magnitude": 0.45,
+    "gravity": -0.4,
+    "vortex": 0.35,
+    "spin": 3,
+    "count": 14,
+    "spread": 360,
+    "fade_start": 0.85,
+    "fade_dur": 0.3,
+    "fade_var": 0.3,
+    "particle_size": 1.25,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791976084.827,
+   "updated": 1791976124.865
+  },
+  {
+   "id": "confetti_06",
+   "motion": "confetti",
+   "n": 6,
+   "name": "Confetti 06",
+   "settings": {
+    "magnitude": 0.95,
+    "gravity": 0.3,
+    "vortex": 0.8,
+    "spin": 3,
+    "count": 14,
+    "spread": 140,
+    "fade_start": 1,
+    "fade_dur": 0.55,
+    "fade_var": 0.3,
+    "particle_size": 1.25,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791976189.697
+  },
+  {
+   "id": "confetti_07",
+   "motion": "confetti",
+   "n": 7,
+   "name": "Confetti 07",
+   "settings": {
+    "magnitude": 0.6,
+    "gravity": 0.3,
+    "vortex": -0.9,
+    "spin": 3,
+    "count": 14,
+    "spread": 360,
+    "fade_start": 1,
+    "fade_dur": 0.85,
+    "fade_var": 0.4,
+    "particle_size": 1.25,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791976253.559
+  },
+  {
+   "id": "burst_04",
+   "motion": "burst",
+   "n": 4,
+   "name": "Burst 04",
    "settings": {
     "magnitude": 0.5,
-    "gravity": 1.0,
-    "vortex": 0.0,
-    "spin": 1.0,
-    "count": 18,
-    "spread": 360.0,
-    "particle_size": 0.25,
-    "size_var": 0.38,
-    "size_in_dur": 0.4,
-    "size_out_dur": 0.4
+    "gravity": -0.1,
+    "vortex": 0,
+    "spin": 2.2,
+    "count": 12,
+    "spread": 360,
+    "fade_start": 0.65,
+    "fade_dur": 0.45,
+    "fade_var": 0.15,
+    "particle_size": 1,
+    "size_var": 0.6,
+    "size_in_dur": 0.15,
+    "size_out_dur": 0.1
    },
-   "created": 1791960517.928
-  },
-  {
-   "id": "confetti_02",
-   "motion": "confetti",
-   "n": 2,
-   "name": "Confetti normal",
-   "settings": {
-    "magnitude": 0.7,
-    "gravity": 1.0,
-    "vortex": 0.0,
-    "spin": 1.0,
-    "count": 28,
-    "spread": 360.0,
-    "particle_size": 0.3,
-    "size_var": 0.38,
-    "size_in_dur": 0.4,
-    "size_out_dur": 0.4
-   },
-   "created": 1791960517.928
-  },
-  {
-   "id": "confetti_03",
-   "motion": "confetti",
-   "n": 3,
-   "name": "Confetti big",
-   "settings": {
-    "magnitude": 1.0,
-    "gravity": 1.0,
-    "vortex": 0.0,
-    "spin": 1.0,
-    "count": 40,
-    "spread": 360.0,
-    "particle_size": 0.4,
-    "size_var": 0.38,
-    "size_in_dur": 0.4,
-    "size_out_dur": 0.4
-   },
-   "created": 1791960517.928
+   "created": 1791976461.602
   }
  ],
- "assign": {}
+ "assign": {
+  "laugh": "vortex_01"
+ },
+ "last": {
+  "rain": 3,
+  "confetti": 7,
+  "vortex": 3,
+  "fountain": 3,
+  "burst": 4
+ },
+ "handpicked": {}
 }
