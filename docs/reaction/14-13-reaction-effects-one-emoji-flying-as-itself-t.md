@@ -17,6 +17,7 @@
 | `size_out_dur` | 0–1.5 s, ≤ lifetime/2 | 0.4 | … and 100% → 0 over this long before death |
 | `fade_out` (Fade out, Simulation group, 2026-10-14) | 0–1 s | 0 | per particle: its alpha fades to nothing over its last `fade_out` seconds (the fade starts at its death − fade_out; capped at its life); 0 = the old fade over the last quarter of its life. Preview, Lottie and preset export alike |
 | `fade_var` (Fade variation) | 0–1 | 0 | each particle's fade is a seeded share in [1 − fade_var, 1] of `fade_out` (1 = from instant to the full fade_out); drawn after every older random draw, so an older burst keeps its bytes |
+| `fade_start` (Fade start) | 0–2 s from the clip's start | 0 (off) | the clip's own fade on top of each particle's: from this second every particle dims together and all reach 0% by `duration − 0.2 s`, whatever its life. **Every reaction is 2 s** (`emoji_reactions.REACTION_SECONDS`, Haitham 2026-10-14): preview, Lottie and preset export; a particle's life is clamped to 1.6 s and the last frames are empty by construction |
 | `hue_var` | 0–180° | 25 | each particle's colours turn by a seeded hue in [−hue_var, +hue_var] |
 | preset | its own, or one of the five | its own | an override takes that preset's own look (the token's pinned values belong to its own preset) |
 

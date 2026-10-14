@@ -83,7 +83,7 @@ class EmojiLottieTests(Base):
     def test_zero_options_are_the_plain_motion(self):
         code, j = self.req("POST", "/api/particles/emoji-lottie", {"token": "laugh", "size_in_dur": 0, "size_out_dur": 0, "hue_var": 0})
         self.assertEqual(code, 200, j)
-        plain = particles.preset("fountain", magnitude=1.9, gravity=1.3, spin=1.5).to_dict()
+        plain = particles.preset("fountain", magnitude=1.9, gravity=1.3, spin=1.5, duration=er.REACTION_SECONDS).to_dict()
         self.assertEqual(j["params"], plain, "laugh's pinned fountain, nothing else")
         self.assertEqual(j["assets"], 1, "no hue variation: the glyph is embedded once")
 

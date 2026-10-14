@@ -69,6 +69,7 @@ class ParticleParams:
     hue_var: float = 0.0            # 0..180 degrees: each particle's colours turn by a seeded hue in [-hue_var, +hue_var] (0 = the sprite's own colours)
     fade_out: float = 0.0           # 0..1 s: each particle fades to nothing over its last `fade_out` seconds, starting at death - fade_out (0 = the last quarter of its life)
     fade_var: float = 0.0           # 0..1: each particle's fade is a seeded share in [1 - fade_var, 1] of `fade_out` (0 = all the same)
+    fade_start: float = 0.0         # s from the clip's start: from here EVERY particle fades, all gone by `duration - QUIET_TAIL` whatever its life (0 = off)
 
     @classmethod
     def from_dict(cls, d: dict) -> "ParticleParams":
@@ -141,6 +142,7 @@ class ParticleParams:
             hue_var=lim(num("hue_var", self.hue_var), 0.0, 180.0),
             fade_out=lim(num("fade_out", self.fade_out), 0.0, 1.0),
             fade_var=lim(num("fade_var", self.fade_var), 0.0, 1.0),
+            fade_start=lim(num("fade_start", self.fade_start), 0.0, duration),
         )
 
 
@@ -174,7 +176,7 @@ class Trajectories:
     pos: np.ndarray          # (F, N, 2) canvas fractions of the particle centre (the origin until it spawns)
     scale: np.ndarray        # (F, N) pop-in x flight growth, 0 before spawn
     angle: np.ndarray        # (F, N) radians
-    opacity: np.ndarray      # (F, N) 0..1: 1 while flying, fades to 0 over its last `fade_out` (x its fade_var share) seconds, else the last quarter of the life
+    opacity: np.ndarray      # (F, N) 0..1: 1 while flying, fades to 0 over its last `fade_out` (x its fade_var share) seconds, else the last quarter of the life; x the clip fade from `fade_start`
     visible: np.ndarray      # (F, N) bool: spawned, not dead, scale and opacity worth drawing
     size_frac: np.ndarray    # (N,) sprite's longest side as a fraction of the canvas at scale 1
     sprite: np.ndarray       # (N,) which sprite each particle shows
@@ -266,6 +268,10 @@ def trajectories(p: ParticleParams, n_sprites: int = 1) -> Trajectories:
     fade = np.minimum(p.fade_out * fade_k, life) if p.fade_out > 0 else FADE_SHARE * life     # Fade out: starts at death - fade (per particle)
     x = np.clip((life[None, :] - a) / np.maximum(fade, dt)[None, :], 0.0, 1.0)
     opacity = np.where(alive, x * x * (3.0 - 2.0 * x), 0.0)
+    if p.fade_start > 0:                                             # Fade start: the clip's own fade, on top of each particle's
+        end = p.duration - QUIET_TAIL
+        g = np.clip((end - frame_idx * dt) / max(end - p.fade_start, dt), 0.0, 1.0)
+        opacity = opacity * (g * g * (3.0 - 2.0 * g))
     angle = theta0[None, :] + omega[None, :] * a
     visible = alive & (scale > 0.02) & (opacity > 0.004)
     return Trajectories(P, scale, angle, opacity, visible, size_frac, sprite, hue, spawn, life,

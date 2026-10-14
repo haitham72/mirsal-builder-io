@@ -13,11 +13,11 @@
 
 /* ---------- settings: [key, label, min, max, step, unit] ---------- */
 const RXPRESETS=['burst','fountain','vortex','rain','confetti'];
-const RXSIM=[['magnitude','Speed',0,3,.05,'×'],['gravity','Gravity',-2,3,.05,''],['vortex','Swirl',-2,2,.05,''],['spin','Rotation',0,3,.05,'×'],['count','Amount',4,80,1,''],['spread','Spread',10,360,5,'°'],['fade_out','Fade out',0,1,.05,'s'],['fade_var','Fade variation',0,1,.05,'%']];
+const RXSIM=[['magnitude','Speed',0,3,.05,'×'],['gravity','Gravity',-2,3,.05,''],['vortex','Swirl',-2,2,.05,''],['spin','Rotation',0,3,.05,'×'],['count','Amount',4,80,1,''],['spread','Spread',10,360,5,'°'],['fade_out','Fade out',0,1,.05,'s'],['fade_var','Fade variation',0,1,.05,'%'],['fade_start','Fade start',0,2,.05,'s']];
 /* no Hue: a preset carries no picture, so the chat app's emoji is shown in its own colours */
 const RXO=[['particle_size','Size',.25,3,.05,'×'],['size_var','Size variation',0,1,.05,'%'],['size_in_dur','Size in',0,1.5,.05,'s'],['size_out_dur','Size out',0,1.5,.05,'s']];
 /* where a new variation starts; the server's EMOJI_START (GET emoji-motions `start`) replaces this copy as soon as the bank is read */
-const RXSTART={magnitude:.7,gravity:1,vortex:0,spin:1,count:28,spread:360,fade_out:0,fade_var:0,particle_size:.3,size_var:.38,size_in_dur:.4,size_out_dur:.4};
+const RXSTART={magnitude:.7,gravity:1,vortex:0,spin:1,count:28,spread:360,fade_out:0,fade_var:0,fade_start:0,particle_size:.3,size_var:.38,size_in_dur:.4,size_out_dur:.4};
 const RXPX=256;                                  /* a preview loop's side */
 const RXED=512;                                  /* the editor's viewer: the export's own 512 x 512 canvas, 1:1 */
 const RXHOV=64;                                  /* the hover reaction's side */

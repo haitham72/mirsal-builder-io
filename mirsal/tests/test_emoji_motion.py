@@ -155,6 +155,15 @@ class EnvelopeAndHueTests(unittest.TestCase):
             else:
                 self.assertGreater(starts.max() - starts.min(), 0.2, "variation: the particles start fading at different times")
 
+    def test_fade_start_fades_the_whole_clip_out_by_its_end(self):
+        self.assertEqual(p.ParticleParams().to_dict()["fade_start"], 0.0, "off by default")
+        a = p.trajectories(p.preset("confetti", seed=2, duration=2.0))
+        b = p.trajectories(p.preset("confetti", seed=2, duration=2.0, fade_start=1.0))
+        np.testing.assert_array_equal(a.pos, b.pos)
+        np.testing.assert_array_equal(a.opacity[:31], b.opacity[:31], "untouched until fade_start")
+        self.assertTrue((b.opacity <= a.opacity + 1e-12).all())
+        self.assertEqual(float(b.opacity[int(1.8 * 30):].max()), 0.0, "all gone by duration - 0.2 s")
+
     def test_envelope_zooms_in_from_nothing_and_out_to_nothing(self):
         base = p.preset("burst", count=12, seed=4, lifetime=2.0)
         env = p.preset("burst", count=12, seed=4, lifetime=2.0, size_in_dur=0.5, size_out_dur=0.4)
