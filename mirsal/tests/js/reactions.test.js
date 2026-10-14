@@ -9,7 +9,7 @@ const BANK = "[{token:'kiss',emoji:'😘',preset:'burst',motion:'hearts pop'},{t
 const LIB = "{presets:[{id:'burst_01',motion:'burst',n:1,name:'Burst soft',settings:{magnitude:0.5,count:18}},{id:'burst_02',motion:'burst',n:2,name:'Burst normal',settings:{magnitude:0.7,count:28}},{id:'rain_01',motion:'rain',n:1,name:'Rain soft',settings:{magnitude:0.5,count:18}}],assign:{kiss:'burst_02'}}";
 const J = (r, code) => JSON.parse(r(`JSON.stringify(${code})`));
 const screen = () => {
-  const r = loadConsole(['reactions.js']);
+  const r = loadConsole(['reactions.js', 'lottiestyle.js']);
   r(`RXS.bank=${BANK};RXS.lib=${LIB}`);
   return r;
 };
@@ -88,7 +88,7 @@ test('Select: Shift-click ticks the range, Assign gives a random variation of ea
 });
 
 test('the wall draws one page at a time (Load more), and Select all ticks the whole list without drawing it', () => {
-  const r = loadConsole(['reactions.js']);
+  const r = loadConsole(['reactions.js', 'lottiestyle.js']);
   r("RXS.bank=Array.from({length:250},(_,i)=>({token:'e'+i,emoji:'🙂',preset:'burst',motion:''}));RXS.lib={presets:[{id:'burst_01',motion:'burst',n:1,name:'b',settings:{}}],assign:{}}");
   const h = r('rxHtml()');
   assert.equal((h.match(/class="rx-e/g) || []).length, 120, 'one page, not 250');
@@ -100,7 +100,7 @@ test('the wall draws one page at a time (Load more), and Select all ticks the wh
 });
 
 test('a pack sticker finds its predefined emoji (the longest match) and asks for the same fit preview as the wall hover', async () => {
-  const r = loadConsole(['reactions.js']);
+  const r = loadConsole(['reactions.js', 'lottiestyle.js']);
   r(`RXS.bank=[{token:'heart',emoji:'❤️',preset:'burst'},{token:'heart_on_fire',emoji:'❤️‍🔥',preset:'burst'},{token:'laugh',emoji:'🤣',preset:'fountain'}];RXS.lib={presets:[],assign:{}}`);
   assert.equal(r("rxTokenOf('🤣')"), 'laugh');
   assert.equal(r("rxTokenOf('❤️‍🔥')"), 'heart_on_fire', 'the longest bank emoji the glyph starts with');

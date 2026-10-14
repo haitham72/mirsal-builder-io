@@ -70,6 +70,16 @@ class ParticleParams:
     fade_start: float = 0.0         # Fade out start, s after a particle's birth: its opacity starts dropping from 100% here
     fade_dur: float = 0.0           # Fade out duration, s: 100% -> 0% takes this long, linearly (0 = off: the old fade over the last quarter of its life)
     fade_var: float = 0.0           # Fade out variation, s: each particle's start and duration each move by a seeded +-fade_var (never below 0)
+    speed_var: float = 0.0          # 0..1: each particle's launch speed is Speed x (1 +- speed_var), seeded (on top of the old 0.5-1.1 spread)
+    speed_pulse: float = 0.0        # 0..1: each particle's speed swells and slows by this share, on its own seeded phase (0 = steady)
+    pulse_hz: float = 2.0           # 0.2..6: how many swells a second
+    flip: float = 0.0               # 0..4 turns/s: the cheap spin, horizontal scale 100% -> -100% -> 100% (a card flip, no rotation; 0 = off)
+    flip_var: float = 0.0           # 0..1: each particle's flip rate +- this share
+    morph_at: float = 0.0           # 0..2 s after birth: when a particle turns from its origin into a morph target (0 = no morph; Lottie style)
+    morph_var: float = 0.0          # 0..1 s: +- per particle on morph_at
+    children: int = 0               # 0..12: Morph auxiliary, each particle bursts this many children (same settings, one level) when its fade starts
+    child_size: float = 0.5         # 0.1..3: a child's size at birth, x its parent's drawn size at that moment
+    child_size_var: float = 0.0     # 0..1: a seeded log spread per child around child_size (most stay near it, a few reach 1x or 3x)
 
     @classmethod
     def from_dict(cls, d: dict) -> "ParticleParams":
@@ -143,6 +153,16 @@ class ParticleParams:
             fade_start=lim(num("fade_start", self.fade_start), 0.0, duration),
             fade_dur=lim(num("fade_dur", self.fade_dur), 0.0, duration),
             fade_var=lim(num("fade_var", self.fade_var), 0.0, 1.0),
+            speed_var=lim(num("speed_var", self.speed_var), 0.0, 1.0),
+            speed_pulse=lim(num("speed_pulse", self.speed_pulse), 0.0, 1.0),
+            pulse_hz=lim(num("pulse_hz", self.pulse_hz), 0.2, 6.0),
+            flip=lim(num("flip", self.flip), 0.0, 4.0),
+            flip_var=lim(num("flip_var", self.flip_var), 0.0, 1.0),
+            morph_at=lim(num("morph_at", self.morph_at), 0.0, duration),
+            morph_var=lim(num("morph_var", self.morph_var), 0.0, 1.0),
+            children=int(lim(round(num("children", self.children)), 0, 12)),
+            child_size=lim(num("child_size", self.child_size), 0.1, 3.0),
+            child_size_var=lim(num("child_size_var", self.child_size_var), 0.0, 1.0),
         )
 
 
@@ -185,6 +205,10 @@ class Trajectories:
     life: np.ndarray         # (N,) seconds
     draw_order: np.ndarray   # (N,) particle indices, smallest first (drawn first = behind)
     p: ParticleParams        # the clamped params the plan was made with
+    flipx: np.ndarray = None     # (F, N) the card flip's horizontal scale, 1 -> -1 -> 1 (all 1 with flip 0)
+    morph: np.ndarray = None     # (N,) seconds after birth each particle morphs (inf = never)
+    pick: np.ndarray = None      # (N,) 0..1 which morph target
+    parent: np.ndarray = None    # (N,) the root a child burst from (-1 = a root)
 
     @property
     def frames(self) -> int:
@@ -197,7 +221,8 @@ def _ease_out_back(t: np.ndarray, c1: float = 1.2) -> np.ndarray:
 
 
 def trajectories(p: ParticleParams, n_sprites: int = 1) -> Trajectories:
-    """The deterministic physics of one burst: seeded, vectorised, one semi-implicit Euler step per frame."""
+    """The deterministic physics of one burst: seeded, vectorised, one semi-implicit Euler step per frame. With `children` > 0 every root
+    particle bursts that many children (same settings, one level) from where it is when its fade starts; they follow the roots in every array."""
     p = p.clamped()
     if n_sprites < 1:
         raise ValueError("n_sprites must be at least 1")
@@ -211,10 +236,7 @@ def trajectories(p: ParticleParams, n_sprites: int = 1) -> Trajectories:
 
     slot = (rng.permutation(n) + rng.uniform(0.1, 0.9, n)) / n      # stratified emission: an even fan, not random clumps
     wheel = rng.uniform(0.0, 2 * math.pi)
-    if p.spread >= 360.0:
-        ang = wheel + slot * 2 * math.pi
-    else:
-        ang = -math.pi / 2 + math.radians(p.spread) * (slot - 0.5)  # y grows downward: -pi/2 is up
+    ang = _fan(p, wheel, slot)
     window = min(SPAWN_WINDOW, 0.15 * p.duration)
     spawn = LEAD_FRAMES + np.rint(rng.uniform(0.0, window, n) * p.fps).astype(np.int64)     # never before frame 3: the start is empty
     speed = p.magnitude * SPEED * rng.uniform(0.5, 1.1, n)
@@ -223,17 +245,98 @@ def trajectories(p: ParticleParams, n_sprites: int = 1) -> Trajectories:
     theta0 = p.spin * rng.uniform(-0.6, 0.6, n)
     jitter = rng.uniform(0.8, 1.0, n)
     hue = rng.uniform(-1.0, 1.0, n) * p.hue_var                     # drawn after every older draw: an older burst is unchanged
-    fade_k = rng.uniform(-1.0, 1.0, (2, n)) * p.fade_var             # drawn LAST, for the same reason: +- seconds on (start, duration)
+    fade_k = rng.uniform(-1.0, 1.0, (2, n)) * p.fade_var             # +- seconds on (start, duration)
+    extra = _Extra.draw(rng, p, n)                                   # drawn LAST, for the same reason: speed spread, pulse, flip, morph
+    speed = speed * extra.speed_k
     life = np.minimum(p.lifetime * jitter, (p.duration - QUIET_TAIL) - spawn * dt)          # dead before duration - 0.2 s
     life = np.maximum(life, 4 * dt)
 
-    origin = np.array(p.origin, dtype=np.float64)
+    origin = np.tile(np.array(p.origin, dtype=np.float64), (n, 1))
     v0 = np.stack([np.cos(ang), np.sin(ang)], 1) * speed[:, None]
+    P = _fly(p, F, dt, spawn, origin, v0, extra)
+    scale, opacity, a, alive = _look(p, F, dt, spawn, life, fade_k)
+
+    parent = np.full(n, -1, dtype=np.int64)
+    if p.children > 0:                                               # Morph auxiliary: one level of child bursts, every child drawn after the roots
+        f_start = spawn + np.rint(_fade_start_s(p, life, fade_k) * p.fps).astype(np.int64)
+        f_last = int(round((p.duration - QUIET_TAIL) * p.fps)) - 4
+        k = p.children
+        par = np.repeat(np.arange(n), k)
+        c_spawn = np.repeat(f_start, k)
+        m = len(par)
+        c_slot = (np.tile(np.arange(k), n) + rng.uniform(0.1, 0.9, m)) / k
+        c_wheel = np.repeat(rng.uniform(0.0, 2 * math.pi, n), k)
+        c_ang = _fan(p, c_wheel, c_slot)
+        c_speed = p.magnitude * SPEED * rng.uniform(0.5, 1.1, m)
+        c_rel = np.clip(p.child_size * np.exp(p.child_size_var * rng.standard_normal(m)), 0.1, 3.0)
+        c_omega = p.spin * rng.uniform(-2.0, 2.0, m)
+        c_theta0 = p.spin * rng.uniform(-0.6, 0.6, m)
+        c_jitter = rng.uniform(0.8, 1.0, m)
+        c_fade_k = rng.uniform(-1.0, 1.0, (2, m)) * p.fade_var
+        c_extra = _Extra.draw(rng, p, m)
+        sel = np.flatnonzero((c_spawn > spawn[par]) & (c_spawn < f_last))
+        if len(sel):
+            par, c_spawn = par[sel], c_spawn[sel]
+            c_origin = P[c_spawn, par]                                # where the parent is when its fade starts
+            c_size = np.minimum(size_frac[par] * np.maximum(scale[c_spawn, par], 0.05) * c_rel[sel], 0.9)
+            c_extra = c_extra.take(sel)
+            c_v0 = np.stack([np.cos(c_ang[sel]), np.sin(c_ang[sel])], 1) * (c_speed[sel] * c_extra.speed_k)[:, None]
+            c_life = np.maximum(np.minimum(p.lifetime * c_jitter[sel], (p.duration - QUIET_TAIL) - c_spawn * dt), 4 * dt)
+            c_fk = c_fade_k[:, sel]
+            CP = _fly(p, F, dt, c_spawn, c_origin, c_v0, c_extra)
+            CP = np.where((np.arange(F)[:, None] < c_spawn[None, :])[..., None], c_origin[None, :, :], CP)
+            c_scale, c_opacity, c_a, c_alive = _look(p, F, dt, c_spawn, c_life, c_fk)
+            P = np.concatenate([P, CP], 1)
+            scale, opacity, a, alive = (np.concatenate(x, 1) for x in ((scale, c_scale), (opacity, c_opacity), (a, c_a), (alive, c_alive)))
+            spawn, life, size_frac = np.concatenate([spawn, c_spawn]), np.concatenate([life, c_life]), np.concatenate([size_frac, c_size])
+            omega, theta0 = np.concatenate([omega, c_omega[sel]]), np.concatenate([theta0, c_theta0[sel]])
+            sprite, hue = np.concatenate([sprite, sprite[par]]), np.concatenate([hue, hue[par]])
+            parent = np.concatenate([parent, par])
+            extra = extra.join(c_extra)
+
+    angle = theta0[None, :] + omega[None, :] * a
+    flipx = np.where(alive, np.cos(2 * math.pi * extra.flip_rate[None, :] * a), 1.0) if p.flip > 0 else np.ones_like(a)
+    visible = alive & (scale > 0.02) & (opacity > 0.004)
+    morph = np.maximum(p.morph_at + extra.morph_k, dt) if p.morph_at > 0 else np.full(len(spawn), np.inf)
+    return Trajectories(P, scale, angle, opacity, visible, size_frac, sprite, hue, spawn, life,
+                        np.argsort(size_frac, kind="stable"), p, flipx, morph, extra.pick, parent)
+
+
+def _fan(p: ParticleParams, wheel, slot):
+    if p.spread >= 360.0:
+        return wheel + slot * 2 * math.pi
+    return -math.pi / 2 + math.radians(p.spread) * (slot - 0.5)      # y grows downward: -pi/2 is up
+
+
+@dataclass
+class _Extra:
+    """The per-particle draws added for Lottie style (2026-10-14), always drawn after the older ones so an older burst keeps its bytes."""
+    speed_k: np.ndarray      # launch speed multiplier, 1 +- speed_var
+    phase: np.ndarray        # the speed pulse's phase
+    flip_rate: np.ndarray    # card flips per second, flip +- flip_var share
+    morph_k: np.ndarray      # +- seconds on morph_at
+    pick: np.ndarray         # 0..1: which morph target (the exporter maps it onto its list)
+
+    @classmethod
+    def draw(cls, rng, p: ParticleParams, n: int) -> "_Extra":
+        u = rng.uniform(-1.0, 1.0, (4, n))
+        return cls(1.0 + p.speed_var * u[0], math.pi * (u[1] + 1.0), p.flip * (1.0 + p.flip_var * u[2]), p.morph_var * u[3], rng.uniform(0.0, 1.0, n))
+
+    def take(self, idx) -> "_Extra":
+        return _Extra(*(getattr(self, f.name)[idx] for f in fields(self)))
+
+    def join(self, other: "_Extra") -> "_Extra":
+        return _Extra(*(np.concatenate([getattr(self, f.name), getattr(other, f.name)]) for f in fields(self)))
+
+
+def _fly(p: ParticleParams, F: int, dt: float, spawn, origin, v0, extra: _Extra) -> np.ndarray:
+    """(F, n, 2) positions: gravity, drag, the swirl about each particle's own origin, the speed pulse on the displacement."""
+    n = len(spawn)
     g_eff = p.gravity * G_CANVAS
     decay = math.exp(-DRAG * dt)
     swirl = min(1.0, abs(p.vortex))                                  # the swirl is a flow field: velocity relaxes toward a rotation about the origin,
     turn = p.vortex * VORTEX_W                                       # and the centripetal term keeps the orbit (no centrifugal fling off the canvas)
-    pos, vel = np.tile(origin, (n, 1)), np.zeros((n, 2))
+    pos, vel = origin.copy(), np.zeros((n, 2))
     P = np.empty((F, n, 2))
     for f in range(F):
         flying = spawn < f
@@ -247,13 +350,30 @@ def trajectories(p: ParticleParams, n_sprites: int = 1) -> Trajectories:
                 tang = (rel[:, 0] * vel[:, 1] - rel[:, 1] * vel[:, 0])[:, None] / r
                 acc += VORTEX_RELAX * swirl * (field - vel) - swirl * (tang * tang / r) * (rel / r)
             vel[flying] = (vel[flying] + acc[flying] * dt) * decay
-            pos[flying] = np.clip(pos[flying] + vel[flying] * dt, -_POS_LIMIT, _POS_LIMIT)
+            step = vel[flying] * dt
+            if p.speed_pulse > 0:                                    # Speed pulse: each particle swells and slows on its own phase
+                age = (f - spawn[flying]) * dt
+                step = step * (1.0 + p.speed_pulse * np.sin(2 * math.pi * p.pulse_hz * age + extra.phase[flying]))[:, None]
+            pos[flying] = np.clip(pos[flying] + step, -_POS_LIMIT, _POS_LIMIT)
         born = spawn == f
         if born.any():
-            pos[born] = origin
+            pos[born] = origin[born]
             vel[born] = v0[born]
         P[f] = pos
+    return P
 
+
+def _fade_start_s(p: ParticleParams, life, fade_k):
+    """Seconds after birth each particle's fade starts (what `_look` uses): the Fade out start, else the last quarter of its life."""
+    if p.fade_dur > 0:
+        dt = 1.0 / p.fps
+        f_end = np.minimum(np.maximum(p.fade_start + fade_k[0], 0.0) + np.maximum(p.fade_dur + fade_k[1], dt), life)
+        return np.minimum(np.maximum(p.fade_start + fade_k[0], 0.0), f_end - dt)
+    return life * (1.0 - FADE_SHARE)
+
+
+def _look(p: ParticleParams, F: int, dt: float, spawn, life, fade_k):
+    """(scale, opacity, age, alive), each (F, n): pop-in, growth, Size in / out, and the fade."""
     frame_idx = np.arange(F)[:, None]
     age = (frame_idx - spawn[None, :]) * dt                         # (F, N), negative before spawn
     alive = (age >= 0) & (age < life[None, :])
@@ -273,10 +393,7 @@ def trajectories(p: ParticleParams, n_sprites: int = 1) -> Trajectories:
     else:
         x = np.clip((life[None, :] - a) / (FADE_SHARE * life[None, :]), 0.0, 1.0)
         opacity = np.where(alive, x * x * (3.0 - 2.0 * x), 0.0)
-    angle = theta0[None, :] + omega[None, :] * a
-    visible = alive & (scale > 0.02) & (opacity > 0.004)
-    return Trajectories(P, scale, angle, opacity, visible, size_frac, sprite, hue, spawn, life,
-                        np.argsort(size_frac, kind="stable"), p)
+    return scale, opacity, a, alive
 
 
 # ---- sprites --------------------------------------------------------------------------------------------------------
@@ -489,8 +606,9 @@ def simulate(sprites: list, p: ParticleParams, on_frame=None, fit: bool = False)
             if x1 <= x0 or y1 <= y0:
                 continue
             scx, scy = (pw - 1) / 2.0, (ph - 1) / 2.0
-            M = np.array([[sc * c, -sc * s, (cx - x0) - (sc * c * scx - sc * s * scy)],
-                          [sc * s, sc * c, (cy - y0) - (sc * s * scx + sc * c * scy)]])
+            fx = float(tr.flipx[f, i])                              # the card flip: x scaled before the rotation
+            M = np.array([[sc * c * fx, -sc * s, (cx - x0) - (sc * c * fx * scx - sc * s * scy)],
+                          [sc * s * fx, sc * c, (cy - y0) - (sc * s * fx * scx + sc * c * scy)]])
             buf = cv2.warpAffine(lvl, M, (x1 - x0, y1 - y0), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=0)
             if i in turn:                                          # linear, so it is exact on premultiplied colour; alpha untouched
                 buf[..., :3] = np.clip(buf[..., :3] @ turn[i].T, 0.0, buf[..., 3:4])

@@ -147,8 +147,9 @@ function rxPick(){
   `<span class=sp></span><button class="btn sm${RXS.multi?' pri':''}" data-act=rxmulti aria-pressed=${RXS.multi}>${ic('check')} Select</button></div>`+
   `<div class=rx-grid data-rxwall>${list.slice(0,RXS.shown).map(rxTile).join('')||'<span class=mut>No match.</span>'}</div>${rxMoreHtml(list.length)}${rxMany()}</section>`}
 function rxHtml(){
- if(!RXS.bank)return `<div class="page rx"><div class=fx-job><span class=spin></span> <span class=mut>Reading the emoji bank…</span></div></div>`;
- return `<div class="page rx">${rxLibHtml()}${rxEditor()}${rxPick()}${rxHpHtml()}</div>`}
+ if(rxStyle()==='lottie')return `<div class="page rx">${rxStyleBar()}${lsHtml()}</div>`;      /* Lottie style: lottiestyle.js */
+ if(!RXS.bank)return `<div class="page rx">${rxStyleBar()}<div class=fx-job><span class=spin></span> <span class=mut>Reading the emoji bank…</span></div></div>`;
+ return `<div class="page rx">${rxStyleBar()}${rxLibHtml()}${rxEditor()}${rxPick()}${rxHpHtml()}</div>`}
 
 /* ---------- page updates: repaint only what changed ---------- */
 function rxDraw(){
@@ -158,6 +159,7 @@ function rxDraw(){
  el.innerHTML=rxHtml();
  const w2=el.querySelector&&el.querySelector('[data-rxwall]');if(w2)w2.scrollTop=top;
  if(q){const i=el.querySelector('[data-rxq]');if(i){i.focus();try{i.setSelectionRange(i.value.length,i.value.length)}catch(e){}}}
+ if(rxStyle()==='lottie')return lsMount();
  rxCardPreviews()}
 const rxSwap=(sel,html)=>{const el=document.querySelector&&document.querySelector(sel);if(el)el.outerHTML=html;else rxDraw()};
 function rxGridRedraw(){const w=document.querySelector&&document.querySelector('[data-rxwall]');if(!w)return;const list=rxList();
@@ -209,7 +211,9 @@ async function rxCardPreviews(){
   const r=await post('/api/particles/emoji-preview',{...rxBodyOf(t,p.settings,p.motion),size:RXPX});
   RXS.ppv[k]=r.ok?r.j.url:'';if(r.ok)RXS.ppar[k]=r.j.params;
   if(r.ok&&route_==='reactions'&&RXS.sample===t){const el=document.querySelector&&document.querySelector(`[data-rxcard="${p.id}"]`);if(el)el.outerHTML=rxCard(p,rxUse()[p.id])}}}
-RENDER.reactions=async()=>{rxDraw();if(!RXS.bank||!RXS.lib){await rxBankEnsure();if(route_==='reactions')rxDraw()}};
+RENDER.reactions=async()=>{rxDraw();
+ if(rxStyle()==='lottie'){if(!LS.files){await lsLoad();if(route_==='reactions')rxDraw()}return}
+ if(!RXS.bank||!RXS.lib){await rxBankEnsure();if(route_==='reactions')rxDraw()}};
 
 /* ---------- events ---------- */
 document.addEventListener('input',ev=>{

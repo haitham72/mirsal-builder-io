@@ -44,6 +44,11 @@ Auth labels refer to the shared guard above; “owner / own batch/job/chat” in
 | `POST /api/particles/{id}/link` | object (open; operation detail) | 200 object (open; operation detail) | owner | no |
 | `POST /api/particles/{id}/unlink` | object (open; operation detail) | 200 object (open; operation detail) | owner | no |
 | `GET /api/particles` | — | 200 {sets?:[object (open; operation detail)]} | owner | no |
+| `GET /api/particles/lottie-reactions` | — | 200 {files, start, keys, seconds, size} (Lottie style, native) | member | no |
+| `POST /api/particles/lottie-reactions/{file}` | `LottieReactionBody` {settings?, morph_targets?} | 200 {file, settings, morph_targets} | member | no |
+| `POST /api/particles/lottie-reactions/{file}/preview` | `LottieReactionBody` | 200 a Lottie document | member | no |
+| `GET /api/particles/lottie-reactions/{file}/export.json` | — | 200 a Lottie document (saved settings) | member | no |
+| `GET /api/particles/lottie-reactions.zip` | — | 200 application/zip | member | no |
 | `POST /api/particles` | ordered alternatives: from_stickers, from_generation, from_video, from_slices, from_effect, or new empty set; see durable-particle contract below | 201 object (open; operation detail) | owner | no |
 | `GET /api/particles/deleted` | — | 200 {sets?:[object (open; operation detail)]} | owner | no |
 | `GET /api/particles/{id}` | — | 200 object (open; operation detail) | owner | no |

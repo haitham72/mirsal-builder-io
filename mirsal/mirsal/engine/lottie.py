@@ -91,7 +91,7 @@ def export_lottie(p: ParticleParams, emoji_png=None, *, size: int = 512, slot: b
                 "r": keys(fr, [[round(math.degrees(float(tr.angle[f, i])), 1)] for f in fr]),
                 "p": keys(fr, [[round(float(tr.pos[f, i, 0]) * W, 1), round(float(tr.pos[f, i, 1]) * H, 1), 0] for f in fr]),
                 "a": {"a": 0, "k": [img_w / 2.0, img_h / 2.0, 0]},
-                "s": keys(fr, [[round(float(tr.scale[f, i]) * k_scale, 2)] * 2 + [100] for f in fr]),
+                "s": keys(fr, [[round(float(tr.scale[f, i]) * k_scale * float(tr.flipx[f, i]), 2), round(float(tr.scale[f, i]) * k_scale, 2), 100] for f in fr]),
             },
             "ip": ip, "op": op, "st": 0,
         })
@@ -119,7 +119,7 @@ def _layers(p: ParticleParams, tr, W: int, H: int, ref_of) -> list:
                 "r": keys(fr, [[round(math.degrees(float(tr.angle[f, i])), 1)] for f in fr]),
                 "p": keys(fr, [[round(float(tr.pos[f, i, 0]) * W, 1), round(float(tr.pos[f, i, 1]) * H, 1), 0] for f in fr]),
                 "a": {"a": 0, "k": [img_w / 2.0, img_h / 2.0, 0]},
-                "s": keys(fr, [[round(float(tr.scale[f, i]) * k_scale, 2)] * 2 + [100] for f in fr]),
+                "s": keys(fr, [[round(float(tr.scale[f, i]) * k_scale * float(tr.flipx[f, i]), 2), round(float(tr.scale[f, i]) * k_scale, 2), 100] for f in fr]),
             },
             "ip": ip, "op": op, "st": 0,
         })
@@ -135,3 +135,107 @@ def _slot_lottie(p: ParticleParams, size: int) -> dict:
     return {"v": "5.7.4", "fr": float(p.fps), "ip": 0, "op": tr.frames, "w": W, "h": H, "nm": f"reaction preset ({p.count} particles)", "ddd": 0,
             "assets": [{"id": SLOT_ID, "w": SLOT_PX, "h": SLOT_PX, "u": "", "p": SLOT_FILE, "e": 0}], "layers": layers}
 
+
+# ---- Lottie style (Haitham, 2026-10-14): every particle is a whole Lottie animation ----------------------------------------------------------------
+MORPH_XFADE = 0.15         # seconds a particle crossfades from its origin Lottie into its morph target
+MAX_PARTICLES = 400        # roots + children: a bigger burst is refused (each particle is a precomp layer, a morph adds one more)
+
+
+def _prefixed(layers: list, pre: str) -> list:
+    """The source's layers with every asset reference renamed into its own namespace (two embedded files never collide)."""
+    out = []
+    for L in layers:
+        L = dict(L)
+        if "refId" in L:
+            L["refId"] = pre + str(L["refId"])
+        out.append(L)
+    return out
+
+
+def _embed(doc: dict, k: int) -> tuple[list, dict]:
+    """(assets, info) of one source Lottie embedded as precomp `L<k>`: its own assets renamed `L<k>_<id>`, its top layers as the precomp."""
+    cid, pre = f"L{k}", f"L{k}_"
+    assets = []
+    for a in doc.get("assets") or []:
+        a = dict(a)
+        a["id"] = pre + str(a.get("id"))
+        if isinstance(a.get("layers"), list):
+            a["layers"] = _prefixed(a["layers"], pre)
+        assets.append(a)
+    assets.append({"id": cid, "nm": str(doc.get("nm") or cid), "layers": _prefixed(doc.get("layers") or [], pre)})
+    fr = float(doc.get("fr") or 30.0)
+    info = {"w": int(doc.get("w") or 512), "h": int(doc.get("h") or 512), "fr": fr, "ip": float(doc.get("ip") or 0.0), "op": float(doc.get("op") or 0.0)}
+    return assets, info
+
+
+def export_lottie_burst(p: ParticleParams, origin: dict, targets: list | None = None, *, size: int = 512, name: str = "lottie reaction") -> dict:
+    """A Lottie-style burst: `origin` (a Lottie document) flying as every particle, each its own instance (its own playhead from its birth), never a
+    raster. `targets` (Lottie documents) are the morph targets: with `morph_at` > 0 each particle picks one (seeded) and crossfades into it
+    MORPH_XFADE s long at its morph time, the target playing from that moment. Children (`children` > 0) fly the origin. The result embeds the origin
+    and every target ONCE each as precomp assets (`L0`, `L1`, ...; their own assets renamed `L<k>_...`), however many particles show them; each source
+    plays at its own frame rate (`sr`) and ends when it ends (no loop). Same params + same documents -> the same JSON. Pure."""
+    if not isinstance(origin, dict) or not isinstance(origin.get("layers"), list):
+        raise ValueError("the origin is not a Lottie animation")
+    targets = [t for t in (targets or []) if isinstance(t, dict)]
+    if any(not isinstance(t.get("layers"), list) for t in targets):
+        raise ValueError("a morph target is not a Lottie animation")
+    p = p.clamped()
+    W = H = int(size)
+    tr = trajectories(p, 1)
+    N = len(tr.spawn)
+    if N > MAX_PARTICLES:
+        raise ValueError(f"{N} particles is more than {MAX_PARTICLES}: lower Amount or Children")
+    fps, F = float(p.fps), tr.frames
+    assets, info = [], []
+    for k, doc in enumerate([origin, *targets]):
+        a, i = _embed(doc, k)
+        assets.extend(a)
+        info.append(i)
+    xf = max(1, int(round(MORPH_XFADE * fps)))
+
+    def keys(frames, vals):
+        return {"a": 1, "k": [{"t": f, "s": v, "h": 1} for f, v in zip(frames, vals)]}
+
+    def layer(i: int, k: int, ip: int, op: int, start: int, fade) -> dict | None:
+        src = info[k]
+        sr = fps / src["fr"]                                         # the source plays at its own speed
+        end = start + int(math.ceil((src["op"] - src["ip"]) * sr))   # ... and ends when it ends
+        op = min(op, end)
+        if op <= ip:
+            return None
+        fr = list(range(ip, op))
+        long_side = float(max(src["w"], src["h"]))
+        k_scale = 100.0 * float(tr.size_frac[i]) * W / long_side
+        return {
+            "ddd": 0, "ind": 0, "ty": 0, "nm": f"particle {i + 1}" + ("" if k == 0 else f" -> L{k}"), "refId": f"L{k}", "sr": round(sr, 6),
+            "w": src["w"], "h": src["h"], "ao": 0, "bm": 0,
+            "ks": {
+                "o": keys(fr, [[round(float(tr.opacity[f, i]) * fade(f) * 100.0, 1)] for f in fr]),
+                "r": keys(fr, [[round(math.degrees(float(tr.angle[f, i])), 1)] for f in fr]),
+                "p": keys(fr, [[round(float(tr.pos[f, i, 0]) * W, 1), round(float(tr.pos[f, i, 1]) * H, 1), 0] for f in fr]),
+                "a": {"a": 0, "k": [src["w"] / 2.0, src["h"] / 2.0, 0]},
+                "s": keys(fr, [[round(float(tr.scale[f, i]) * k_scale * float(tr.flipx[f, i]), 2), round(float(tr.scale[f, i]) * k_scale, 2), 100] for f in fr]),
+            },
+            "ip": ip, "op": op, "st": round(start - src["ip"] * sr, 4),
+        }
+
+    layers = []
+    for i in tr.draw_order[::-1].tolist():                          # Lottie draws its first layer on top: the biggest particle first
+        alive = np.flatnonzero(tr.scale[:, i] > 0)
+        if not len(alive):
+            continue
+        ip, op = int(alive[0]), int(alive[-1]) + 1
+        birth = int(tr.spawn[i])
+        m = birth + int(round(float(tr.morph[i]) * fps)) if targets and math.isfinite(float(tr.morph[i])) else None
+        if m is not None and ip < m < op:
+            k = 1 + min(len(targets) - 1, int(float(tr.pick[i]) * len(targets)))
+            out_ = layer(i, 0, ip, min(op, m + xf), birth, lambda f, m=m: min(1.0, max(0.0, (m + xf - f) / xf)))
+            in_ = layer(i, k, m, op, m, lambda f, m=m: min(1.0, max(0.0, (f - m + 1) / xf)))
+            layers.extend(L for L in (in_, out_) if L)
+        else:
+            L = layer(i, 0, ip, op, birth, lambda f: 1.0)
+            if L:
+                layers.append(L)
+    for n_, L in enumerate(layers, 1):
+        L["ind"] = n_
+    return {"v": "5.7.4", "fr": fps, "ip": 0, "op": F, "w": W, "h": H, "nm": f"{name} ({N} particles)", "ddd": 0, "assets": assets, "layers": layers}
