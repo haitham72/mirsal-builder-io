@@ -191,12 +191,12 @@ class NamingTests(unittest.TestCase):
         with zipfile.ZipFile(io.BytesIO(data)) as z:
             row = json.loads(z.read("manifest.json"))["assets"][0]
             self.assertTrue(row.get("light"), row)
-            self.assertEqual(row["frames"], 30)
-            self.assertAlmostEqual(row["fps"], 10, delta=0.5, msg="the whole 3 s clip in 30 frames, not its first second")
-            self.assertTrue(row["fits"], row)
-            self.assertIn("crf", row)
+            self.assertEqual(row["frames"], 90, "every frame is kept (Haitham, 2026-10-14)")
+            self.assertAlmostEqual(row["fps"], 30, delta=0.5, msg="at its own frame rate")
+            self.assertLessEqual(row["crf"], 46, "quality is never traded past LIGHT_MAX_CRF")
             got = z.read(row["filename"])
-            self.assertLessEqual(len(got), 21 * 1024, f"{len(got) // 1024}KB at crf{row['crf']}")
+            if row["fits"]:
+                self.assertLessEqual(len(got), 64 * 1024, f"{len(got) // 1024}KB at crf{row['crf']}")
             self.assertEqual(row["kb"], max(1, len(got) // 1024))
             g = json.loads(z.read("manifest.json"))["grey"]                                             # its grey stand-in (no still on disk: the first frame)
             self.assertEqual([x["filename"] for x in g], [row["filename"].rsplit(".", 1)[0] + "_grey.png"], "beside its original, under its name")

@@ -261,8 +261,8 @@ def encode_frames(frames, fps: float, fmt: str, loop: bool, cfg: EngineConfig, i
     return data, mime, fmt, info
 
 
-LIGHT_FRAMES = (30, 24, 20)  # light exports: the WHOLE clip in this many frames (a 3 s loop at 10 fps), fewer only when 30 cannot fit…
-LIGHT_BYTES = 20 * 1024      # …fitted to this budget (the crf ladder, plus VP9's last rung 63, walks until it fits)
+LIGHT_BYTES = 64 * 1024      # light exports aim for this size… (Haitham, 2026-10-14: "zipping crushed quality and dropped frames": every frame is kept)
+LIGHT_MAX_CRF = 46           # …but never trade quality past this rung of the crf ladder: a clip that cannot reach the size at crf 46 ships at crf 46, bigger
 
 
 RETIME_S = 3.0            # Retime to 3 s (Haitham, 2026-10-12): an export may stretch a shorter animation to Telegram's full 3 seconds…
@@ -303,27 +303,22 @@ def retime_webm(path: Path, cfg: EngineConfig, seconds: float = RETIME_S):
 
 
 def light_webm(path: Path, cfg: EngineConfig, retime: bool = False):
-    """A stored animation re-encoded small (~20 KB): decode with alpha, keep the whole clip in LIGHT_FRAMES evenly spaced
-    frames (the duration and the loop stay, the frame rate drops), fit the crf ladder to LIGHT_BYTES.
-    A very detailed sticker may not reach the budget even at 20 frames and crf 63: it ships its smallest try with fits False.
+    """A stored animation re-encoded smaller: decode with alpha, keep EVERY frame at its own frame rate (Haitham, 2026-10-14: frames are never
+    dropped), and take the best quality of the crf ladder that fits LIGHT_BYTES, never past LIGHT_MAX_CRF: a detailed sticker that cannot reach
+    the size at that rung ships at it, bigger, with fits False. Retime stretches the same frames over 3 s.
     Returns (bytes, {"crf", "kb", "frames", "fps", "fits"}). The stored file is untouched; quality vs size is on the record."""
     import dataclasses
     import tempfile
     from ..engine.video import _encode_fit
     frames, secs = _clip(path)
-    lcfg = dataclasses.replace(cfg, crf_ladder=tuple(sorted({*cfg.crf_ladder, 63})))
+    lcfg = dataclasses.replace(cfg, crf_ladder=tuple(c for c in cfg.crf_ladder if c <= LIGHT_MAX_CRF) or (LIGHT_MAX_CRF,))
     retimed_from = None
     if retime and secs < SHORT_S:                                   # Retime to 3 s: the same frames over the full 3 seconds
         retimed_from, secs = round(secs, 2), RETIME_S
+    n = len(frames)
+    fps = round(n / secs, 3)
     with tempfile.TemporaryDirectory() as td:
-        out = Path(td) / "light.webm"
-        for want in LIGHT_FRAMES:
-            n = min(want, len(frames))
-            small = frames[(np.arange(n) * len(frames)) // n]       # even steps, the last frame not repeated, so the loop seam stays where it was
-            fps = round(n / secs, 3)
-            crf, data, _ = _encode_fit(small, fps, lcfg, out, start=len(lcfg.crf_ladder) - 3, budget=LIGHT_BYTES)
-            if len(data) <= LIGHT_BYTES:
-                break
+        crf, data, _ = _encode_fit(frames, fps, lcfg, Path(td) / "light.webm", start=len(lcfg.crf_ladder) // 2, budget=LIGHT_BYTES)
     meta = {"crf": crf, "kb": max(1, len(data) // 1024), "frames": n, "fps": fps, "fits": len(data) <= LIGHT_BYTES,
             **({"retimed_from": retimed_from, "seconds": RETIME_S} if retimed_from else {})}
     return data, meta
@@ -997,7 +992,7 @@ class Library:
         `.png` / `.webp` for the static ones), renamed to the export contract
         `{emoji}-{pack_slug}-{multi_action_tag}-{sNN}-{G###}-{date}.{ext}` (`media/export_names.py`), and a `manifest.json`
         (schema version 1: pack, assets with filename, sha256, tags and source cell). Source media stays intact; export resolutions are saved under out/.
-        `light` (default on): animated stickers ship re-encoded small (the whole clip in 30 frames or fewer, ~20 KB each: `light_webm`; the row records crf/kb/frames so quality can be judged).
+        `light` (default on): animated stickers ship re-encoded small (every frame kept, the best quality down to crf 46 that fits ~64 KB each: `light_webm`; the row records crf/kb/frames so quality can be judged).
         `retime`: an animation shorter than SHORT_S plays its same frames over 3 s (`retime_webm`, or inside `light_webm`; the row records retimed_from).
         Every animated sticker also gets its grey stand-in beside it, `{its file stem}_grey.png`, from its still (`media/grey.py`; manifest `grey`).
         Returns (zip bytes, a safe file stem)."""
