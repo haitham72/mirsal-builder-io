@@ -1,0 +1,65 @@
+{
+ "token": "speaker-low-volume",
+ "emoji": "🔈",
+ "lottie": [
+  {
+   "id": "L001",
+   "preset": "rain",
+   "params": {
+    "gravity": 1.0,
+    "magnitude": 0.7,
+    "vortex": 0.0,
+    "count": 28,
+    "size_min": 0.0682,
+    "size_max": 0.1518,
+    "particle_size": 0.3,
+    "spin": 1.0,
+    "lifetime": 2.2,
+    "spread": 360.0,
+    "pop": 0.25,
+    "seed": 1,
+    "fps": 30.0,
+    "duration": 3.0,
+    "size": 512,
+    "origin": [
+     0.5,
+     0.1
+    ],
+    "show_source": false,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4,
+    "hue_var": 25.0
+   },
+   "settings": {
+    "particle_size": 0.3,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4,
+    "hue_var": 25.0,
+    "magnitude": 0.7,
+    "gravity": 1.0,
+    "vortex": 0.0,
+    "spin": 1.0,
+    "count": 28,
+    "spread": 360.0
+   },
+   "file": "renders/L001.lottie.json",
+   "glyph": "renders/L001.png",
+   "preview": "renders/L001.webp",
+   "bytes": 221020,
+   "created": 1791955526.147
+  }
+ ],
+ "history": [
+  {
+   "ts": 1791955526.147,
+   "actor": "local",
+   "decision": "LOTTIE",
+   "reason": "exported L001 as Lottie (rain)",
+   "detail": {
+    "preset": "rain",
+    "seed": 1
+   }
+  }
+ ]
+}

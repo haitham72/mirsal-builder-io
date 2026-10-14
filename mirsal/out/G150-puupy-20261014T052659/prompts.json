@@ -1,0 +1,145 @@
+{
+  "task": "cute puupy",
+  "task_slug": "puupy",
+  "subject": "cute puupy",
+  "scene": "",
+  "described": "cute puupy",
+  "context": "",
+  "kind": "default",
+  "grid": [
+    2,
+    2
+  ],
+  "template_id": "sheet_2x2",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "cute puupy",
+    "style_id": "flat_vector",
+    "mode": "sheet_2x2",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "beaming with happiness, bouncing on the spot with a huge smile",
+        "tags": [
+          "puupy_happy",
+          "happy",
+          "smile",
+          "joy"
+        ],
+        "emoji": "😀",
+        "motion": "bounces happily, the smile widens, a little hop"
+      },
+      {
+        "pos": 2,
+        "label": "laughing so hard tears of joy fly out, holding the belly",
+        "tags": [
+          "puupy_laugh",
+          "laugh",
+          "laughing",
+          "lol",
+          "rofl"
+        ],
+        "emoji": "🤣",
+        "motion": "doubles over laughing, shoulders shake, wipes a tear"
+      },
+      {
+        "pos": 3,
+        "label": "bawling with big streaming tears, rubbing the eyes",
+        "tags": [
+          "puupy_cry",
+          "cry",
+          "crying",
+          "sobbing",
+          "tears"
+        ],
+        "emoji": "😭",
+        "motion": "tears stream in two arcs, the body shakes with sobs"
+      },
+      {
+        "pos": 4,
+        "label": "sad and slumped, head hanging low, a single tear",
+        "tags": [
+          "puupy_sad",
+          "sad",
+          "unhappy",
+          "disappointed"
+        ],
+        "emoji": "😔",
+        "motion": "sighs, the shoulders drop, a tear slides down"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "face": false,
+    "preset": null,
+    "loop": false
+  },
+  "guidelines": {
+    "sheet": "2x2 sticker sheet, 4 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 4 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+  },
+  "stickers": [
+    {
+      "index": 1,
+      "id": "prompt01",
+      "key": "puupy_happy",
+      "tags": [
+        "puupy_happy",
+        "happy",
+        "smile",
+        "joy"
+      ],
+      "emoji": "😀",
+      "prompt": "cute puupy beaming with happiness, bouncing on the spot with a huge smile, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 2,
+      "id": "prompt02",
+      "key": "puupy_laugh",
+      "tags": [
+        "puupy_laugh",
+        "laugh",
+        "laughing",
+        "lol",
+        "rofl"
+      ],
+      "emoji": "🤣",
+      "prompt": "cute puupy laughing so hard tears of joy fly out, holding the belly, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 3,
+      "id": "prompt03",
+      "key": "puupy_cry",
+      "tags": [
+        "puupy_cry",
+        "cry",
+        "crying",
+        "sobbing",
+        "tears"
+      ],
+      "emoji": "😭",
+      "prompt": "cute puupy bawling with big streaming tears, rubbing the eyes, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    },
+    {
+      "index": 4,
+      "id": "prompt04",
+      "key": "puupy_sad",
+      "tags": [
+        "puupy_sad",
+        "sad",
+        "unhappy",
+        "disappointed"
+      ],
+      "emoji": "😔",
+      "prompt": "cute puupy sad and slumped, head hanging low, a single tear, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge"
+    }
+  ],
+  "expanded_by": "deterministic",
+  "actions_mode": "predefined",
+  "batches_max": 4,
+  "sheet_prompt": "One illustration of 4 separate characters arranged in 2 rows of 2, evenly spaced across a single seamless background.\nSubject: cute puupy.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: beaming with happiness, bouncing on the spot with a huge smile\nCharacter 2: laughing so hard tears of joy fly out, holding the belly\nCharacter 3: bawling with big streaming tears, rubbing the eyes\nCharacter 4: sad and slumped, head hanging low, a single tear\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 4 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this 2x2 sheet of characters as a 3-second clip.\nCreate a very expressive animation of each character, each having its own personality with a wide range of emotions.\n1. bounces happily, the smile widens, a little hop\n2. doubles over laughing, shoulders shake, wipes a tear\n3. tears stream in two arcs, the body shakes with sobs\n4. sighs, the shoulders drop, a tear slides down\nEach character moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every character's design unchanged."
+}

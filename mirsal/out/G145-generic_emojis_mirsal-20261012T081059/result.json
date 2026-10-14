@@ -2235,5 +2235,16 @@
       ]
     }
   ],
-  "sheet_issues": []
+  "sheet_issues": [],
+  "group": "G145",
+  "group_history": [
+    {
+      "ts": 1791951249.082,
+      "actor": "local",
+      "decision": "JOIN",
+      "to": "G145",
+      "via": "G144 removed"
+    }
+  ],
+  "picked": "G145"
 }

@@ -1,0 +1,40 @@
+{
+  "id": "J112",
+  "kind": "video",
+  "task": "generic emojis",
+  "generation": "G152",
+  "provider": "higgsfield-cli",
+  "model": "kling3_0",
+  "request": {
+    "model": "kling3_0",
+    "options": {},
+    "prompt": "Animate this 2x2 sheet of emojis as a 3-second clip.\nCreate a very expressive animation of each emoji, each having its own personality with a wide range of emotions.\n1. beams brightly, eyes shine with joy, happy sway\n2. the face shakes with laughter, tears fly, the mouth opens wide\n3. tears stream in two arcs, the lip quivers, the face crumples\n4. sighs, a tear slides down, the face droops lower\nEach emoji moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every emoji's design unchanged. Faces only: no bodies, no hands.",
+    "custom_prompt": false,
+    "start_image": "G:\\Haitham\\VsCode\\Mirsal-Builder\\mirsal\\out\\G152-generic_emojis-20261014T054236\\video_sheet\\A1\\sheet.png",
+    "sheet": "A1",
+    "label": "generic emojis",
+    "loop": false,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "508a376d-9d82-4702-84e5-bad19333008f",
+  "result": {
+    "file": "jobs/J112-generic_emojis-video/result.mp4",
+    "sha256": "14e7471bacdba32e45d86f35f23239f56df36e8e903edabdcbf08275c5a99450",
+    "bytes": 4733225
+  },
+  "cost": 4.5,
+  "error": null,
+  "created_at": 1791958525.826,
+  "claimed_at": 1791958532.348,
+  "completed_at": 1791958693.525,
+  "params": {
+    "aspect_ratio": "1:1",
+    "sound": "off",
+    "mode": "pro",
+    "duration": "3"
+  },
+  "cost_estimate": 4.5,
+  "stage": "downloading",
+  "waiting_pid": null
+}

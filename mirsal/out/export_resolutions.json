@@ -1553,6 +1553,187 @@
       "resolution_reason": null,
       "candidates": [],
       "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "0e620dbde0bdf4b30b44279c24c45853ed4cab4d0c76fe6e3a5130dd9db96571": {
+      "emoji": "😀",
+      "emojis": [
+        "😀"
+      ],
+      "tag": "happy_smile_joy",
+      "tokens": [
+        "happy",
+        "smile",
+        "joy"
+      ],
+      "action": "happy",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "3cf73d19aa64217f78f816cb7d7b0eb9119c681f2419f814125cc9652542f7b0": {
+      "emoji": "🤣",
+      "emojis": [
+        "🤣"
+      ],
+      "tag": "laugh_laughing_lol_rofl_lmao_lmfao",
+      "tokens": [
+        "laugh",
+        "laughing",
+        "lol",
+        "rofl",
+        "lmao",
+        "lmfao"
+      ],
+      "action": "laugh",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "e0598405b10a3aa6801353014b42f305deecb547321d8c6139f34d3d6c6455f5": {
+      "emoji": "😭",
+      "emojis": [
+        "😭"
+      ],
+      "tag": "cry_crying_sobbing_tears",
+      "tokens": [
+        "cry",
+        "crying",
+        "sobbing",
+        "tears"
+      ],
+      "action": "cry",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "832992a72dd50d124ca894a2d8064735dabe577882129af56f64b10d3f07b84c": {
+      "emoji": "😔",
+      "emojis": [
+        "😔"
+      ],
+      "tag": "sad_unhappy_disappointed",
+      "tokens": [
+        "sad",
+        "unhappy",
+        "disappointed"
+      ],
+      "action": "sad",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "30be096bffb958c2aa2e7ecb16371709e30d62cf23d207de20266a73a134e4a0": {
+      "emoji": "😍",
+      "emojis": [
+        "😍"
+      ],
+      "tag": "love_heart_loving",
+      "tokens": [
+        "love",
+        "heart",
+        "loving"
+      ],
+      "action": "love",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "c6f3963ea95bf2cad607756d90b950a943ee5eba1d667e7580e56aad7b4f222f": {
+      "emoji": "😠",
+      "emojis": [
+        "😠"
+      ],
+      "tag": "angry_mad_furious_rage",
+      "tokens": [
+        "angry",
+        "mad",
+        "furious",
+        "rage"
+      ],
+      "action": "angry",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "1e08266424b9be8f3d2a4417e9aa19563532ed1602bdc7427a91964ae6d0e55e": {
+      "emoji": "😉",
+      "emojis": [
+        "😉"
+      ],
+      "tag": "wink_winking",
+      "tokens": [
+        "wink",
+        "winking"
+      ],
+      "action": "wink",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "08985bd0935bd0bb0ee100f44e729e628a2f3377e3cd161d26dcae4979b156d1": {
+      "emoji": "😘",
+      "emojis": [
+        "😘"
+      ],
+      "tag": "kiss_kissing",
+      "tokens": [
+        "kiss",
+        "kissing"
+      ],
+      "action": "kiss",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "1906144f4118346b98239cbc66857bbbfdfcdd89d0eba9c90ee21cb18b1e7a8b": {
+      "emoji": "😮",
+      "emojis": [
+        "😮"
+      ],
+      "tag": "surprised_shocked_wow",
+      "tokens": [
+        "surprised",
+        "shocked",
+        "wow"
+      ],
+      "action": "surprised",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "374611eb876fe989491e4ea558ca82531ce2df5d2ee85b84901d0b9308560e78": {
+      "emoji": "😀",
+      "emojis": [
+        "😀",
+        "🤣",
+        "😍",
+        "😭",
+        "😔",
+        "😠",
+        "😮",
+        "😱",
+        "🙏"
+      ],
+      "tag": "recovered_particles_burst",
+      "tokens": [
+        "recovered",
+        "particles",
+        "burst"
+      ],
+      "action": "recovered",
+      "unresolved": true,
+      "resolution_reason": "unmapped",
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
     }
   }
 }

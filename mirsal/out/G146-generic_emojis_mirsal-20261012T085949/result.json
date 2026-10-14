@@ -105,7 +105,7 @@
     3,
     3
   ],
-  "stage": "pack_final",
+  "stage": "video_sliced",
   "error": null,
   "plan_source": "stub (generation/prompter.py)",
   "sheet_prompt": "One illustration of 9 separate characters arranged in 3 rows of 3, evenly spaced across a single seamless background.\nSubject: generic emojis mirsal.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character shows a different emotion on the same face: only the expression changes, so no two characters share the same eyes, eyebrows or mouth:\nCharacter 1: pure happiness with a bright beaming smile and joyful eyes\nCharacter 2: laughing so hard tears of joy fly out, mouth wide open, eyes squeezed shut\nCharacter 3: lovestruck with sparkling eyes, blushing cheeks and a dreamy smile\nCharacter 4: bawling with big streaming tears and a trembling lip\nCharacter 5: sad and drooping face with a single tear\nCharacter 6: furious and steaming with a deep scowl and flared nostrils\nCharacter 7: surprised with wide round eyes and a small o-shaped mouth\nCharacter 8: terrified and trembling with wide darting eyes\nCharacter 9: grateful smile with eyes closed in thanks and glowing cheeks\nMake every expression big and readable at small size: exaggerated eyes, eyebrows and mouth. Faces only: never a body, arms, hands, legs, feet, ears, tails or props.\nConsistency: the same character design, proportions and colours for all 9 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is the face and head alone, large and centred, with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
@@ -968,7 +968,7 @@
               "9": 0.889
             },
             "bad": [],
-            "ms": 221.9
+            "ms": 161.7
           }
         },
         {
@@ -1278,16 +1278,16 @@
         "source": "video sheet",
         "threshold": 115.5,
         "ms": {
-          "decode": 1037,
-          "key": 1057,
-          "bounds": 483,
-          "render": 2429,
-          "seam": 1392,
-          "encode": 4048,
+          "decode": 239,
+          "key": 431,
+          "bounds": 369,
+          "render": 2051,
+          "seam": 1419,
+          "encode": 2487,
           "encodes": 3,
-          "probe": 381,
-          "verify": 114,
-          "finish": 8862
+          "probe": 188,
+          "verify": 15,
+          "finish": 6539
         },
         "frames": 72,
         "fps": 24.0,
@@ -1299,25 +1299,27 @@
         ],
         "edge_touch_frames": 0,
         "subject_px_in_video": 318,
-        "scale": 1.3278,
+        "video_size": 0.85,
+        "scale": 1.1286,
         "size_mode": "kept",
-        "motion": 24.92,
+        "motion": 24.93,
         "loop_seam_before": 25.67,
         "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 24.66,
+        "loop_limit": 24.65,
         "frames_out": 66,
         "cut_off_frames": 0,
         "crf": 38,
         "sharp_kept": 1.0,
-        "detail_vs_still": 1.1,
+        "detail_vs_still": 1.25,
         "soft_sigma": 0.0,
-        "kb": 251.6
+        "kb": 213.5,
+        "cache": "hit"
       },
       "webm": "slices/vid-generic_emojis_mirsal-happy-20261012T085949-8cd1d0.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -1629,6 +1631,72 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791951087.603,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951116.488,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951139.659,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951238.129,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953451.046,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953480.026,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -1644,7 +1712,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 161.1
+            "ms": 158.3
           }
         },
         {
@@ -1658,16 +1726,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 147.6
+            "ms": 144.8
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "251KB @crf38",
+          "detail": "213KB @crf38",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 251,
+          "value": 213,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -1754,17 +1822,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 2.7
+            "ms": 0.8
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 24.66",
+          "detail": "0.0 <= 24.65",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 24.66,
+          "limit": 24.65,
           "data": {
             "ms": 0.0
           }
@@ -1775,19 +1843,19 @@
           "detail": "first frame matches the still at IoU 0.99",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.993,
+          "value": 0.992,
           "limit": 0.5,
           "data": {
-            "ms": 7.6
+            "ms": 2.3
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 24.92",
+          "detail": "median frame-to-frame change 24.93",
           "severity": "WARN",
           "stage": "anim",
-          "value": 24.92,
+          "value": 24.93,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -1802,7 +1870,7 @@
           "value": 0.008,
           "limit": 0.35,
           "data": {
-            "ms": 104.3
+            "ms": 12.8
           }
         },
         {
@@ -1854,7 +1922,8 @@
           "ts": 1791800240.512
         }
       ],
-      "anim_verdict_stale": true
+      "anim_verdict_stale": true,
+      "anim_at": 1791953480.026
     },
     {
       "index": 2,
@@ -2051,16 +2120,16 @@
         "source": "video sheet",
         "threshold": 116.5,
         "ms": {
-          "decode": 1032,
-          "key": 1062,
-          "bounds": 505,
-          "render": 2464,
-          "seam": 1728,
-          "encode": 2619,
+          "decode": 694,
+          "key": 993,
+          "bounds": 699,
+          "render": 3304,
+          "seam": 1608,
+          "encode": 2132,
           "encodes": 2,
-          "probe": 318,
-          "verify": 95,
-          "finish": 7742
+          "probe": 313,
+          "verify": 42,
+          "finish": 8108
         },
         "frames": 72,
         "fps": 24.0,
@@ -2076,26 +2145,27 @@
           "inside_slot",
           "cross_slot"
         ],
-        "scale": 1.3375,
+        "video_size": 0.85,
+        "scale": 1.1369,
         "size_mode": "kept",
-        "motion": 40.28,
-        "loop_seam_before": 83.97,
+        "motion": 47.91,
+        "loop_seam_before": 84.98,
         "loop_cut": 11,
         "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 49.15,
+        "loop_limit": 55.35,
         "frames_out": 55,
-        "cut_off_frames": 30,
+        "cut_off_frames": 28,
         "crf": 42,
-        "sharp_kept": 1.0,
-        "detail_vs_still": 1.02,
+        "sharp_kept": 1.02,
+        "detail_vs_still": 1.18,
         "soft_sigma": 0.0,
-        "kb": 234.5
+        "kb": 221.8
       },
       "webm": "slices/vid-generic_emojis_mirsal-laugh-20261012T085949-55df06.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -2407,6 +2477,72 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791951087.51,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951114.87,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951138.547,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951236.99,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953461.849,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953489.835,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -2422,7 +2558,7 @@
             "frame": 3,
             "over_px": 3,
             "edge_px": 7,
-            "ms": 156.8
+            "ms": 217.2
           }
         },
         {
@@ -2436,16 +2572,16 @@
           "data": {
             "frame": 3,
             "px": 3798,
-            "ms": 165.8
+            "ms": 236.9
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "234KB @crf42",
+          "detail": "221KB @crf42",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 234,
+          "value": 221,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -2532,17 +2668,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 3.1
+            "ms": 2.7
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 49.15",
+          "detail": "0.0 <= 55.35",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 49.15,
+          "limit": 55.35,
           "data": {
             "ms": 0.0
           }
@@ -2556,16 +2692,16 @@
           "value": 0.971,
           "limit": 0.5,
           "data": {
-            "ms": 18.3
+            "ms": 5.4
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 40.28",
+          "detail": "median frame-to-frame change 47.91",
           "severity": "WARN",
           "stage": "anim",
-          "value": 40.28,
+          "value": 47.91,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -2574,22 +2710,22 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 2% over the frames",
+          "detail": "subject area varies by 3% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.022,
+          "value": 0.026,
           "limit": 0.35,
           "data": {
-            "ms": 74.0
+            "ms": 34.4
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "1.00x of the edge detail survives the encode",
+          "detail": "1.02x of the edge detail survives the encode",
           "severity": "WARN",
           "stage": "anim",
-          "value": 1.0,
+          "value": 1.02,
           "limit": 0.8,
           "data": {
             "ms": 0.0
@@ -2632,7 +2768,8 @@
           "ts": 1791800240.512
         }
       ],
-      "anim_verdict_stale": true
+      "anim_verdict_stale": true,
+      "anim_at": 1791953489.835
     },
     {
       "index": 3,
@@ -2828,16 +2965,16 @@
         "source": "video sheet",
         "threshold": 116.5,
         "ms": {
-          "decode": 941,
-          "key": 1113,
-          "bounds": 508,
-          "render": 2473,
-          "seam": 1275,
-          "encode": 3457,
-          "encodes": 3,
-          "probe": 433,
-          "verify": 115,
-          "finish": 8270
+          "decode": 832,
+          "key": 929,
+          "bounds": 652,
+          "render": 3252,
+          "seam": 1179,
+          "encode": 4189,
+          "encodes": 4,
+          "probe": 186,
+          "verify": 18,
+          "finish": 9490
         },
         "frames": 72,
         "fps": 24.0,
@@ -2849,26 +2986,27 @@
         ],
         "edge_touch_frames": 0,
         "subject_px_in_video": 324,
-        "scale": 1.3278,
+        "video_size": 0.85,
+        "scale": 1.1286,
         "size_mode": "kept",
-        "motion": 20.05,
-        "loop_seam_before": 77.62,
+        "motion": 20.06,
+        "loop_seam_before": 77.58,
         "loop_cut": 13,
         "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 19.2,
+        "loop_limit": 19.21,
         "frames_out": 53,
         "cut_off_frames": 0,
-        "crf": 38,
-        "sharp_kept": 0.99,
-        "detail_vs_still": 1.1,
+        "crf": 34,
+        "sharp_kept": 1.0,
+        "detail_vs_still": 1.24,
         "soft_sigma": 0.0,
-        "kb": 206.8
+        "kb": 229.5
       },
       "webm": "slices/vid-generic_emojis_mirsal-love-20261012T085949-62d6b8.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -3180,6 +3318,72 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791951086.789,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951115.909,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951139.119,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951238.301,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953462.085,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953491.286,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -3195,7 +3399,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 159.7
+            "ms": 215.2
           }
         },
         {
@@ -3209,16 +3413,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 171.9
+            "ms": 182.9
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "206KB @crf38",
+          "detail": "229KB @crf34",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 206,
+          "value": 229,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -3305,17 +3509,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 2.1
+            "ms": 0.8
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 19.2",
+          "detail": "0.0 <= 19.21",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 19.2,
+          "limit": 19.21,
           "data": {
             "ms": 0.0
           }
@@ -3323,22 +3527,22 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 0.99",
+          "detail": "first frame matches the still at IoU 1.00",
           "severity": "WARN",
           "stage": "anim",
           "value": 0.995,
           "limit": 0.5,
           "data": {
-            "ms": 19.3
+            "ms": 2.6
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 20.05",
+          "detail": "median frame-to-frame change 20.06",
           "severity": "WARN",
           "stage": "anim",
-          "value": 20.05,
+          "value": 20.06,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -3353,16 +3557,16 @@
           "value": 0.011,
           "limit": 0.35,
           "data": {
-            "ms": 93.7
+            "ms": 14.7
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "0.99x of the edge detail survives the encode",
+          "detail": "1.00x of the edge detail survives the encode",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.99,
+          "value": 1.0,
           "limit": 0.8,
           "data": {
             "ms": 0.0
@@ -3405,7 +3609,8 @@
           "ts": 1791800240.512
         }
       ],
-      "anim_verdict_stale": true
+      "anim_verdict_stale": true,
+      "anim_at": 1791953491.286
     },
     {
       "index": 4,
@@ -3602,16 +3807,16 @@
         "source": "video sheet",
         "threshold": 116.5,
         "ms": {
-          "decode": 962,
-          "key": 1091,
-          "bounds": 510,
-          "render": 2422,
-          "seam": 1184,
-          "encode": 4271,
+          "decode": 721,
+          "key": 998,
+          "bounds": 656,
+          "render": 3267,
+          "seam": 1056,
+          "encode": 3780,
           "encodes": 4,
-          "probe": 374,
-          "verify": 79,
-          "finish": 8850
+          "probe": 282,
+          "verify": 28,
+          "finish": 9077
         },
         "frames": 72,
         "fps": 24.0,
@@ -3623,26 +3828,27 @@
         ],
         "edge_touch_frames": 0,
         "subject_px_in_video": 328,
-        "scale": 1.3311,
+        "video_size": 0.85,
+        "scale": 1.1314,
         "size_mode": "kept",
-        "motion": 24.86,
-        "loop_seam_before": 66.74,
+        "motion": 24.85,
+        "loop_seam_before": 66.71,
         "loop_cut": 20,
         "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 20.69,
+        "loop_limit": 20.76,
         "frames_out": 46,
         "cut_off_frames": 0,
         "crf": 34,
-        "sharp_kept": 0.99,
-        "detail_vs_still": 1.05,
+        "sharp_kept": 1.0,
+        "detail_vs_still": 1.2,
         "soft_sigma": 0.0,
-        "kb": 254.6
+        "kb": 209.5
       },
       "webm": "slices/vid-generic_emojis_mirsal-cry-20261012T085949-51d69e.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -3920,6 +4126,72 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791951087.302,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951116.519,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951139.437,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951237.703,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953461.581,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953490.841,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -3935,7 +4207,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 167.4
+            "ms": 223.6
           }
         },
         {
@@ -3949,16 +4221,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 171.7
+            "ms": 187.0
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "254KB @crf34",
+          "detail": "209KB @crf34",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 254,
+          "value": 209,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -4045,17 +4317,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 2.7
+            "ms": 0.8
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 20.69",
+          "detail": "0.0 <= 20.76",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 20.69,
+          "limit": 20.76,
           "data": {
             "ms": 0.0
           }
@@ -4069,16 +4341,16 @@
           "value": 0.995,
           "limit": 0.5,
           "data": {
-            "ms": 14.9
+            "ms": 3.5
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 24.86",
+          "detail": "median frame-to-frame change 24.85",
           "severity": "WARN",
           "stage": "anim",
-          "value": 24.86,
+          "value": 24.85,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -4093,16 +4365,16 @@
           "value": 0.007,
           "limit": 0.35,
           "data": {
-            "ms": 61.6
+            "ms": 24.0
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "0.99x of the edge detail survives the encode",
+          "detail": "1.00x of the edge detail survives the encode",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.99,
+          "value": 1.0,
           "limit": 0.8,
           "data": {
             "ms": 0.0
@@ -4141,7 +4413,8 @@
           "ts": 1791800240.512
         }
       ],
-      "anim_verdict_stale": true
+      "anim_verdict_stale": true,
+      "anim_at": 1791953490.841
     },
     {
       "index": 5,
@@ -4337,16 +4610,16 @@
         "source": "video sheet",
         "threshold": 116.5,
         "ms": {
-          "decode": 1051,
-          "key": 1054,
-          "bounds": 486,
-          "render": 2453,
-          "seam": 1315,
-          "encode": 4648,
+          "decode": 831,
+          "key": 952,
+          "bounds": 646,
+          "render": 3255,
+          "seam": 1320,
+          "encode": 4229,
           "encodes": 4,
-          "probe": 318,
-          "verify": 55,
-          "finish": 9285
+          "probe": 222,
+          "verify": 39,
+          "finish": 9718
         },
         "frames": 72,
         "fps": 24.0,
@@ -4358,26 +4631,27 @@
         ],
         "edge_touch_frames": 0,
         "subject_px_in_video": 322,
-        "scale": 1.3278,
+        "video_size": 0.85,
+        "scale": 1.1286,
         "size_mode": "kept",
         "motion": 10.79,
-        "loop_seam_before": 28.95,
+        "loop_seam_before": 28.93,
         "loop_cut": 8,
         "loop_faded": true,
         "loop_seam": 0.0,
         "loop_limit": 12.0,
         "frames_out": 58,
         "cut_off_frames": 0,
-        "crf": 34,
-        "sharp_kept": 0.98,
-        "detail_vs_still": 1.06,
+        "crf": 30,
+        "sharp_kept": 0.99,
+        "detail_vs_still": 1.21,
         "soft_sigma": 0.0,
-        "kb": 207.9
+        "kb": 218.5
       },
       "webm": "slices/vid-generic_emojis_mirsal-sad-20261012T085949-79d4e1.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -4673,6 +4947,72 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791951087.913,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951116.837,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951140.149,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951238.339,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953462.199,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953491.542,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -4688,7 +5028,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 169.5
+            "ms": 213.7
           }
         },
         {
@@ -4702,16 +5042,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 138.7
+            "ms": 179.6
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "207KB @crf34",
+          "detail": "218KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 207,
+          "value": 218,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -4798,7 +5138,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.8
+            "ms": 1.8
           }
         },
         {
@@ -4819,10 +5159,10 @@
           "detail": "first frame matches the still at IoU 1.00",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.995,
+          "value": 0.997,
           "limit": 0.5,
           "data": {
-            "ms": 13.5
+            "ms": 5.0
           }
         },
         {
@@ -4846,16 +5186,16 @@
           "value": 0.007,
           "limit": 0.35,
           "data": {
-            "ms": 41.5
+            "ms": 32.9
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "0.98x of the edge detail survives the encode",
+          "detail": "0.99x of the edge detail survives the encode",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.98,
+          "value": 0.99,
           "limit": 0.8,
           "data": {
             "ms": 0.0
@@ -4894,7 +5234,8 @@
           "ts": 1791800240.512
         }
       ],
-      "anim_verdict_stale": true
+      "anim_verdict_stale": true,
+      "anim_at": 1791953491.542
     },
     {
       "index": 6,
@@ -5091,16 +5432,16 @@
         "source": "video sheet",
         "threshold": 116.5,
         "ms": {
-          "decode": 1044,
-          "key": 1061,
-          "bounds": 534,
-          "render": 2561,
-          "seam": 1530,
-          "encode": 2618,
+          "decode": 866,
+          "key": 925,
+          "bounds": 860,
+          "render": 3218,
+          "seam": 1887,
+          "encode": 2308,
           "encodes": 2,
-          "probe": 313,
-          "verify": 69,
-          "finish": 7633
+          "probe": 303,
+          "verify": 64,
+          "finish": 8650
         },
         "frames": 72,
         "fps": 24.0,
@@ -5116,26 +5457,27 @@
           "inside_slot",
           "cross_slot"
         ],
-        "scale": 1.3292,
+        "video_size": 0.85,
+        "scale": 1.1298,
         "size_mode": "kept",
-        "motion": 58.96,
-        "loop_seam_before": 128.81,
+        "motion": 64.77,
+        "loop_seam_before": 139.59,
         "loop_cut": 15,
         "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 58.12,
+        "loop_limit": 62.3,
         "frames_out": 51,
-        "cut_off_frames": 46,
+        "cut_off_frames": 20,
         "crf": 46,
-        "sharp_kept": 1.02,
-        "detail_vs_still": 1.14,
+        "sharp_kept": 1.03,
+        "detail_vs_still": 1.3,
         "soft_sigma": 0.0,
-        "kb": 241.1
+        "kb": 237.4
       },
       "webm": "slices/vid-generic_emojis_mirsal-angry-20261012T085949-9ed491.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -5486,6 +5828,72 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791951086.602,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951115.133,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951138.829,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951237.584,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953462.052,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953490.482,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -5501,7 +5909,7 @@
             "frame": 15,
             "over_px": 3,
             "edge_px": 7,
-            "ms": 180.1
+            "ms": 221.0
           }
         },
         {
@@ -5515,16 +5923,16 @@
           "data": {
             "frame": 5,
             "px": 6951,
-            "ms": 172.3
+            "ms": 382.0
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "241KB @crf46",
+          "detail": "237KB @crf46",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 241,
+          "value": 237,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -5611,17 +6019,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 3.3
+            "ms": 1.9
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 58.12",
+          "detail": "0.0 <= 62.3",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 58.12,
+          "limit": 62.3,
           "data": {
             "ms": 0.0
           }
@@ -5635,16 +6043,16 @@
           "value": 0.994,
           "limit": 0.5,
           "data": {
-            "ms": 10.3
+            "ms": 9.6
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 58.96",
+          "detail": "median frame-to-frame change 64.77",
           "severity": "WARN",
           "stage": "anim",
-          "value": 58.96,
+          "value": 64.77,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -5653,22 +6061,22 @@
         {
           "name": "alpha_stable",
           "ok": true,
-          "detail": "subject area varies by 5% over the frames",
+          "detail": "subject area varies by 6% over the frames",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.051,
+          "value": 0.057,
           "limit": 0.35,
           "data": {
-            "ms": 56.3
+            "ms": 52.8
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "1.02x of the edge detail survives the encode",
+          "detail": "1.03x of the edge detail survives the encode",
           "severity": "WARN",
           "stage": "anim",
-          "value": 1.02,
+          "value": 1.03,
           "limit": 0.8,
           "data": {
             "ms": 0.0
@@ -5711,7 +6119,8 @@
           "ts": 1791800240.512
         }
       ],
-      "anim_verdict_stale": true
+      "anim_verdict_stale": true,
+      "anim_at": 1791953490.482
     },
     {
       "index": 7,
@@ -5907,16 +6316,16 @@
         "source": "video sheet",
         "threshold": 116.0,
         "ms": {
-          "decode": 621,
-          "key": 1400,
-          "bounds": 425,
-          "render": 1855,
-          "seam": 1082,
-          "encode": 3291,
+          "decode": 865,
+          "key": 928,
+          "bounds": 647,
+          "render": 3245,
+          "seam": 1056,
+          "encode": 3687,
           "encodes": 4,
-          "probe": 200,
-          "verify": 38,
-          "finish": 6901
+          "probe": 291,
+          "verify": 40,
+          "finish": 8976
         },
         "frames": 72,
         "fps": 24.0,
@@ -5928,26 +6337,27 @@
         ],
         "edge_touch_frames": 0,
         "subject_px_in_video": 322,
-        "scale": 1.3278,
+        "video_size": 0.85,
+        "scale": 1.1286,
         "size_mode": "kept",
-        "motion": 16.37,
-        "loop_seam_before": 32.65,
+        "motion": 16.39,
+        "loop_seam_before": 32.63,
         "loop_cut": 20,
         "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 13.94,
+        "loop_limit": 13.92,
         "frames_out": 46,
         "cut_off_frames": 0,
-        "crf": 34,
-        "sharp_kept": 0.99,
-        "detail_vs_still": 1.11,
+        "crf": 30,
+        "sharp_kept": 1.0,
+        "detail_vs_still": 1.26,
         "soft_sigma": 0.0,
-        "kb": 207.2
+        "kb": 222.2
       },
       "webm": "slices/vid-generic_emojis_mirsal-surprised-20261012T085949-52c7c1.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -6227,6 +6637,72 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791951093.784,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951124.24,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951145.473,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951244.699,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953461.28,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953490.831,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -6242,7 +6718,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 132.7
+            "ms": 203.8
           }
         },
         {
@@ -6256,16 +6732,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 142.8
+            "ms": 187.7
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "207KB @crf34",
+          "detail": "222KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 207,
+          "value": 222,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -6352,17 +6828,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.7
+            "ms": 9.7
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 13.94",
+          "detail": "0.0 <= 13.92",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 13.94,
+          "limit": 13.92,
           "data": {
             "ms": 0.0
           }
@@ -6370,22 +6846,22 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 1.00",
+          "detail": "first frame matches the still at IoU 0.99",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.997,
+          "value": 0.995,
           "limit": 0.5,
           "data": {
-            "ms": 3.4
+            "ms": 12.2
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 16.37",
+          "detail": "median frame-to-frame change 16.39",
           "severity": "WARN",
           "stage": "anim",
-          "value": 16.37,
+          "value": 16.39,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -6400,16 +6876,16 @@
           "value": 0.005,
           "limit": 0.35,
           "data": {
-            "ms": 34.7
+            "ms": 19.0
           }
         },
         {
           "name": "sharpness",
           "ok": true,
-          "detail": "0.99x of the edge detail survives the encode",
+          "detail": "1.00x of the edge detail survives the encode",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.99,
+          "value": 1.0,
           "limit": 0.8,
           "data": {
             "ms": 0.0
@@ -6448,7 +6924,8 @@
           "ts": 1791800240.512
         }
       ],
-      "anim_verdict_stale": true
+      "anim_verdict_stale": true,
+      "anim_at": 1791953490.831
     },
     {
       "index": 8,
@@ -6644,16 +7121,16 @@
         "source": "video sheet",
         "threshold": 116.5,
         "ms": {
-          "decode": 761,
-          "key": 1243,
-          "bounds": 447,
-          "render": 1844,
-          "seam": 1212,
-          "encode": 2998,
-          "encodes": 3,
-          "probe": 215,
-          "verify": 23,
-          "finish": 6748
+          "decode": 401,
+          "key": 720,
+          "bounds": 208,
+          "render": 2418,
+          "seam": 1284,
+          "encode": 4016,
+          "encodes": 4,
+          "probe": 227,
+          "verify": 41,
+          "finish": 8202
         },
         "frames": 72,
         "fps": 24.0,
@@ -6665,26 +7142,27 @@
         ],
         "edge_touch_frames": 0,
         "subject_px_in_video": 319,
-        "scale": 1.3278,
+        "video_size": 0.85,
+        "scale": 1.1286,
         "size_mode": "kept",
         "motion": 18.36,
-        "loop_seam_before": 70.95,
+        "loop_seam_before": 70.94,
         "loop_cut": 3,
         "loop_faded": true,
         "loop_seam": 0.0,
-        "loop_limit": 17.99,
+        "loop_limit": 18.0,
         "frames_out": 63,
         "cut_off_frames": 0,
-        "crf": 38,
+        "crf": 34,
         "sharp_kept": 1.0,
-        "detail_vs_still": 1.11,
+        "detail_vs_still": 1.26,
         "soft_sigma": 0.0,
-        "kb": 226.7
+        "kb": 254.7
       },
       "webm": "slices/vid-generic_emojis_mirsal-scared-20261012T085949-6934aa.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -6962,6 +7440,72 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791951093.854,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951124.39,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951145.637,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951245.278,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953470.101,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953499.186,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -6977,7 +7521,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 147.5
+            "ms": 65.7
           }
         },
         {
@@ -6991,16 +7535,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 153.4
+            "ms": 43.3
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "226KB @crf38",
+          "detail": "254KB @crf34",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 226,
+          "value": 254,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -7087,17 +7631,17 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 0.9
+            "ms": 1.0
           }
         },
         {
           "name": "loop_seam",
           "ok": true,
-          "detail": "0.0 <= 17.99",
+          "detail": "0.0 <= 18.0",
           "severity": "BLOCK",
           "stage": "anim",
           "value": 0.0,
-          "limit": 17.99,
+          "limit": 18.0,
           "data": {
             "ms": 0.0
           }
@@ -7105,13 +7649,13 @@
         {
           "name": "identity_kept",
           "ok": true,
-          "detail": "first frame matches the still at IoU 0.99",
+          "detail": "first frame matches the still at IoU 1.00",
           "severity": "WARN",
           "stage": "anim",
           "value": 0.995,
           "limit": 0.5,
           "data": {
-            "ms": 3.3
+            "ms": 5.6
           }
         },
         {
@@ -7135,7 +7679,7 @@
           "value": 0.009,
           "limit": 0.35,
           "data": {
-            "ms": 19.0
+            "ms": 35.3
           }
         },
         {
@@ -7183,7 +7727,8 @@
           "ts": 1791800240.512
         }
       ],
-      "anim_verdict_stale": true
+      "anim_verdict_stale": true,
+      "anim_at": 1791953499.186
     },
     {
       "index": 9,
@@ -7378,16 +7923,16 @@
         "source": "video sheet",
         "threshold": 116.5,
         "ms": {
-          "decode": 631,
-          "key": 1037,
-          "bounds": 370,
-          "render": 1934,
-          "seam": 1046,
-          "encode": 3491,
+          "decode": 334,
+          "key": 468,
+          "bounds": 476,
+          "render": 2311,
+          "seam": 1276,
+          "encode": 3567,
           "encodes": 4,
-          "probe": 254,
-          "verify": 48,
-          "finish": 7151
+          "probe": 224,
+          "verify": 45,
+          "finish": 7909
         },
         "frames": 72,
         "fps": 24.0,
@@ -7399,26 +7944,27 @@
         ],
         "edge_touch_frames": 0,
         "subject_px_in_video": 358,
-        "scale": 1.3278,
+        "video_size": 0.85,
+        "scale": 1.1286,
         "size_mode": "kept",
-        "motion": 12.63,
-        "loop_seam_before": 104.98,
+        "motion": 12.65,
+        "loop_seam_before": 105.02,
         "loop_cut": 13,
         "loop_faded": true,
         "loop_seam": 0.0,
         "loop_limit": 12.0,
         "frames_out": 53,
         "cut_off_frames": 0,
-        "crf": 34,
+        "crf": 30,
         "sharp_kept": 0.99,
-        "detail_vs_still": 1.15,
+        "detail_vs_still": 1.31,
         "soft_sigma": 0.0,
-        "kb": 232.0
+        "kb": 247.8
       },
       "webm": "slices/vid-generic_emojis_mirsal-thanks-20261012T085949-47b2f1.webm",
       "review": {
         "still": "APPROVED",
-        "anim": "APPROVED"
+        "anim": "PENDING"
       },
       "history": [
         {
@@ -7696,6 +8242,72 @@
           "reason": "approved by Add",
           "ref": null,
           "detail": null
+        },
+        {
+          "ts": 1791951094.026,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951125.289,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951146.198,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791951245.604,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953469.758,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
+        },
+        {
+          "ts": 1791953499.221,
+          "stage": "video",
+          "actor": "python",
+          "decision": "PASS",
+          "reason": null,
+          "ref": "A5",
+          "detail": {
+            "warnings": []
+          }
         }
       ],
       "anim_report": [
@@ -7711,7 +8323,7 @@
             "frame": null,
             "over_px": 0,
             "edge_px": 7,
-            "ms": 156.0
+            "ms": 148.6
           }
         },
         {
@@ -7725,16 +8337,16 @@
           "data": {
             "frame": null,
             "px": 0,
-            "ms": 46.3
+            "ms": 176.4
           }
         },
         {
           "name": "size_budget",
           "ok": true,
-          "detail": "231KB @crf34",
+          "detail": "247KB @crf30",
           "severity": "BLOCK",
           "stage": "anim",
-          "value": 231,
+          "value": 247,
           "limit": 256,
           "data": {
             "ms": 0.0
@@ -7821,7 +8433,7 @@
           "value": null,
           "limit": null,
           "data": {
-            "ms": 1.2
+            "ms": 1.7
           }
         },
         {
@@ -7842,19 +8454,19 @@
           "detail": "first frame matches the still at IoU 0.99",
           "severity": "WARN",
           "stage": "anim",
-          "value": 0.995,
+          "value": 0.994,
           "limit": 0.5,
           "data": {
-            "ms": 11.4
+            "ms": 4.7
           }
         },
         {
           "name": "motion_present",
           "ok": true,
-          "detail": "median frame-to-frame change 12.63",
+          "detail": "median frame-to-frame change 12.65",
           "severity": "WARN",
           "stage": "anim",
-          "value": 12.63,
+          "value": 12.65,
           "limit": 0.5,
           "data": {
             "ms": 0.0
@@ -7869,7 +8481,7 @@
           "value": 0.008,
           "limit": 0.35,
           "data": {
-            "ms": 35.9
+            "ms": 39.1
           }
         },
         {
@@ -7917,7 +8529,8 @@
           "ts": 1791800240.512
         }
       ],
-      "anim_verdict_stale": true
+      "anim_verdict_stale": true,
+      "anim_at": 1791953499.221
     }
   ],
   "sheet_issues": [],
@@ -7945,5 +8558,6 @@
       "animated:9"
     ]
   },
-  "keep_size": true
+  "keep_size": true,
+  "anim_scale": 0.85
 }

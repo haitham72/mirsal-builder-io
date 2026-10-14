@@ -1,0 +1,44 @@
+{
+  "id": "J110",
+  "kind": "sheet",
+  "task": "071",
+  "generation": "G150",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {},
+    "prompt": "One illustration of 4 separate characters arranged in 2 rows of 2, evenly spaced across a single seamless background.\nSubject: cute puupy.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: beaming with happiness, bouncing on the spot with a huge smile\nCharacter 2: laughing so hard tears of joy fly out, holding the belly\nCharacter 3: bawling with big streaming tears, rubbing the eyes\nCharacter 4: sad and slumped, head hanging low, a single tear\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 4 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+    "label": "cute puupy",
+    "refs": [],
+    "outline": null,
+    "erode": null,
+    "custom_prompt": false,
+    "parent": null,
+    "regen_of": null,
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "b157f04b-e1f8-4f75-b3ea-3f87b547838a",
+  "result": {
+    "file": "jobs/J110-puupy-sheet/result.png",
+    "sha256": "61fc93b72977d6ddc59e0d86398d7aa28f79e013cc9dc81e34c5147fd64168c8",
+    "bytes": 4002830
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1791955595.259,
+  "claimed_at": 1791955596.612,
+  "completed_at": 1791955619.54,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null,
+  "dismissed": {
+    "at": 1791955878.649,
+    "by": "local"
+  }
+}

@@ -1,0 +1,290 @@
+{
+ "presets": [
+  {
+   "id": "burst_01",
+   "motion": "burst",
+   "n": 1,
+   "name": "Burst soft",
+   "settings": {
+    "magnitude": 0.5,
+    "gravity": 1.0,
+    "vortex": 0.0,
+    "spin": 1.0,
+    "count": 18,
+    "spread": 360.0,
+    "particle_size": 0.25,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791960517.928
+  },
+  {
+   "id": "burst_02",
+   "motion": "burst",
+   "n": 2,
+   "name": "Burst normal",
+   "settings": {
+    "magnitude": 0.7,
+    "gravity": 1.0,
+    "vortex": 0.0,
+    "spin": 1.0,
+    "count": 28,
+    "spread": 360.0,
+    "particle_size": 0.3,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791960517.928
+  },
+  {
+   "id": "burst_03",
+   "motion": "burst",
+   "n": 3,
+   "name": "Burst big",
+   "settings": {
+    "magnitude": 1.0,
+    "gravity": 1.0,
+    "vortex": 0.0,
+    "spin": 1.0,
+    "count": 40,
+    "spread": 360.0,
+    "particle_size": 0.4,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791960517.928
+  },
+  {
+   "id": "fountain_01",
+   "motion": "fountain",
+   "n": 1,
+   "name": "Fountain soft",
+   "settings": {
+    "magnitude": 0.5,
+    "gravity": 1.0,
+    "vortex": 0.0,
+    "spin": 1.0,
+    "count": 18,
+    "spread": 360.0,
+    "particle_size": 0.25,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791960517.928
+  },
+  {
+   "id": "fountain_02",
+   "motion": "fountain",
+   "n": 2,
+   "name": "Fountain normal",
+   "settings": {
+    "magnitude": 0.7,
+    "gravity": 1.0,
+    "vortex": 0.0,
+    "spin": 1.0,
+    "count": 28,
+    "spread": 360.0,
+    "particle_size": 0.3,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791960517.928
+  },
+  {
+   "id": "fountain_03",
+   "motion": "fountain",
+   "n": 3,
+   "name": "Fountain big",
+   "settings": {
+    "magnitude": 1.0,
+    "gravity": 1.0,
+    "vortex": 0.0,
+    "spin": 1.0,
+    "count": 40,
+    "spread": 360.0,
+    "particle_size": 0.4,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791960517.928
+  },
+  {
+   "id": "vortex_01",
+   "motion": "vortex",
+   "n": 1,
+   "name": "Vortex soft",
+   "settings": {
+    "magnitude": 0.5,
+    "gravity": 1.0,
+    "vortex": 0.0,
+    "spin": 1.0,
+    "count": 18,
+    "spread": 360.0,
+    "particle_size": 0.25,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791960517.928
+  },
+  {
+   "id": "vortex_02",
+   "motion": "vortex",
+   "n": 2,
+   "name": "Vortex normal",
+   "settings": {
+    "magnitude": 0.7,
+    "gravity": 1.0,
+    "vortex": 0.0,
+    "spin": 1.0,
+    "count": 28,
+    "spread": 360.0,
+    "particle_size": 0.3,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791960517.928
+  },
+  {
+   "id": "vortex_03",
+   "motion": "vortex",
+   "n": 3,
+   "name": "Vortex big",
+   "settings": {
+    "magnitude": 1.0,
+    "gravity": 1.0,
+    "vortex": 0.0,
+    "spin": 1.0,
+    "count": 40,
+    "spread": 360.0,
+    "particle_size": 0.4,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791960517.928
+  },
+  {
+   "id": "rain_01",
+   "motion": "rain",
+   "n": 1,
+   "name": "Rain soft",
+   "settings": {
+    "magnitude": 0.5,
+    "gravity": 1.0,
+    "vortex": 0.0,
+    "spin": 1.0,
+    "count": 18,
+    "spread": 360.0,
+    "particle_size": 0.25,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791960517.928
+  },
+  {
+   "id": "rain_02",
+   "motion": "rain",
+   "n": 2,
+   "name": "Rain normal",
+   "settings": {
+    "magnitude": 0.7,
+    "gravity": 1.0,
+    "vortex": 0.0,
+    "spin": 1.0,
+    "count": 28,
+    "spread": 360.0,
+    "particle_size": 0.3,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791960517.928
+  },
+  {
+   "id": "rain_03",
+   "motion": "rain",
+   "n": 3,
+   "name": "Rain big",
+   "settings": {
+    "magnitude": 1.0,
+    "gravity": 1.0,
+    "vortex": 0.0,
+    "spin": 1.0,
+    "count": 40,
+    "spread": 360.0,
+    "particle_size": 0.4,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791960517.928
+  },
+  {
+   "id": "confetti_01",
+   "motion": "confetti",
+   "n": 1,
+   "name": "Confetti soft",
+   "settings": {
+    "magnitude": 0.5,
+    "gravity": 1.0,
+    "vortex": 0.0,
+    "spin": 1.0,
+    "count": 18,
+    "spread": 360.0,
+    "particle_size": 0.25,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791960517.928
+  },
+  {
+   "id": "confetti_02",
+   "motion": "confetti",
+   "n": 2,
+   "name": "Confetti normal",
+   "settings": {
+    "magnitude": 0.7,
+    "gravity": 1.0,
+    "vortex": 0.0,
+    "spin": 1.0,
+    "count": 28,
+    "spread": 360.0,
+    "particle_size": 0.3,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791960517.928
+  },
+  {
+   "id": "confetti_03",
+   "motion": "confetti",
+   "n": 3,
+   "name": "Confetti big",
+   "settings": {
+    "magnitude": 1.0,
+    "gravity": 1.0,
+    "vortex": 0.0,
+    "spin": 1.0,
+    "count": 40,
+    "spread": 360.0,
+    "particle_size": 0.4,
+    "size_var": 0.38,
+    "size_in_dur": 0.4,
+    "size_out_dur": 0.4
+   },
+   "created": 1791960517.928
+  }
+ ],
+ "assign": {}
+}

@@ -1,0 +1,756 @@
+{
+ "id": "S018",
+ "user": "local",
+ "title": "original emojis",
+ "created": 1791955658.817,
+ "updated": 1791956491.339,
+ "settings": {
+  "grid": "2x2",
+  "style_id": "glossy_3d",
+  "ask_before_spending": true,
+  "ai": true,
+  "actions": "predefined",
+  "allow_vlm": true,
+  "stage": "auto",
+  "creator": {
+   "on": false,
+   "scope": "images",
+   "bypass": false
+  }
+ },
+ "focus": {
+  "generation": "G151",
+  "stickers": []
+ },
+ "subjects": [
+  {
+   "name": "original emojis",
+   "slug": "original_emojis",
+   "passes": [
+    {
+     "generation": "G151",
+     "job": null,
+     "prompt": "original emojis",
+     "grid": "2x2",
+     "style_id": "glossy_3d",
+     "parent": null,
+     "created": 1791955672.29,
+     "ready": 0,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": ""
+    }
+   ]
+  }
+ ],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1791955659.252,
+   "user": "original emojis",
+   "assistant": "Here's the plan for **original emojis**: 9 stickers, glossy 3d (I have this prepared: 0 credits). Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 2,
+   "ts": 1791955668.904,
+   "user": "original emojis",
+   "assistant": "Here's the plan for **original emojis**: 4 stickers, glossy 3d (I have this prepared: 0 credits). Shall I create it?\n\nAI vision is on, as you allowed: I can look at your stickers now (names, captions).",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 3,
+   "ts": 1791955672.295,
+   "user": "confirm",
+   "assistant": "Creating **original emojis** now. The stickers appear below as they are ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G151"
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "original emojis",
+   "cards": [],
+   "steps": [],
+   "ts": 1791955658.932
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "Here's the plan for **original emojis**: 9 stickers, glossy 3d (I have this prepared: 0 credits). Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "original emojis",
+     "grid": "3x3",
+     "style": "glossy 3d",
+     "count": 9,
+     "names": [
+      "original emojis happy",
+      "original emojis laugh",
+      "original emojis cry",
+      "original emojis sad",
+      "original emojis love",
+      "original emojis angry",
+      "original emojis wink",
+      "original emojis kiss",
+      "original emojis surprised"
+     ],
+     "estimate": 0,
+     "balance": 46.37,
+     "prompt": "original emojis",
+     "prepared": true,
+     "free": false,
+     "stage": "emojis",
+     "batch": {
+      "no": 1,
+      "max": 4,
+      "label": "Batch 01 · actions 1-9",
+      "text": "Batch 01 of 04 · actions 1-9"
+     }
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating original emojis",
+     "detail": null,
+     "status": "running",
+     "ts": 1791955658.935
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955658.937
+    },
+    {
+     "kind": "step",
+     "label": "writing 9 sticker ideas with openai:gpt-6-luna (cloud)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955658.969
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "9 stickers",
+      "lines": [
+       "original emojis happy",
+       "original emojis laugh",
+       "original emojis cry",
+       "original emojis sad",
+       "original emojis love",
+       "original emojis angry",
+       "original emojis wink",
+       "original emojis kiss",
+       "original emojis surprised"
+      ]
+     },
+     "status": "done",
+     "ts": 1791955658.977
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · free",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955659.248
+    }
+   ],
+   "ts": 1791955658.932,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Make a new one (paid)",
+     "action": "confirm_new"
+    },
+    {
+     "label": "Allow AI vision",
+     "on": "AI vision on",
+     "off": "AI vision off",
+     "setting": {
+      "allow_vlm": true
+     },
+     "side": "right",
+     "glow": true
+    }
+   ]
+  },
+  {
+   "id": "m3",
+   "role": "user",
+   "text": "original emojis",
+   "cards": [],
+   "steps": [],
+   "ts": 1791955667.747
+  },
+  {
+   "id": "m4",
+   "role": "assistant",
+   "text": "Here's the plan for **original emojis**: 4 stickers, glossy 3d (I have this prepared: 0 credits). Shall I create it?\n\nAI vision is on, as you allowed: I can look at your stickers now (names, captions).",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "original emojis",
+     "grid": "2x2",
+     "style": "glossy 3d",
+     "count": 4,
+     "names": [
+      "original emojis happy",
+      "original emojis laugh",
+      "original emojis cry",
+      "original emojis sad"
+     ],
+     "estimate": 0,
+     "balance": 46.37,
+     "prompt": "original emojis",
+     "prepared": true,
+     "free": false,
+     "stage": "emojis",
+     "batch": {
+      "no": 1,
+      "max": 4,
+      "label": "Batch 01 · actions 1-4",
+      "text": "Batch 01 of 04 · actions 1-4"
+     }
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating original emojis",
+     "detail": null,
+     "status": "running",
+     "ts": 1791955667.754
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955667.76
+    },
+    {
+     "kind": "step",
+     "label": "writing 4 sticker ideas with openai:gpt-6-luna (cloud)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955667.795
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "4 stickers",
+      "lines": [
+       "original emojis happy",
+       "original emojis laugh",
+       "original emojis cry",
+       "original emojis sad"
+      ]
+     },
+     "status": "done",
+     "ts": 1791955667.813
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · free",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955668.9
+    }
+   ],
+   "ts": 1791955667.747,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Make a new one (paid)",
+     "action": "confirm_new"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m5",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791955671.465
+  },
+  {
+   "id": "m6",
+   "role": "assistant",
+   "text": "Creating **original emojis** now. The stickers appear below as they are ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": "G151",
+     "job": null,
+     "subject": "original emojis",
+     "parent": null,
+     "note": "",
+     "batch": "Batch 01 · actions 1-4"
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating original emojis",
+     "detail": null,
+     "status": "running",
+     "ts": 1791955671.469
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955671.5
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955671.507
+    },
+    {
+     "kind": "final",
+     "label": "started · G151",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955672.29
+    }
+   ],
+   "ts": 1791955671.465,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m7",
+   "role": "assistant",
+   "text": "**original emojis**: batch 01 of 04 is ready. Regenerate it, or make the next batches of the pack.",
+   "cards": [],
+   "steps": [],
+   "ts": 1791955675.658,
+   "chips": [
+    {
+     "label": "Regenerate · 2 credits",
+     "action": "regenerate",
+     "generation": "G151"
+    },
+    {
+     "label": "Batch 02 · 2 credits",
+     "action": "batch_more",
+     "to": 2
+    },
+    {
+     "label": "Batch 03 · 4 credits",
+     "action": "batch_more",
+     "to": 3
+    },
+    {
+     "label": "Batch 04 · 6 credits",
+     "action": "batch_more",
+     "to": 4
+    }
+   ]
+  },
+  {
+   "id": "m8",
+   "role": "assistant",
+   "text": "That turn was interrupted before it finished (the server restarted). Check the Queue for any job already started before trying again.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking at Original emojis",
+     "detail": null,
+     "status": "running",
+     "ts": 1791955675.699
+    },
+    {
+     "kind": "note",
+     "label": "That turn was interrupted before it finished (the server restarted). Check the Queue for any job already started before trying again.",
+     "status": "done"
+    }
+   ],
+   "ts": 1791955675.696,
+   "status": "error"
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": null,
+ "vision_asked": true,
+ "pack": {
+  "request": "original emojis",
+  "subject": "original emojis",
+  "grid": "2x2",
+  "style_id": "glossy_3d",
+  "ai": true,
+  "plan": {
+   "task": "original emojis",
+   "task_slug": "original_emojis",
+   "subject": "original emojis",
+   "scene": "",
+   "described": "original emojis",
+   "context": "",
+   "kind": "default",
+   "grid": [
+    2,
+    2
+   ],
+   "template_id": "sheet_2x2",
+   "template_version": 4,
+   "slots": {
+    "subject_description": "original emojis",
+    "style_id": "glossy_3d",
+    "mode": "sheet_2x2",
+    "cells": [
+     {
+      "pos": 1,
+      "label": "pure happiness with a bright beaming smile and joyful eyes",
+      "tags": [
+       "original_emojis_happy",
+       "happy",
+       "smile",
+       "joy"
+      ],
+      "emoji": "😀",
+      "motion": "beams brightly, eyes shine with joy, happy sway"
+     },
+     {
+      "pos": 2,
+      "label": "laughing so hard tears of joy fly out, mouth wide open, eyes squeezed shut",
+      "tags": [
+       "original_emojis_laugh",
+       "laugh",
+       "laughing",
+       "lol",
+       "rofl"
+      ],
+      "emoji": "🤣",
+      "motion": "the face shakes with laughter, tears fly, the mouth opens wide"
+     },
+     {
+      "pos": 3,
+      "label": "bawling with big streaming tears and a trembling lip",
+      "tags": [
+       "original_emojis_cry",
+       "cry",
+       "crying",
+       "sobbing",
+       "tears"
+      ],
+      "emoji": "😭",
+      "motion": "tears stream in two arcs, the lip quivers, the face crumples"
+     },
+     {
+      "pos": 4,
+      "label": "sad and drooping face with a single tear",
+      "tags": [
+       "original_emojis_sad",
+       "sad",
+       "unhappy",
+       "disappointed"
+      ],
+      "emoji": "😔",
+      "motion": "sighs, a tear slides down, the face droops lower"
+     }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "face": true,
+    "preset": null,
+    "loop": false
+   },
+   "guidelines": {
+    "sheet": "2x2 sticker sheet, 4 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 4 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+   },
+   "stickers": [
+    {
+     "index": 1,
+     "id": "prompt01",
+     "key": "original_emojis_happy",
+     "tags": [
+      "original_emojis_happy",
+      "happy",
+      "smile",
+      "joy"
+     ],
+     "emoji": "😀"
+    },
+    {
+     "index": 2,
+     "id": "prompt02",
+     "key": "original_emojis_laugh",
+     "tags": [
+      "original_emojis_laugh",
+      "laugh",
+      "laughing",
+      "lol",
+      "rofl"
+     ],
+     "emoji": "🤣"
+    },
+    {
+     "index": 3,
+     "id": "prompt03",
+     "key": "original_emojis_cry",
+     "tags": [
+      "original_emojis_cry",
+      "cry",
+      "crying",
+      "sobbing",
+      "tears"
+     ],
+     "emoji": "😭"
+    },
+    {
+     "index": 4,
+     "id": "prompt04",
+     "key": "original_emojis_sad",
+     "tags": [
+      "original_emojis_sad",
+      "sad",
+      "unhappy",
+      "disappointed"
+     ],
+     "emoji": "😔"
+    }
+   ],
+   "expanded_by": "deterministic",
+   "actions_mode": "predefined",
+   "batches_max": 4
+  },
+  "max": 4,
+  "transformation": false,
+  "made": [
+   {
+    "no": 1,
+    "label": "Batch 01 · actions 1-4",
+    "generation": "G151",
+    "job": null,
+    "plan": {
+     "task": "original emojis",
+     "task_slug": "original_emojis",
+     "subject": "original emojis",
+     "scene": "",
+     "described": "original emojis",
+     "context": "",
+     "kind": "default",
+     "grid": [
+      2,
+      2
+     ],
+     "template_id": "sheet_2x2",
+     "template_version": 4,
+     "slots": {
+      "subject_description": "original emojis",
+      "style_id": "glossy_3d",
+      "mode": "sheet_2x2",
+      "cells": [
+       {
+        "pos": 1,
+        "label": "pure happiness with a bright beaming smile and joyful eyes",
+        "tags": [
+         "original_emojis_happy",
+         "happy",
+         "smile",
+         "joy"
+        ],
+        "emoji": "😀",
+        "motion": "beams brightly, eyes shine with joy, happy sway"
+       },
+       {
+        "pos": 2,
+        "label": "laughing so hard tears of joy fly out, mouth wide open, eyes squeezed shut",
+        "tags": [
+         "original_emojis_laugh",
+         "laugh",
+         "laughing",
+         "lol",
+         "rofl"
+        ],
+        "emoji": "🤣",
+        "motion": "the face shakes with laughter, tears fly, the mouth opens wide"
+       },
+       {
+        "pos": 3,
+        "label": "bawling with big streaming tears and a trembling lip",
+        "tags": [
+         "original_emojis_cry",
+         "cry",
+         "crying",
+         "sobbing",
+         "tears"
+        ],
+        "emoji": "😭",
+        "motion": "tears stream in two arcs, the lip quivers, the face crumples"
+       },
+       {
+        "pos": 4,
+        "label": "sad and drooping face with a single tear",
+        "tags": [
+         "original_emojis_sad",
+         "sad",
+         "unhappy",
+         "disappointed"
+        ],
+        "emoji": "😔",
+        "motion": "sighs, a tear slides down, the face droops lower"
+       }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "face": true,
+      "preset": null,
+      "loop": false
+     },
+     "guidelines": {
+      "sheet": "2x2 sticker sheet, 4 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+      "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+      "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+      "consistency": "same character design, proportions and colors in all 4 cells",
+      "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+     },
+     "stickers": [
+      {
+       "index": 1,
+       "id": "prompt01",
+       "key": "original_emojis_happy",
+       "tags": [
+        "original_emojis_happy",
+        "happy",
+        "smile",
+        "joy"
+       ],
+       "emoji": "😀"
+      },
+      {
+       "index": 2,
+       "id": "prompt02",
+       "key": "original_emojis_laugh",
+       "tags": [
+        "original_emojis_laugh",
+        "laugh",
+        "laughing",
+        "lol",
+        "rofl"
+       ],
+       "emoji": "🤣"
+      },
+      {
+       "index": 3,
+       "id": "prompt03",
+       "key": "original_emojis_cry",
+       "tags": [
+        "original_emojis_cry",
+        "cry",
+        "crying",
+        "sobbing",
+        "tears"
+       ],
+       "emoji": "😭"
+      },
+      {
+       "index": 4,
+       "id": "prompt04",
+       "key": "original_emojis_sad",
+       "tags": [
+        "original_emojis_sad",
+        "sad",
+        "unhappy",
+        "disappointed"
+       ],
+       "emoji": "😔"
+      }
+     ],
+     "expanded_by": "deterministic",
+     "actions_mode": "predefined",
+     "batches_max": 4
+    },
+    "creator": false,
+    "ts": 1791955672.29
+   }
+  ],
+  "said": "1:G151"
+ },
+ "named": [
+  "G151"
+ ]
+}

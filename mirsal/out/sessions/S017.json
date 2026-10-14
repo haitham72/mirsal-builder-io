@@ -1,0 +1,847 @@
+{
+ "id": "S017",
+ "user": "local",
+ "title": "original emojis kawai",
+ "created": 1791955503.457,
+ "updated": 1791955621.747,
+ "settings": {
+  "grid": "2x2",
+  "style_id": "flat_vector",
+  "ask_before_spending": true,
+  "ai": true,
+  "actions": "predefined",
+  "allow_vlm": null,
+  "stage": "auto",
+  "creator": {
+   "on": false,
+   "scope": "images",
+   "bypass": false
+  }
+ },
+ "focus": {
+  "generation": "G149",
+  "stickers": []
+ },
+ "subjects": [
+  {
+   "name": "original emojis kawai",
+   "slug": "original_emojis_kawai",
+   "passes": [
+    {
+     "generation": "G149",
+     "job": null,
+     "prompt": "original emojis kawai",
+     "grid": "2x2",
+     "style_id": "flat_vector",
+     "parent": null,
+     "created": 1791955521.495,
+     "ready": 0,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": ""
+    }
+   ]
+  },
+  {
+   "name": "cute puupy",
+   "slug": "cute_puupy",
+   "passes": [
+    {
+     "generation": null,
+     "job": "J110",
+     "prompt": "cute puupy",
+     "grid": "2x2",
+     "style_id": "flat_vector",
+     "parent": null,
+     "created": 1791955595.262,
+     "ready": 0,
+     "approved": 0,
+     "rejected": 0,
+     "liked": [],
+     "disliked": [],
+     "note": ""
+    }
+   ]
+  }
+ ],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1791955516.962,
+   "user": "original emojis kawai",
+   "assistant": "Here's the plan for **original emojis kawai**: 4 stickers, flat (I have this prepared: 0 credits). Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 2,
+   "ts": 1791955521.499,
+   "user": "confirm",
+   "assistant": "Creating **original emojis kawai** now. The stickers appear below as they are ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": "G149"
+  },
+  {
+   "seq": 3,
+   "ts": 1791955591.066,
+   "user": "cute puupy",
+   "assistant": "Here's the plan for **cute puupy**: 4 stickers, flat. Shall I create it?",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 4,
+   "ts": 1791955595.267,
+   "user": "confirm",
+   "assistant": "Creating **cute puupy** now (about 2 credits). The stickers appear below as they are ready.",
+   "intents": [
+    "CONFIRM"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 2.0
+   },
+   "generation_id": null
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "original emojis kawai",
+   "cards": [],
+   "steps": [],
+   "ts": 1791955515.745
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "Here's the plan for **original emojis kawai**: 4 stickers, flat (I have this prepared: 0 credits). Shall I create it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "original emojis kawai",
+     "grid": "2x2",
+     "style": "flat",
+     "count": 4,
+     "names": [
+      "original emojis kawai happy",
+      "original emojis kawai laugh",
+      "original emojis kawai cry",
+      "original emojis kawai sad"
+     ],
+     "estimate": 0,
+     "balance": 48.37,
+     "prompt": "original emojis kawai",
+     "prepared": true,
+     "free": false,
+     "stage": "emojis",
+     "batch": {
+      "no": 1,
+      "max": 4,
+      "label": "Batch 01 · actions 1-4",
+      "text": "Batch 01 of 04 · actions 1-4"
+     }
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating original emojis kawai",
+     "detail": null,
+     "status": "running",
+     "ts": 1791955515.761
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955515.793
+    },
+    {
+     "kind": "step",
+     "label": "writing 4 sticker ideas with openai:gpt-6-luna (cloud)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955515.804
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "4 stickers",
+      "lines": [
+       "original emojis kawai happy",
+       "original emojis kawai laugh",
+       "original emojis kawai cry",
+       "original emojis kawai sad"
+      ]
+     },
+     "status": "done",
+     "ts": 1791955515.853
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · free",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955516.956
+    }
+   ],
+   "ts": 1791955515.745,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Make a new one (paid)",
+     "action": "confirm_new"
+    },
+    {
+     "label": "Allow AI vision",
+     "on": "AI vision on",
+     "off": "AI vision off",
+     "setting": {
+      "allow_vlm": true
+     },
+     "side": "right",
+     "glow": true
+    }
+   ]
+  },
+  {
+   "id": "m3",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791955520.813
+  },
+  {
+   "id": "m4",
+   "role": "assistant",
+   "text": "Creating **original emojis kawai** now. The stickers appear below as they are ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": "G149",
+     "job": null,
+     "subject": "original emojis kawai",
+     "parent": null,
+     "note": "",
+     "batch": "Batch 01 · actions 1-4"
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating original emojis kawai",
+     "detail": null,
+     "status": "running",
+     "ts": 1791955520.82
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955520.849
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955520.857
+    },
+    {
+     "kind": "final",
+     "label": "started · G149",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955521.495
+    }
+   ],
+   "ts": 1791955520.813,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m5",
+   "role": "assistant",
+   "text": "**original emojis kawai**: batch 01 of 04 is ready. Regenerate it, or make the next batches of the pack.",
+   "cards": [],
+   "steps": [],
+   "ts": 1791955525.052,
+   "chips": [
+    {
+     "label": "Regenerate · 2 credits",
+     "action": "regenerate",
+     "generation": "G149"
+    },
+    {
+     "label": "Batch 02 · 2 credits",
+     "action": "batch_more",
+     "to": 2
+    },
+    {
+     "label": "Batch 03 · 4 credits",
+     "action": "batch_more",
+     "to": 3
+    },
+    {
+     "label": "Batch 04 · 6 credits",
+     "action": "batch_more",
+     "to": 4
+    }
+   ]
+  },
+  {
+   "id": "m6",
+   "role": "user",
+   "text": "cute puupy",
+   "cards": [],
+   "steps": [],
+   "ts": 1791955589.527
+  },
+  {
+   "id": "m7",
+   "role": "assistant",
+   "text": "Here's the plan for **cute puupy**: 4 stickers, flat. Shall I create it?",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "cute puupy",
+     "grid": "2x2",
+     "style": "flat",
+     "count": 4,
+     "names": [
+      "puupy happy",
+      "puupy laugh",
+      "puupy cry",
+      "puupy sad"
+     ],
+     "estimate": 2.0,
+     "balance": 48.37,
+     "prompt": "cute puupy",
+     "prepared": false,
+     "free": false,
+     "stage": "emojis",
+     "batch": {
+      "no": 1,
+      "max": 4,
+      "label": "Batch 01 · actions 1-4",
+      "text": "Batch 01 of 04 · actions 1-4"
+     }
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating cute puupy",
+     "detail": null,
+     "status": "running",
+     "ts": 1791955589.54
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955589.546
+    },
+    {
+     "kind": "step",
+     "label": "writing 4 sticker ideas with openai:gpt-6-luna (cloud)",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955589.584
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "4 stickers",
+      "lines": [
+       "puupy happy",
+       "puupy laugh",
+       "puupy cry",
+       "puupy sad"
+      ]
+     },
+     "status": "done",
+     "ts": 1791955589.596
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 2 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955591.059
+    }
+   ],
+   "ts": 1791955589.527,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create it",
+     "action": "confirm"
+    },
+    {
+     "label": "Not yet",
+     "action": "cancel"
+    }
+   ]
+  },
+  {
+   "id": "m8",
+   "role": "user",
+   "text": "Create",
+   "cards": [],
+   "steps": [],
+   "ts": 1791955593.92
+  },
+  {
+   "id": "m9",
+   "role": "assistant",
+   "text": "Creating **cute puupy** now (about 2 credits). The stickers appear below as they are ready.",
+   "cards": [
+    {
+     "type": "generation",
+     "generation": null,
+     "job": "J110",
+     "subject": "cute puupy",
+     "parent": null,
+     "note": "",
+     "batch": "Batch 01 · actions 1-4"
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating cute puupy",
+     "detail": null,
+     "status": "running",
+     "ts": 1791955593.927
+    },
+    {
+     "kind": "step",
+     "label": "understood: your go-ahead",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955593.959
+    },
+    {
+     "kind": "step",
+     "label": "confirmed: create",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955593.967
+    },
+    {
+     "kind": "final",
+     "label": "started · J110",
+     "detail": null,
+     "status": "done",
+     "ts": 1791955595.262
+    }
+   ],
+   "ts": 1791955593.92,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m10",
+   "role": "assistant",
+   "text": "**cute puupy**: batch 01 of 04 is ready. Regenerate it, or make the next batches of the pack.",
+   "cards": [],
+   "steps": [],
+   "ts": 1791955621.747,
+   "chips": [
+    {
+     "label": "Regenerate · 2 credits",
+     "action": "regenerate",
+     "generation": "G150"
+    },
+    {
+     "label": "Batch 02 · 2 credits",
+     "action": "batch_more",
+     "to": 2
+    },
+    {
+     "label": "Batch 03 · 4 credits",
+     "action": "batch_more",
+     "to": 3
+    },
+    {
+     "label": "Batch 04 · 6 credits",
+     "action": "batch_more",
+     "to": 4
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": null,
+ "vision_asked": true,
+ "pack": {
+  "request": "cute puupy",
+  "subject": "cute puupy",
+  "grid": "2x2",
+  "style_id": "flat_vector",
+  "ai": true,
+  "plan": {
+   "task": "cute puupy",
+   "task_slug": "puupy",
+   "subject": "cute puupy",
+   "scene": "",
+   "described": "cute puupy",
+   "context": "",
+   "kind": "default",
+   "grid": [
+    2,
+    2
+   ],
+   "template_id": "sheet_2x2",
+   "template_version": 3,
+   "slots": {
+    "subject_description": "cute puupy",
+    "style_id": "flat_vector",
+    "mode": "sheet_2x2",
+    "cells": [
+     {
+      "pos": 1,
+      "label": "beaming with happiness, bouncing on the spot with a huge smile",
+      "tags": [
+       "puupy_happy",
+       "happy",
+       "smile",
+       "joy"
+      ],
+      "emoji": "😀",
+      "motion": "bounces happily, the smile widens, a little hop"
+     },
+     {
+      "pos": 2,
+      "label": "laughing so hard tears of joy fly out, holding the belly",
+      "tags": [
+       "puupy_laugh",
+       "laugh",
+       "laughing",
+       "lol",
+       "rofl"
+      ],
+      "emoji": "🤣",
+      "motion": "doubles over laughing, shoulders shake, wipes a tear"
+     },
+     {
+      "pos": 3,
+      "label": "bawling with big streaming tears, rubbing the eyes",
+      "tags": [
+       "puupy_cry",
+       "cry",
+       "crying",
+       "sobbing",
+       "tears"
+      ],
+      "emoji": "😭",
+      "motion": "tears stream in two arcs, the body shakes with sobs"
+     },
+     {
+      "pos": 4,
+      "label": "sad and slumped, head hanging low, a single tear",
+      "tags": [
+       "puupy_sad",
+       "sad",
+       "unhappy",
+       "disappointed"
+      ],
+      "emoji": "😔",
+      "motion": "sighs, the shoulders drop, a tear slides down"
+     }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "face": false,
+    "preset": null,
+    "loop": false
+   },
+   "guidelines": {
+    "sheet": "2x2 sticker sheet, 4 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 4 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+   },
+   "stickers": [
+    {
+     "index": 1,
+     "id": "prompt01",
+     "key": "puupy_happy",
+     "tags": [
+      "puupy_happy",
+      "happy",
+      "smile",
+      "joy"
+     ],
+     "emoji": "😀"
+    },
+    {
+     "index": 2,
+     "id": "prompt02",
+     "key": "puupy_laugh",
+     "tags": [
+      "puupy_laugh",
+      "laugh",
+      "laughing",
+      "lol",
+      "rofl"
+     ],
+     "emoji": "🤣"
+    },
+    {
+     "index": 3,
+     "id": "prompt03",
+     "key": "puupy_cry",
+     "tags": [
+      "puupy_cry",
+      "cry",
+      "crying",
+      "sobbing",
+      "tears"
+     ],
+     "emoji": "😭"
+    },
+    {
+     "index": 4,
+     "id": "prompt04",
+     "key": "puupy_sad",
+     "tags": [
+      "puupy_sad",
+      "sad",
+      "unhappy",
+      "disappointed"
+     ],
+     "emoji": "😔"
+    }
+   ],
+   "expanded_by": "deterministic",
+   "actions_mode": "predefined",
+   "batches_max": 4
+  },
+  "max": 4,
+  "transformation": false,
+  "made": [
+   {
+    "no": 1,
+    "label": "Batch 01 · actions 1-4",
+    "generation": "G150",
+    "job": "J110",
+    "plan": {
+     "task": "cute puupy",
+     "task_slug": "puupy",
+     "subject": "cute puupy",
+     "scene": "",
+     "described": "cute puupy",
+     "context": "",
+     "kind": "default",
+     "grid": [
+      2,
+      2
+     ],
+     "template_id": "sheet_2x2",
+     "template_version": 3,
+     "slots": {
+      "subject_description": "cute puupy",
+      "style_id": "flat_vector",
+      "mode": "sheet_2x2",
+      "cells": [
+       {
+        "pos": 1,
+        "label": "beaming with happiness, bouncing on the spot with a huge smile",
+        "tags": [
+         "puupy_happy",
+         "happy",
+         "smile",
+         "joy"
+        ],
+        "emoji": "😀",
+        "motion": "bounces happily, the smile widens, a little hop"
+       },
+       {
+        "pos": 2,
+        "label": "laughing so hard tears of joy fly out, holding the belly",
+        "tags": [
+         "puupy_laugh",
+         "laugh",
+         "laughing",
+         "lol",
+         "rofl"
+        ],
+        "emoji": "🤣",
+        "motion": "doubles over laughing, shoulders shake, wipes a tear"
+       },
+       {
+        "pos": 3,
+        "label": "bawling with big streaming tears, rubbing the eyes",
+        "tags": [
+         "puupy_cry",
+         "cry",
+         "crying",
+         "sobbing",
+         "tears"
+        ],
+        "emoji": "😭",
+        "motion": "tears stream in two arcs, the body shakes with sobs"
+       },
+       {
+        "pos": 4,
+        "label": "sad and slumped, head hanging low, a single tear",
+        "tags": [
+         "puupy_sad",
+         "sad",
+         "unhappy",
+         "disappointed"
+        ],
+        "emoji": "😔",
+        "motion": "sighs, the shoulders drop, a tear slides down"
+       }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "face": false,
+      "preset": null,
+      "loop": false
+     },
+     "guidelines": {
+      "sheet": "2x2 sticker sheet, 4 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+      "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+      "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+      "consistency": "same character design, proportions and colors in all 4 cells",
+      "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+     },
+     "stickers": [
+      {
+       "index": 1,
+       "id": "prompt01",
+       "key": "puupy_happy",
+       "tags": [
+        "puupy_happy",
+        "happy",
+        "smile",
+        "joy"
+       ],
+       "emoji": "😀"
+      },
+      {
+       "index": 2,
+       "id": "prompt02",
+       "key": "puupy_laugh",
+       "tags": [
+        "puupy_laugh",
+        "laugh",
+        "laughing",
+        "lol",
+        "rofl"
+       ],
+       "emoji": "🤣"
+      },
+      {
+       "index": 3,
+       "id": "prompt03",
+       "key": "puupy_cry",
+       "tags": [
+        "puupy_cry",
+        "cry",
+        "crying",
+        "sobbing",
+        "tears"
+       ],
+       "emoji": "😭"
+      },
+      {
+       "index": 4,
+       "id": "prompt04",
+       "key": "puupy_sad",
+       "tags": [
+        "puupy_sad",
+        "sad",
+        "unhappy",
+        "disappointed"
+       ],
+       "emoji": "😔"
+      }
+     ],
+     "expanded_by": "deterministic",
+     "actions_mode": "predefined",
+     "batches_max": 4
+    },
+    "creator": false,
+    "ts": 1791955595.262
+   }
+  ],
+  "said": "1:J110"
+ }
+}

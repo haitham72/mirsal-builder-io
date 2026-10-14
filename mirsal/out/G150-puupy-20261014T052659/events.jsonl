@@ -1,0 +1,7 @@
+{"ts": 1791955619.572, "stage": "requested", "status": "done", "ms": 0, "detail": {"prompt": "cute puupy", "task_slug": "puupy"}}
+{"ts": 1791955619.587, "stage": "sheet_picked", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791955619.977, "stage": "sheet_picked", "status": "done", "ms": 388, "detail": {"subject": "puupy", "variant": 1, "of": 1, "file": "result.png", "blocked": null, "cut_anyway": [], "warnings": []}}
+{"ts": 1791955619.978, "stage": "keyed", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791955620.329, "stage": "keyed", "status": "done", "ms": 350, "detail": {"bg": [4, 253, 5], "threshold": [124.0, 123.5, 123.5, 123.0], "grid": "2x2", "cut": "gutter", "xs": [0, 1030, 2048], "ys": [0, 1083, 2048]}}
+{"ts": 1791955620.33, "stage": "sliced", "status": "start", "ms": 0, "detail": null}
+{"ts": 1791955620.65, "stage": "sliced", "status": "done", "ms": 319, "detail": {"ready": 4, "failed": 0}}
