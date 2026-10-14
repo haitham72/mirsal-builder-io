@@ -3,8 +3,10 @@
    the engine and the review gates are unchanged: a finished sheet runs through the same stills run, a video only starts from an approved video sheet. */
 'use strict';
 const LIVE={hf:null,m:null,style:'flat_vector',img:{id:'',options:{}},vid:{id:'',options:{}},jobs:[],est:{},loop:false,fill:null,q:[],typ:{},dis:[]};
-try{const s=JSON.parse(localStorage.getItem('mirsal.live')||'null');if(s){LIVE.style=s.style||LIVE.style;LIVE.img=s.img||LIVE.img;LIVE.vid=s.vid||LIVE.vid;LIVE.jobs=Array.isArray(s.jobs)?s.jobs:[];LIVE.loop=!!s.loop;LIVE.fill=typeof s.fill==='number'?s.fill:null;LIVE.dis=Array.isArray(s.dis)?s.dis:[]}}catch(e){}
-const lsave=()=>gstore('mirsal.live',JSON.stringify({style:LIVE.style,img:LIVE.img,vid:LIVE.vid,jobs:LIVE.jobs,loop:LIVE.loop,fill:LIVE.fill,dis:LIVE.dis.slice(-60)}));
+try{const s=JSON.parse(localStorage.getItem('mirsal.live')||'null');if(s){LIVE.style=s.style||LIVE.style;LIVE.img=s.img||LIVE.img;LIVE.vid=s.vid||LIVE.vid;LIVE.jobs=Array.isArray(s.jobs)?s.jobs:[];LIVE.loop=!!s.loop;LIVE.grid=s.grid==='2x2'?'2x2':'3x3';LIVE.fill=typeof s.fill==='number'?s.fill:null;LIVE.dis=Array.isArray(s.dis)?s.dis:[]}}catch(e){}
+/* the Studio's grid (the composer's Grid chip): 3x3 (default) or 2x2; every sheet request and plan of the Studio reads it */
+const cpGrid=()=>(typeof LIVE!=='undefined'&&LIVE.grid==='2x2')?'2x2':'3x3';
+const lsave=()=>gstore('mirsal.live',JSON.stringify({style:LIVE.style,img:LIVE.img,vid:LIVE.vid,jobs:LIVE.jobs,loop:LIVE.loop,grid:LIVE.grid,fill:LIVE.fill,dis:LIVE.dis.slice(-60)}));
 const fcr=n=>n==null?'?':(+n).toLocaleString(undefined,{maximumFractionDigits:2});
 const lkind=k=>k==='image'||k==='video'?k:(k==='sheet'||k==='single'?'image':'video');
 
@@ -79,7 +81,7 @@ const liveReadyNow=()=>!!(LIVE.hf&&LIVE.hf.available&&!LIVE.hf.error&&LIVE.m);
 function liveOffer(prompt){if(!liveReadyNow())return false;liveStart('sheet',{prompt,ai:typeof aiOn==='function'&&aiOn(),refs:[]});return true}
 async function liveStart(kind,ctx){const isSheet=kind==='sheet',im=lsel('image'),vi=lsel('video'),est=await lcost(isSheet?'image':'video',true);
   if(est!=null&&LIVE.hf&&LIVE.hf.credits!=null&&est>LIVE.hf.credits){toast(`Not enough credits: this costs ${fcr(est)} and ${fcr(LIVE.hf.credits)} are left`,1);return false}
-  const body=isSheet?{prompt:ctx.prompt,grid:'3x3',style_id:ctx.style_id||LIVE.style,ai:!!ctx.ai,outline:GS.outline,loop:ctx.loop===undefined?!!LIVE.loop:!!ctx.loop,model:im.sel.id,options:im.sel.options,refs:ctx.refs||[],
+  const body=isSheet?{prompt:ctx.prompt,grid:ctx.grid||cpGrid(),style_id:ctx.style_id||LIVE.style,ai:!!ctx.ai,outline:GS.outline,loop:ctx.loop===undefined?!!LIVE.loop:!!ctx.loop,model:im.sel.id,options:im.sel.options,refs:ctx.refs||[],
       ...(ctx.from_generation?{from_generation:ctx.from_generation}:{}),...(ctx.parent?{parent:ctx.parent}:{}),...(ctx.regen_of?{regen_of:ctx.regen_of}:{}),...(ctx.sheet_prompt?{sheet_prompt:ctx.sheet_prompt}:{}),...(ctx.plan?{plan:ctx.plan}:{})}      /* the Prompt tab: this batch's own plan, and the text the person wrote */
     :{kind:'video',generation:ctx.g,model:vi.sel.id,options:vi.sel.options,slot_fill:fillNow(),loop:!!LIVE.loop,...(ctx.video_prompt?{video_prompt:ctx.video_prompt}:{}),...(ctx.redo?{redo:true}:{}),...(egDirty()?{outline:egVals().o,erode:egVals().e}:{})};
   const r=await postWait(isSheet?'/api/live/sheet':'/api/live/video',body,'Finishing the previous step…',{'Idempotency-Key':ikey()});

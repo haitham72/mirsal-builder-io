@@ -395,7 +395,7 @@ def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: s
     if erode is not None and not 0 <= int(erode) <= 8:
         raise PipelineError("erode must be 0 (none) to 8 px")
     if pick is None:
-        base = sources.find(inp, prompt, 1)
+        base = sources.find(inp, prompt, 1, grid)                    # only a prepared sheet drawn in the asked grid (None: any)
         if base:
             picks = sources.scan(inp)[base.subject]
             pick = picks[min(max(variant or 1, 1), len(picks)) - 1]      # explicit folder, else the first: it never advances by itself

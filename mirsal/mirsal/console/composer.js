@@ -94,6 +94,7 @@ function cpDrawBar(){const el=$('cpbar');if(!el)return;const {model,sel}=lsel('i
    <div class=cp-pw><button class="cp-chip ${CP.pop==='stroke'?'open':''}" data-act=cpstroke aria-haspopup=true aria-expanded=${CP.pop==='stroke'}>${glyph(st)}<span><b>Stroke</b><em>${strokeName(st)}</em></span></button>
     ${CP.pop==='stroke'?`<div class=cp-pop role=menu>${STROKES.map(([px,n])=>`<button role=menuitemradio aria-checked=${px===st} class="${px===st?'on':''}" data-act=cpstrokeset data-px=${px}>${glyph(px)}<span><b>${n}</b><em>${px?px+' px':'no border'}</em></span></button>`).join('')}</div>`:''}</div>
    <button class="cp-chip cp-ai ${LIVE.loop?'on':''}" data-act=cploop aria-pressed=${!!LIVE.loop} title="Off: the animation plays once through and Mirsal closes the loop itself. On: the video prompt asks for a loop and Kling ends on its first pose. A loop wording makes the stickers bounce several times in the 3 seconds."><span class=cp-sw><i></i></span><span><b>Loop</b><em>${LIVE.loop?'On':'Off'}</em></span></button>
+   <button class="cp-chip ${cpGrid()==='2x2'?'on':''}" data-act=cpgrid aria-pressed=${cpGrid()==='2x2'} title="The sheet's grid: 3×3 makes 9 stickers, 2×2 makes 4 (Haitham, 2026-10-14). A prepared sheet serves only a request in its own grid."><span><b>Grid</b><em>${cpGrid()==='2x2'?'2×2':'3×3'}</em></span></button>
    <button class="cp-chip cp-ai ${ptOn()?'on':''}" data-act=cppart aria-pressed=${ptOn()} title="On: the prompt asks for particles on their own (for example: particles for lipsticks and ribbons). No sticker owns them; preview, render, download them or make a pack of them."><span class=cp-sw><i></i></span><span><b>Reactions</b><em>${ptOn()?'On':'Off'}</em></span></button>
    <button class="cp-chip cp-ai ${aiOn()?'on':''}" data-act=cpai aria-pressed=${aiOn()} ${GAI&&GAI.configured?'':'disabled'} title="${esc(aiChipTitle())}"><span class=cp-sw><i></i></span><span><b>AI enhancer</b><em>${aiOn()?'On':'Off'}</em></span></button>
    <span class="gseg cp-act" role=group aria-label="Where the stickers come from"><button type=button data-act=cpactions data-v=creative aria-pressed=${CP.actions!=='predefined'} title="The AI (or the built-in mood list) invents nine stickers for your idea">Creative</button><button type=button data-act=cpactions data-v=predefined aria-pressed=${CP.actions==='predefined'} title="Nine of the 36 predefined actions (happy, laugh, cry …), drawn as your character; the next batches continue through the 36">Predefined</button></span>
@@ -110,6 +111,7 @@ function cpDrawEngine(){const el=$('cpeng');if(!el)return;const show=typeof AIEN
   const html=`<div class="ai-set on cp-eng" aria-label="AI enhancer engine" title="Local: free. Cloud: one small OpenAI call.">${AIENG.rows(cpEngSrc())}</div>`;
   if(el._h!==html){el._h=html;el.innerHTML=html}}          // only when it changed: the bar is redrawn often, and a redraw would close an open drop-down
 ACT.cpactions=el=>{CP.actions=el.dataset.v==='predefined'?'predefined':'creative';try{localStorage.setItem('mirsal.actions',CP.actions)}catch(e){}cpDrawBar()};
+ACT.cpgrid=()=>{LIVE.grid=cpGrid()==='2x2'?'3x3':'2x2';lsave();cpDrawBar()};
 ACT.cploop=()=>{LIVE.loop=!LIVE.loop;lsave();cpDrawBar();document.querySelectorAll('[data-lvloop]').forEach(c=>c.checked=LIVE.loop)};
 ACT.cpai=()=>{CP.ai=!CP.ai;gstore('mirsal.ai',CP.ai?'1':'0');cpDrawBar();if(CP.ai){if(typeof AIENG!=='undefined')AIENG.load();if(typeof aiRefresh==='function')aiRefresh()}};      // turning it On reads the engine and the models again (LM Studio may have started since the page opened)
 ACT.cpstroke=e=>{CP.pop=CP.pop==='stroke'?null:'stroke';cpDrawBar();if(e&&e.stopPropagation)e.stopPropagation()};
@@ -131,7 +133,7 @@ const _ggo=ACT.ggo;
 ACT.ggo=async()=>{const p=(($('prompt')||{}).value||'').trim();
   if(!p){say('Write what you want first, for example <b>an angel reading a newspaper</b>.');return}
   if(liveReady()&&!CP.refs.some(r=>r.busy)){
-    try{const r=await api('/api/prepared/match?prompt='+encodeURIComponent(p));
+    try{const r=await api('/api/prepared/match?prompt='+encodeURIComponent(p)+'&grid='+cpGrid());
       if(r.ok&&r.j.subject&&r.j.prefer){say('');return _ggo()}}catch(e){}
   }
   if(liveReady()){say('');

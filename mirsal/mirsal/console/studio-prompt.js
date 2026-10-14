@@ -343,7 +343,7 @@ async function gdPlan(ai) {
       loop = !!(typeof LIVE !== 'undefined' && LIVE.loop);
     const r = await post('/api/plan', {
       prompt: p,
-      grid: '3x3',
+      grid: typeof cpGrid === 'function' ? cpGrid() : '3x3',
       style_id: style,
       loop,
       ai: !!ai,
@@ -622,7 +622,7 @@ ACT.ghiggs = async () => {
   if (!p) return;
   const r = await post('/api/plan', {
     prompt: p,
-    grid: '3x3',
+    grid: typeof cpGrid === 'function' ? cpGrid() : '3x3',
     style_id: (typeof LIVE !== 'undefined' && LIVE.style) || 'flat_vector',
     loop: !!(typeof LIVE !== 'undefined' && LIVE.loop),
     ai: typeof aiOn === 'function' && aiOn(),
@@ -647,7 +647,7 @@ ACT.hcopy = async (el) => {
 ACT.hgenop = async () => {
   const p = $('prompt').value.trim();
   if (!p) return;
-  const r = await post('/api/jobs', { kind: 'sheet', request: { prompt: p, grid: [3, 3] } });
+  const r = await post('/api/jobs', { kind: 'sheet', request: { prompt: p, grid: typeof cpGrid === 'function' && cpGrid() === '2x2' ? [2, 2] : [3, 3] } });
   if (!r.ok) return toast(r.j.error, 1);
   const id = r.j.id,
     t0 = Date.now();
@@ -675,7 +675,7 @@ ACT.hgenop = async () => {
 ACT.hreserve = async () => {
   const r = await post('/api/tasks', {
     prompt: $('prompt').value.trim(),
-    grid: '3x3',
+    grid: typeof cpGrid === 'function' ? cpGrid() : '3x3',
     style_id: (typeof LIVE !== 'undefined' && LIVE.style) || 'flat_vector',
     loop: !!(typeof LIVE !== 'undefined' && LIVE.loop),
     ai: typeof aiOn === 'function' && aiOn(),

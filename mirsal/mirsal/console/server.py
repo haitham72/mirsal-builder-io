@@ -1196,8 +1196,9 @@ def make_handler(c: Console):
             if path == "/api/inputs":
                 return self._json(200, {"inputs": pl.list_inputs(c.inp)})
             if path == "/api/prepared/match":       # which prepared subject a request names (whole signature words), and whether prepared is preferred
-                q = parse_qs(urlparse(self.path).query).get("prompt", [""])[0]
-                subject = sources.match_subject(c.inp, q)
+                qs = parse_qs(urlparse(self.path).query)
+                q = qs.get("prompt", [""])[0]
+                subject = sources.match_subject(c.inp, q, qs.get("grid", [None])[0])
                 n = len(sources.scan(c.inp).get(subject, [])) if subject else 0
                 return self._json(200, {"subject": subject, "variants": n, "prefer": sources.prefer_prepared(c.out)})
             if path == "/api/prepared/setting":     # the owner's prefer-prepared switch (MIRSAL_PREFER_PREPARED wins when set)

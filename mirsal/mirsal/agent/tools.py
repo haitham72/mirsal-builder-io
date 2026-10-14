@@ -201,14 +201,14 @@ class ConsoleTools:
         data = (pl.gen_dir(self.out, int(gid[1:])) / st["png"]).read_bytes()
         return self.c.save_ref(data, f"{sid.replace('/', '_')}.png")["id"]
 
-    def prepared_match(self, prompt: str) -> str | None:
-        """The prepared subject this request names, when serving it from the watch folder is preferred (else None:
+    def prepared_match(self, prompt: str, grid=None) -> str | None:
+        """The prepared subject this request names in this grid, when serving it from the watch folder is preferred (else None:
         the request goes live). Free: no provider call, no credits."""
         if not self.live():
             return None
         from ..flow import sources
         try:
-            return sources.match_subject(self.c.inp, prompt) if sources.prefer_prepared(self.out) else None
+            return sources.match_subject(self.c.inp, prompt, grid) if sources.prefer_prepared(self.out) else None
         except Exception:
             return None
 
@@ -220,7 +220,7 @@ class ConsoleTools:
         subject -> that prepared set (0 credits, the same gates), unless `force_live` ("Make a new one");
         otherwise the prepared-sheet lookup, exactly as the page does. `base_plan` is the plan the person
         approved on the card: it is what is sent (the cells, tags and slots of the card), never planned a second time."""
-        match = None if force_live else self.prepared_match(prompt)
+        match = None if force_live else self.prepared_match(prompt, grid)
         manual = (base_plan or {}).get("slots", {}).get("emoji_batch")
         if manual:
             from ..generation.emoji_batches import validate_target
@@ -808,7 +808,7 @@ class FakeTools:
     def edge_of(self, gid):
         return dict(getattr(self, "edges", {}).get(gid) or {})
 
-    def prepared_match(self, prompt):
+    def prepared_match(self, prompt, grid=None):
         return None
 
     def create(self, prompt, grid="3x3", style_id="flat_vector", ai=True, parent=None, regen_of=None, refs=None, base_plan=None, ref_clause=None, outline=None, erode=None, force_live=False):

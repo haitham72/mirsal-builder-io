@@ -475,7 +475,7 @@ class Agent:
                          + (f"; left out as you asked: {', '.join(tr['forbidden'])}" if tr.get("forbidden") else ""))
         subject = (plan.get("described") if plan.get("scene") else None) or plan.get("subject") or guess         # the normalised request ("camel in Lamborghini"), never the bare character
         t.res.generation = None
-        pm = self.tools.prepared_match(prompt) if self.tools.live() else None
+        pm = self.tools.prepared_match(prompt, st["grid"]) if self.tools.live() else None
         est = 0 if pm else (self.tools.estimate("image") if self.tools.live() else None)
         card = {"type": "plan", "subject": subject, "grid": st["grid"], "style": STYLE_NAMES.get(sid, sid),
                 "count": len(names), "names": names, "estimate": est, "balance": self.tools.credits(), "prompt": prompt,

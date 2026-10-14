@@ -111,8 +111,48 @@ def scan(root: Path) -> dict[str, list[Pick]]:
     return out
 
 
-def find(root: Path, prompt: str, variant: int = 1) -> Pick | None:
-    subject = match_subject(root, prompt)
+def grid_of(g) -> tuple[int, int] | None:
+    """"2x2" / [2, 2] / (2, 2) -> (2, 2); None for anything else."""
+    if isinstance(g, str):
+        m = re.fullmatch(r"\s*(\d)\s*[x×]\s*(\d)\s*", g)
+        return (int(m.group(1)), int(m.group(2))) if m else None
+    if isinstance(g, (list, tuple)) and len(g) == 2 and all(isinstance(x, int) for x in g):
+        return (int(g[0]), int(g[1]))
+    return None
+
+
+_GRIDS: dict = {}
+
+
+def sheet_grid(sheet: Path) -> tuple[int, int] | None:
+    """The grid a prepared sheet is drawn in (rows, cols), measured from its gutters on a green or a blue screen, once per file version (cached by
+    path and mtime). A sheet that cannot be measured counts as 3x3, as pipeline.start cuts it (the watch folders' default)."""
+    try:
+        key = (str(sheet), Path(sheet).stat().st_mtime)
+    except OSError:
+        return None
+    if key not in _GRIDS:
+        try:
+            import numpy as np
+            from PIL import Image
+            from ..engine.grid import detect_grid
+            im = Image.open(sheet).convert("RGB")
+            im.thumbnail((1024, 1024))
+            from ..generation import prompter
+            arr, got = np.asarray(im), None
+            for chroma in ("green", "blue"):
+                g = tuple(int(x) for x in detect_grid(arr, chroma))
+                if g in prompter.GRIDS and g != (1, 1):            # 1x1 = not measured (a single cell is never a prepared sheet)
+                    got = g
+                    break
+            _GRIDS[key] = got or (3, 3)
+        except Exception:
+            _GRIDS[key] = (3, 3)
+    return _GRIDS[key]
+
+
+def find(root: Path, prompt: str, variant: int = 1, grid=None) -> Pick | None:
+    subject = match_subject(root, prompt, grid)
     if not subject:
         return None
     picks = scan(root)[subject]
@@ -132,17 +172,19 @@ def words_of(text: str) -> set[str]:
     return out
 
 
-def match_subject(root: Path, prompt: str) -> str | None:
+def match_subject(root: Path, prompt: str, grid=None) -> str | None:
     """The prepared subject a request names, or None. A whole signature word of the folder name (not a shared
     filler word) must appear as a whole word of the request: "teddy bear", "teddy" and "emoji"/"emojis" all match,
     and so do the near-misses "bear in a teddy costume" and "emoji keyboard" (Haitham, 2026-10-05: whole-word
-    signature match). Best (most shared words) wins; ties keep scan order."""
-    want = words_of(prompt)
+    signature match). Best (most shared words) wins; ties keep scan order. `grid` ("2x2"): only a subject whose sheet
+    is drawn in that grid can serve the request (Haitham, 2026-10-14: a 2x2 request was served from a 3x3 prepared
+    sheet, 9 old stickers instead of 4 new ones); None = any grid."""
+    want, g = words_of(prompt), grid_of(grid)
     best, best_score = None, 0
-    for subject in scan(root):
+    for subject, picks in scan(root).items():
         sig = {w for w in words_of(subject.replace("_", " ")) if w not in STOPWORDS}
         score = len(sig & want)
-        if score > best_score:
+        if score > best_score and (g is None or any(sheet_grid(p.sheet) == g for p in picks)):
             best, best_score = subject, score
     return best
 
