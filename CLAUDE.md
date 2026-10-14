@@ -19,7 +19,7 @@
 | redesign (no action may disappear without a `renamed`/`retired` entry in `mirsal/tests/data/ui_baseline.json`) | `docs/redesign_plan.md`, `docs/ui_inventory.md` |
 | the whole app on one page | `docs/architecture.md` |
 | proposals waiting for a go | `docs/burst_plan.md`, `docs/chat-interaction-proposal.md` |
-| numbers, audits | `docs/measurements.md`, `docs/review-prompt.md`, `docs/review.md`; reference inputs `docs/inputs/` |
+| numbers, audits | `docs/measurements.md`, `docs/review-prompt.md` (whole repo), `docs/uiux-review-prompt.md` (UI/UX + duplication, for an orchestrating LLM), `docs/review.md`; reference inputs `docs/inputs/` |
 
 ## Standing instructions
 
