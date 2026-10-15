@@ -127,15 +127,18 @@ class ImportTests(unittest.TestCase):
         self.assertEqual((two["regen_of"], two["parent"], two["task_slug"]), ("G001", 1, one["task_slug"]))        # the batch's own naming
         self.assertEqual([s["key"] for s in two["stickers"]], [s["key"] for s in one["stickers"]])               # the batch's own cells and tags
         self.assertEqual([m["id"] for m in groups.family(self.out, 1)["members"]], [1, 2])
-        self.assertEqual(im.import_file(self.c, self.user, "again.png", other, batch="G001")[1]["duplicate"], True)   # never twice
+        self.assertEqual(im.import_file(self.c, self.user, "again.png", other, batch="G001")[1]["duplicate"], True)   # never twice by accident
+        code, got = im.import_file(self.c, self.user, "again.png", other, batch="G001", again=True)                     # ... but on purpose (2026-10-15)
+        self.wait()
+        self.assertEqual((code, got["kind"], got["generation"]), (202, "sheet", "G003"))
         # a video drawn from the image sheet: the main generation (G002, the newest) gets it as its 3x3 video
         vid = self.out / "src.mp4"
         synth.make_video(vid)
         code, got = im.import_file(self.c, self.user, "anim.mp4", vid.read_bytes(), batch="G001")
         self.wait()
-        self.assertEqual((code, got["kind"], got["generation"], got["match"]["sheet"]), (202, "video", "G002", "image"))
+        self.assertEqual((code, got["kind"], got["generation"], got["match"]["sheet"]), (202, "video", "G003", "image"))
         self.assertIn("image sheet", got["message"])
-        two = pl.read_result(self.out, 2)
+        two = pl.read_result(self.out, 3)
         self.assertTrue(two["source"]["has_video"])
         self.assertTrue(any(s["anim_status"] == "READY" for s in two["stickers"]))
         # a video drawn from G001's video sheet: G001 is made the main, the video is attached to A1 and cut
@@ -145,7 +148,7 @@ class ImportTests(unittest.TestCase):
         v = pl.read_result(self.out, 1)["video_sheets"][0]
         lay = self.out / "lay.mp4"
         synth.make_layout_video(lay, np.array(Image.open(d / v["file"]).convert("RGB")), json.loads((d / v["layout"]).read_text()), size=600, frames=30)
-        code, got = im.import_file(self.c, self.user, "lay.mp4", lay.read_bytes(), batch="G002")
+        code, got = im.import_file(self.c, self.user, "lay.mp4", lay.read_bytes(), batch="G003")
         self.wait()
         self.assertEqual((code, got["generation"], got["match"]["sheet"], got["sheet"]), (202, "G001", "A1", "A1"), got)
         self.assertLess(got["match"]["distances"]["A1"], got["match"]["distances"]["image"])

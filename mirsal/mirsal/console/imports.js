@@ -44,16 +44,22 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
  /* a video of the image sheet whose first frame shows another grid than the batch's: the server asks (409, hint.detected_grid) and the person may cut it
     with the batch's grid anyway (grid_ok=1, rule 10); the file waits in BIMP until they answer */
  let BIMP=null;
- const batchImport=async(n,file,ok)=>{const g=GM.get(n);if(!g)return;toast('Importing…');
-  const r=await api(`/api/import?name=${encodeURIComponent(file.name)}&batch=${encodeURIComponent(g.generation_id)}${ok?'&grid_ok=1':''}`,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:file});
-  if(!r.ok&&r.j.detected_grid){const[dr,dc]=r.j.detected_grid,[br,bc]=r.j.batch_grid;BIMP={n,file};
+ const anim0=f=>/\.(mp4|mov|webm)$/i.test(f.name||'');
+ /* ok: cut with the batch's grid anyway; again: the same bytes once more (into the batch, or with asNew as a batch of its own) */
+ const batchImport=async(n,file,ok,again,asNew)=>{const g=GM.get(n);if(!g)return;toast('Importing…');
+  const q=`name=${encodeURIComponent(file.name)}${asNew?'&as_new=1':`&batch=${encodeURIComponent(g.generation_id)}`}${ok?'&grid_ok=1':''}${again?'&again=1':''}`;
+  const r=await api(`/api/import?${q}`,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:file});
+  if(asNew&&r.ok&&!r.j.duplicate){closeDlg();const gid=r.j.id||+(String(r.j.generation||'').replace(/^G/i,''));if(gid){SES.gens=[...SES.gens,+gid];saveSes()}toast(r.j.message||'Imported as a new batch');glast='';return tick(true)}
+  if(!r.ok&&r.j.detected_grid){const[dr,dc]=r.j.detected_grid,[br,bc]=r.j.batch_grid;BIMP={n,file,again};
    return dlg(`<h2>Another grid?</h2><p>This video's first frame looks like a ${dr}×${dc} grid, but ${esc(g.generation_id)} is ${br}×${bc} (${r.j.cells} stickers). It can only be cut with the batch's grid.</p><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Cancel</button><button class="btn pri" data-act=impgrid>Cut it as ${br}×${bc} anyway</button></div>`)}
   if(!r.ok)return toast(r.j.error||'Import failed',1);
-  if(r.j.duplicate)return toast(`Already imported${r.j.generation?' as '+r.j.generation:''}: nothing was made`,1);
+  if(r.j.duplicate){BIMP={n,file};const was=r.j.generation?esc(r.j.generation):'this batch';
+   return dlg(`<h2>Already imported</h2><p>This file is already in Mirsal as ${was}. Import it again? Nothing is removed and nothing is spent.</p><div class=row style="justify-content:flex-end;flex-wrap:wrap"><button class=btn data-act=dlgx>Cancel</button><button class=btn data-act=impagain data-new=1 title="A batch of its own, cut and waiting in the Studio">As a new batch</button><button class="btn pri" data-act=impagain title="${anim0(file)?'Its next animation':'Its next generation'}">Again into ${esc(g.generation_id)}</button></div>`)}
   if(r.j.kind==='sheet'&&r.j.id){FAM.clear();SES.gens=SES.gens.map(x=>x===n?r.j.id:x);saveSes()}
   GS.tab=r.j.kind==='video'?'anim':'stickers';toast(r.j.message||'Imported');glast='';tick(true)};
  ACT.impbatch=el=>{const n=+el.dataset.g,anim=el.dataset.m==='anim',f=document.createElement('input');f.type='file';f.hidden=true;f.accept=anim?'.mp4,.mov,.webm':'.png,.jpg,.jpeg,.webp';
   f.onchange=()=>{const file=f.files[0];f.remove();if(file)batchImport(n,file,false)};
   document.body.appendChild(f);f.click()};
- ACT.impgrid=()=>{const b=BIMP;BIMP=null;closeDlg();if(b)batchImport(b.n,b.file,true)};
+ ACT.impgrid=()=>{const b=BIMP;BIMP=null;closeDlg();if(b)batchImport(b.n,b.file,true,b.again)};
+ ACT.impagain=el=>{const b=BIMP;BIMP=null;closeDlg();if(b)batchImport(b.n,b.file,false,true,!!el.dataset.new)};
 }

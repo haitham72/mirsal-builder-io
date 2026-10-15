@@ -1808,6 +1808,7 @@ def make_handler(c: Console):
             options["retry"] = q.get("retry", ["false"])[0].lower() in ("1", "true")
             options["as_new"] = q.get("as_new", ["false"])[0].lower() in ("1", "true")
             options["grid_ok"] = q.get("grid_ok", ["false"])[0].lower() in ("1", "true")
+            options["again"] = q.get("again", ["false"])[0].lower() in ("1", "true")
             try:
                 return self._json(*im.import_file(c, self.user, name, data, job_id=job_id, **options))
             except im.ImportError as e:
