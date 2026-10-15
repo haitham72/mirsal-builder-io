@@ -67,3 +67,9 @@ Remaining acceptance: exact imported3×3 fixture, native duplicate-upload retry,
 Added shared8px spacing tokens, five type roles with legacy aliases, status foreground/background pairs, focus/elevation/motion tokens and reduced-motion durations. Preserved locked issue colours and existing theme/route contracts. Shared controls have44px floors; checkbox/radio labels carry the hit target. Preview cards are bounded phone bottom sheets, retaining their frame controls.
 
 Checks: theme/surface7 pass. Fresh-server browser: Studio desktop93 controls with zero targets below44; phone no page overflow, frame sheet x12..378/y184..832 and every frame button at least44px. Three engine-selector controls measured43px during the immediate resize/press transition and need settled-state confirmation in the Studio reference pass. Original old-styles measurement is excluded; the server static asset cache requires restart before CSS acceptance.
+
+## Redesign phase 4 — Studio reference
+
+Regrouped the batch header into identity, tools and Motion; generation and batch secondary actions use labelled details menus. Existing-project New request and Edge fold behind summaries, while an empty session/draft opens the composer. Composer Options and Prompt engine disclose advanced choices without flattening or removing controls. APIs, Grid/Resize/Position and recovery remain intact.
+
+Validation: Studio menu/prompt9 pass before final disclosure; final menu/queue4 pass. Browser1440desktop and390phone in both themes: no page overflow, New request/Edge closed for G154, exactly one enabled stage primary (gadd). Reference desktop/phone screenshots in output/playwright; compare with the phase2 before screenshot. Broader cross-journey acceptance remains in the next phase.

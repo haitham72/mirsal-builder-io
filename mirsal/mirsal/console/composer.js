@@ -27,8 +27,8 @@ const liveReady=()=>!!(LIVE.hf&&LIVE.hf.available&&!LIVE.hf.error&&LIVE.m);
 function composerMount(){const g=document.querySelector('.gen2');if(!g||!LIVE.m||document.getElementById('cpwrap'))return;
   const prev=$('prompt')?$('prompt').value:'';
   g.querySelectorAll(':scope > .sh, :scope > .gform, :scope > .gopts, #lvpanel').forEach(n=>n.remove());
-  const w=document.createElement('section');w.id='cpwrap';w.className='cp';g.insertBefore(w,g.firstChild);
-  w.innerHTML=`<div class=cp-halo></div>
+  const w=document.createElement('details');w.id='cpwrap';w.className='cp';w.open=!SES.gens.length||gdOn();g.insertBefore(w,g.firstChild);
+  w.innerHTML=`<summary class=cp-summary>New request <small>Describe and plan another sticker set</small></summary><div class=cp-halo></div>
    <header class=cp-head><img class=cp-orb src=/assets/brand/mirsal-logo.png alt=""><h1>Studio</h1><span class=cp-gap></span><div class=cp-top id=cptop></div></header>
    <div class=cp-box id=cpbox>
     <div class=cp-refs id=cprefs></div>
@@ -88,17 +88,17 @@ async function cpAddFiles(files){const {model}=lsel('image');if(model&&model.ref
 const ptOn=()=>{try{return localStorage.getItem('mirsal.particles.on')==='1'}catch(e){return false}};
 ACT.cppart=()=>{try{localStorage.setItem('mirsal.particles.on',ptOn()?'0':'1')}catch(e){}cpDrawBar()};
 function cpDrawBar(){const el=$('cpbar');if(!el)return;const {model,sel}=lsel('image'),st=GS.outline;
-  const sty=(LIVE.m&&LIVE.m.styles||[]).find(x=>x.id===LIVE.style);
+  const sty=(LIVE.m&&LIVE.m.styles||[]).find(x=>x.id===LIVE.style),advanced=!!el.querySelector?.('.cp-options')?.open;
   el.innerHTML=`<button class=cp-chip data-act=lmodels title="Choose the image model">${logoHtml(model)}<span><b>${esc(model?model.label:'Model')}</b><em>${esc(optSummary(model,sel))}</em></span></button>
    <button class="cp-chip ${CP.styles?'open':''}" data-act=cpstyles aria-expanded=${!!CP.styles} title="Choose the look of the stickers">${sty?`<img class=cp-chipimg src="/assets/styles/${esc(sty.id)}" alt="">`:''}<span><b>Style</b><em>${esc(sty?sty.label:'Choose')}</em></span></button>
-   <div class=cp-pw><button class="cp-chip ${CP.pop==='stroke'?'open':''}" data-act=cpstroke aria-haspopup=true aria-expanded=${CP.pop==='stroke'}>${glyph(st)}<span><b>Stroke</b><em>${strokeName(st)}</em></span></button>
+   <details class=cp-options ${advanced?'open':''}><summary>Options <small>${cpGrid()==='2x2'?'2×2':'3×3'} · ${strokeName(st)} · loop ${LIVE.loop?'on':'off'}</small></summary><div class=cp-option-grid><div class=cp-pw><button class="cp-chip ${CP.pop==='stroke'?'open':''}" data-act=cpstroke aria-haspopup=true aria-expanded=${CP.pop==='stroke'}>${glyph(st)}<span><b>Stroke</b><em>${strokeName(st)}</em></span></button>
     ${CP.pop==='stroke'?`<div class=cp-pop role=menu>${STROKES.map(([px,n])=>`<button role=menuitemradio aria-checked=${px===st} class="${px===st?'on':''}" data-act=cpstrokeset data-px=${px}>${glyph(px)}<span><b>${n}</b><em>${px?px+' px':'no border'}</em></span></button>`).join('')}</div>`:''}</div>
    <button class="cp-chip cp-ai ${LIVE.loop?'on':''}" data-act=cploop aria-pressed=${!!LIVE.loop} title="Off: the animation plays once through and Mirsal closes the loop itself. On: the video prompt asks for a loop and Kling ends on its first pose. A loop wording makes the stickers bounce several times in the 3 seconds."><span class=cp-sw><i></i></span><span><b>Loop</b><em>${LIVE.loop?'On':'Off'}</em></span></button>
    <button class="cp-chip ${cpGrid()==='2x2'?'on':''}" data-act=cpgrid aria-pressed=${cpGrid()==='2x2'} title="The sheet's grid: 3×3 makes 9 stickers, 2×2 makes 4 (Haitham, 2026-10-14). A prepared sheet serves only a request in its own grid."><span><b>Grid</b><em>${cpGrid()==='2x2'?'2×2':'3×3'}</em></span></button>
    <button class="cp-chip cp-ai ${ptOn()?'on':''}" data-act=cppart aria-pressed=${ptOn()} title="On: the prompt asks for particles on their own (for example: particles for lipsticks and ribbons). No sticker owns them; preview, render, download them or make a pack of them."><span class=cp-sw><i></i></span><span><b>Reactions</b><em>${ptOn()?'On':'Off'}</em></span></button>
    <button class="cp-chip cp-ai ${aiOn()?'on':''}" data-act=cpai aria-pressed=${aiOn()} ${GAI&&GAI.configured?'':'disabled'} title="${esc(aiChipTitle())}"><span class=cp-sw><i></i></span><span><b>AI enhancer</b><em>${aiOn()?'On':'Off'}</em></span></button>
    <span class="gseg cp-act" role=group aria-label="Where the stickers come from"><button type=button data-act=cpactions data-v=creative aria-pressed=${CP.actions!=='predefined'} title="The AI (or the built-in mood list) invents nine stickers for your idea">Creative</button><button type=button data-act=cpactions data-v=predefined aria-pressed=${CP.actions==='predefined'} title="Nine of the 36 predefined actions (happy, laugh, cry …), drawn as your character; the next batches continue through the 36">Predefined</button></span>
-   <span class=cp-gap></span>
+   </div></details><span class=cp-gap></span>
    ${GD&&!gdOn()?'<button class="btn sm" data-act=gdtab data-t=plan title="Return to the prompt you were editing">Prompt draft</button>':''}
    <button id=go class=cp-go data-act=gprompt title="${aiOn()&&GAI.provider!=='local'?'Shows the prompt you can edit before any sheet is paid for; the AI enhancer makes one small OpenAI call to write it. No batch is created and no Higgsfield credits are spent.':'Free. Shows the prompt you can edit before any sheet is paid for; no batch is created.'} Pressing Enter in the box still starts a paid sheet at once.">Generate prompt <span class=cp-bp>${aiOn()&&GAI.provider!=='local'?'1 AI call':'free'}</span></button>${typeof impButtons==='function'?impButtons():''}`;
   cpDrawEngine()}
@@ -108,7 +108,7 @@ const cpEngSrc=()=>{const g=typeof GAI!=='undefined'?GAI:{};return{agent:{provid
 function cpDrawEngine(){const el=$('cpeng');if(!el)return;const show=typeof AIENG!=='undefined'&&(CP.ai||!(GAI&&GAI.configured));
   el.hidden=!show;if(!show){el.innerHTML='';el._h='';return}          // forget what was drawn: turning the enhancer On again must draw the engine again (it stayed empty)
   AIENG.ensure();
-  const html=`<div class="ai-set on cp-eng" aria-label="AI enhancer engine" title="Local: free. Cloud: one small OpenAI call.">${AIENG.rows(cpEngSrc())}</div>`;
+  const html=`<details class=cp-engine><summary>Prompt engine <small>${esc(GAI&&GAI.configured?GAI.model||GAI.provider:'Built-in prompt · no model configured')}</small></summary><div class="ai-set on cp-eng" aria-label="AI enhancer engine" title="Local: free. Cloud: one small OpenAI call.">${AIENG.rows(cpEngSrc())}</div></details>`;
   if(el._h!==html){el._h=html;el.innerHTML=html}}          // only when it changed: the bar is redrawn often, and a redraw would close an open drop-down
 ACT.cpactions=el=>{CP.actions=el.dataset.v==='predefined'?'predefined':'creative';try{localStorage.setItem('mirsal.actions',CP.actions)}catch(e){}cpDrawBar()};
 ACT.cpgrid=()=>{LIVE.grid=cpGrid()==='2x2'?'3x3':'2x2';lsave();cpDrawBar()};

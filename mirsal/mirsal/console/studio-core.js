@@ -468,8 +468,8 @@ function gensHtml(g) {
     ms = f && f.members && f.members.length ? f.members : [{ id: g.number, generation_id: g.generation_id, n: 1 }],
     main = f ? f.picked : g.generation_id;
   return `<span class=ggens>${ms.map((m) => `<button class="ggen${m.id === g.number ? ' on' : ''}${m.generation_id === main ? ' main' : ''}" data-act=ggen data-g=${g.number} data-to=${m.id} aria-pressed=${m.id === g.number} title="${esc(m.generation_id)}${m.generation_id === main ? ' · the main generation' : ' · a backup'}${m.sheet_model ? ' · ' + esc(m.sheet_model) : ''}">${m.generation_id === main ? '★ ' : ''}gen ${m.n}</button>`).join('')}</span>
-   <span class=ggact>${g.generation_id === main ? `<span class=keychip title="Animate and Add to pack use this generation">Main</span>` : `<button class="btn sm" data-act=gmain data-g=${g.number} title="Make this the batch's main generation; the others stay as backups">Make main</button>`}
-    <button class="btn sm" data-act=gdel data-g=${g.number} title="Move this generation to the trash (restorable)">Delete</button><button class="btn sm" data-act=tkreport data-k=generation data-id=${g.generation_id}>Report</button></span>`;
+   <details class="gh-more ggact"><summary class="btn sm" aria-label="Generation options">⋯</summary><div class=gh-pop role=menu>${g.generation_id === main ? `<span class=keychip title="Animate and Add to pack use this generation">Main</span>` : `<button class="btn sm" data-act=gmain data-g=${g.number} title="Make this the batch's main generation; the others stay as backups">Make main</button>`}
+    <button class="btn sm" data-act=gdel data-g=${g.number} title="Move this generation to the trash (restorable)">Delete</button><button class="btn sm" data-act=tkreport data-k=generation data-id=${g.generation_id}>Report</button></div></details>`;
 }
 
 ACT.ggen = (el) => {
@@ -529,15 +529,14 @@ function batchHtml(g, k, total, mode) {
   const inc = !SES.off.includes(g.number),
     s = g.source,
     staff = typeof ME === 'undefined' || !ME || ['owner', 'admin'].includes(ME.role);
-  const head = `<div class=gbhead>${total > 1 ? `<label class=gbinc title="Include this batch when you Animate or Add"><input type=checkbox class=ginc data-g=${g.number} ${inc ? 'checked' : ''}> <b>Batch ${k + 1}</b></label>` : `<b>Batch ${k + 1}</b>`}
+  const head = `<header class=gbhead><div class=gbidentity>${total > 1 ? `<label class=gbinc title="Include this batch when you Animate or Add"><input type=checkbox class=ginc data-g=${g.number} ${inc ? 'checked' : ''}> <b>Batch ${k + 1}</b></label>` : `<b>Batch ${k + 1}</b>`}
     ${gensHtml(g)}
     ${g.key_colour === 'blue' ? `<span class=keychip title="This sheet has a blue screen, so it was keyed as blue (and the video sheet is blue too). Nothing to do.">Blue key</span>` : ''}
     ${s.prepared && staff ? `<span class=keychip title="Served from a prepared sheet in the watch folder: 0 credits, no provider call.">Prepared</span>` : ''}
-    ${allowAllRow(g, mode === 'anim' ? 'animation' : 'still')}
-    <span class=gbact>${s.has_video || making(g) || (typeof liveReadyNow === 'function' && liveReadyNow()) ? '' : `<button class="btn sm" data-act=gvideo data-g=${g.number} ${keptStills(g).length ? '' : 'disabled'} title="This sheet has no prepared video: make one from the sheet in your own tool">${ic('film')} Make a video…</button>`}
-    ${typeof impBatchBtn === 'function' ? impBatchBtn(g, mode) : ''}${mode === 'anim' ? motionRow(g) : ''}
-    <button class="btn sm" data-act=gopenfolder data-g=${g.number} title="Open this batch's folder in the file manager: a properly named folder with the sheet, stickers, animations and prompts">${ic('folder')} Open folder</button>
-    ${total > 1 ? `<button class="btn sm" data-act=gbdrop data-g=${g.number} title="Take this batch out of the session">${ic('x')}</button>` : ''}</span></div>`;
+    </div><div class=gbact>${s.has_video || making(g) || (typeof liveReadyNow === 'function' && liveReadyNow()) ? '' : `<button class="btn sm" data-act=gvideo data-g=${g.number} ${keptStills(g).length ? '' : 'disabled'} title="This sheet has no prepared video: make one from the sheet in your own tool">${ic('film')} Make a video…</button>`}
+    ${typeof impBatchBtn === 'function' ? impBatchBtn(g, mode) : ''}
+    <details class="gh-more batch-options"><summary class="btn sm" aria-label="Batch options">⋯</summary><div class=gh-pop role=menu><button class="btn sm" data-act=gopenfolder data-g=${g.number} title="Open this batch's folder in the file manager: a properly named folder with the sheet, stickers, animations and prompts">${ic('folder')} Open folder</button>
+    ${total > 1 ? `<button class="btn sm" data-act=gbdrop data-g=${g.number} title="Take this batch out of the session">${ic('x')}</button>` : ''}</div></details></div>${mode === 'anim' ? `<div class=gbmotion><span class=mut>Motion</span>${motionRow(g)}</div>` : ''}${allowAllRow(g, mode === 'anim' ? 'animation' : 'still')}</header>`;
   if (making(g))
     return `<section class=gbatch>${head}<div class=gwork><div class=spin></div><b>Making your stickers…</b><div class=mut>${g.stage === 'requested' ? 'Reading the sheet' : g.stage === 'sheet_picked' ? 'Removing the background' : 'Cutting and checking each sticker'}</div></div></section>`;
   const sheetErr = g.stickers.every((t) => t.status === 'FAILED') && (g.verify.sheet || []).find((c) => !c.ok && c.severity !== 'WARN');

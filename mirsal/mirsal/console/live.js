@@ -203,7 +203,7 @@ liveInit();
 const EG={outline:null,erode:null,pick:null,busy:false,drag:false};
 const edgeBatches=()=>typeof included==='function'?included().filter(g=>g.stickers.some(t=>t.status==='READY')):[];
 function ensureBars(){const g=document.querySelector('.gen2');if(!g)return;
-  if(!document.getElementById('gedge')){const e=document.createElement('div');e.id='gedge';const ref=document.getElementById('gres');ref?ref.insertAdjacentElement('beforebegin',e):g.appendChild(e)}
+  if(!document.getElementById('gedge')){const e=document.createElement('details');e.id='gedge';const ref=document.getElementById('gres');ref?ref.insertAdjacentElement('beforebegin',e):g.appendChild(e)}
   if(!document.getElementById('gpart')){const h=document.createElement('section');h.id='gpart';g.appendChild(h)}}
 /* Undo replays the log as a stack: an applied edge is pushed, an undo entry pops it, so Undo always steps back one real snapshot (and never flips between two) */
 function egCommitted(){const g=edgeBatches()[0];if(!g)return{o:0,e:0,hist:[],prev:null};
@@ -224,9 +224,10 @@ function edgeControlsHtml(){return`<label>Stroke <input type=range min=0 max=24 
 /* bring every edge control (the bar and the open thumbnail's) in line with the state; never rebuild or move the slider that is being dragged */
 function egSync(){const bar=document.getElementById('gedge'),gs=edgeBatches();
   if(bar){if(!gs.length){bar.innerHTML='';bar.className='';bar.removeAttribute('data-built')}      // no batch, no bar: the empty strip (a bordered white box) must not stay behind after Remove batch
-    else if(!bar.dataset.built){bar.dataset.built='1';bar.className='lv-edge';bar.innerHTML='<b>Edge</b>'+edgeControlsHtml()}}
+    else if(!bar.dataset.built){bar.dataset.built='1';bar.className='lv-edge';bar.innerHTML='<summary>Edge <small data-egsummary>Stroke and trim</small></summary><div class=lv-edge-controls>'+edgeControlsHtml()+'</div>'}}
   const c=egCommitted(),v=egVals(),dirty=egDirty(),prev=c.prev,t=egTarget(),
     working=gs.some(x=>x.stickers.some(s=>['PROCESSING','STALE'].includes(s.anim_status)));
+  const summary=bar&&bar.querySelector('[data-egsummary]');if(summary)summary.textContent=(dirty?'Testing: ':'')+'stroke '+v.o+' px · trim '+v.e+' px';
   document.querySelectorAll('[data-edge]').forEach(i=>{const k=i.dataset.edge,val=k==='outline'?v.o:v.e;if(!(EG.drag&&i===document.activeElement)){i.value=val;if(i.nextElementSibling)i.nextElementSibling.textContent=val+' px'}});
   document.querySelectorAll('[data-act=egapply]').forEach(b=>b.disabled=!dirty||EG.busy);
   document.querySelectorAll('[data-act=egundo]').forEach(b=>{b.disabled=EG.busy||!(dirty||prev);b.textContent=dirty?'Cancel':'Undo';b.title=dirty?'Drop the test':prev?`Go back to the previous snapshot (stroke ${prev.outline} px, trim ${prev.erode} px)`:'Nothing to undo'});

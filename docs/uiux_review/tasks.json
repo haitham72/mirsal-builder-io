@@ -1591,7 +1591,9 @@
       "size": 280,
       "trace": "UX-04",
       "review_status": "revise_scope_before_implementation",
-      "finding_status": "changed"
+      "finding_status": "changed",
+      "status": "implemented_browser_checked",
+      "implementation": "Studio reference grouping and progressive disclosure, one visible current-stage primary in desktop/phone dark/light."
     },
     {
       "id": "T-069",
@@ -1618,7 +1620,9 @@
       "size": 220,
       "trace": "UX-05",
       "review_status": "revise_scope_before_implementation",
-      "finding_status": "changed"
+      "finding_status": "changed",
+      "status": "implemented_browser_checked",
+      "implementation": "Studio reference grouping and progressive disclosure, one visible current-stage primary in desktop/phone dark/light."
     },
     {
       "id": "T-070",

@@ -68,3 +68,7 @@ The header’s “…” menu is anchored to the action row, with its width boun
 ---
 
 Dialog Escape closes the top shared dialog through its dismissal callback and stops propagation to the underlying viewer. A welcome overlay above it retains priority. Retime therefore settles cancellation for Escape as well as backdrop and explicit Cancel.
+
+### Studio reference (redesign)
+
+An existing project starts with New request and Edge folded behind native summaries. New request stays open for an empty session/draft. Composer model/style remain primary choices; Options groups Stroke/Loop/Grid/Reactions/AI settings, and Prompt engine is a separate disclosure. Batch identity/version controls, import/tools and Motion have separate rows. Generation and folder/removal actions remain available in labelled menus; reversible picture recovery stays outside those menus. The current stage retains its one primary action in the bottom bar. All layout uses the shared semantic tokens; phone controls wrap without page overflow.
