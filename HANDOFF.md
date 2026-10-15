@@ -2,18 +2,18 @@
 
 ## Pick up here
 
-Worktree: G:/Haitham/VsCode/Mirsal-Builder/.worktrees/redesign-ui-ux
+Worktree: G:/Haitham/VsCode/Mirsal-Builder-redesign (proper independent checkout since 2026-10-15; the old `.worktrees/redesign-ui-ux` folder inside the main repo is unregistered dead files, delete after closing IDEs/reboot)
 Branch: redesign-ui-ux
-Last committed/pushed source: c2df01a7. **The slider integration below is local WIP, not committed or pushed. Work in this exact worktree; a fresh checkout from origin will not contain it.**
+Last committed/pushed source: 42a93282 (reaction-tabs port). **The slider integration below is local WIP, not committed or pushed. Work in this exact checkout; a fresh clone from origin will not contain it.**
 
 Haitham asked to stop coding and leave this handoff plus a thin remaining-only plan. Do not repeat the completed redesign. [plan.md](plan.md) lists only remaining work. Earlier phase evidence is in [implementation-log.md](docs/uiux_review/implementation-log.md); [design images](docs/uiux_review/redesign-shots/README.md) predate the new inline sliders.
 
 ## Current user choices — preserve
 
-- Keep our duplicate **choice router**: Open existing / Import again as a new batch, plus the batch-specific choices, explicit recovery and grid-mismatch consent. Haitham explicitly rejected enforced fresh cuts after reviewing5ad67e2d. Do not import that conflicting policy.
+- Keep our duplicate **choice router**: Open existing / Import again as a new batch, plus the batch-specific choices, explicit recovery and grid-mismatch consent. Haitham explicitly rejected enforced fresh cuts after reviewing5ad67e2d. Do not import that conflicting policy. Main has since removed the check entirely — deliberate divergence; never reconcile it without Haitham.
 - Grey-thumbnail code from5ad67e2d was imported unchanged in a439eec4. Requested32 Python tests and5 UI tests passed.
 - Keep the redesign structure, shared TESTCARD, staged frame editor, tokens/44px targets, saved-set/pack flows and distinct Emoji-style versus Lottie-style export contracts.
-- Never switch/stash/reset the shared handpicked-lottie checkout. No main merge/deployment or runtime-data commits.
+- Never switch/stash/reset another checkout: the main repo sits on main (handpicked-lottie was merged and deleted 2026-10-15). No main merge/deployment or runtime-data commits.
 
 ## Pending integration: 9194bfc5 + 47817ab6
 
@@ -53,7 +53,7 @@ The WIP sender now captures the released value (not later DOM values), defers it
 
 ## Test server and data
 
-User test server remains at http://127.0.0.1:8796/ (localhost only), running this worktree's current WIP source. Owner8770 was not restarted.
+User test server remains at http://127.0.0.1:8796/ (localhost only), running this checkout's current WIP source. No listener was observed there 2026-10-15 — restart via the launcher below before any browser acceptance. Owner8770 was not restarted.
 
 Launcher: %TEMP%/mirsal-redesign-local-test/serve.ps1
 PID file/logs: same folder, server.pid / server.log / server-error.log. Validate the process chain before restarting only this instance.
@@ -63,7 +63,7 @@ CLI browser config/scripts/logs remain in %TEMP%/mirsal-redesign-RyghIK; use Pla
 
 ## Next actions
 
-1. Review the preserved WIP and reproduce/fix the remaining native acceptance timeout; complete both batch types, widths and themes, respecting async recuts and writer-lock behavior.
+1. Review the preserved WIP and reproduce/fix the remaining native acceptance timeout; complete both batch types, widths and themes, respecting async recuts and writer-lock behavior. Then the ported reaction tabs (42a93282, node-green only): Emoji Style | Lottie Style | Packs on `#/reactions` and Library › Reactions, same state both ways.
 2. Update owning area/design docs, execution log and journey status with actual evidence. Keep unfinished acceptance visible in plan.md.
 3. Check branch, stage explicit integration paths (including the new test), inspect diff, commit with provenance9194bfc5/47817ab6 and push. No runtime media, Custom_emojis or trash.
 4. Restart the localhost test server after final code/CSS changes and tell Haitham the verified revision/address.
