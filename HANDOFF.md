@@ -21,4 +21,4 @@ Tests run (narrow): gates area 40, engine/video area 56, imports 14, live slicin
    - The uiux repair batch (T-001..T-004, T-065, T-086, T-074, T-072, T-073) IS in HEAD (`uiux-fixes` is an ancestor); every source marker present. T-001 is superseded by the Resize/frame editor. Browser acceptance outstanding for all.
    - `docs/uiux_review/revalidation.md` (2026-10-14) predates the repairs and the Size/Position + Lottie work: its "still present" for F-01/F-05/F-06/F-24/F-26..F-28/F-30/F-36 is stale.
    - plan.md items 1–9 (reaction/pack cleanup) were not checked this session: keep them.
-3. Haitham's decisions still open: proposal decisions 1–3 (Resize meaning, hot-spot target, retiring old modes); "Use 2×2" for a mismatched grid was deliberately not offered (a 3×3 batch's stickers are its cells).
+3. Proposal decisions 1–3 approved by Haitham 2026-10-15 (as built). UI/UX plan review done: docs/uiux_review/plan-review.md. Still open: "Use 2×2" for a mismatched grid was deliberately not offered (a 3×3 batch's stickers are its cells).

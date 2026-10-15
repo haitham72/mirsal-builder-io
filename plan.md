@@ -60,11 +60,10 @@ Use copied data/providers off and your own server, never owner port 8770. No pai
 
 ### Size/Position and Lottie style: BUILT 2026-10-15 (Haitham: "do it"), browser acceptance open
 
-[docs/size-position-lottie-proposal.md](docs/size-position-lottie-proposal.md) A–D are implemented and tested by narrow suites (commits f3b9ef52, 7f1e4d17 on `handpicked-lottie`); details in `docs/engine-and-studio/09-engine.md` and `docs/reaction/17-17-lottie-style-reactions.md`. Built with Claude's recommended answers, which Haitham has **not explicitly confirmed**: Resize off = one scale, on = hot spot matched to the approved still; the three old size modes left the screen (still read on old batches).
+[docs/size-position-lottie-proposal.md](docs/size-position-lottie-proposal.md) A–D are implemented and tested by narrow suites (commits f3b9ef52, 7f1e4d17 on `handpicked-lottie`); details in `docs/engine-and-studio/09-engine.md` and `docs/reaction/17-17-lottie-style-reactions.md`. **Approved by Haitham 2026-10-15**: Resize off = one uniform scale, on = hot spot matched to the approved still; the three old size modes stay off the screen (still read on old batches).
 
 - [ ] Browser acceptance (own server, copied `out/`): batch row `[✓] Resize · Size`, per-sticker frame editor (drag, arrows, Centre, Grid, frame scrubber, Apply), on a video-sheet batch AND an imported 3x3 video; dark/light and ≤760 px.
 - [ ] Browser acceptance of Lottie style: collapsible groups, presets, seed re-roll, time sampling in lottie-web (loop / random still).
-- [ ] Haitham to confirm decisions 1–3 of the proposal (Resize meaning, hot spot target, retiring the old modes).
 - [ ] Not built from D, waiting for a go: Pre-run, Time scale, sticker-silhouette emitter, blend modes.
 - [ ] Two failing tests found, NOT caused by this work (they fail in committed code): `tests.test_particle_set.ParticleCutTests.test_a_sparse_sheet_that_gutter_detection_mis_reads_is_cut_into_exact_equal_cells` (builds `out / "G###"` by hand, rule 9) and `...test_the_kind_is_only_written_for_a_particle_batch_and_only_that_value_is_accepted` (history lookup). Fix the tests.
 

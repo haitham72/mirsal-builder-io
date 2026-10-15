@@ -64,7 +64,7 @@ Not delivered: semantic tokens (spacing, type roles, status pairs, radii, elevat
 
 ## Decisions for Haitham
 
-1. Resize: off = one uniform scale, on = hot spot matched to the approved still; the three old size modes stay off the screen. Built that way, not yet confirmed.
+1. ~~Resize meaning~~: **approved by Haitham 2026-10-15** as built (off = one uniform scale, on = hot spot matched to the approved still; old modes stay off the screen).
 2. Plan item 6 (no pack tabs) against the audit's question about tabs: the item stands unless you withdraw it.
 3. Reaction wording: "Reaction effects" is used for two workflows (F-31): Home's link goes to `#/effects`, + New goes to `#/reactions`.
 4. Cloud pricing copy (unchanged from `uiux_plan.md`, Questions).
