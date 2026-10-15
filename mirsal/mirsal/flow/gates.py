@@ -24,7 +24,7 @@ from . import pipeline as pl
 from ..generation import prompter
 from ..engine import verify
 from ..engine.config import EngineConfig
-from ..engine.video import check_returned_video, process_video, AnimCache
+from ..engine.video import check_returned_video, process_video, process_clips, AnimCache
 from ..engine.video_sheet import build_video_sheet
 
 GATES = ("plan", "still", "video_sheet", "anim", "pack")
@@ -56,6 +56,17 @@ def cut_sheet(res: dict, index=None):
     redo_video stays the source until the new sheet's video is sliced, so the stickers never lose their animation while the new video is made."""
     has = [v for v in reversed(res.get("video_sheets") or []) if v.get("video") and (index is None or int(index) in v["slots"])]
     return next((v for v in has if v.get("status") == "SLICED"), None) or next((v for v in has if v.get("status") == "SUPERSEDED"), None)     # the picked one first
+
+
+def prepared_source(res: dict) -> bool:
+    """The batch has a prepared source to cut animations from again: a 3x3 video of the image sheet (an imported one too) or pre-sliced clips."""
+    src = res.get("source") or {}
+    return bool(src.get("has_video") and (src.get("video_path") or src.get("clips")))
+
+
+def can_reslice(res: dict) -> bool:
+    """reslice has something to cut again: a sliced video sheet, else a prepared source with animations made from it."""
+    return bool(cut_sheet(res)) or (prepared_source(res) and any(st.get("webm") for st in res["stickers"]))
 
 
 def sheet_of(res: dict, aid: str) -> dict:
@@ -754,8 +765,9 @@ def reanimate_prepared(out: Path, gid: int, indexes: list, cfg: EngineConfig, pa
 
 
 def reslice(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0, only: list | None = None) -> None:
-    """Apply the batch's CURRENT stroke and trim to the animations of the sliced video sheet they come from (cut_sheet), from the video that is already stored: no new video,
-    no credits. Repeated settings come back from the animation cache at once."""
+    """Apply the batch's CURRENT stroke, trim, Video size and Keep approved size to the animations, from the video that is already stored: no new video,
+    no credits. The source is the sliced video sheet they come from (cut_sheet), else the prepared 3x3 video or clips (an imported video of the image
+    sheet, Haitham 2026-10-15: Keep approved size did nothing there). Repeated settings come back from the animation cache at once."""
     res = pl.read_result(out, gid)
     v = cut_sheet(res)                     # only the sheet the animations come from (a superseded one while its successor is being made)
     if v:
@@ -766,20 +778,32 @@ def reslice(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0, only: lis
                 next(x for x in r2["video_sheets"] if x["id"] == v["id"])["preview"] = f"video_sheet/{v['id']}/{pv}"
                 pl.write_result(out, gid, r2)
         slice_video(out, gid, v["id"], cfg, pace, only=only)              # only: one sticker's Video size changed, the others stay as they are
+    elif prepared_source(res):             # run_animate cuts only what is not READY: mark the animations to cut again STALE first
+        cells = [st["index"] for st in res["stickers"] if st.get("webm") and not st.get("edited") and st["status"] == "READY"
+                 and st["review"].get("still") != "REJECTED" and (only is None or st["index"] in only)]     # the cells run_animate cuts
+        if not cells:
+            return
+        for i in cells:
+            res["stickers"][i - 1]["anim_status"] = "STALE"
+        pl.write_result(out, gid, res)
+        pl.run_animate(out, gid, cfg, "slice" if len(cells) == 1 else "pack", cells[0] if len(cells) == 1 else None, pace)
 
 
 def reloop(out: Path, gid: int, cfg: EngineConfig, lib=None) -> dict:
     """Make a batch's animations again from its stored videos with the current engine (Haitham, 2026-10-05: the grey seam came back on every
     sticker made before the loop fix), then refresh the copies in the packs. Free: no new video, no credits; every S# and review stays."""
     res = pl.read_result(out, gid)
-    if not cut_sheet(res):
+    v = cut_sheet(res)
+    src = res.get("source") or {}
+    if not v and not prepared_source(res):
         return {"id": gid, "animations": 0, "pack_copies": 0}
     edited = [st["index"] for st in res["stickers"] if st.get("edited") and st.get("webm")]
     if edited:                                            # text or drawing baked in the Studio: slicing again would lose it
         return {"id": gid, "animations": 0, "pack_copies": 0, "skipped": f"edited in the Studio: {', '.join('S' + str(i) for i in edited)}"}
-    missing = [v["id"] for v in [cut_sheet(res)] if not (pl.gen_dir(out, gid) / v["video"]).is_file()]
-    if missing:
-        return {"id": gid, "animations": 0, "pack_copies": 0, "skipped": "stored video is missing: " + ", ".join(missing)}
+    if v and not (pl.gen_dir(out, gid) / v["video"]).is_file():
+        return {"id": gid, "animations": 0, "pack_copies": 0, "skipped": "stored video is missing: " + v["id"]}
+    if not v and src.get("video_path") and not Path(src["video_path"]).is_file():
+        return {"id": gid, "animations": 0, "pack_copies": 0, "skipped": "stored video is missing: " + Path(src["video_path"]).name}
     decisions = {s["index"]: dict(s.get("review") or {}) for s in res["stickers"]}
     previously_ready = {s["index"] for s in res["stickers"] if s.get("anim_status") == "READY"}
     prior_stage = res.get("stage")
@@ -833,18 +857,18 @@ def attach_video(out: Path, gid: int, aid: str, data: bytes, filename: str = "vi
     return {"sheet": aid, "bytes": len(data)}
 
 
-def anim_preview(out: Path, gid: int, index: int, cfg: EngineConfig, scale=None, keep=None) -> tuple[bytes, dict]:
+def anim_preview(out: Path, gid: int, index: int, cfg: EngineConfig, scale=None, keep=None, same=None) -> tuple[bytes, dict]:
     """ONE sticker's animation as it would be cut with this Video size (`scale`, None = what it has now) and Keep approved size (`keep`, None = the
     batch's), from the stored video: the same process_video, layout, still and animation cache as the real re-cut, but nothing is written to the batch
     (Haitham, 2026-10-14: a size change previews on one thumbnail with Apply / Cancel, instead of re-cutting all nine on every 5% step).
     Returns (the WebM, {cut_off_frames, frames, scale, size_mode}); the route writes it to the batch's preview/ folder (never base64), and the cache
-    means Apply is then instant for this sticker."""
+    means Apply is then instant for this sticker. The source is the sliced video sheet, else the prepared 3x3 video or clip (an imported video too)."""
     from dataclasses import replace
     res = pl.read_result(out, gid)
     v = cut_sheet(res)
-    if not v:
+    if not v and not prepared_source(res):
         raise pl.PipelineError("This batch has no cut video to preview", 409)
-    if not 1 <= int(index) <= len(res["stickers"]) or int(index) not in v["slots"]:
+    if not 1 <= int(index) <= len(res["stickers"]) or (v and int(index) not in v["slots"]):
         raise pl.PipelineError(f"S{index} is not on the video sheet", 404)
     st, d = res["stickers"][int(index) - 1], pl.gen_dir(out, gid)
     if scale is not None and not pl.VIDEO_SIZE[0] <= float(scale) <= pl.VIDEO_SIZE[1]:
@@ -852,15 +876,25 @@ def anim_preview(out: Path, gid: int, index: int, cfg: EngineConfig, scale=None,
     c_cfg = pl.cfg_for(res, cfg)
     own = st.get("anim_scale")
     f = float(scale) if scale is not None else float(own if own is not None else c_cfg.anim_scale)
-    c_cfg = replace(c_cfg, anim_scale=round(f, 2), **({"anim_keep_size": bool(keep)} if keep is not None else {}))
-    layout = json.loads((d / v["layout"]).read_text(encoding="utf-8"))
+    c_cfg = replace(c_cfg, anim_scale=round(f, 2), **({"anim_keep_size": bool(keep)} if keep is not None else {}), **({"anim_same_scale": bool(same)} if same is not None else {}))
     refs = {int(index): _read_rgba(d / st["png"])} if st.get("png") else {}
-    r = process_video(d / v["video"], c_cfg, cells=[int(index)], layout=layout, refs=refs, cache=AnimCache(out / "cache" / "anim"),
-                      waive={int(index): set(st.get("anim_override") or [])})[0]
+    waive, cache, src = {int(index): set(st.get("anim_override") or [])}, AnimCache(out / "cache" / "anim"), res.get("source") or {}
+    clip = (src.get("clips") or {}).get(str(int(index)))
+    if v:
+        layout = json.loads((d / v["layout"]).read_text(encoding="utf-8"))
+        r = process_video(d / v["video"], c_cfg, cells=[int(index)], layout=layout, refs=refs, cache=cache, waive=waive)[0]
+    elif clip:                             # a pre-sliced clip: the same process_clips as animate_cells
+        r = process_clips({int(index): {k: Path(x) for k, x in clip.items()}}, c_cfg, cache=cache, waive=waive)[0]
+    else:                                  # the prepared 3x3 video, cut with the image sheet's rects like animate_cells
+        if not src.get("video_path") or not Path(src["video_path"]).is_file():
+            raise pl.PipelineError("The stored video of this batch is missing", 409)
+        g = src.get("grid")
+        r = process_video(Path(src["video_path"]), c_cfg, cells=[int(index)], rects=g["rects"] if g else None,
+                          sheet_wh=tuple(src["sheet_size"]) if g else None, refs=refs, cache=cache, waive=waive)[0]
     if not r.data:
         raise pl.PipelineError(f"S{index} could not be cut with this size: {r.reason or 'no animation'}", 422)
     m = r.metrics or {}
-    return r.data, {"index": int(index), "scale": round(f, 2), "keep": c_cfg.anim_keep_size, "status": r.status, "cut_off_frames": m.get("cut_off_frames"), "frames": m.get("frames_out")}
+    return r.data, {"index": int(index), "scale": round(f, 2), "keep": c_cfg.anim_keep_size, "same": c_cfg.anim_same_scale, "status": r.status, "cut_off_frames": m.get("cut_off_frames"), "frames": m.get("frames_out")}
 
 
 def slice_video(out: Path, gid: int, aid: str, cfg: EngineConfig, pace: float = 0.0, only: list | None = None,

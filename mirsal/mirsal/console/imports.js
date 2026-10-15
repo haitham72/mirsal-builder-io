@@ -41,12 +41,19 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
  /* Import INSIDE a batch (flow/imports._into_batch): on Stickers a picture becomes the batch's next generation (its own cells, tags and naming), on Animation
     a video becomes its next animation; the server reads which sheet the video was animated from (image sheet or video sheet) and says which one it used */
  globalThis.impBatchBtn=(g,mode)=>owner()&&!making(g)&&g.kind!=='particles'?`<button class="btn sm" data-act=impbatch data-g=${g.number} data-m=${mode==='anim'?'anim':'still'} title="${mode==='anim'?'Import a video made from this batch: it becomes the next animation':'Import a picture: it becomes the next generation of this batch, cut with its own cells and tags'}">${ic('plus')} Import ${mode==='anim'?'video':'picture'}</button>`:'';
+ /* a video of the image sheet whose first frame shows another grid than the batch's: the server asks (409, hint.detected_grid) and the person may cut it
+    with the batch's grid anyway (grid_ok=1, rule 10); the file waits in BIMP until they answer */
+ let BIMP=null;
+ const batchImport=async(n,file,ok)=>{const g=GM.get(n);if(!g)return;toast('Importing…');
+  const r=await api(`/api/import?name=${encodeURIComponent(file.name)}&batch=${encodeURIComponent(g.generation_id)}${ok?'&grid_ok=1':''}`,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:file});
+  if(!r.ok&&r.j.detected_grid){const[dr,dc]=r.j.detected_grid,[br,bc]=r.j.batch_grid;BIMP={n,file};
+   return dlg(`<h2>Another grid?</h2><p>This video's first frame looks like a ${dr}×${dc} grid, but ${esc(g.generation_id)} is ${br}×${bc} (${r.j.cells} stickers). It can only be cut with the batch's grid.</p><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Cancel</button><button class="btn pri" data-act=impgrid>Cut it as ${br}×${bc} anyway</button></div>`)}
+  if(!r.ok)return toast(r.j.error||'Import failed',1);
+  if(r.j.duplicate)return toast(`Already imported${r.j.generation?' as '+r.j.generation:''}: nothing was made`,1);
+  if(r.j.kind==='sheet'&&r.j.id){FAM.clear();SES.gens=SES.gens.map(x=>x===n?r.j.id:x);saveSes()}
+  GS.tab=r.j.kind==='video'?'anim':'stickers';toast(r.j.message||'Imported');glast='';tick(true)};
  ACT.impbatch=el=>{const n=+el.dataset.g,anim=el.dataset.m==='anim',f=document.createElement('input');f.type='file';f.hidden=true;f.accept=anim?'.mp4,.mov,.webm':'.png,.jpg,.jpeg,.webp';
-  f.onchange=async()=>{const file=f.files[0];f.remove();if(!file)return;const g=GM.get(n);if(!g)return;toast('Importing…');
-   const r=await api(`/api/import?name=${encodeURIComponent(file.name)}&batch=${encodeURIComponent(g.generation_id)}`,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:file});
-   if(!r.ok)return toast(r.j.error||'Import failed',1);
-   if(r.j.duplicate)return toast(`Already imported${r.j.generation?' as '+r.j.generation:''}: nothing was made`,1);
-   if(r.j.kind==='sheet'&&r.j.id){FAM.clear();SES.gens=SES.gens.map(x=>x===n?r.j.id:x);saveSes()}
-   GS.tab=r.j.kind==='video'?'anim':'stickers';toast(r.j.message||'Imported');glast='';tick(true)};
+  f.onchange=()=>{const file=f.files[0];f.remove();if(file)batchImport(n,file,false)};
   document.body.appendChild(f);f.click()};
+ ACT.impgrid=()=>{const b=BIMP;BIMP=null;closeDlg();if(b)batchImport(b.n,b.file,true)};
 }

@@ -357,12 +357,13 @@ def sheet_match(res: dict, d: Path, frame: Path) -> dict:
     return {"sheet": best, "distance": dist[best], "distances": dist}
 
 
-def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "") -> tuple[int, dict]:
+def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "", grid_ok: bool = False) -> tuple[int, dict]:
     """Import INSIDE a batch (Haitham, 2026-10-08: "import in Stickers and in Animation, proper naming").
     - A picture becomes the NEXT GENERATION of this batch, like Regenerate: the batch's own plan (cells, tags, emoji) and naming, `parent` = the batch's root,
       `regen_of` = its main generation; the stills are cut from the picture.
     - A video attaches to the batch's MAIN generation. Which sheet it was animated from is read from its first frame (`sheet_match`), no question asked:
-      the image sheet -> it is the batch's prepared 3x3 video and animates the kept stickers (the earlier clips kept as versions); a video sheet -> attached
+      the image sheet -> it is the batch's prepared 3x3 video and animates the kept stickers (the earlier clips kept as versions; when its first frame
+      shows another grid than the batch's, a 409 with `detected_grid` asks first and `grid_ok` cuts it with the batch's grid anyway); a video sheet -> attached
       as the next animation (a sheet that already has a video is retired first with `redo_video`, and a new one is built at the same gap).
     The answer says which one was used. Free: nothing here calls a provider. Never twice: the same bytes answer where they already are."""
     from . import pipeline as pl, gates, groups, sources
@@ -424,8 +425,21 @@ def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "") 
             if any(s.get("anim_status") == "PROCESSING" for s in res["stickers"]) or any(v.get("status") == "VIDEO_RETURNED" for v in res["video_sheets"]):
                 raise ImportError("A video is being cut into animations in this batch: wait for it to finish", 409)
             gid, d = main, pl.gen_dir(c.out, main)
-            m = sheet_match(res, d, first_frame(f))
+            frame = first_frame(f)
+            m = sheet_match(res, d, frame)
             info["match"] = m
+            g = (res.get("source") or {}).get("grid") or {}
+            if m["sheet"] == "image" and g.get("rows") and not grid_ok:     # Haitham, 2026-10-15: ask when the video shows another grid than the batch's
+                from ..engine.grid import detect_grid
+                want = (int(g["rows"]), int(g["cols"]))
+                try:
+                    seen = detect_grid(pl.load_rgb(frame), pl.cfg_for(res, c.cfg).chroma)
+                except Exception:
+                    seen = want                  # an unreadable gutter profile is not a reason to stop
+                if tuple(seen) != want:
+                    f.unlink(missing_ok=True)
+                    raise ImportError(f"This video looks like a {seen[0]}x{seen[1]} grid, but {res['generation_id']} is {want[0]}x{want[1]}", 409,
+                                      hint={"detected_grid": list(seen), "batch_grid": list(want), "cells": len(res["stickers"])})
             if m["sheet"] == "image":
                 gates.redo_video(c.out, gid, user["id"], note="replaced by an imported video of the image sheet")      # a sliced video sheet is retired, its clips kept
                 res = pl.read_result(c.out, gid)
@@ -494,7 +508,7 @@ def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "") 
 
 
 def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generation=None, sheet=None, job_id=None, retry=False, job=None, as_new=False,
-                batch=None) -> tuple[int, dict]:
+                batch=None, grid_ok=False) -> tuple[int, dict]:
     """One serialized import lifecycle. Console holds the cross-process writer lock.
 
     The ledger reserves bytes before mutation, records the batch before background
@@ -503,7 +517,8 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
     `job` (a local J id, the dialog's explicit choice) or exactly one of the person's own failed jobs
     holding this file's ticket completes that job instead (`_recover`): no new batch, no second charge.
     `as_new` imports as an unrelated batch even when a failed job matches.
-    `batch` (any G### of a batch) imports INSIDE that batch (`_into_batch`): a picture is its next generation, a video its next animation.
+    `batch` (any G### of a batch) imports INSIDE that batch (`_into_batch`): a picture is its next generation, a video its next animation;
+    `grid_ok` cuts a video of the image sheet with the batch's grid although its first frame looks like another one.
     """
     from . import pipeline as pl, gates, sources
     from ..media.video_project import MAX_UPLOAD
@@ -514,7 +529,7 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
         raise ImportError("Import a PNG, JPEG, WebP, MP4, MOV or WebM file")
     with _LOCK:
         if batch is not None and str(batch).strip():
-            return _into_batch(c, user, name, data, batch, prompt)
+            return _into_batch(c, user, name, data, batch, prompt, grid_ok=grid_ok)
         if job:
             return _recover(c, user, name, data, _linkable(c.out, user, job_id or job_id_of(name), job, name), prompt)
         ticket = job_id or job_id_of(name)

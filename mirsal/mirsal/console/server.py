@@ -1212,13 +1212,13 @@ def make_handler(c: Console):
                 return self._send(200, png, "image/png")
             if path.startswith("/api/generations/") and path.endswith("/anim_preview"):        # ONE sticker re-cut with a Video size / Keep approved size, not stored (gates.anim_preview)
                 q = parse_qs(urlparse(self.path).query)
-                sc, kp = q.get("scale", [""])[0], q.get("keep", [""])[0]
+                sc, kp, sm = q.get("scale", [""])[0], q.get("keep", [""])[0], q.get("same", [""])[0]
                 try:
                     scale = float(sc) if sc not in ("", "null") else None
                 except ValueError:
                     raise pl.PipelineError("scale must be a number")
                 webm, meta = gates.anim_preview(c.out, int(path.split("/")[3]), int(q.get("index", ["1"])[0]), c.cfg, scale,
-                                                {"1": True, "0": False}.get(kp))
+                                                {"1": True, "0": False}.get(kp), {"1": True, "0": False}.get(sm))
                 # a file in the batch's folder (one per sticker, overwritten by the next test), never base64 (Haitham, 2026-10-14)
                 import hashlib
                 gid_ = int(path.split("/")[3])
@@ -1805,6 +1805,7 @@ def make_handler(c: Console):
             options = {k: q[k][0] for k in ("prompt", "generation", "sheet", "job", "batch") if q.get(k)}
             options["retry"] = q.get("retry", ["false"])[0].lower() in ("1", "true")
             options["as_new"] = q.get("as_new", ["false"])[0].lower() in ("1", "true")
+            options["grid_ok"] = q.get("grid_ok", ["false"])[0].lower() in ("1", "true")
             try:
                 return self._json(*im.import_file(c, self.user, name, data, job_id=job_id, **options))
             except im.ImportError as e:
@@ -2185,18 +2186,20 @@ def make_handler(c: Console):
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
                     idx = body.get("index")
                     res_ = pl.set_video_size(c.out, gid, body.get("scale"), int(idx) if idx is not None else None)
-                    if body.get("reslice") and gates.cut_sheet(pl.read_result(c.out, gid)):
+                    if body.get("reslice") and gates.can_reslice(pl.read_result(c.out, gid)):
                         only = [int(idx)] if idx is not None else None
                         c.submit(lambda: gates.reslice(c.out, gid, pl.cfg_for(pl.read_result(c.out, gid), c.cfg), c.pace, only=only))
                         res_["resliced"] = True
                     return self._json(200, res_)
-                if parts[3] == "keep_size":      # Motion: keep the approved still's size (cut off what leaves the frame) or fit the whole motion; reslice cuts the animations again, free
+                if parts[3] == "keep_size":      # Motion: keep the approved still's size (cut off what leaves the frame), fit the whole motion, or Same scale (same: true); reslice cuts the animations again, free
                     if c.lock.locked():
                         raise pl.PipelineError("busy: a job is running, wait for it to finish", 409)
                     if not isinstance(body.get("on"), bool):
                         raise pl.PipelineError("on must be true or false")
-                    res_ = pl.set_keep_size(c.out, gid, body["on"])
-                    if body.get("reslice") and gates.cut_sheet(pl.read_result(c.out, gid)):
+                    if body.get("same") is not None and not isinstance(body["same"], bool):
+                        raise pl.PipelineError("same must be true or false")
+                    res_ = pl.set_keep_size(c.out, gid, body["on"], body.get("same"))
+                    if body.get("reslice") and gates.can_reslice(pl.read_result(c.out, gid)):
                         c.submit(lambda: gates.reslice(c.out, gid, pl.cfg_for(pl.read_result(c.out, gid), c.cfg), c.pace))
                         res_["resliced"] = True
                     return self._json(200, res_)

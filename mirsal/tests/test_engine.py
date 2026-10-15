@@ -102,6 +102,17 @@ class VideoTests(unittest.TestCase):
                 self.assertLess(m["frames_out"], m["frames"])
                 self.assertLessEqual(len(r.data), CFG.video_max_bytes)
 
+    def test_same_scale_cuts_every_cell_at_one_scale(self):
+        """Same scale (anim_same_scale): every cell at the canvas / largest-cell-side scale, times Video size; keep/fit size each clip by its subject."""
+        with tempfile.TemporaryDirectory() as td:
+            mp4 = Path(td) / "v.mp4"
+            synth.make_video(mp4)
+            for f in (1.0, 0.8):
+                res = process_video(mp4, replace(CFG, anim_same_scale=True, anim_scale=f), cells=[1, 9])
+                self.assertEqual({r.status for r in res}, {"READY"}, [r.reason for r in res])
+                self.assertEqual({r.metrics["size_mode"] for r in res}, {"same"})
+                self.assertEqual({r.metrics["scale"] for r in res}, {round(CFG.size / 200 * f, 4)})
+
     def test_presliced_clip_path(self):
         import cv2
         from mirsal.engine import ffmpeg as ff

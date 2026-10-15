@@ -514,6 +514,8 @@ def cfg_for(res: dict, cfg: EngineConfig) -> EngineConfig:
         kw["anim_scale"] = float(res["anim_scale"])
     if res.get("keep_size") is not None:      # the batch's Motion switch: keep the approved still's size (True) or fit the whole motion (False)
         kw["anim_keep_size"] = bool(res["keep_size"])
+    if res.get("same_scale"):                 # ... or Same scale, which wins: every sticker at one scale from its cell
+        kw["anim_same_scale"] = True
     if res.get("key_colour") == "blue":       # the sheet came with a blue screen (green is the default and is never written): keyer, despill and video sheet follow it
         kw["chroma"] = "blue"
     return cfg if not kw else replace(cfg, **kw)
@@ -1154,14 +1156,20 @@ def set_video_size(out: Path, gid: int, scale, index: int | None = None) -> dict
             "stickers": {s["index"]: s["anim_scale"] for s in res["stickers"] if s.get("anim_scale") is not None}}
 
 
-def set_keep_size(out: Path, gid: int, on: bool) -> dict:
+def set_keep_size(out: Path, gid: int, on: bool, same: bool | None = None) -> dict:
     """The batch's Motion switch "Keep approved size": True (the default) keeps every animation at its approved still's size and place, cutting off
     what moves past the frame; False shrinks a clip until its whole motion fits. Stored on the batch (cfg_for reads it); the animations already made
-    change only when they are cut again (`gates.reslice`, free, from the stored video)."""
+    change only when they are cut again (`gates.reslice`, free, from the stored video). `same` True = Same scale (Haitham, 2026-10-15): every sticker cut
+    from its cell at ONE scale, uniform sizes as on the sheet; it wins over keep/fit; False clears it, None leaves it."""
     res = read_result(out, gid)
     res["keep_size"] = bool(on)
+    if same is not None:
+        if same:
+            res["same_scale"] = True
+        else:
+            res.pop("same_scale", None)
     write_result(out, gid, res)
-    return {"id": gid, "keep_size": bool(on)}
+    return {"id": gid, "keep_size": bool(on), "same_scale": bool(res.get("same_scale"))}
 
 
 def set_appearance(out: Path, gid: int, cfg: EngineConfig, outline: int | None = None, erode: int | None = None) -> dict:

@@ -761,13 +761,21 @@ ACT.gopenfolder = async (el) => {
 };
 
 /* ---------- polling: only while this screen is open */
-/* Motion: "Keep approved size" (Haitham, 2026-10-12). On (the default): every animation keeps its approved still's size and place, and what moves past
-   the frame is cut off. Off: a clip shrinks until its whole motion fits, so a lively one plays smaller than its still. Stored on the batch; when the
-   batch already has animations they are cut again from the stored video, free (POST /api/generations/{id}/keep_size). */
+/* Motion size, three ways (POST /api/generations/{id}/keep_size {on, same}). Approved size (Haitham, 2026-10-12, the default): every animation keeps
+   its approved still's size and place, and what moves past the frame is cut off. Fit motion: a clip shrinks until its whole motion fits, so a lively one
+   plays smaller. Same scale (Haitham, 2026-10-15: "fixed uniform scale sizes"): every sticker is cut from its cell at ONE scale, so the stickers keep
+   the sheet's relative sizes and Video size scales them all alike. The first two size each sticker by its own subject, so their sizes differ.
+   Stored on the batch; when it already has animations they are cut again from the stored video, free. */
+const SIZE_MODES = [
+  ['kept', 'Approved size', 'Each animation keeps the size and place of its approved still; motion past the frame is cut off. Sizes follow each still, so they differ'],
+  ['fit', 'Fit motion', 'Each animation shrinks until its whole motion fits, so a lively one plays smaller. Sizes differ from sticker to sticker'],
+  ['same', 'Same scale', 'Every sticker is cut from its cell at one scale: uniform sizes, as on the sheet. Video size changes them all alike'],
+];
+const gMode = (g) => (g.same_scale ? 'same' : g.keep_size !== false ? 'kept' : 'fit');
 function keepSizeBtn(g) {
   if (!g || g.kind === 'particles' || making(g)) return '';
-  const on = vzKeep(g);
-  return `<button class="btn sm ${on ? 'act' : ''}${vzOn(g) && VZ.keep != null ? ' vztest' : ''}" data-act=gkeepsize data-g=${g.number} aria-pressed=${on} title="${on ? 'On: each animation keeps the size and place of its approved still; motion that goes past the frame is cut off. Click to fit the whole motion instead (the sticker gets smaller)' : 'Off: each animation is shrunk until its whole motion fits, so a lively one plays smaller than its approved still. Click to keep the approved size'}">Keep approved size: ${on ? 'on' : 'off'}</button>`;
+  const cur = vzMode(g), test = vzOn(g) && VZ.mode != null;
+  return `<span class=vsize title="How each animation is sized from the video">Size ${SIZE_MODES.map(([m, label, tip]) => `<button class="btn sm ${cur === m ? 'act' : ''}${test && cur === m ? ' vztest' : ''}" data-act=gkeepsize data-g=${g.number} data-m=${m} aria-pressed=${cur === m} title="${tip}">${label}</button>`).join('')}</span>`;
 }
 
 /* Video size after the video is received (Haitham, 2026-10-12): the batch's (every animation) in the batch row, one sticker's under its tile, 50-150%
@@ -792,9 +800,9 @@ function vsizeRow(g, t) {
    floating card copied from the edge's test card (live.js egCard: the sticker large on the checkerboard, a "test" badge, Apply and Cancel). Apply
    sends the change once (video_size / keep_size with reslice); Cancel drops it. The test sticker: the one whose size was clicked, else the open one,
    else the first animated sticker. */
-const VZ = { g: null, i: null, scale: null, keep: null, src: '', meta: null, busy: false, n: 0, t: 0 };
-const vzOn = (g) => !!g && VZ.g === g.number && (VZ.scale != null || VZ.keep != null);
-const vzKeep = (g) => (vzOn(g) && VZ.keep != null ? VZ.keep : g.keep_size !== false);
+const VZ = { g: null, i: null, scale: null, mode: null, src: '', meta: null, busy: false, n: 0, t: 0 };
+const vzOn = (g) => !!g && VZ.g === g.number && (VZ.scale != null || VZ.mode != null);
+const vzMode = (g) => (vzOn(g) && VZ.mode != null ? VZ.mode : gMode(g));
 function vzTarget(g) {
   const ok = (i) => { const t = g.stickers[i - 1]; return !!(t && t.anim_status === 'READY'); };
   if (VZ.i && ok(VZ.i)) return VZ.i;
@@ -802,7 +810,7 @@ function vzTarget(g) {
   const t = g.stickers.find((x) => x.anim_status === 'READY');
   return t ? t.index : null;
 }
-function vzClear() { Object.assign(VZ, { g: null, i: null, scale: null, keep: null, src: '', meta: null }); vzCard(false); }
+function vzClear() { Object.assign(VZ, { g: null, i: null, scale: null, mode: null, src: '', meta: null }); vzCard(false); }
 function vzCard(show) {
   let c = document.getElementById('vzcard');
   if (!show) { if (c) c.remove(); return; }
@@ -818,7 +826,7 @@ function vzCard(show) {
   c.querySelector('.spin').style.display = VZ.src ? 'none' : '';
   const f = VZ.scale != null ? VZ.scale : (g.stickers[i - 1].anim_scale != null ? g.stickers[i - 1].anim_scale : g.anim_scale || 1),
     m = VZ.meta, cut = m && m.cut_off_frames ? ` · cut off in ${m.cut_off_frames} of ${m.frames} frames` : m ? ' · nothing cut off' : '';
-  c.querySelector('.egccap').textContent = `S${i} · video size ${pct(f)} · keep approved size ${vzKeep(g) ? 'on' : 'off'}${cut} · Apply uses it on ${VZ.i ? 'S' + VZ.i : 'all'}`;
+  c.querySelector('.egccap').textContent = `S${i} · video size ${pct(f)} · ${SIZE_MODES.find((x) => x[0] === vzMode(g))[1].toLowerCase()}${cut} · Apply uses it on ${VZ.i ? 'S' + VZ.i : 'all'}`;
   c.querySelectorAll('.egcbtn .btn').forEach((b) => (b.disabled = VZ.busy));
   const anchor = document.querySelector(`[data-act=gvsize][data-g="${g.number}"]${VZ.i ? `[data-i="${VZ.i}"]` : ':not([data-i])'}`) || document.querySelector(`[data-act=gkeepsize][data-g="${g.number}"]`),
     r = anchor ? anchor.getBoundingClientRect() : null, w = Math.min(300, innerWidth - 24);
@@ -834,7 +842,7 @@ function vzPreview() {
   const n = ++VZ.n;
   clearTimeout(VZ.t);
   VZ.t = setTimeout(async () => {
-    const q = `index=${i}${VZ.scale != null ? '&scale=' + VZ.scale : ''}${VZ.keep != null ? '&keep=' + (VZ.keep ? 1 : 0) : ''}`;
+    const q = `index=${i}${VZ.scale != null ? '&scale=' + VZ.scale : ''}${VZ.mode != null ? `&keep=${VZ.mode !== 'fit' ? 1 : 0}&same=${VZ.mode === 'same' ? 1 : 0}` : ''}`;
     const r = await api(`/api/generations/${g.number}/anim_preview?${q}`);
     if (n !== VZ.n) return;
     if (!r.ok) { toast(r.j.error || 'Could not preview this size', 1); return vzClear(); }
@@ -859,19 +867,19 @@ ACT.gkeepsize = (el) => {
   const g = GM.get(+el.dataset.g);
   if (!g) return;
   if (VZ.g !== g.number) vzStart(g, null);
-  VZ.keep = !vzKeep(g);
-  if (VZ.keep === (g.keep_size !== false) && VZ.scale == null) return vzClear(), (glast = ''), tick(true);
+  VZ.mode = el.dataset.m === gMode(g) ? null : el.dataset.m;
+  if (VZ.mode == null && VZ.scale == null) return vzClear(), (glast = ''), tick(true);
   vzPreview(); glast = ''; tick(true);
 };
 
-async function vzSend(g, { scale, index, keep }) {
+async function vzSend(g, { scale, index, mode }) {
   const redo = (g.stickers || []).some((s) => s.anim_status === 'READY');
   if (scale !== undefined) {
-    const r = await post(`/api/generations/${g.number}/video_size`, { scale, ...(index ? { index } : {}), reslice: redo && keep == null });
+    const r = await post(`/api/generations/${g.number}/video_size`, { scale, ...(index ? { index } : {}), reslice: redo && mode == null });
     if (!r.ok) return toast(r.j.error || 'Could not change the size', 1), false;
   }
-  if (keep != null) {
-    const r = await post(`/api/generations/${g.number}/keep_size`, { on: keep, reslice: redo });
+  if (mode != null) {
+    const r = await post(`/api/generations/${g.number}/keep_size`, { on: mode !== 'fit', same: mode === 'same', reslice: redo });
     if (!r.ok) return toast(r.j.error || 'Could not change it', 1), false;
   }
   glast = ''; tick(true);
@@ -881,8 +889,8 @@ ACT.vzapply = async () => {
   const g = GM.get(VZ.g);
   if (!g || VZ.busy) return;
   VZ.busy = true; vzCard(true);
-  const keep = VZ.keep != null && VZ.keep !== (g.keep_size !== false) ? VZ.keep : null,
-    ok = await vzSend(g, { ...(VZ.scale != null ? { scale: VZ.scale } : {}), index: VZ.i, keep });
+  const mode = VZ.mode != null && VZ.mode !== gMode(g) ? VZ.mode : null,
+    ok = await vzSend(g, { ...(VZ.scale != null ? { scale: VZ.scale } : {}), index: VZ.i, mode });
   VZ.busy = false;
   if (ok) { toast(`Applied to ${VZ.i ? 'S' + VZ.i : 'the batch'}: cutting again (free)`); vzClear(); } else vzCard(true);
 };

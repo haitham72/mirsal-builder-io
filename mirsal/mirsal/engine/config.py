@@ -40,6 +40,7 @@ class EngineConfig:
     loop_fade_frames: int = 6
     anim_scale: float = 1.0        # the animation's size after it is received, on top of keep/fit: 0.9 = 10% smaller, 1.1 = 10% larger (the batch's Video size, or one sticker's; Haitham 2026-10-12)
     anim_keep_size: bool = True    # an animation keeps its APPROVED still's size and place (what leaves the 512 frame is cut off); False = shrink the clip until its whole motion fits (the old way, Haitham 2026-10-12)
+    anim_same_scale: bool = False  # wins over keep/fit: every cell of the video at ONE scale (the largest cell side -> the canvas), so the stickers keep the sheet's relative sizes (Haitham 2026-10-15: "fixed uniform scale sizes")
     clip_prefer: tuple = ("mov", "webm")   # pre-sliced clip formats, best first (ProRes 4444 has the cleanest alpha)
     clip_alpha_floor: int = 12               # alpha below this is haze (VP9 alpha leaves values 1-3) -> 0
 

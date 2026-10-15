@@ -313,12 +313,13 @@ def process_video(mp4, cfg, cells: list[int] | None = None, on_probe=None, on_ce
         a = (refs or {}).get(idx)
         return hashlib.sha1(a.tobytes()).hexdigest()[:16] if a is not None else None
     use_cache = cache
-    return _run_cells(cells, lambda idx: _cached(use_cache, use_cache and use_cache.key(cfg, "mp4", src, list(vr[idx - 1]), fps, cap_fps, max_frames, bool(layout), refkey(idx), sorted((waive or {}).get(idx, ()))), idx,
-                                                  lambda: _one_cell(mp4, idx, vr[idx - 1], fps, cap_fps, max_frames, cfg, bool(layout), (refs or {}).get(idx), (waive or {}).get(idx, ()))),
+    same = max(max(r[2], r[3]) for r in vr) if cfg.anim_same_scale else None      # Same scale: one window side for every cell of this video
+    return _run_cells(cells, lambda idx: _cached(use_cache, use_cache and use_cache.key(cfg, "mp4", src, list(vr[idx - 1]), fps, cap_fps, max_frames, bool(layout), refkey(idx), sorted((waive or {}).get(idx, ())), *([same] if same else [])), idx,
+                                                  lambda: _one_cell(mp4, idx, vr[idx - 1], fps, cap_fps, max_frames, cfg, bool(layout), (refs or {}).get(idx), (waive or {}).get(idx, ()), same)),
                       cfg, on_cell)
 
 
-def _one_cell(mp4, idx, rect, fps, cap_fps, max_frames, cfg, slot=False, ref_alpha=None, waive=()) -> AnimationResult:
+def _one_cell(mp4, idx, rect, fps, cap_fps, max_frames, cfg, slot=False, ref_alpha=None, waive=(), same=None) -> AnimationResult:
     x, y, cw, ch = rect
     t0 = time.perf_counter()
     frames = ff.decode_cell(mp4, x, y, cw, ch, max_frames, cap_fps)   # one cell at a time
@@ -329,7 +330,7 @@ def _one_cell(mp4, idx, rect, fps, cap_fps, max_frames, cfg, slot=False, ref_alp
         # Wrong chroma key used (e.g., green key on a blue screen) - fail immediately instead of producing a "blue screen" result
         return AnimationResult(idx, "FAILED", "wrong_chroma_key", metrics={"error": str(e)[:200], "chroma": cfg.chroma})
     keyed = [key_image(f, cfg, calib).rgba for f in frames]
-    return _finish(idx, keyed, fps, cfg, {"source": "video sheet" if slot else "3x3 mp4", "threshold": round(calib[1], 1), "ms": {"decode": t_dec, "key": _ms(t1)}}, slot, ref_alpha, waive)
+    return _finish(idx, keyed, fps, cfg, {"source": "video sheet" if slot else "3x3 mp4", "threshold": round(calib[1], 1), "ms": {"decode": t_dec, "key": _ms(t1)}}, slot, ref_alpha, waive, same)
 
 
 def keyed_cell(mp4, rect, cap_fps, max_frames, cfg) -> list:
@@ -425,7 +426,7 @@ def _encode_fit(frames, fps, cfg, path, start: int = CRF_START, budget: int | No
     return ladder[i], got[i], len(got)
 
 
-def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None, waive=()) -> AnimationResult:
+def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None, waive=(), same=None) -> AnimationResult:
     ms = m.setdefault("ms", {})                       # where the time went, per stage (read by `python -m mirsal profile` and kept in result.json)
     t_all = time.perf_counter(); t = time.perf_counter()
     union = None
@@ -450,16 +451,21 @@ def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None, waive=()) -> An
     if any(not c.ok and c.severity == verify.BLOCK for c in pre):
         rep = Report(pre)
         return AnimationResult(idx, "FAILED", rep.first_failure, rep, m)
-    kept = keep_window(keyed, ref_alpha, cfg) if cfg.anim_keep_size else None
+    h0, w0 = keyed[0].shape[:2]
+    if cfg.anim_same_scale:                    # Same scale: the cell's centre square at the video's largest cell side, the same for every cell (a clip: its own frame)
+        side = float(same or max(h0, w0))
+        kept = ((w0 - side) / 2, (h0 - side) / 2, side), cfg.size / side
+    else:
+        kept = keep_window(keyed, ref_alpha, cfg) if cfg.anim_keep_size else None
     t = time.perf_counter()
-    f = float(cfg.anim_scale or 1.0)           # Video size (anim_scale): one more factor on top of keep / fit, about the canvas centre
+    f = float(cfg.anim_scale or 1.0)           # Video size (anim_scale): one more factor on top of same / keep / fit, about the canvas centre
     if f != 1.0:
         m["video_size"] = round(f, 3)
     if kept:                                   # the approved still's size and place (anim_keep_size); what moves past the frame is cut off
         (x0, y0, side), s = kept
         side2 = side / f
         out = render_kept(keyed, (x0 + (side - side2) / 2, y0 + (side - side2) / 2, side2), cfg)
-        m["scale"], m["size_mode"] = round(s * f, 4), "kept"
+        m["scale"], m["size_mode"] = round(s * f, 4), "same" if cfg.anim_same_scale else "kept"
     else:                                      # fit the whole motion inside the frame: the clip shrinks when the subject moves far
         scale = min(fit_scale(union, cfg), cfg.max_fit * cfg.size / max(union[2] - union[0], union[3] - union[1])) * f
         m["scale"], m["size_mode"] = round(scale, 4), "fit"
