@@ -50,7 +50,7 @@ Not delivered: semantic tokens (spacing, type roles, status pairs, radii, elevat
 
 1. Resize box and frame editor, on a video-sheet batch and on an imported 3×3 video: drag, arrows, Centre, Grid, scrubber, Apply; both themes; ≤760 px.
 2. Lottie style: groups, presets, Re-roll, loop and random-still playback in lottie-web.
-3. Re-import: the duplicate dialog, "Again into G###" and "As a new batch".
+3. Re-import: a file used before is cut again as a new batch, no dialog (the duplicate check is gone, 2026-10-15).
 4. Repair batch: retime Esc and backdrop; queue clock; badge vs Timeline click; phone viewer; welcome in dark; Settings → Tickets and local Account; Help with the keyboard.
 
 ## Sequence

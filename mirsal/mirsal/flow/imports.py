@@ -357,7 +357,7 @@ def sheet_match(res: dict, d: Path, frame: Path) -> dict:
     return {"sheet": best, "distance": dist[best], "distances": dist}
 
 
-def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "", grid_ok: bool = False, again: bool = False) -> tuple[int, dict]:
+def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "", grid_ok: bool = False) -> tuple[int, dict]:
     """Import INSIDE a batch (Haitham, 2026-10-08: "import in Stickers and in Animation, proper naming").
     - A picture becomes the NEXT GENERATION of this batch, like Regenerate: the batch's own plan (cells, tags, emoji) and naming, `parent` = the batch's root,
       `regen_of` = its main generation; the stills are cut from the picture.
@@ -365,8 +365,8 @@ def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "", 
       the image sheet -> it is the batch's prepared 3x3 video and animates the kept stickers (the earlier clips kept as versions; when its first frame
       shows another grid than the batch's, a 409 with `detected_grid` asks first and `grid_ok` cuts it with the batch's grid anyway); a video sheet -> attached
       as the next animation (a sheet that already has a video is retired first with `redo_video`, and a new one is built at the same gap).
-    The answer says which one was used. Free: nothing here calls a provider. Never twice by accident: the same bytes answer where they already are,
-    unless `again` (Haitham, 2026-10-15: "import video sheet manually should allow 'add to pack' and then import again as batch or as gen#")."""
+    The answer says which one was used. Free: nothing here calls a provider. No duplicate check (Haitham, 2026-10-15: "i dont need that check, user picks
+    an image -> slice -> picks another video used before -> slice -> export"): a file used before is simply cut again."""
     from . import pipeline as pl, gates, groups, sources
     from ..generation import prompter
     ext = Path(name).suffix.lower()
@@ -376,9 +376,6 @@ def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "", 
     res = pl.read_result(c.out, main)
     if res.get("kind") == "particles":
         raise ImportError("This batch is a particle sheet: import into a sticker batch", 409)
-    hit = None if again else known(c.out, "", data)
-    if hit:
-        return 200, {"duplicate": True, "batch": fam["root"], **hit}
     if not c.lock.acquire(blocking=False):
         raise ImportError("busy: a job is running, wait for it to finish", 409)
     handed_off, row = False, None
@@ -509,7 +506,7 @@ def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "", 
 
 
 def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generation=None, sheet=None, job_id=None, retry=False, job=None, as_new=False,
-                batch=None, grid_ok=False, again=False) -> tuple[int, dict]:
+                batch=None, grid_ok=False) -> tuple[int, dict]:
     """One serialized import lifecycle. Console holds the cross-process writer lock.
 
     The ledger reserves bytes before mutation, records the batch before background
@@ -520,7 +517,8 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
     `as_new` imports as an unrelated batch even when a failed job matches.
     `batch` (any G### of a batch) imports INSIDE that batch (`_into_batch`): a picture is its next generation, a video its next animation;
     `grid_ok` cuts a video of the image sheet with the batch's grid although its first frame looks like another one.
-    `again` imports bytes Mirsal already has once more (into `batch`, or as a new batch), instead of answering where they already are.
+    A file Mirsal already has is imported again, a new batch each time (Haitham, 2026-10-15: no duplicate check for a person's own file); only
+    `retry` looks the earlier import up, to finish that same batch.
     """
     from . import pipeline as pl, gates, sources
     from ..media.video_project import MAX_UPLOAD
@@ -531,7 +529,7 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
         raise ImportError("Import a PNG, JPEG, WebP, MP4, MOV or WebM file")
     with _LOCK:
         if batch is not None and str(batch).strip():
-            return _into_batch(c, user, name, data, batch, prompt, grid_ok=grid_ok, again=again)
+            return _into_batch(c, user, name, data, batch, prompt, grid_ok=grid_ok)
         if job:
             return _recover(c, user, name, data, _linkable(c.out, user, job_id or job_id_of(name), job, name), prompt)
         ticket = job_id or job_id_of(name)
@@ -542,9 +540,9 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
                                   409, hint={"candidates": candidates(c.out, ticket, user["id"])})
             if len(cands) == 1:
                 return _recover(c, user, name, data, cands[0], prompt)
-        hit = None if again else known(c.out, "" if as_new else name, data, None if as_new else job_id)      # as new: only the same bytes are a duplicate, not the failed job's id; again: none
-        if hit and not (retry and hit.get("import") and hit.get("recoverable")):
-            return 200, {"duplicate": True, **hit}
+        hit = known(c.out, "" if as_new else name, data, None if as_new else job_id) if retry else None      # only a retry looks for the earlier import
+        if hit and not (hit.get("import") and hit.get("recoverable")):
+            hit = None                                                   # nothing to finish there: a new batch
         if not c.lock.acquire(blocking=False):
             raise ImportError("busy: a job is running, wait for it to finish", 409)
         row = None
