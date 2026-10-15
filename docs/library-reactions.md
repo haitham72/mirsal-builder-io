@@ -1,13 +1,15 @@
 # Reaction effects tabs: Emoji style | Lottie style | Packs (2026-10-15)
 
-Haitham: `#/reactions` looked completely different from Sticker Library › Reactions, and nothing connected them. First fix was a bridge (two links + the made list in the Library); then Haitham asked for the merge instead: `#/reactions` now has three sub-tabs, **Emoji Style | Lottie Style | Packs**, where Packs is the Library's Reactions dumped as is. The bridge links are gone with it — there is nothing left to bridge to.
+Haitham: `#/reactions` looked completely different from Sticker Library › Reactions, and nothing connected them. First fix was a bridge (two links + the made list in the Library); then the merge: `#/reactions` got three sub-tabs, **Emoji Style | Lottie Style | Packs**, Packs being the Library's Reactions dumped as is. Then the same three tabs went into **Library › Reactions** too: both screens render the same switch and the same views, from the one tab state.
 
 ## How it is implemented
 
 One tab state, three views, no new route or engine function. Emoji Style and Lottie Style render exactly as before.
 
-- Tab state: `RXS.tab` (`mirsal/mirsal/console/reactions.js`, `'emoji' | 'lottie' | 'packs'`, kept in the browser as `rx.tab`; an unknown value falls back to Emoji style). The style bar (`rxStyleBar`, `mirsal/mirsal/console/lottiestyle.js`, shared by all three views) offers all three through the one `ACT.rxstyle` action (`{s}` + redraw).
-- Packs view: `rxHtml` renders `spLibHtml()` (`mirsal/mirsal/console/particles.js`) verbatim — the same sets list, bank Create flow, and "Made in Reaction effects" section the Library shows. `rxDraw` triggers `spLibSync()` on that tab; `RENDER.reactions` returns after the draw (the style-specific loaders only run for their own tab). `spLibRefresh` (`particles.js`) also redraws `#/reactions` when it is the current route, so bank builds, approvals and previews arriving late repaint the tab like they repaint the Library.
+- Tab state: `RXS.tab` (`mirsal/mirsal/console/reactions.js`, `'emoji' | 'lottie' | 'packs'`, kept in the browser as `rx.tab`; an unknown value falls back to Emoji style). The switch (`rxStyleBar`, `mirsal/mirsal/console/lottiestyle.js`) offers all three through the one `ACT.rxstyle` action (`{s}` + redraw of the current route: `RENDER.reactions()` on `#/reactions`, `spLibRefresh()` → `RENDER.library()` in the Library).
+- `#/reactions`: `rxHtml` renders the tab's view; `rxDraw` triggers `spLibSync()` on Packs and returns (style loaders only run for their own tab).
+- Library › Reactions: `spLibHtml()` (`mirsal/mirsal/console/particles.js`) renders the same bar (`spRxTabs`) plus the tab's view — its own sets/bank/made content on Packs, the `#/reactions` renderers (`rxLibHtml`, `rxEditor`, `rxPick`, `rxHpHtml`, `lsHtml`) on the style tabs. `spRxTabSync` loads what the shown tab needs (bank / Lottie files, once each) and refreshes; without `reactions.js` every `typeof` guard falls back to the dumped list, so older callers never break.
+- Packs view (either screen): `rxHtml` renders `spLibHtml()` verbatim — the same sets list, bank Create flow, and "Made in Reaction effects" section the Library shows. `rxDraw` triggers `spLibSync()` on that tab; `RENDER.reactions` returns after the draw (the style-specific loaders only run for their own tab). `spLibRefresh` (`particles.js`) also redraws `#/reactions` when it is the current route, so bank builds, approvals and previews arriving late repaint the tab like they repaint the Library.
 - Data, unchanged: `/api/particles` (sets), `/api/particles/bank` (finished/unclaimed), `/api/particles/emoji-lottie` (created Lotties, newest first, capped at 24 in the list).
 
 ## Deliberately not changed
