@@ -1,24 +1,20 @@
-# Library ↔ Reaction effects bridge (built 2026-10-15)
+# Reaction effects tabs: Emoji style | Lottie style | Packs (2026-10-15)
 
-Haitham: `#/reactions` looked completely different from Sticker Library › Reactions, and nothing connected them. It was true: the backend served every created Lottie reaction (`GET /api/particles/emoji-lottie`), but **no screen read it** — work made in Reaction effects was invisible everywhere else, and neither screen linked to the other.
+Haitham: `#/reactions` looked completely different from Sticker Library › Reactions, and nothing connected them. First fix was a bridge (two links + the made list in the Library); then Haitham asked for the merge instead: `#/reactions` now has three sub-tabs, **Emoji Style | Lottie Style | Packs**, where Packs is the Library's Reactions dumped as is. The bridge links are gone with it — there is nothing left to bridge to.
 
-## What connects them now
+## How it is implemented
 
-Two links and one list. No new route, no new engine function, no storage change: the bridge only reads the existing API and navigates (rule 11: the contract already existed; the screens came second).
+One tab state, three views, no new route or engine function. Emoji Style and Lottie Style render exactly as before.
 
-| direction | where | what |
-|---|---|---|
-| Reactions → Library | `rxStyleBar` (`mirsal/mirsal/console/lottiestyle.js`, shared by Emoji and Lottie style) | "Library Reactions" button (`ACT.rxgolib`, `mirsal/mirsal/console/reactions.js`): sets `LIBTAB='particles'` (the `let` in `app.js`) and goes to `#/library` |
-| Library → Reactions | `spLibHead` (`mirsal/mirsal/console/particles.js`) | "Reaction effects" anchor to `#/reactions`, beside Create/Back |
-| Library shows the made work | `spMadeHtml` / `spMadeCard` (`particles.js`), rendered inside `spLibHtml` | "Made in Reaction effects": every created Lottie, newest first (the server sorts), preview image, token + preset, Download of the stored file, capped at 24 |
-
-Loading: `spMadeSync` (`particles.js`) fetches `GET /api/particles/emoji-lottie` once per page (`SPL.made`, same pattern as `spLibSync`/`spBankSync`; `spLibRefresh` redraws on arrival, `spSetsForget` clears it). States: still loading → section absent (sets spinner shows); loaded empty → "none yet" with the link back — including on the otherwise-empty "No reaction sets yet" card, so the bridge is visible before anything exists.
+- Tab state: `RXS.tab` (`mirsal/mirsal/console/reactions.js`, `'emoji' | 'lottie' | 'packs'`, kept in the browser as `rx.tab`; an unknown value falls back to Emoji style). The style bar (`rxStyleBar`, `mirsal/mirsal/console/lottiestyle.js`, shared by all three views) offers all three through the one `ACT.rxstyle` action (`{s}` + redraw).
+- Packs view: `rxHtml` renders `spLibHtml()` (`mirsal/mirsal/console/particles.js`) verbatim — the same sets list, bank Create flow, and "Made in Reaction effects" section the Library shows. `rxDraw` triggers `spLibSync()` on that tab; `RENDER.reactions` returns after the draw (the style-specific loaders only run for their own tab). `spLibRefresh` (`particles.js`) also redraws `#/reactions` when it is the current route, so bank builds, approvals and previews arriving late repaint the tab like they repaint the Library.
+- Data, unchanged: `/api/particles` (sets), `/api/particles/bank` (finished/unclaimed), `/api/particles/emoji-lottie` (created Lotties, newest first, capped at 24 in the list).
 
 ## Deliberately not changed
 
-- The bank's `finished`/`unclaimed` states still mean "a covering set holds a READY render" (`reaction/13-12-library-create-flow-2026-10-13.md`): created Lotties don't alter the Create flow.
-- Presets, the editor, and pack attach are untouched. A created Lottie is web-only (glyph embedded); packs hold stickers and bursts, so there is no "add to pack" for it — Download is the way out, as before.
-- Additions only: one new action (`rxgolib`), no removed/renamed action, so `tests/data/ui_baseline.json` needs no entry. No new CSS classes (reuses `ps-libh`/`ps-lib`/`ps-card`).
+- The bank's `finished`/`unclaimed` states still mean "a covering set holds a READY render" (`reaction/13-12-library-create-flow-2026-10-13.md`).
+- A created Lottie is web-only (glyph embedded); packs hold stickers and bursts, so there is still no "add to pack" for it — Download is the way out.
+- One action kept (`rxstyle`, extended with `packs`); the bridge's `rxgolib` never reached the baseline and is deleted. No `renamed`/`retired` entries needed. No new CSS classes.
 
 ## Tests
 

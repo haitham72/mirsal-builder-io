@@ -209,12 +209,12 @@ function spMadeCard(r){return `<div class=ps-card><div class=ps-main><b>${esc(r.
  `<div class=row><a class="btn sm" href="${esc(r.url||'')}" download="${esc((r.token||'reaction')+'.lottie.json')}">Download</a></div></div>`}
 function spMadeHtml(){const made=SPL.made;
  if(!made)return '';
- if(!made.length)return `<section class=ps-made><div class=ps-libh><h2>Made in Reaction effects</h2><span class=mut>none yet</span><span class=gspace></span><a class=link href="#/reactions">Open Reaction effects</a></div></section>`;
- return `<section class=ps-made><div class=ps-libh><h2>Made in Reaction effects</h2><span class=mut>${made.length} Lottie</span><span class=gspace></span><a class=link href="#/reactions">Open Reaction effects</a></div><div class=ps-lib>${made.slice(0,24).map(spMadeCard).join('')}</div></section>`}
+ if(!made.length)return `<section class=ps-made><div class=ps-libh><h2>Made in Reaction effects</h2><span class=mut>none yet</span></div></section>`;
+ return `<section class=ps-made><div class=ps-libh><h2>Made in Reaction effects</h2><span class=mut>${made.length} Lottie</span></div><div class=ps-lib>${made.slice(0,24).map(spMadeCard).join('')}</div></section>`}
 const spBankSel=()=>SPL.bankSel||(SPL.bankSel=new Set());
 function spBankCounts(){const bank=SPL.bank||[];let f=0;for(const m of bank)if(m.state==='finished')f++;return{finished:f,unclaimed:bank.length-f}}
 function spLibHead(){const c=SPL.bank?spBankCounts():null;
- return `<div class=ps-libh><h2>Reactions</h2>${c?`<span class=mut>${c.finished} finished · ${c.unclaimed} unclaimed</span>`:''}<span class=gspace></span><a class=link href="#/reactions" title="Reaction effects: the preset library and the reactions made there">Reaction effects</a>${SPL.view?`<button class=btn data-act=rosback>Back</button>`:`<button class="btn pri" data-act=roscreate>${ic('fx')} Create</button>`}</div>`}
+ return `<div class=ps-libh><h2>Reactions</h2>${c?`<span class=mut>${c.finished} finished · ${c.unclaimed} unclaimed</span>`:''}<span class=gspace></span>${SPL.view?`<button class=btn data-act=rosback>Back</button>`:`<button class="btn pri" data-act=roscreate>${ic('fx')} Create</button>`}</div>`}
 function spCreateChooseHtml(){
  return `<div class=sp-modes><button class=sp-mode data-act=rosbank><b>Predefined</b><em>The emoji bank</em></button><button class=sp-mode data-act=rosstickers><b>Stickers</b><em>Your stickers</em></button></div>
  <div class=mut>Predefined: finished and unclaimed bank reactions, built one by one or in batches. Stickers: reactions from your stickers, in the Studio.</div>`}
