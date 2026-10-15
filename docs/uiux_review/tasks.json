@@ -26,7 +26,8 @@
       "review_status": "superseded",
       "finding_status": "still_present",
       "preserve_current_fix": "vzPreview reads r.j.url; do not revert to src",
-      "status_note": "2026-10-15 plan-review.md: Keep approved size retired; Resize box + one-frame editor (f3b9ef52). Rewrite size_preview.test.js."
+      "status_note": "2026-10-15 plan-review.md: Keep approved size retired; Resize box + one-frame editor (f3b9ef52). Rewrite size_preview.test.js.",
+      "status": "superseded_resize_behavior_tests_updated"
     },
     {
       "id": "T-002",
@@ -283,7 +284,9 @@
       "trace": "CT-020",
       "review_status": "revise_scope_before_implementation",
       "finding_status": "still_present",
-      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
+      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17).",
+      "status": "implemented_pending_browser_acceptance",
+      "implementation": "Shared TESTCARD presentation; current frame/edge controllers and request semantics preserved."
     },
     {
       "id": "T-013",
@@ -771,7 +774,9 @@
       "trace": "CT-044",
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
-      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
+      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17).",
+      "status": "implemented_pending_browser_acceptance",
+      "implementation": "Shared TESTCARD presentation; current frame/edge controllers and request semantics preserved."
     },
     {
       "id": "T-034",

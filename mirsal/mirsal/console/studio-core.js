@@ -811,13 +811,13 @@ function vzGuide() {
 }
 function vzCard(show) {
   let c = document.getElementById('vzcard');
-  if (!show) { if (c) c.remove(); return; }
+  if (!show) return TESTCARD.close('vzcard');
   const g = GM.get(VZ.g), i = g && vzTarget(g);
   if (!g || !i) return vzCard(false);
   if (!c) {
-    c = document.createElement('div'); c.id = 'vzcard';
-    c.innerHTML = '<div class="egcimg bg-checker vzstage"><img alt=""><svg class=vzguide viewBox="0 0 512 512" aria-hidden=true></svg><span class=egbadge>test</span><span class=spin></span></div><div class=vzframe><input type=range min=0 value=0 aria-label="Frame"><small class=mut></small></div><div class=vzctl></div><div class=egccap></div><div class=egcbtn><button class="btn sm pri" data-act=vzapply>Apply</button><button class="btn sm" data-act=vzcancel>Cancel</button></div>';
-    document.body.appendChild(c);
+    c = TESTCARD.open({id:'vzcard',apply:'vzapply',cancel:'vzcancel',stageClass:'vzstage',
+      stageExtra:'<svg class=vzguide viewBox="0 0 512 512" aria-hidden=true></svg>',
+      controls:'<div class=vzframe><input type=range min=0 value=0 aria-label="Frame"><small class=mut></small></div><div class=vzctl></div>'});
     const rg = c.querySelector('input[type=range]');
     rg.addEventListener('input', () => { VZ.frame = +rg.value; vzPreview(); });
     const st = c.querySelector('.vzstage'), img = st.querySelector('img');
@@ -837,9 +837,6 @@ function vzCard(show) {
     const end = () => { if (VZ.drag) { VZ.drag = null; vzPreview(); } };
     st.addEventListener('pointerup', end); st.addEventListener('pointercancel', end);
   }
-  const img = c.querySelector('img');
-  if (VZ.src && img.getAttribute('src') !== VZ.src) img.src = VZ.src;
-  c.querySelector('.spin').style.display = VZ.src ? 'none' : '';
   c.querySelector('.vzguide').innerHTML = vzGuide();
   const m = VZ.meta, rg = c.querySelector('input[type=range]');
   rg.max = m ? Math.max(0, m.frames - 1) : 0; rg.value = VZ.frame;
@@ -850,14 +847,11 @@ function vzCard(show) {
        <span class=vsize><button ${b} data-act=vzmove data-x=-1 aria-label="Left">←</button><button ${b} data-act=vzmove data-y=-1 aria-label="Up">↑</button><button ${b} data-act=vzmove data-y=1 aria-label="Down">↓</button><button ${b} data-act=vzmove data-x=1 aria-label="Right">→</button>
        <button ${b} data-act=vzcentre ${m && m.centre_canvas ? '' : 'disabled'} title="Put the hot spot's centre in the middle">Centre</button>${o[0] || o[1] ? `<button ${b} data-act=vzzero title="Back to where the cut puts it">Reset</button>` : ''}</span>`
     : '') + `<label class=vsize><input type=checkbox data-act=vzgrid ${VZ.grid ? 'checked' : ''}> Grid</label>`;
-  c.querySelectorAll('.egcbtn .btn').forEach((x) => (x.disabled = VZ.busy));
   const mode = m ? { hot: 'hot spot', same: 'one scale', kept: 'approved still', fit: 'fit motion' }[m.mode] || m.mode : '';
-  c.querySelector('.egccap').textContent = `S${i} · ${pct(f)}${o[0] || o[1] ? ` · moved ${Math.round(o[0] * 100)}%, ${Math.round(o[1] * 100)}%` : ''}${mode ? ' · ' + mode : ''} · Apply uses it on ${VZ.i ? 'S' + VZ.i : 'the batch'}`;
-  const anchor = document.querySelector(VZ.i ? `[data-act=vzedit][data-g="${g.number}"][data-i="${VZ.i}"]` : `[data-act=gvsize][data-g="${g.number}"]:not([data-i]),[data-act=gresize][data-g="${g.number}"]`),
-    r = anchor ? anchor.getBoundingClientRect() : null, w = Math.min(320, innerWidth - 24);
-  c.style.width = w + 'px';
-  c.style.left = Math.max(12, Math.min(innerWidth - w - 12, r ? r.left : 12)) + 'px';
-  c.style.top = Math.max(70, Math.min(innerHeight - w - 190, r ? r.bottom + 8 : 90)) + 'px';
+  const caption = `S${i} · ${pct(f)}${o[0] || o[1] ? ` · moved ${Math.round(o[0] * 100)}%, ${Math.round(o[1] * 100)}%` : ''}${mode ? ' · ' + mode : ''} · Apply uses it on ${VZ.i ? 'S' + VZ.i : 'the batch'}`;
+  TESTCARD.sync(c,{src:VZ.src,caption,busy:VZ.busy,loading:!VZ.src});
+  const anchor = document.querySelector(VZ.i ? `[data-act=vzedit][data-g="${g.number}"][data-i="${VZ.i}"]` : `[data-act=gvsize][data-g="${g.number}"]:not([data-i]),[data-act=gresize][data-g="${g.number}"]`);
+  TESTCARD.place(c,anchor,320,190);
 }
 const vzClamp = (v) => Math.max(-0.5, Math.min(0.5, Math.round(v * 1000) / 1000));
 /* ask for the test frame; a newer click wins over an older answer */

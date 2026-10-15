@@ -29,3 +29,21 @@ test('owner upload keeps destination options, navigates to its batch, and member
  assert.equal(browser.SES.gens[0],111);assert.equal(browser.location.hash,'#/studio');
  browser.ME={role:'member'};assert.equal(browser.impButtons(),'');
 });
+
+
+test('a general duplicate import can reopen or deliberately import a new batch',async()=>{
+ for(const again of [false,true]){
+  const fields={'imp-file':{files:[{name:'same.png'}]},'imp-prompt':{value:'Cats'},'imp-generation':{value:'G104'},'imp-sheet':{value:'A2'}};
+  const sent=[],dialogs=[];
+  const browser=vm.createContext({document:{},ACT:{},ME:{role:'owner'},SES:{gens:[104]},GS:{},location:{},route_:'generate',glast:'',
+   $:id=>fields[id],esc:s=>s,dlg:h=>dialogs.push(h),closeDlg(){},toast(){},saveSes(){},tick:async()=>{},URLSearchParams,
+   api:async(url,opts)=>{sent.push({url,opts});return {ok:true,j:sent.length===1?{duplicate:true,id:104}:{id:112}}}});
+  vm.runInContext(readConsoleFile(path.join(__dirname,'../../mirsal/console/imports.js'),'utf8'),browser);
+  browser.ACT.impopen();browser.ACT.impupload();await new Promise(resolve=>setImmediate(resolve));
+  assert.match(dialogs.at(-1),/Import again as a new batch/);assert.equal(browser.location.hash,undefined);
+  if(again){await browser.ACT.impreimport();const q=new URL(sent[1].url,'http://local').searchParams;
+   assert.equal(q.get('again'),'1');assert.equal(q.get('as_new'),'1');assert.equal(q.has('generation'),false);assert.equal(q.has('sheet'),false);
+   assert.equal(browser.SES.gens[0],112);
+  }else{await browser.ACT.impexisting();assert.equal(sent.length,1);assert.equal(browser.SES.gens[0],104)}
+ }
+});

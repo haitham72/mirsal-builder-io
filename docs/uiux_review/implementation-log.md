@@ -47,3 +47,9 @@ Docs in the same step: `design/05` (Pack/Settings/Help), `design/10` (welcome),
 ## Remaining owner decisions (unchanged)
 
 Reaction labels, pack tabs, cloud pricing (`docs/uiux_plan.md` Questions for Haitham).
+
+## Redesign phase 1 — current contracts and unfinished code
+
+Branch `redesign-ui-ux`, isolated under `.worktrees/redesign-ui-ux` from `2fb92c3e`. Replaced the obsolete Keep test with four behavioral Resize/Size/Position/Cancel tests using production controllers and fake I/O. Corrected particle fixtures to resolve generation paths and inspect nested history batches. TESTCARD now shares edge/frame presentation without merging controllers. window_box receives cfg.size. General duplicate file import offers Open existing or Import again as a new batch, using again=1/as_new=1 without a destination; batch-specific impagain remains intact.
+
+Validation: four Resize controller tests; four import/trending tests; two corrected particle cases plus two HotSpot tests (4total); UIinventory4 pass. No provider calls. Browser acceptance of shared presentation is next; these test passes do not claim visual acceptance.

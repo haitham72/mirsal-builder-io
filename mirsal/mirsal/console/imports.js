@@ -14,11 +14,12 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
  const form=()=>`<div class=fld><label>Description (optional)</label><input id=imp-prompt maxlength=2000 value="${esc(($('prompt')||{}).value||'')}"></div><div class=fld><label>Destination batch for a video</label><input id=imp-generation placeholder="G104" value="${SES.gens.length?'G'+String(SES.gens[0]).padStart(3,'0'):''}"></div><div class=fld><label>Video sheet (optional)</label><input id=imp-sheet placeholder="First approved sheet"></div>`;
   async function result(r){if(!r.ok){if(r.j&&r.j.candidates&&r.j.candidates.length>1){chooseDlg(r.j.candidates);return}toast(r.j.error||'Import failed',1);return}const j=r.j;
   if(j.duplicate&&j.recoverable&&j.import){dlg(`<h2>This import needs recovery</h2><p>Retry processing the saved batch. No provider job is created.</p><button class=btn data-act=impretry>Retry import</button><button class=btn data-act=dlgx>Close</button>`);return}
+  if(j.duplicate&&!IMP.again&&IMP.file){dlg('<h2>This file is already imported</h2><p>Open the existing batch, or import the same file as a new batch. No provider job is created.</p><div class=row><button class="btn pri" data-act=impexisting>Open existing batch</button><button class=btn data-act=impreimport>Import again as a new batch</button><button class=btn data-act=dlgx>Cancel</button></div>');IMP.existing=r;return}
   closeDlg();const gid=j.id||+(String(j.generation||'').replace(/^G/i,''));
   if(gid){SES={prompt:IMP.options&&IMP.options.prompt||'',gens:[+gid],off:[],pack:''};saveSes();glast='';GS.tab=j.kind==='video'?'anim':'stickers';location.hash='#/studio';if(route_==='generate')await tick(true);toast(j.recovered?`Recovered ${j.job||''}: linked to the failed job, no second charge`:(j.duplicate?'Opened the existing batch':'Imported; processing the file'));return}
   if(j.effect){location.hash='#/effects/'+j.effect;return}
   toast(j.job?`Already in Queue: ${j.job}${j.recoverable?' (still processing or needs recovery)':''}`:j.task?`Already in the Inbox: task ${j.task}`:'This file is already imported')}
-  async function send(retry=false){if(IMP.busy)return;IMP.busy=true;try{const o={...IMP.options,retry};let r;
+  async function send(retry=false){if(IMP.busy)return;IMP.busy=true;try{const o={...IMP.options,retry,...(IMP.again?{again:1,as_new:1}:{})};let r;
   if(IMP.localJob){if(IMP.job)o.local_job=IMP.localJob}
   if(IMP.job)r=await post('/api/higgsfield/import',{id:IMP.job,...o});
   else{const q=new URLSearchParams();Object.entries({...o,name:IMP.file.name}).forEach(([k,v])=>{if(v!==undefined&&v!=='')q.set(k,String(v))});if(IMP.localJob)q.set('job',IMP.localJob);if(IMP.asNew)q.set('as_new','1');r=await api('/api/import?'+q,{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:IMP.file})}
@@ -34,6 +35,8 @@ if(typeof document!=='undefined'&&typeof ACT!=='undefined'){
       if(cs.length>1){chooseDlg(cs);return}}
     send()};
   ACT.impchoose=el=>{IMP.localJob=el.dataset.j;send()};
+  ACT.impexisting=()=>{IMP.again=true;return result(IMP.existing)};
+  ACT.impreimport=()=>{IMP.again=true;IMP.asNew=true;IMP.localJob=null;IMP.options={...IMP.options,generation:undefined,sheet:undefined};return send()};
   ACT.impnew=()=>{IMP.asNew=true;IMP.localJob=null;send()};
  ACT.impretry=()=>send(true);
    ACT.imphistory=async()=>{IMP={file:null,job:null,options:null,busy:false,localJob:null,asNew:false};dlg('<h2>Higgsfield history</h2><p>Loading completed jobs…</p>');const r=await api('/api/higgsfield/history');if(!r.ok)return dlg(`<h2>Higgsfield history</h2><p>${esc(r.j.error||'Could not load history')}</p><button class=btn data-act=dlgx>Close</button>`);dlg(`<h2>Higgsfield history</h2><p class=mut>Importing downloads an existing result. No credits are spent.</p>${form()}${IMPV.rows(r.j.jobs)}<button class=btn data-act=dlgx>Close</button>`)};

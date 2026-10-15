@@ -235,13 +235,12 @@ function egSync(){const bar=document.getElementById('gedge'),gs=edgeBatches();
 /* the preview itself. Outside the open view it is a floating card under the sliders (the grid is never touched): the target sticker, large, on the checkerboard,
    with Apply and Cancel on it. In the open view the big sticker pane is the preview. Both refresh in place while a slider moves. */
 let EGT=null;
-function egCard(show,url,t,v){let c=document.getElementById('egcard');
-  if(!show){if(c)c.remove();return}
-  if(!c){c=document.createElement('div');c.id='egcard';c.innerHTML='<div class="egcimg bg-checker"><img alt=""><span class=egbadge>test</span></div><div class=egccap></div><div class=egcbtn><button class="btn sm pri" data-act=egapply>Apply</button><button class="btn sm" data-act=egundo>Cancel</button></div>';document.body.appendChild(c)}
-  const im=c.querySelector('img');if(im.getAttribute('src')!==url)im.src=url;
-  c.querySelector('.egccap').textContent=`S${t.i} · stroke ${v.o} px, trim ${v.e} px · Apply uses it on all`;
-  const bar=document.getElementById('gedge'),r=bar?bar.getBoundingClientRect():null,w=Math.min(300,innerWidth-24);
-  c.style.width=w+'px';c.style.left=Math.max(12,Math.min(innerWidth-w-12,r?r.left:12))+'px';c.style.top=Math.max(70,Math.min(innerHeight-w-110,r?r.bottom+8:90))+'px'}
+function egCard(show,url,t,v){
+  if(!show)return TESTCARD.close('egcard');
+  const c=TESTCARD.open({id:'egcard',apply:'egapply',cancel:'egundo'});
+  TESTCARD.sync(c,{src:url,busy:EG.busy,caption:`S${t.i} · stroke ${v.o} px, trim ${v.e} px · Apply uses it on all`});
+  TESTCARD.place(c,document.getElementById('gedge'),300,110);
+}
 function applyEdgePreview(){const dirty=egDirty(),t=dirty?egTarget():null,v=egVals(),modal=typeof MD!=='undefined'&&MD,
     url=t?`/api/generations/${t.g}/edge_preview?index=${t.i}&outline=${v.o}&erode=${v.e}&px=${modal?520:360}`:'',
     box=modal?document.querySelector('#modal .mpanes .pane:first-child .box'):null;

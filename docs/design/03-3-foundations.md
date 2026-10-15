@@ -13,3 +13,7 @@ A sun/moon button at the top-right of every screen switches Dark / Light immedia
 Inter is self-hosted. The shared type steps are 11.5 / 12.5 / 14 / 16 / 20 / 24px, with radius tokens 8 / 12 / 16 / 24px and a pill radius. `--gutter` governs page spacing. Home's headline sizes remain a scoped exception; some inline script font sizes still await the scale sweep in the backlog.
 
 Interactive elements share hover, press, selected and `:focus-visible` states. Click-opened dialogs, menus and panels use a short entrance animation; content redrawn by polling has none. `prefers-reduced-motion` disables transitions, entrances and film autoplay. Every keyboard control retains a visible focus ring.
+
+### Shared test preview
+
+Edge and frame tests use one TESTCARD presentation, retaining their independent controls and API contracts. Frame controls (grid, scrubber and Position) remain in the frame adapter; both preview cards expose a labelled dialog, live caption and shared busy state.
