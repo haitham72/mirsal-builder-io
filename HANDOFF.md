@@ -1,32 +1,71 @@
-# Current handoff — redesign-ui-ux, 2026-10-15
+# Handoff — stopped at Haitham's request, 2026-10-15
 
-Read [current status](docs/uiux_review/current-status.md), [remaining plan](plan.md), [implementation log](docs/uiux_review/implementation-log.md) and [real images](docs/uiux_review/redesign-shots/README.md). The redesign is isolated under `.worktrees/redesign-ui-ux`, based on handpicked-lottie2fb92c3e. All source phases are pushed on redesign-ui-ux; main and the shared checkout were not switched or merged.
+## Pick up here
 
-Latest user choice: retain the duplicate choice router, not forced fresh cuts. Grey/export code from5ad67e2d was reviewed and imported unchanged in a439eec4; the contradictory import-policy portion was excluded. Requested32 Python tests and5 UI tests pass. Optional Lottie fields and broader catalog refactors remain explicitly open in plan.md. Historical notes below describe earlier sessions.
+Worktree: G:/Haitham/VsCode/Mirsal-Builder/.worktrees/redesign-ui-ux
+Branch: redesign-ui-ux
+Last committed/pushed source: c2df01a7. **The slider integration below is local WIP, not committed or pushed. Work in this exact worktree; a fresh checkout from origin will not contain it.**
 
----
+Haitham asked to stop coding and leave this handoff plus a thin remaining-only plan. Do not repeat the completed redesign. [plan.md](plan.md) lists only remaining work. Earlier phase evidence is in [implementation-log.md](docs/uiux_review/implementation-log.md); [design images](docs/uiux_review/redesign-shots/README.md) predate the new inline sliders.
 
-# HANDOFF — 2026-10-15 (save point; Claude stopped at Haitham's request: weekly budget at 99%)
+## Current user choices — preserve
 
-Branch `handpicked-lottie`, everything below committed and pushed. No uncommitted source of mine. Other sessions' uncommitted data in `mirsal/out/` and `Custom_emojis/` is untouched.
+- Keep our duplicate **choice router**: Open existing / Import again as a new batch, plus the batch-specific choices, explicit recovery and grid-mismatch consent. Haitham explicitly rejected enforced fresh cuts after reviewing5ad67e2d. Do not import that conflicting policy.
+- Grey-thumbnail code from5ad67e2d was imported unchanged in a439eec4. Requested32 Python tests and5 UI tests passed.
+- Keep the redesign structure, shared TESTCARD, staged frame editor, tokens/44px targets, saved-set/pack flows and distinct Emoji-style versus Lottie-style export contracts.
+- Never switch/stash/reset the shared handpicked-lottie checkout. No main merge/deployment or runtime-data commits.
 
-## Done this session (commits)
+## Pending integration: 9194bfc5 + 47817ab6
 
-| commit | what |
-|---|---|
-| 826cf70f | Repaired another session's broken import fix (JS syntax error in imports.js killed the import buttons; nonexistent ffmpeg call; `cut_sheet` VIDEO_RETURNED reverted). Grid-mismatch question: "Cut it as R×C anyway" (`grid_ok=1`). reslice/preview/reloop work on imported 3x3 videos. |
-| a9f16b93 | Proposal doc `docs/size-position-lottie-proposal.md`. |
-| f3b9ef52 | **Size/Position**: `[✓] Resize` + Size on the batch row; hot spot (pixels opaque in ≥50% of frames) sizing; per-sticker frame editor (Position drag/arrows/Centre, guide grid, frame scrubber); every test = ONE frame PNG (`engine/video.preview_frame`, `size_window`); native routes `POST /api/generations/{id}/resize`, `/position`. |
-| 7f1e4d17 | **Lottie style à la Trapcode Particular**: Emitter / Particle / Physics / Aux groups, presets, seed re-roll, time sampling (`tm`). Byte-identical for old bursts (second RNG; 9 cases compared). Fix: fresh preset library lacked `handpicked`. |
-| ec16244a | Import the same file again on purpose: "Again into G###" / "As a new batch" (`again=1`). |
+Both were fetched/reviewed and applied with no-commit cherry-picks. **Do not blindly cherry-pick them again.**
 
-Tests run (narrow): gates area 40, engine/video area 56, imports 14, live slicing test, lottie_reactions 22, emoji_lottie 12, ui_inventory 4 — all pass. Particle area: 2 pre-existing failures in `test_particle_set` (see plan.md).
+9194bfc5 adds per-tile Size50–150%, X/Y−50…+50% sliders, readouts,500ms release scheduling and Reset using existing position/video_size routes. The frame-editor button remains. CSS conflicted with the redesign's appended foundations: kept all redesign rules and one copy of the incoming .vsl block (upstream had it twice).
 
-## Not done / next (see plan.md)
+47817ab6 adds the slider documentation. plan.md and docs/waiting-for-haitham.md conflicted with our newer plan/user import choice: working-file content was reconciled to retain our structure and choice router while adding slider acceptance. For this handoff the cherry-pick sequencer is quit and pending integration paths are unstaged; their working-file content is retained.
 
-1. **No browser check of anything above** — restart the server from `mirsal/.venv` and look before judging.
-2. UI/UX plan review (`docs/uiux_review/plan-review.md`) not written. Facts already established:
-   - The uiux repair batch (T-001..T-004, T-065, T-086, T-074, T-072, T-073) IS in HEAD (`uiux-fixes` is an ancestor); every source marker present. T-001 is superseded by the Resize/frame editor. Browser acceptance outstanding for all.
-   - `docs/uiux_review/revalidation.md` (2026-10-14) predates the repairs and the Size/Position + Lottie work: its "still present" for F-01/F-05/F-06/F-24/F-26..F-28/F-30/F-36 is stale.
-   - plan.md items 1–9 (reaction/pack cleanup) were not checked this session: keep them.
-3. Proposal decisions 1–3 approved by Haitham 2026-10-15 (as built). UI/UX plan review done: docs/uiux_review/plan-review.md. Still open: "Use 2×2" for a mismatched grid was deliberately not offered (a 3×3 batch's stickers are its cells).
+Pending source/test paths:
+- mirsal/mirsal/console/studio-core.js
+- mirsal/mirsal/console/studio.css
+- mirsal/tests/js/tile_sliders.test.js (new, untracked)
+
+Pending imported area docs:
+- docs/size-position-lottie-proposal.md
+- docs/design/05-5-per-screen.md
+- docs/uiux_review/redesign-prompt.md
+- docs/waiting-for-haitham.md
+
+### Additional local fixes — review, do not discard
+
+Native delayed-response test reproduced a lost second release:85→90→95 sent90 only and erased pending95 while the first request was in flight. New regressions also exposed Reset allowing an old scheduled edit to reapply, and a thrown network error leaving the busy guard set.
+
+The WIP sender now captures the released value (not later DOM values), defers it500ms while its sticker request is busy, retains newer pending input, caches acknowledged values until the canonical refresh, cancels a scheduled edit on Reset and clears busy in finally. Tests cover return-to-original edits and a newer unreleased drag too. No route/backend contract changed.
+
+## Checks already run — do not repeat without a reason
+
+- node --check mirsal/mirsal/console/studio-core.js: clean after the fix.
+- Python tests.test_ui_inventory:5 pass after integration/fix.
+- tile_sliders + size_preview:8 pass before the last test-only additions; final tile_sliders alone:5 pass (covers extra rapid-return/unreleased-drag cases). Existing frame-editor4 tests passed with the changed controllers.
+- Native delayed-response replay after the fix:90 and95 both sent in order; pending cleared.
+- Native pointer drag with a forced redraw retained X22% and sent one request on release.
+- Real copied3×3 G156: untouched Size release0POST; one X edit1positionPOST200; Reset position(offset:null,reslice:false) then video_size(scale:null,reslice:true), both200, one re-cut.
+
+**Not accepted yet:** the full2batch×2width×2theme slider/Reset sweep. It timed out waiting for a response twice. The first run encountered the legitimate engine writer-lock busy response when Reset followed a cut too quickly. A second run that attempted to wait on generations.busy also timed out; the exact remaining cause was not resolved. Do not label this a passing matrix or assume it is only a harness issue. The acceptance browser has been closed; no automation is left running.
+
+## Test server and data
+
+User test server remains at http://127.0.0.1:8796/ (localhost only), running this worktree's current WIP source. Owner8770 was not restarted.
+
+Launcher: %TEMP%/mirsal-redesign-local-test/serve.ps1
+PID file/logs: same folder, server.pid / server.log / server-error.log. Validate the process chain before restarting only this instance.
+MIRSAL_OUT: same folder/outcopy. DB writes off; real CLI and LLM/agent/vision providers disabled. Account/session/Telegram/model-call files were not copied. The first sanitized copy missed named generation folders; corrected by copying only G<number>-<name> artwork folders. G146 is the existing video-sheet fixture; G156 is the new synthetic imported3×3 fixture (nine ready animations). These are copied test data, never stage them.
+
+CLI browser config/scripts/logs remain in %TEMP%/mirsal-redesign-RyghIK; use Playwright skill/CLI. Last8state loop timed out; no final slider screenshot was produced. Preserve the existing committed gallery.
+
+## Next actions
+
+1. Review the preserved WIP and reproduce/fix the remaining native acceptance timeout; complete both batch types, widths and themes, respecting async recuts and writer-lock behavior.
+2. Update owning area/design docs, execution log and journey status with actual evidence. Keep unfinished acceptance visible in plan.md.
+3. Check branch, stage explicit integration paths (including the new test), inspect diff, commit with provenance9194bfc5/47817ab6 and push. No runtime media, Custom_emojis or trash.
+4. Restart the localhost test server after final code/CSS changes and tell Haitham the verified revision/address.
+
+Broader refactors and optional features remain in plan.md; this handoff does not claim those are implemented.
