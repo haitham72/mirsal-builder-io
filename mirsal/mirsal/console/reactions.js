@@ -174,6 +174,8 @@ function rxEdSync(){
   const o=rxOpt(i.dataset.rxo);if(!o||i===document.activeElement)return;
   const v=rxVal(k,o);if(v!=null)i.value=v;const out=i.parentNode.querySelector('output');if(out)out.textContent=rxFmt(o,v)})}
 
+/* the bridge to the Sticker Library: its Reactions tab shows the finished sets and every reaction made on this screen */
+ACT.rxgolib=()=>{try{LIBTAB='particles'}catch(e){} if(typeof location!=='undefined')location.hash='#/library';};
 /* ---------- the server ---------- */
 /* the editor's preview (the plain framing), or a hovered emoji's (fit) */
 async function rxPlay(t){

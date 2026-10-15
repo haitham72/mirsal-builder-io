@@ -28,7 +28,7 @@ const LS={files:null,start:null,sel:'',ed:null,doc:null,anim:null,t:0,err:'',bus
 const rxStyle=()=>{try{return localStorage.getItem('rx.style')==='lottie'?'lottie':'emoji'}catch(e){return 'emoji'}};
 const rxStyleBar=()=>{const s=rxStyle();
  return `<div class=tabs role=tablist aria-label="Reaction style"><button class="tab ${s==='emoji'?'on':''}" data-act=rxstyle data-s=emoji role=tab aria-selected=${s==='emoji'}>Emoji style</button>`+
-  `<button class="tab ${s==='lottie'?'on':''}" data-act=rxstyle data-s=lottie role=tab aria-selected=${s==='lottie'}>Lottie style</button></div>`};
+  `<button class="tab ${s==='lottie'?'on':''}" data-act=rxstyle data-s=lottie role=tab aria-selected=${s==='lottie'}>Lottie style</button><span class=sp></span><button class=link data-act=rxgolib title="The Reactions tab of the Sticker Library: finished sets, and every reaction made on this screen">Library Reactions</button></div>`};
 const lsFile=f=>(LS.files||[]).find(x=>x.file===f);
 const lsName=f=>String(f||'').replace(/\.json$/i,'');
 

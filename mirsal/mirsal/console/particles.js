@@ -167,8 +167,8 @@ setInterval(()=>{if(route_==='generate'&&!document.hidden)spSecSync()},2500);
    The trash is listed (GET /api/particles/deleted): Restore is offered on the notice right after a delete AND from the "Deleted" list under the sets, long after. One set belongs to pack(s): the card says
    "used in: A, B" or "stand-alone", never per sticker. */
 const SPL={sets:null,busy:false,open:'',detail:{},pick:{},deleted:null,trash:null,poll:0,
- view:null,bank:null,bankBusy:false,bankQ:'',bankSel:null,build:[]};
-const spSetsForget=()=>{SPL.sets=null;SPL.detail={};SPL.open='';SPL.deleted=null;SPL.trash=null;SPL.view=null;SPL.bank=null;SPL.bankQ='';SPL.bankSel=null;SPL.build=[]};
+ view:null,bank:null,bankBusy:false,bankQ:'',bankSel:null,build:[],made:null,madeBusy:false};
+const spSetsForget=()=>{SPL.sets=null;SPL.detail={};SPL.open='';SPL.deleted=null;SPL.trash=null;SPL.view=null;SPL.bank=null;SPL.bankQ='';SPL.bankSel=null;SPL.build=[];SPL.made=null;};
 const spCredits=n=>n==null||+n===0?'nothing spent yet':`about ${+n} credit${+n===1?'':'s'} spent`;
 function spSetCard(s){const cells=s.cells||[],picked=cells.filter(c=>c.picked),strip=picked.slice(0,8),used=s.used_in||[],open=SPL.open===s.id;
  return `<div class="ps-card${open?' open':''}" data-ps=${esc(s.id)}>
@@ -191,17 +191,30 @@ function spSetDetail(s){const d=SPL.detail[s.id],full=d&&d.id===s.id?d:s,cells=f
   ${spBurstHtml(full)}
  </div>`}
 function spLibHtml(){const sets=SPL.sets;
- if(!sets)return `<div class=pk-pt-load><div class=spin></div><span class=mut>Reading the particle sets…</span></div>`;
+ spMadeSync();
+ if(!sets)return `<div class=pk-pt-load><div class=spin></div><span class=mut>Reading the particle sets…</span></div>${spMadeHtml()}`;
  const del=SPL.deleted?`<div class=ps-del><span>Deleted ${esc(SPL.deleted.name)}: it is in the trash, nothing is destroyed.</span><button class="btn sm" data-act=psrestore data-id=${esc(SPL.deleted.id)}>Restore</button></div>`:'',trash=spTrashHtml(SPL.trash);
  const create=SPL.view==='choose'?spCreateChooseHtml():SPL.view==='bank'?(SPL.bank?`<div data-rosbank>${spBankHtml()}</div>`:`<div class=fx-job><span class=spin></span> <span class=mut>Reading the bank…</span></div>`):SPL.view==='build'?spBuildHtml():SPL.view==='stickers'?spScopePicker('rosscope'):'';
  const list=sets.length?`<div class=ps-lib>${sets.map(spSetCard).join('')}</div>`:'';
- const empty=!sets.length&&!SPL.view?`${del}<div class="card" style="text-align:center;padding:40px"><h2>No reaction sets yet</h2><p class=mut>Create one from the bank or from your stickers.</p><button class="btn pri" data-act=roscreate>${ic('fx')} Create</button></div>${trash}`:'';
- if(empty)return empty;
- return `${del}${spLibHead()}${create}${list}${trash}`}
+ const made=SPL.made||[];
+ const empty=!sets.length&&!SPL.view&&!made.length?`${del}<div class="card" style="text-align:center;padding:40px"><h2>No reaction sets yet</h2><p class=mut>Create one from the bank or from your stickers.</p><button class="btn pri" data-act=roscreate>${ic('fx')} Create</button></div>${trash}`:'';
+ if(empty)return empty+spMadeHtml();
+ return `${del}${spLibHead()}${create}${list}${spMadeHtml()}${trash}`}
+/* reactions made in Reaction effects (#/reactions): the created Lottie of each emoji, read-only here (GET /api/particles/emoji-lottie).
+   Before this bridge they were visible nowhere else, which is why the two screens looked disconnected. */
+async function spMadeSync(force){if(SPL.madeBusy||(SPL.made&&!force))return;SPL.madeBusy=true;
+ try{const r=await api('/api/particles/emoji-lottie');if(r.ok){SPL.made=r.j.reactions||[];spLibRefresh()}}finally{SPL.madeBusy=false}}
+function spMadeCard(r){return `<div class=ps-card><div class=ps-main><b>${esc(r.emoji||'')} ${esc(r.token||'')}</b><small class=mut>${esc(r.preset||'')} · Lottie</small></div>`+
+ (r.preview?`<img src="${esc(r.preview)}" alt="" loading=lazy style="max-width:220px;border-radius:8px">`:'')+
+ `<div class=row><a class="btn sm" href="${esc(r.url||'')}" download="${esc((r.token||'reaction')+'.lottie.json')}">Download</a></div></div>`}
+function spMadeHtml(){const made=SPL.made;
+ if(!made)return '';
+ if(!made.length)return `<section class=ps-made><div class=ps-libh><h2>Made in Reaction effects</h2><span class=mut>none yet</span><span class=gspace></span><a class=link href="#/reactions">Open Reaction effects</a></div></section>`;
+ return `<section class=ps-made><div class=ps-libh><h2>Made in Reaction effects</h2><span class=mut>${made.length} Lottie</span><span class=gspace></span><a class=link href="#/reactions">Open Reaction effects</a></div><div class=ps-lib>${made.slice(0,24).map(spMadeCard).join('')}</div></section>`}
 const spBankSel=()=>SPL.bankSel||(SPL.bankSel=new Set());
 function spBankCounts(){const bank=SPL.bank||[];let f=0;for(const m of bank)if(m.state==='finished')f++;return{finished:f,unclaimed:bank.length-f}}
 function spLibHead(){const c=SPL.bank?spBankCounts():null;
- return `<div class=ps-libh><h2>Reactions</h2>${c?`<span class=mut>${c.finished} finished · ${c.unclaimed} unclaimed</span>`:''}<span class=gspace></span>${SPL.view?`<button class=btn data-act=rosback>Back</button>`:`<button class="btn pri" data-act=roscreate>${ic('fx')} Create</button>`}</div>`}
+ return `<div class=ps-libh><h2>Reactions</h2>${c?`<span class=mut>${c.finished} finished · ${c.unclaimed} unclaimed</span>`:''}<span class=gspace></span><a class=link href="#/reactions" title="Reaction effects: the preset library and the reactions made there">Reaction effects</a>${SPL.view?`<button class=btn data-act=rosback>Back</button>`:`<button class="btn pri" data-act=roscreate>${ic('fx')} Create</button>`}</div>`}
 function spCreateChooseHtml(){
  return `<div class=sp-modes><button class=sp-mode data-act=rosbank><b>Predefined</b><em>The emoji bank</em></button><button class=sp-mode data-act=rosstickers><b>Stickers</b><em>Your stickers</em></button></div>
  <div class=mut>Predefined: finished and unclaimed bank reactions, built one by one or in batches. Stickers: reactions from your stickers, in the Studio.</div>`}
