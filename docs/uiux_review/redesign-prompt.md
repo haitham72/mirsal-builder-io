@@ -1,5 +1,7 @@
 # Prompt: implement the UI/UX redesign on branch `redesign-ui-ux`
 
+> Current 2026-10-15 steering: retain the duplicate **choice router** (Open existing / Import again as a new batch), per Haitham after reviewing 5ad67e2d. Do not enforce a fresh cut for every upload. Import the grey-thumbnail implementation from that commit; preserve the redesign structure. See implementation-log.md for current acceptance.
+
 You produced the UI/UX review of Mirsal Builder (`docs/uiux_review/`, `docs/uiux_plan.md`, `tasks.json`). Now implement it. Work **only** on a new branch `redesign-ui-ux`. Since your review, the app gained a lot of functionality, so build on what exists today, not on your old screenshots.
 
 ## Set up

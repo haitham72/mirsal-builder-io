@@ -233,7 +233,10 @@ class CollectionTests(unittest.TestCase):
     def test_tags_are_the_action_tokens_without_the_emoji(self):
         self.assertEqual(col.tags_of({"tags": ["laugh", "rofl", "LMAO", "🤣", "eye-roll", "laugh"]}), "laugh_rofl_lmao_eye_roll")
 
-    def test_a_thumbnail_is_a_png_with_alpha_from_a_webp_or_a_webm_first_frame(self):
+    def test_a_thumbnail_is_grey_for_a_webm_and_unchanged_for_a_png(self):
+        """The CMS shows our MediaThumbnails PNG at `user_media/Emoji_Assets/{emoji}.png` (Haitham, 2026-10-15: it showed the
+        full-colour first frame), so a `.webm`'s thumbnail is the grey silhouette, the same bytes as the Download .zip's
+        `{stem}_grey.png`; a `.webp` is converted as before, a `.png` goes as it is."""
         import numpy as np
         from PIL import Image
         from mirsal.engine import ffmpeg as ff
@@ -243,10 +246,15 @@ class CollectionTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             ff.encode_webm(frames, 30, 30, Path(d) / "a.webm")
             webm = (Path(d) / "a.webm").read_bytes()
-        for name, data in (("a.webp", buf.getvalue()), ("a.webm", webm)):
-            img = Image.open(io.BytesIO(col.thumbnail(name, data)))
-            self.assertEqual((img.format, img.mode, img.size), ("PNG", "RGBA", (64, 64)), name)
-            self.assertEqual((img.getpixel((0, 0))[3], img.getpixel((32, 32))[3] > 200), (0, True), name)
+        img = Image.open(io.BytesIO(col.thumbnail("a.webp", buf.getvalue())))
+        self.assertEqual((img.format, img.mode, img.size), ("PNG", "RGBA", (64, 64)))
+        self.assertEqual((img.getpixel((0, 0))[3], img.getpixel((32, 32))[3] > 200), (0, True))
+        grey = Image.open(io.BytesIO(col.thumbnail("a.webm", webm)))
+        self.assertEqual((grey.format, grey.mode, grey.size), ("PNG", "P", (64, 64)))
+        self.assertEqual(grey.getpalette()[:3], [191, 191, 191], "the #BFBFBF silhouette")
+        self.assertEqual(max(grey.info["transparency"]), 153, "40% transparent, like the .zip's _grey.png")
+        self.assertEqual((grey.getpixel((0, 0)), grey.getpixel((32, 32))), (0, 3), "transparent outside, solid inside")
+        self.assertLess(len(col.thumbnail("a.webm", webm)), 6 * 1024)
         self.assertEqual(col.thumbnail("a.png", b"same bytes"), b"same bytes")
         with self.assertRaises(col.CollectionError):
             col.thumbnail("a.webm", b"not a video")

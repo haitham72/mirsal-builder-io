@@ -1,5 +1,5 @@
-"""Grey stand-ins for every exported animation (Haitham, 2026-10-12): beside each video in a Download .zip, its sticker's STILL (the image
-sheet's cell, the same S#) as a flat grey silhouette — one colour, 75% white and 25% black (#BFBFBF), the still's own alpha kept as the shape —
+"""Grey stand-ins for every exported animation (Haitham, 2026-10-12): beside each video in a Download .zip, the animation's own first visible
+frame (its still when the video cannot be read; 2026-10-15) as a flat grey silhouette — one colour, 75% white and 25% black (#BFBFBF), the frame's own alpha kept as the shape —
 40% transparent (60% opacity: a solid pixel's alpha is 153), right next to its original under the original's own name plus `_grey.png`
 (`🤣-falcon-laugh-s08-G112-20261008.webm` -> `🤣-falcon-laugh-s08-G112-20261008_grey.png`), compressed hard: a palette PNG with 4 alpha levels
 (transparent, two edge steps, solid), about 2-3 KB a sticker. They are listed in `manifest.json` under `grey`, never under `assets`, so Export to
@@ -14,6 +14,7 @@ import numpy as np
 GREY = 191                 # 75% white + 25% black: round(0.75 * 255)
 ALPHA_LEVELS = 4           # transparent, 1/3, 2/3, solid: soft edges at a fraction of the bytes of a full alpha
 OPACITY = 0.6              # 40% transparent (Haitham, 2026-10-12): the whole silhouette, edges included, at 60%
+FIRST_FRAMES = 8           # the first visible frame is looked for among these (a clip may open on empty frames)
 
 def grey_png(alpha: np.ndarray) -> bytes:
     """A flat #BFBFBF silhouette of `alpha` (HxW uint8), 40% transparent, as a palette PNG with ALPHA_LEVELS transparency steps."""
@@ -28,19 +29,22 @@ def grey_png(alpha: np.ndarray) -> bytes:
 
 
 def alpha_of(still: Path | None, video: Path | None) -> np.ndarray | None:
-    """The shape to grey: the sticker's still when it is on disk, else the video's first frame. None when neither can be read."""
+    """The shape to grey: the ANIMATION's own first visible frame (what is shipped beside it), else the sticker's still. None when neither can be
+    read. (Haitham, 2026-10-15: "the thumbnail is NOT grey conversion now, it is a random image": the still came first, and a video imported into
+    the batch, or cut with Resize / Size / Position, no longer matches its still.)"""
     from PIL import Image
-    if still is not None and Path(still).is_file():
-        try:
-            return np.array(Image.open(still).convert("RGBA"))[..., 3]
-        except Exception:
-            pass
     if video is not None and Path(video).is_file():
         try:
             from ..engine import ffmpeg as ff
             info = ff.probe(video, vp9_native=True)
-            frames = ff.decode_full(video, info["width"], info["height"], 1, None)
-            return frames[0][..., 3]
+            for f in ff.decode_full(video, info["width"], info["height"], FIRST_FRAMES, None):
+                if (f[..., 3] > 25).any():
+                    return f[..., 3]
+        except Exception:
+            pass
+    if still is not None and Path(still).is_file():
+        try:
+            return np.array(Image.open(still).convert("RGBA"))[..., 3]
         except Exception:
             pass
     return None

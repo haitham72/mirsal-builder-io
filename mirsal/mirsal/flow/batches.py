@@ -150,7 +150,7 @@ def export_zip(out: Path, gid: int, light: bool = True, retime: bool = False) ->
     (schema version 1: pack, assets with filename, sha256, tags and source cell). Source media stays intact; export resolutions are saved under out/.
     `light` (default on): animations ship re-encoded small, as the pack's zip does (`library.light_webm`; the row records crf/kb/frames/fits).
     `retime`: an animation shorter than 3 s plays its same frames over 3 s (`library.retime_webm`; the row records retimed_from).
-    Every animation also gets its grey stand-in beside it, `{its file stem}_grey.png`, from its still (`media/grey.py`; manifest `grey`).
+    Every animation also gets its grey stand-in beside it, `{its file stem}_grey.png`, from the animation's own first visible frame (`media/grey.py`; manifest `grey`).
     Returns (zip bytes, a safe file stem)."""
     import hashlib
     import io

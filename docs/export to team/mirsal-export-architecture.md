@@ -2108,11 +2108,12 @@ Manifest v1 adds `bank_version` on each asset, plus `resolution_reason` and `can
 ```
 
 **Grey stand-ins (Haitham, 2026-10-12).** Every animation in a Download .zip (pack or batch) has a PNG right beside it, under its own name plus
-`_grey.png` (`🤣-falcon-laugh-s08-7k2q-20261008.webm` -> `🤣-falcon-laugh-s08-7k2q-20261008_grey.png`): the sticker's still (the image sheet's
-cell, same `S#`; the video's first frame when the still is gone) as a flat silhouette in one colour, 75% white and 25% black (`#BFBFBF`), the
-still's alpha kept as the shape, the whole silhouette 40% transparent (a solid pixel's alpha is 153). It is a palette PNG with 4 alpha levels
+`_grey.png` (`🤣-falcon-laugh-s08-7k2q-20261008.webm` -> `🤣-falcon-laugh-s08-7k2q-20261008_grey.png`): the animation's own first visible
+frame (the sticker's still when the video cannot be read, 2026-10-15) as a flat silhouette in one colour, 75% white and 25% black (`#BFBFBF`), the
+frame's own alpha kept as the shape, the whole silhouette 40% transparent (a solid pixel's alpha is 153). It is a palette PNG with 4 alpha levels
 (transparent, two edge steps, solid), about 2-4 KB at 512 px. They are listed under `grey` (`original` names the file it stands for), never
-`assets`, so Export to collection sends only the stickers (`media/grey.py`).
+`assets`, so the stickers stay the only `Media`; Export to collection sends the same grey bytes as each animation's `MediaThumbnails`
+(the CMS shows that PNG at `user_media/Emoji_Assets/{emoji}.png`, Haitham 2026-10-15) (`media/grey.py`, `services/collection.py`).
 
 ## 8. Acceptance rules
 

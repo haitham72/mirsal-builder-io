@@ -4,7 +4,8 @@
 - `CollectionName` (the pack's name, at most 40 characters), `Description` (required, at most 160; the collection's name when none is given),
 - `ContentSubType` (`webm` for animated packs),
 - `Media` repeated once per file (`.webm` animated, `.png` / `.webp` static),
-- `MediaThumbnails` repeated once per file, a PNG paired with `Media` by index (`thumbnail`: a `.png` as it is, a `.webp` converted, a `.webm`'s first frame),
+- `MediaThumbnails` repeated once per file, a PNG paired with `Media` by index (a `.png` as it is, a `.webp` converted, a `.webm`'s
+  grey silhouette: the same bytes as the Download .zip's `{stem}_grey.png`, `media/grey.py` from the animation's first visible frame),
 - `MediaMetadata`: ONE JSON string, an array of `{emoji_utf, tags}` paired with `Media` BY INDEX (never by file name).
 
 What is sent is exactly what Download .zip holds, in the same order: `Library.export_zip` (a pack) and `batches.export_zip` (a batch) choose the
@@ -108,8 +109,9 @@ def items_from_zip(data: bytes) -> tuple[dict, list[dict]]:
 
 
 def thumbnail(name: str, data: bytes) -> bytes:
-    """The sticker as one PNG with its alpha, for `MediaThumbnails`: a `.png` as it is, a `.webp` converted, a `.webm`'s first frame
-    (the animation starts from the approved still, so that frame is its rest pose)."""
+    """One PNG with alpha for `MediaThumbnails`: a `.png` as it is, a `.webp` converted, a `.webm`'s grey silhouette (Haitham,
+    2026-10-15: the CMS shows this PNG at `user_media/Emoji_Assets/{emoji}.png`, so it is the same grey as the Download .zip's
+    `{stem}_grey.png`, not the animation's first frame in full colour). An unreadable video refuses the export, as before."""
     ext = Path(name).suffix.lower()
     if ext == ".png":
         return data
@@ -118,16 +120,21 @@ def thumbnail(name: str, data: bytes) -> bytes:
         if ext == ".webm":
             import tempfile
             from ..engine import ffmpeg as ff
+            from ..media import grey as _grey
             with tempfile.TemporaryDirectory() as d:
                 f = Path(d) / "clip.webm"
                 f.write_bytes(data)
-                info = ff.probe(f, vp9_native=True)
-                img = Image.fromarray(ff.decode_full(f, info["width"], info["height"], 1, None)[0], "RGBA")
-        else:
-            img = Image.open(io.BytesIO(data)).convert("RGBA")
+                a = _grey.alpha_of(None, f)
+                if a is None:
+                    info = ff.probe(f, vp9_native=True)          # raise the decode error below, like the first frame used to
+                    a = ff.decode_full(f, info["width"], info["height"], 1, None)[0][..., 3]
+                return _grey.grey_png(a)
+        img = Image.open(io.BytesIO(data)).convert("RGBA")
         buf = io.BytesIO()
         img.save(buf, "PNG", optimize=True)
         return buf.getvalue()
+    except CollectionError:
+        raise
     except Exception as e:
         raise CollectionError(f"{name}: its thumbnail could not be made ({e})", 409)
 
