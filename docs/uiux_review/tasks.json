@@ -50,7 +50,9 @@
       "trace": "CT-002",
       "review_status": "implemented_browser_acceptance_open",
       "finding_status": "still_present",
-      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3)."
+      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3).",
+      "status": "implemented_browser_checked",
+      "browser_evidence": "2026-10-15 redesign phase2, implementation-log.md"
     },
     {
       "id": "T-003",
@@ -1503,7 +1505,9 @@
       "trace": "UX-01",
       "review_status": "implemented_browser_acceptance_open",
       "finding_status": "still_present",
-      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3)."
+      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3).",
+      "status": "implemented_browser_checked",
+      "browser_evidence": "2026-10-15 redesign phase2, implementation-log.md"
     },
     {
       "id": "T-066",
@@ -1695,7 +1699,9 @@
       "trace": "UX-08",
       "review_status": "implemented_browser_acceptance_open",
       "finding_status": "still_present",
-      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3)."
+      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3).",
+      "status": "implemented_browser_checked",
+      "browser_evidence": "2026-10-15 redesign phase2, implementation-log.md"
     },
     {
       "id": "T-073",
@@ -1720,7 +1726,9 @@
       "trace": "UX-09",
       "review_status": "implemented_browser_acceptance_open",
       "finding_status": "still_present",
-      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3)."
+      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3).",
+      "status": "implemented_browser_checked",
+      "browser_evidence": "2026-10-15 redesign phase2, implementation-log.md"
     },
     {
       "id": "T-074",
@@ -1745,7 +1753,9 @@
       "trace": "UX-10",
       "review_status": "implemented_browser_acceptance_open",
       "finding_status": "still_present",
-      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3)."
+      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3).",
+      "status": "implemented_browser_checked",
+      "browser_evidence": "2026-10-15 redesign phase2, implementation-log.md"
     },
     {
       "id": "T-075",
@@ -2019,7 +2029,9 @@
       "trace": "UX-15",
       "review_status": "implemented_browser_acceptance_open",
       "finding_status": "still_present",
-      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3)."
+      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3).",
+      "status": "implemented_browser_checked",
+      "browser_evidence": "2026-10-15 redesign phase2, implementation-log.md"
     },
     {
       "id": "T-087",

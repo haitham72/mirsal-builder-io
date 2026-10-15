@@ -66,3 +66,5 @@ The header’s “…” menu is anchored to the action row, with its width boun
 - **A member** has no Team in the avatar menu (Haitham, 2026-10-05: Users is for the owner and admins). Their own page, **My usage** (their numbers only, no management card), opens from the **My usage** button in Settings, on the "Signed in as" card.
 
 ---
+
+Dialog Escape closes the top shared dialog through its dismissal callback and stops propagation to the underlying viewer. A welcome overlay above it retains priority. Retime therefore settles cancellation for Escape as well as backdrop and explicit Cancel.

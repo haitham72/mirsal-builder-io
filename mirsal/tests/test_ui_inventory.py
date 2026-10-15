@@ -24,6 +24,14 @@ class UIInventoryTests(unittest.TestCase):
         for name, why in retired.items():
             self.assertTrue(str(why).strip(), f"{kind} {name} is retired without a reason")
 
+    def test_every_shell_script_is_served(self):
+        import re
+        from mirsal.console.server import UI_FILES
+        shell = (inventory.UI / "index.html").read_text(encoding="utf-8")
+        scripts = re.findall(r"<script src=/ui/([^>]+)>", shell)
+        self.assertTrue(scripts)
+        self.assertEqual([name for name in scripts if UI_FILES.get(name) != "text/javascript"], [])
+
     def test_no_action_is_lost(self):
         self.check("actions", {a["name"] for a in inventory.actions()})
 

@@ -356,7 +356,12 @@ document.addEventListener('click', (e) => {
   if (d && (!e.target.closest('.ct-new') || e.target.closest('[role=menuitem]'))) d.open = false;
 });
 
+function dlgEscape(e) {
+  if (e.key !== 'Escape' || !$('dlg').classList.contains('on') || $('welcome').classList.contains('on')) return false;
+  closeDlg('escape'); e.preventDefault(); e.stopImmediatePropagation(); return true;
+}
 document.addEventListener('keydown', (e) => {
+  if (dlgEscape(e)) return;
   if (e.key === 'Escape' && RME) {
     rmeClose();
     const b = document.querySelector('#rail .rme');
