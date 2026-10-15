@@ -4,7 +4,7 @@
 
 Worktree: G:/Haitham/VsCode/Mirsal-Builder-redesign (proper independent checkout since 2026-10-15; the old `.worktrees/redesign-ui-ux` folder inside the main repo is unregistered dead files, delete after closing IDEs/reboot)
 Branch: redesign-ui-ux
-Last committed/pushed source: 42a93282 (reaction-tabs port). **The slider integration below is local WIP, not committed or pushed. Work in this exact checkout; a fresh clone from origin will not contain it.**
+Last committed/pushed source: d3c3c178 (plan records). Committed since: slider integration 57c8850b, Adjust toggle 699a49a1, stale-test repairs eb0c4f83, busy-retry 825f4dcc. Full js suite 388 pass, 0 fail. Work in this exact checkout.
 
 Haitham asked to stop coding and leave this handoff plus a thin remaining-only plan. Do not repeat the completed redesign. [plan.md](plan.md) lists only remaining work. Earlier phase evidence is in [implementation-log.md](docs/uiux_review/implementation-log.md); [design images](docs/uiux_review/redesign-shots/README.md) predate the new inline sliders.
 
@@ -15,7 +15,7 @@ Haitham asked to stop coding and leave this handoff plus a thin remaining-only p
 - Keep the redesign structure, shared TESTCARD, staged frame editor, tokens/44px targets, saved-set/pack flows and distinct Emoji-style versus Lottie-style export contracts.
 - Never switch/stash/reset another checkout: the main repo sits on main (handpicked-lottie was merged and deleted 2026-10-15). No main merge/deployment or runtime-data commits.
 
-## Pending integration: 9194bfc5 + 47817ab6
+## Integrated 2026-10-15: 9194bfc5 + 47817ab6 (committed 57c8850b, do not cherry-pick again)
 
 Both were fetched/reviewed and applied with no-commit cherry-picks. **Do not blindly cherry-pick them again.**
 
@@ -63,7 +63,7 @@ CLI browser config/scripts/logs remain in %TEMP%/mirsal-redesign-RyghIK; use Pla
 
 ## Next actions
 
-1. Review the preserved WIP and reproduce/fix the remaining native acceptance timeout; complete both batch types, widths and themes, respecting async recuts and writer-lock behavior. Then the ported reaction tabs (42a93282, node-green only): Emoji Style | Lottie Style | Packs on `#/reactions` and Library › Reactions, same state both ways.
+1. Slider-timeout acceptance is now code-assisted (825f4dcc: quick second edits wait out 409-busy up to ~12 s instead of erroring) but the interactive sweep is still open: complete both batch types, widths and themes, respecting async recuts and writer-lock behavior. Then the ported reaction tabs (42a93282, node-green only): Emoji Style | Lottie Style | Packs on `#/reactions` and Library › Reactions, same state both ways. Temp-server verified 2026-10-15 (redesign code, port 8797): tab endpoints + JS bundles 200 with real data; interactive clicks remain human-lane.
 2. Update owning area/design docs, execution log and journey status with actual evidence. Keep unfinished acceptance visible in plan.md.
 3. Check branch, stage explicit integration paths (including the new test), inspect diff, commit with provenance9194bfc5/47817ab6 and push. No runtime media, Custom_emojis or trash.
 4. Restart the localhost test server after final code/CSS changes and tell Haitham the verified revision/address.

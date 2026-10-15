@@ -20,7 +20,7 @@ origin/main @ 53f5a7f5 (stable, merged, handpicked-lottie deleted)
 ## Locked decisions (Haitham — do not relitigate)
 
 1. **Imports: this branch keeps the duplicate-choice dialogs** (`again`, "Again into / As a new batch", explicit recovery). Main removed the whole check; that removal must never land here — a future merge keeps this branch's dialogs.
-2. **Tile sliders collapse behind a toggle.** Tiles stay compact; an Adjust/Size control reveals Size/X/Y. Implement in the redesign (not yet built anywhere).
+2. **Tile sliders collapse behind a toggle.** Tiles stay compact; an Adjust control (`ACT.vslopen`, aria-expanded) reveals Size/X/Y. Built 699a49a1, covered in tile_sliders.test.js.
 3. **Two homes stay, with this logic.** `#/reactions` is the MAKE side (presets, editor, bank wall, Lottie files, batch create); Library › Reactions is the OWN side (finished sets, attach/detach, bank build states, made list). The shared tabs (`rx.tab`) flip perspective without losing place — the Packs tab on `#/reactions` answers "what have I made" read-only; management lives in the Library.
 4. **Frame editor stays.** Sliders for quick edits; the floating card keeps grid/scrubber/Centre. No merge, no retirement.
 5. **Verification order: main agent first.** Node + contract checks are done here (below); interactive browser acceptance stays open for a human or browser agent on the 8796 server (deliberately stopped; restart via `%TEMP%/mirsal-redesign-local-test/serve.ps1`).
