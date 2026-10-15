@@ -1,6 +1,8 @@
-# HANDOFF — 2026-10-15 (final; pushed and clean)
+# HANDOFF — 2026-10-15
 
 ## Latest user fixes (2026-10-15)
+
+Implementation checkpoint: `1980c857` on `redesign-ui-ux`, pushed. Documentation follow-up synchronizes the area docs, README, plan and review status.
 
 - Lottie selection redraws the active screen; the player and thumbnails mount within that screen. Browser verified saved-file switching and advancing playback in Library and Create, including returning to Create.
 - Create > + New > From a photo asks Sticker / Emojis; Sticker keeps the cutout/editor, Emojis imports an image sheet into Studio. From a video imports a video sheet into Studio.
@@ -12,11 +14,11 @@
 
 ```
 origin/main @ 0167761b  (stable base — merged implementation)
-origin/redesign-ui-ux @ 95d4b4a4  (checkout: G:/Haitham/VsCode/Mirsal-Builder-redesign)
+redesign-ui-ux: implementation checkpoint 1980c857
+active checkout: G:/Haitham/VsCode/Mirsal-Builder
 ```
 
-Main has 44 uncommitted runtime files (`mirsal/out/*`, `Custom_emojis/*`) — never commit these.
-Redesign is fully clean. Dead `.worktrees/redesign-ui-ux` folder deleted.
+The earlier main-checkout handoff recorded 44 runtime files (`mirsal/out/*`, `Custom_emojis/*`); do not commit runtime files. This session's active checkout is on `redesign-ui-ux`. Dead `.worktrees/redesign-ui-ux` folder was deleted previously.
 
 ## What main carries (all session work)
 
@@ -30,7 +32,7 @@ Redesign is fully clean. Dead `.worktrees/redesign-ui-ux` folder deleted.
 | dc8c0c6b | `GUIDE.md` visual interview guide. |
 
 Tests on main: js 372/0, python narrow (imports + collection + library + ui_inventory + particle_cut) green.
-Redesign: js 388/0, same python gates green.
+Redesign's latest results are recorded above; historical Python gates do not supersede the current stale console assertion.
 
 ## What redesign carries (beyond main)
 
@@ -41,13 +43,13 @@ Redesign: js 388/0, same python gates green.
 
 ## Still open (see plan.md for the full list)
 
-1. **Interactive browser acceptance** — tabs on both screens, sliders, frame editor, dark/light, ≤760 px. Needs a human or browser agent.
-2. **UI/UX redesign backlog** — `plan.md` items 1–9 (reaction/pack cleanup), T-056 tokens → T-066 44px targets → J1 Studio visual reference, journeys J2–J11. The visual redesign has not started.
+1. **Remaining browser acceptance** — full slider/frame-editor sweep, Emoji/Packs tab transitions on both screens, theme/phone matrix and extended states. Lottie selection/playback and Create sheet imports passed targeted browser checks.
+2. **Engineering follow-ups and visual review** — see `plan.md` and `docs/uiux_review/current-status.md`. The visual redesign and original reaction/pack requirements are implemented; broader shared-code extraction and owner visual review remain open.
 3. **Optional Lottie fields** — Pre-run, Time scale, sticker-silhouette emitter, blend modes (need a go-ahead).
 
 ## How to pick up
 
-- Read `plan.md` (main) for the ordered remaining work. Read `docs/uiux_review/main-agent-brief-2026-10-15.md` (redesign) for the redesign lane status.
+- Read `plan.md` in the active checkout for remaining work, then `docs/uiux_review/main-agent-brief-2026-10-15.md` for the redesign lane status. Check the branch before edits or commits.
 - Tests: narrowest only (`mirsal test fast|focused|area <module>`). Full `unittest discover` retired.
 - Server: `python -m mirsal serve` from `mirsal/.venv`. Owner runs :8770; use your own `--port` with `MIRSAL_OUT=<copy>`.
 - Providers off for checks: `MIRSAL_NO_REAL_CLI=1`, `MIRSAL_LLM_PROVIDER=none`.

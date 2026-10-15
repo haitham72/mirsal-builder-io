@@ -1,6 +1,6 @@
 # Redesign implementation status — 2026-10-15
 
-Branch redesign-ui-ux, isolated worktree from handpicked-lottie2fb92c3e. [Execution evidence](implementation-log.md) and [real design images](redesign-shots/README.md) are current. Historical reviews remain evidence, not an open-bug list.
+Branch `redesign-ui-ux`; implementation checkpoint `1980c857`. Active checkout: `G:/Haitham/VsCode/Mirsal-Builder`. [Execution evidence](implementation-log.md) and [real design images](redesign-shots/README.md) record the completed work. The latest acceptance section below supersedes earlier validation snapshots; `plan.md` lists remaining work. Historical reviews retain their original findings.
 
 ## Delivered
 
@@ -20,3 +20,9 @@ Reviewed5ad67e2d and imported its grey/export implementation unchanged in a439ee
 ## Historical reaction task re-scope
 
 T-007/018/047 describe obsolete batch/filter/menu surfaces. T-024/025/031/034/035 remain explicit shared-code follow-ups, with current preset/Lottie payload, cache and export contracts preserved. T-070 applies to today's preset editor; it is not a reason to recreate per-emoji generation. Original issue/proposed-fix files remain in each journey folder.
+
+## Lottie selection/playback and Create imports — 2026-10-15
+
+Implemented in `1980c857` on `redesign-ui-ux`. Lottie redraws and player mounting are scoped to the active Create or Library screen; file changes invalidate stale preview requests. From a photo asks Sticker / Emojis, and From a video opens video-sheet import; sheet paths lead directly to Studio. All sheet import dialogs offer Auto detect / 2×2 / 3×3; a manually different destination grid starts a separate batch. Duplicate/recovery choices remain.
+
+Evidence: node suite 389 passing; focused automatic/manual image-grid, preserved-original-batch, standalone-video and existing in-batch image/video checks pass. Browser on temporary storage confirmed saved-file highlighting, advancing SVG playback on both screens and Library → Create return. Automatic 2×2 image and manual 2×2 video imports finished READY. The Python console wrapper retains one stale assertion expecting removed `data-act=rxedit`; it is not green. No provider calls or external sends. The user server was restarted at http://127.0.0.1:8796/. Wider theme/phone/slider acceptance remains open in `plan.md`.

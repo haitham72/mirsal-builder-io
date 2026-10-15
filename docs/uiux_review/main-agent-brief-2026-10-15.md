@@ -1,38 +1,22 @@
-# Main-agent brief for the redesign branch (2026-10-15)
+# Main-agent brief for the redesign branch — 2026-10-15
 
-What `main` finished, what this branch already has, and Haitham's locked decisions — so the redesign continues without re-asking or redoing.
+Implementation checkpoint: `1980c857`, pushed on `redesign-ui-ux`. Active checkout: `G:/Haitham/VsCode/Mirsal-Builder`. The user server runs at http://127.0.0.1:8796/. Check the current branch before committing. [Current status](current-status.md), [execution log](implementation-log.md) and the root `plan.md` describe delivered work and remaining acceptance.
 
-## Branch map
+## Locked decisions
 
-```
-origin/main @ 53f5a7f5 (stable, merged, handpicked-lottie deleted)
- │  5ad67e2d  no-dup removal + grey everywhere (imports part NOT for this branch)
- │  9194bfc5  tile sliders Size/X/Y + 47817ab6 docs (already integrated here as WIP)
- │  2743bd7f  bridge → d78d6605 3-tabs → 15da937d Library tabs → 09d62c8c docs
- │  53f5a7f5  HANDOFF merge note
- │
- └── origin/redesign-ui-ux @ 0b242630 (this checkout: G:/Haitham/VsCode/Mirsal-Builder-redesign)
-      ├── already had: grey .zip thumbnails (a439eec4), slider integration WIP + tile_sliders.test.js
-      ├── ported + pushed: 42a93282 reaction tabs, 0b242630 plan/handoff finalization
-      └── still open: WIP commit, slider-timeout + tabs browser acceptance (below)
-```
+1. Imports retain duplicate lookup, Open existing / Import again, in-batch Again into / As a new batch and explicit recovery. Main's forced-fresh-cut policy must not replace these dialogs during a future merge.
+2. Tile Size/X/Y sliders stay behind Adjust; the frame editor remains available. Scheduling, Reset and busy-retry fixes are implemented.
+3. Create and Library share Emoji style / Lottie style / Packs tab state (`rx.tab`). Keep both entry points and their existing management actions.
+4. Emoji and Lottie exports remain distinct. Lottie selection, thumbnails and main-player updates target the active screen; older preview responses cannot replace a newer selection.
+5. From a photo asks Sticker / Emojis. Sticker keeps the existing cutout/editor; Emojis imports an image sheet into Studio. From a video imports a video sheet into Studio. Imports offer Auto detect / 2×2 / 3×3; an explicitly different destination grid starts a separate batch.
 
-## Locked decisions (Haitham — do not relitigate)
+## Latest evidence
 
-1. **Imports: this branch keeps the duplicate-choice dialogs** (`again`, "Again into / As a new batch", explicit recovery). Main removed the whole check; that removal must never land here — a future merge keeps this branch's dialogs.
-2. **Tile sliders collapse behind a toggle.** Tiles stay compact; an Adjust control (`ACT.vslopen`, aria-expanded) reveals Size/X/Y. Built 699a49a1, covered in tile_sliders.test.js.
-3. **Two homes stay, with this logic.** `#/reactions` is the MAKE side (presets, editor, bank wall, Lottie files, batch create); Library › Reactions is the OWN side (finished sets, attach/detach, bank build states, made list). The shared tabs (`rx.tab`) flip perspective without losing place — the Packs tab on `#/reactions` answers "what have I made" read-only; management lives in the Library.
-4. **Frame editor stays.** Sliders for quick edits; the floating card keeps grid/scrubber/Centre. No merge, no retirement.
-5. **Verification order: main agent first.** Node + contract checks are done here (below); interactive browser acceptance stays open for a human or browser agent on the 8796 server (deliberately stopped; restart via `%TEMP%/mirsal-redesign-local-test/serve.ps1`).
+- Node suite: 389 checks passed. Focused imports passed for automatic/manual image grids, preserving the original batch, standalone video and existing in-batch image/video behavior.
+- Python console checks retain one stale assertion expecting removed `data-act=rxedit`; the Python wrapper suite is not green. Windows runs need UTF-8 (`PYTHONUTF8=1`) to read console source reliably.
+- Browser, temporary storage and copied Lottie settings: saved-file highlight follows selection; SVG playback advances in Create and Library; returning to Create mounts its visible player.
+- Browser imports completed READY: automatic 2×2 image sheet and a 3×3 video manually cut as 2×2, both opening Studio. No provider calls or external sends were used.
 
-## Verification done here (no browser available to this session)
+## Remaining work
 
-- Full js suite on this branch: 388 pass, 0 fail (stale suite repaired: prompt_step cpGrid stub, cell_op ?v= cache-buster, home railcreate entry, lottiestyle Particular groups; size_preview rewritten for Resize + frame editor). `node --check` clean on all touched scripts. `test_ui_inventory`: green.
-- The tab loaders call only pre-existing endpoints, each covered by existing suites: `GET /api/particles` (test_particle_sets), `/api/particles/bank` (test_particles), `/api/particles/emoji-lottie` (test_emoji_lottie), `/api/particles/lottie-reactions` (test_lottie_reactions). No backend changed.
-- Tabs server-verified 2026-10-15 (temp 8797, redesign code): all four tab endpoints 200 with real data (9 sets, 1898 bank, 4 Lottie files), all four JS bundles 200; shell renders, no login wall on local routes.
-- Slider busy-retry built (825f4dcc: `postBusy`, 12×1s, slider/frame-editor sends survive a running cut; same fix on main cdeae419). Adjust toggle built (699a49a1).
-
-## Still open on this branch
-
-- Interactive browser acceptance only (both screens, both routes, dark/light, ≤760 px) — needs a human or browser agent; no browser tooling in this session.
-- UI/UX redesign backlog (plan.md items 4–9, journeys) — the visual redesign work, untouched.
+The visual redesign and original reaction/pack requirements are implemented; owner visual review remains. Finish the slider/frame-editor and reaction-tab theme/phone matrices, extended browser states and shared-code extractions listed in `plan.md`. Optional Pre-run, Time scale, silhouette emitters and blend modes remain unimplemented and need a go-ahead. No main merge or deployment is authorized by this handoff.

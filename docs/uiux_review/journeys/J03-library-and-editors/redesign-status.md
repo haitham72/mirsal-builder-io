@@ -9,3 +9,7 @@
 **Remaining:** Broader grid/preview/download helper extraction and exhaustive editor states remain.
 
 [Current status](../../current-status.md) · [Execution log](../../implementation-log.md) · [Images](../../redesign-shots/README.md). Historical issue/proposed-fix documents retain the original findings; they are not a claim that all catalog refactors shipped.
+
+### Latest Library and Create acceptance — 2026-10-15
+
+`1980c857` fixes Library Lottie highlighting and visible-player mounting. Browser checks followed multiple saved-file selections and confirmed playback after Library → Create return. Create now offers Sticker / Emojis from a photo and video-sheet import; image/video sheets open Studio with Auto / 2×2 / 3×3 controls. Temporary imports finished READY. Wider editor/theme/phone states remain pending.
