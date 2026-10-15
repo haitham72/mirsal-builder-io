@@ -16,3 +16,7 @@ the manifest row records `retimed_from`; the stored animations never change. `GE
 
 **Health** (every dependency reports itself; nothing raises): `GET /api/health` (database with write-through counters, Redis engine, models, providers, storage, the job queue's mode and counts),
 `/api/health/models`, `/api/health/storage`, `GET /api/vision`. **Metrics**: `GET /api/metrics` (owner only; `python -m mirsal metrics` prints it): from what is already on disk, the time from a batch's request to its first cut sticker (median, p90, max), the share approved of the stickers a human decided at G2 (stills) and G4 (animations), the share of batches that are a redo, batches with no sticker, and one line per batch (`flow/metrics.py`).
+
+### Semantic library counts (redesign)
+
+GET /api/library adds sticker_count and reaction_count at the root and on each visible pack. GET /api/trending adds the same pair on each public pack summary. Counts are computed by media.library.pack_counts after the existing visibility filter; a stored source.particle_set identifies a reaction. Existing arrays, total and Trending's stickers total are preserved. Home/Library/Trending use these authoritative labels, with legacy or neutral-item fallback. See [count contract](pack-counts.md).

@@ -358,6 +358,11 @@ ACT.seeall = (el) => {
 
 /* My Stickers, one box per pack (Haitham, 2026-10-05: stacked by pack like the Particles tab). ONE selection area over all the boxes, so a drag box
    crosses packs; the carousel index stays the position in the whole list (LCL) */
+function libCountLabel(pack, fallback) {
+  if (pack && Number.isInteger(pack.sticker_count) && Number.isInteger(pack.reaction_count))
+    return pack.sticker_count+' sticker'+(pack.sticker_count===1?'':'s')+(pack.reaction_count?' · '+pack.reaction_count+' reaction'+(pack.reaction_count===1?'':'s'):'');
+  return fallback+' item'+(fallback===1?'':'s');
+}
 function libByPackHtml(all) {
   if (!all.length) return '<span class=mut>No matches.</span>';
   const by = new Map();
@@ -369,7 +374,7 @@ function libByPackHtml(all) {
     const on = SEL.has(selKey(s.pack_id, s.id));
     return `<div class="cell ${on ? 'sel' : ''}" data-act=lcopen data-i=${i}><span class="selbox ${on ? 'on' : ''}" data-act=lsel data-p=${s.pack_id} data-id=${s.id} title="Select"></span>${media(s)}<div class=cap>${esc(s.emoji)} ${esc(s.name)}</div></div>`;
   };
-  return `<div class="selgrid lib-bypack ${SEL.size ? 'selmode' : ''}">${[...by].map(([pid, xs]) => `<section class=lib-pk><div class=lib-pkh><b>${esc(xs[0][0].pack)}</b><small class=mut>${xs.length} sticker${xs.length === 1 ? '' : 's'}</small><button class=link data-act=openpack data-id=${esc(pid)}>Open pack</button></div><div class=grid>${xs.map(cell).join('')}</div></section>`).join('')}</div>`;
+  return `<div class="selgrid lib-bypack ${SEL.size ? 'selmode' : ''}">${[...by].map(([pid, xs]) => `<section class=lib-pk><div class=lib-pkh><b>${esc(xs[0][0].pack)}</b><small class=mut>${libCountLabel((typeof LIBQ==='undefined'||!LIBQ.trim())&&typeof LIB!=='undefined'?(LIB.packs||[]).find(p=>p.id===pid):null,xs.length)}</small><button class=link data-act=openpack data-id=${esc(pid)}>Open pack</button></div><div class=grid>${xs.map(cell).join('')}</div></section>`).join('')}</div>`;
 }
 
 function libBody() {
@@ -397,7 +402,7 @@ function libBody() {
     shown
       .map((e) => {
         const row = (p) =>
-          `<div class=packrow data-act=openpack data-id=${p.id}><div class=cover>${coverMedia(p)}</div><div style="flex:1"><b>${esc(p.name)}</b><br><small>${(()=>{const r=(p.stickers||[]).filter(s=>(s.source||{}).particle_set).length,n=(p.stickers||[]).length-r;return n+' sticker'+(n===1?'':'s')+(r?' · '+r+' reaction'+(r===1?'':'s'):'')})()}</small></div><button class=btn data-act=libpackstudio data-id=${p.id} ${(p.stickers||[]).some(s=>(s.source||{}).generation)?'':'disabled'}>Open in Studio</button>${ic('chev')}</div>`;
+          `<div class=packrow data-act=openpack data-id=${p.id}><div class=cover>${coverMedia(p)}</div><div style="flex:1"><b>${esc(p.name)}</b><br><small>${libCountLabel(p,(p.stickers||[]).length)}</small></div><button class=btn data-act=libpackstudio data-id=${p.id} ${(p.stickers||[]).some(s=>(s.source||{}).generation)?'':'disabled'}>Open in Studio</button>${ic('chev')}</div>`;
         return e.pack
           ? row(e.pack)
           : `<div class=pkgroup><div class=pkgh>${e.group.startsWith('P-') ? esc(e.packs[0].name) : `Group ${esc(e.group)}`} · ${e.packs.length} packs</div>${e.packs.map(row).join('')}</div>`;

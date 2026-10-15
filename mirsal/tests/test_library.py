@@ -30,6 +30,21 @@ def encode(rgb, fmt="png"):
 
 
 class LibraryTests(unittest.TestCase):
+    def test_semantic_counts_preserve_items_and_follow_owner_visibility(self):
+        from mirsal.media.library import pack_counts
+        for items, expected in [([], (0, 0)), ([{}], (1, 0)), ([{"source": {"particle_set": "P1"}}], (0, 1)), ([{}, {"source": {"particle_set": "P1"}}], (1, 1))]:
+            counts = pack_counts({"stickers": items})
+            self.assertEqual((counts["sticker_count"], counts["reaction_count"]), expected)
+        own = self.lib.create_pack("Mine", owner="A")
+        other = self.lib.create_pack("Other", owner="B")
+        self.lib.add_bytes(own["id"], self.sticker_png(), "png", "sticker", "static", "🙂")
+        self.lib.add_bytes(own["id"], self.sticker_png(), "png", "reaction", "static", "🙂", source={"particle_set": "P1"})
+        self.lib.add_bytes(other["id"], self.sticker_png(), "png", "private", "static", "🙂")
+        snap = self.lib.snapshot(owner="A")
+        self.assertEqual([p["id"] for p in snap["packs"]], [own["id"]])
+        self.assertEqual((snap["total"], snap["sticker_count"], snap["reaction_count"]), (2, 1, 1))
+        self.assertEqual(len(snap["packs"][0]["stickers"]), 2)
+
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp()); self.lib = Library(self.tmp); self.cfg = EngineConfig()
 

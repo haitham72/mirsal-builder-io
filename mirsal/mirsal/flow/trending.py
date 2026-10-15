@@ -130,6 +130,7 @@ def score(d: dict, pid: str, now: float | None = None) -> float:
 def listing(out: Path, lib, viewer: str, order: str = "trending", users: list | None = None) -> list[dict]:
     if order not in ("trending", "new", "liked"):
         raise TrendingError("order must be trending, new or liked")
+    from ..media.library import pack_counts
     d = _read(out)
     with lib.lock:
         db = lib._load()
@@ -145,7 +146,7 @@ def listing(out: Path, lib, viewer: str, order: str = "trending", users: list | 
         cover = next((s for s in p["stickers"] if s["id"] == p.get("cover")), (p["stickers"] or [None])[0])
         maker = p.get("owner", "local")
         rows.append({"pack_id": pid, "name": p["name"], "by": names.get(maker, maker), "mine": maker == viewer,
-                     "views": len(d["views"].get(pid, [])), "uses": len(d["uses"].get(pid, [])), "stickers": len(p["stickers"]), "shared_at": sh["at"], "shared_by": sh["by"],
+                     "views": len(d["views"].get(pid, [])), "uses": len(d["uses"].get(pid, [])), "stickers": len(p["stickers"]), **pack_counts(p), "shared_at": sh["at"], "shared_by": sh["by"],
                      "likes": len(likes), "liked": any(x["user"] == viewer for x in likes),
                      "comments": sum(1 for c in d["comments"].get(pid, []) if not c.get("deleted")),
                      "cover": {"id": cover["id"], "type": cover.get("type")} if cover else None, "score": score(d, pid)})

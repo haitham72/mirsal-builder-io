@@ -31,3 +31,5 @@ This is an index: each section is its own file under [`api-parts/`](api-parts/);
 | [Edits and the AI (2026-10-03, UI/UX spec P8-P13)](api-parts/19-edits-and-the-ai-2026-10-03-ui-ux-spec-p8-p13.md) | `POST /api/generations/{id}/edit {index, png}` (and the animated `studio_edit` commit) now also answers `sheet_fixed: {file, cells}` (or null): the batch's s… |
 | [Import an existing sheet or video (native FastAPI)](api-parts/20-import-an-existing-sheet-or-video-native-fastapi.md) | The Studio offers Use my own sheet and Import from Higgsfield to the owner. These routes never generate or spend credits and also have `/api/v1/` ali… |
 | [Expanded emoji resolution and LLM selection](api-parts/21-expanded-emoji-resolution-and-llm-selection.md) | ZIP manifest v1 assets carry `bank_version`; unresolved assets also carry `resolution_reason` (`unmapped`, `ambiguous_alias`, `invalid_emoji`) and canonical… |
+
+[Pack presentation counts](api-parts/pack-counts.md): additive sticker_count/reaction_count, preserving existing totals and visibility.

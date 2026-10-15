@@ -1834,7 +1834,9 @@
       "size": 100,
       "trace": "UX-13",
       "review_status": "source_evidence_validated_check_exact_task_scope",
-      "finding_status": "still_present"
+      "finding_status": "still_present",
+      "status": "implemented_accepted",
+      "status_note": "2026-10-15 redesign phase6a: backend additive sticker/reaction counts, existing visibility filters and legacy totals preserved. Python2 + node8 + Home5 targeted checks; desktop/phone initial surface acceptance. See implementation-log.md."
     },
     {
       "id": "T-078",
@@ -2064,7 +2066,9 @@
       "size": 100,
       "trace": "UX-16",
       "review_status": "source_evidence_validated_check_exact_task_scope",
-      "finding_status": "still_present"
+      "finding_status": "still_present",
+      "status": "implemented_accepted",
+      "status_note": "2026-10-15 redesign phase6a: backend additive sticker/reaction counts, existing visibility filters and legacy totals preserved. Python2 + node8 + Home5 targeted checks; desktop/phone initial surface acceptance. See implementation-log.md."
     }
   ],
   "phases": {

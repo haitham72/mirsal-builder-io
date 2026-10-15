@@ -81,3 +81,9 @@ Implemented original items1–9: native saved-set open button, hover/focus/expan
 Validation: saved-set/editor18 pass; particle UI42 pass after updating intentionally obsolete cost/markup expectations; pack/Studio/particle35 passed before final small label/download changes; pack-generation3 pass; UI inventory5 pass. Erosion3 tests and existing preview/strict-param2 tests pass. Baseline vs modified default hashes identical: frames56c9438feb3858d90f3489fb78a28155d143d0687e1a2c5545238f6662bf0746; Lottied4b5261b7da81f78dc27e961abe9c6775e5d2c9674bc7c758ad741a6f23ebe45.
 
 Browser: pack9ebb180c has grid plus Reaction studio, zero pktab controls, no page overflow; P010 exposes one Advanced and Manage stickers. Active Open and save mode says Save as a new row. Erosion1 preview returned200 with params.erosion_px=1; Save returned201 P012 while original P010 remained200. All mutations were in scratch outcopy. Library shortcut opened G002 in Studio. Remaining: phone/theme/keyboard saved-set polish and cross-journey checks, so the nine original plan descriptions remain until those are accepted.
+
+## Redesign phase 6a — authoritative cross-journey counts
+
+Library snapshots and public Trending summaries now add sticker_count/reaction_count using one backend classifier, after existing owner/public filtering. Legacy totals and arrays remain intact. Home, grouped Library and Trending cards consume the additive fields; filtered subsets use neutral item wording. No client-only ownership or classification rule was added.
+
+Validation: two narrow Python cases cover empty/static/reaction/mixed packs, owner filtering and public-only visibility. Imports/Trending + Packs column8 node tests pass; five relevant Home cases pass. Browser initial surfaces at1440/390 in both themes have no page overflow or below44px fully visible sampled controls. This geometry sample does not claim every off-screen, opened or hover state.

@@ -324,6 +324,13 @@ def light_webm(path: Path, cfg: EngineConfig, retime: bool = False):
     return data, meta
 
 
+def pack_counts(pack: dict) -> dict:
+    """Presentation counts, after the caller's existing pack visibility filter."""
+    items = pack.get("stickers") or []
+    reactions = sum(bool((item.get("source") or {}).get("particle_set")) for item in items)
+    return {"sticker_count": len(items) - reactions, "reaction_count": reactions}
+
+
 class Library:
     def __init__(self, out: Path):
         self.root = Path(out) / "library"
@@ -422,9 +429,11 @@ class Library:
             db = self._load()
         if owner is not None:
             db["packs"] = [p for p in db["packs"] if p.get("owner", "local") == owner]
+        db["packs"] = [dict(p, **pack_counts(p)) for p in db["packs"]]
         allst = [dict(s, pack_id=p["id"], pack=p["name"]) for p in db["packs"] for s in p["stickers"]]
         allst.sort(key=lambda s: s["created"], reverse=True)
-        return {"packs": db["packs"], "recent": allst[:recent], "total": len(allst)}
+        return {"packs": db["packs"], "recent": allst[:recent], "total": len(allst),
+                "sticker_count": sum(p["sticker_count"] for p in db["packs"]), "reaction_count": sum(p["reaction_count"] for p in db["packs"])}
 
     # ---- packs
     def owns(self, pid: str, owner: str, trash: bool = False) -> bool:

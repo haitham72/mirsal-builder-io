@@ -8,7 +8,8 @@ const TRV=(()=>{
   const fileUrl=(pid,sid)=>`/api/trending/${encodeURIComponent(pid)}/file/${encodeURIComponent(sid)}`;
   const pic=(pid,s)=>!s?'<span class=mut>no stickers</span>':s.type==='animated'?`<video src="${fileUrl(pid,s.id)}" autoplay loop muted playsinline preload=metadata></video>`:`<img src="${fileUrl(pid,s.id)}" alt="" loading=lazy>`;
   const ORDERS=[['trending','Trending'],['new','New'],['liked','Most liked']];
-  const card=p=>`<div class=tr-card><button class=tr-open data-act=tropen data-id="${esc(p.pack_id)}" title="Open ${esc(p.name)}"><span class=tr-cover>${pic(p.pack_id,p.cover)}</span><b>${esc(p.name)}</b><small class=mut>${p.stickers} sticker${p.stickers===1?'':'s'} · ${esc(p.by||'')} · ${p.views||0} views</small></button>
+  const countLabel=p=>{const n=Number.isInteger(p.sticker_count)?p.sticker_count:p.stickers;return n+' sticker'+(n===1?'':'s')+(p.reaction_count>0?' · '+p.reaction_count+' reaction'+(p.reaction_count===1?'':'s'):'')};
+  const card=p=>`<div class=tr-card><button class=tr-open data-act=tropen data-id="${esc(p.pack_id)}" title="Open ${esc(p.name)}"><span class=tr-cover>${pic(p.pack_id,p.cover)}</span><b>${esc(p.name)}</b><small class=mut>${countLabel(p)} · ${esc(p.by||'')} · ${p.views||0} views</small></button>
     <div class=tr-meta><button class="tr-like${p.liked?' on':''}" data-act=trlike data-id="${esc(p.pack_id)}" aria-pressed=${!!p.liked} title="${p.liked?'Unlike':'Like'}">♥ ${p.likes}</button><span class=mut>💬 ${p.comments}</span></div></div>`;
   const list=(packs,order)=>`<div class=tabs style="margin:0 0 12px">${ORDERS.map(([v,l])=>`<button class="tab${order===v?' on':''}" data-act=trorder data-v=${v}>${l}</button>`).join('')}</div>`+
     (packs.length?`<div class=tr-grid>${packs.map(card).join('')}</div>`:'<div class=mut>Nothing public yet. Make a pack public from its page.</div>');

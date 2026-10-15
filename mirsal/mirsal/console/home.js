@@ -45,7 +45,7 @@ RENDER.home=async()=>{await loadLib();const ps=LIB.packs,st=ps.flatMap(p=>p.stic
   owner=typeof ME==='undefined'||!ME||ME.role==='owner',canImport=typeof ACT.impackopen==='function'&&owner;
  $('s-home').innerHTML=`<div class=hm>
  <div class=hm-intro><div><div class=hm-eye>Your creative playground${ps.length?` · ${ps.length} pack${ps.length===1?'':'s'}`:''}</div><h1>A little more expressive.</h1><p>Turn the things you love into stickers worth sending.</p>
-  ${ps.length?`<div class=hm-sum><span>${ps.length} pack${ps.length===1?'':'s'}</span><span>${st.length} sticker${st.length===1?'':'s'}</span><span>${anim} animated</span></div>`:''}</div>
+  ${ps.length?`<div class=hm-sum><span>${ps.length} pack${ps.length===1?'':'s'}</span><span>${LIB.sticker_count??st.length} sticker${(LIB.sticker_count??st.length)===1?'':'s'}</span>${LIB.reaction_count>0?`<span>${LIB.reaction_count} reaction${LIB.reaction_count===1?'':'s'}</span>`:''}<span>${anim} animated${LIB.reaction_count>0?' items':''}</span></div>`:''}</div>
   <div class=hm-intro-end><label class=hm-search>${ic('search')}<input id=hm-q type=search placeholder="Search your library" aria-label="Search your packs" value="${esc(HM.q)}"></label><button class="btn pri" data-act=hmai>${ic('ai')} Start creating</button></div></div>
  <div class=hm-feat>
   <article class=hm-hero><div class=hm-copy><span class=hm-badge><i></i>Made for your imagination</span><h2>Big feelings.<br><em>Little stickers.</em></h2><p>A character, an inside joke, a whole mood. Make it yours, then bring it to life.</p><button class="btn pri" data-act=hmai>${ps.length?'Make a new pack':'Make your first pack'} ${ic('chev')}</button></div>

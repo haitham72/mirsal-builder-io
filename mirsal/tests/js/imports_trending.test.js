@@ -47,3 +47,10 @@ test('a general duplicate import can reopen or deliberately import a new batch',
   }else{await browser.ACT.impexisting();assert.equal(sent.length,1);assert.equal(browser.SES.gens[0],104)}
  }
 });
+
+
+test('public card uses backend semantic counts and retains legacy fallback',()=>{
+ const base={pack_id:'p',name:'Mixed',stickers:3,likes:0,comments:0,views:0};
+ assert.match(ctx.TRV.card({...base,sticker_count:2,reaction_count:1}),/2 stickers · 1 reaction/);
+ assert.match(ctx.TRV.card(base),/3 stickers/);
+});
