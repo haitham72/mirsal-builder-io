@@ -1,54 +1,164 @@
-# Mirsal Builder — where everything happens (interview guide)
+# Mirsal Builder — visual guide
 
-Flashy animated Telegram stickers. One deterministic engine (`mirsal/mirsal/engine/`), one free import/flow layer (`flow/`), two interfaces (AI chat, Studio web UI in `console/`). All code lives under `mirsal/mirsal/`; tests mirror it under `mirsal/tests/`.
+> Flashy **animated Telegram stickers**. One deterministic engine, one flow layer,
+> two interfaces (AI chat + Studio web UI). All code lives under `mirsal/mirsal/`;
+> tests mirror it under `mirsal/tests/`.
 
-## Layout in 30 seconds
+---
 
-| area | lives in | notes |
+## The big picture
+
+```
+                        ┌────────────── Studio web UI ──────────────┐
+                        │  console/*.js + studio.css + index.html   │
+                        │  (buttons only — every click posts to     │
+                        │   an API; no logic lives in the browser)  │
+                        └──────────────┬──────────────┬─────────────┘
+                                       │              │
+                        ┌──────────────▼──────────────▼─────────────┐
+                        │            HTTP routes                     │
+                        │  console/app.py  (native FastAPI)          │
+                        │  console/server.py (legacy adapter)       │
+                        │  console/openapi.py (the contract)        │
+                        └──────────────┬──────────────┬─────────────┘
+                                       │              │
+              ┌────────────────────────▼──┐   ┌───────▼───────────────────┐
+              │  FLOW  flow/              │   │  MEDIA  media/            │
+              │  pipeline.py · gates.py  │   │  library.py (packs)       │
+              │  imports.py · batches.py │   │  grey.py (silhouettes)    │
+              │  golden path G1–G5       │   │  out/library, out/G###    │
+              └────────────┬──────────────┘   └───────┬───────────────────┘
+                           │                        │
+              ┌────────────▼──────────────┐   ┌───────▼───────────────────┐
+              │  ENGINE  engine/         │   │  BACKENDS  services/      │
+              │  sheet · video · verify  │   │  telegram.py → Telegram  │
+              │  ffmpeg · particles      │   │  collection.py → CMS      │
+              │  pure + deterministic    │   │  (the only two receivers) │
+              └──────────────────────────┘   └───────────────────────────┘
+
+  Paid generation ── generation/ + services/llm*.py ──► every call logged
+                                                        to out/model_calls.jsonl
+  Postgres/search ── store/
+```
+
+---
+
+## Repo map
+
+```
+mirsal/mirsal/
+├── engine/        cut · key · render · verify · ffmpeg   (never imports DB/LLM)
+├── flow/          pipeline · gates · imports · batches  (the golden path)
+├── console/       Studio/Library/chat UI + routes + contract
+│   ├── studio-core.js    batch header, tiles, sliders, frame editor
+│   ├── studio-tiles.js   tile markup (what each tile shows)
+│   ├── packs.js · library.js    packs, stickers, Reactions sections
+│   ├── reactions.js · lottiestyle.js · particles.js    reaction screens
+│   ├── live.js · composer.js     generation composer, job polling
+│   ├── imports.js    import dialogs
+│   ├── app.py · server.py · app_models.py · openapi.py    routes + contract
+│   └── studio.css · theme.css · agent.css · index.html
+├── media/         library.py (packs) · grey.py (silhouettes)
+├── generation/    jobs · prompter · expander (paid calls)
+├── services/      telegram.py · collection.py · llm*.py
+├── store/         postgres, search, pool
+└── runtime/       names.py (every filename), atomic writes, activity
+
+mirsal/tests/     mirrors the above, plus tests/js/ (browser-less UI tests)
+mirsal/out/       runtime data — batches, jobs, library, logs (never committed)
+docs/             the real spec, one area per doc (see docs/<area>.md)
+```
+
+---
+
+## A sticker's journey (the golden path)
+
+```
+ request ──► plan (G1) ──► sheet ──► stills (G2) ──► video sheet
+     ──► video ──► per-frame check ──► animations (G4) ──► pack (G5)
+```
+
+| stage | happens in | stored in |
 |---|---|---|
-| Sticker engine (cut, key, render, verify) | `engine/` (`sheet.py`, `video.py`, `verify.py`, `ffmpeg.py`) | Pure + deterministic; never imports DB/LLM |
-| Pipeline, gates, golden path | `flow/` (`pipeline.py`, `gates.py`, `imports.py`, `batches.py`) | Request → plan → sheet → stills → video → animations → pack |
-| Web UI (Studio, Library, chat) | `console/` (`*.js`, `studio.css`, `index.html`) | No logic lives only in JS (rule) — every control posts to an API |
-| HTTP routes | `console/app.py` (native FastAPI), `console/server.py` (legacy), `console/openapi.py` (contract), `console/app_models.py` (pydantic) | Route list: `docs/http_route_inventory.md` |
-| Packs, stickers, files on disk | `media/` (`library.py`, `grey.py`) | `out/library/`, `out/G###-*/` |
-| Paid generation (Higgsfield/Kling/jobs) | `generation/`, `services/llm*.py` | Every call logged to `out/model_calls.jsonl` |
-| Telegram send, collection CMS send | `services/telegram.py`, `services/collection.py` | The only two backends that receive files |
-| Postgres/search | `store/` | |
-| Area docs (the real spec) | `docs/<area>.md` + section files | Engine+Studio, reactions, export, API parts… |
+| Plan, prompt | `generation/prompter.py`, `flow/pipeline.py` | `out/G###-*/prompts.json` |
+| Sheet + stills | `engine/sheet.py`, `flow/imports.py` (own files) | `out/G###-*/source/`, `slices/` |
+| Video + animations | `engine/video.py` (ffmpeg VP9+alpha) | `out/G###-*/slices/*.webm` |
+| Verdicts | `engine/verify.py` (44 checks, `OVERRIDABLE` vs `TECHNICAL`) | `result.json` + `reviews` rows |
+| Human gates | Studio tiles, sheet cells, chat cards | `history` lines, never deletions |
 
-## The golden path (the spine of every demo)
+Naming (never hand-build paths): batches `out/G###-<slug>-<UTC>/`, jobs
+`out/jobs/J###-<subject>-<kind>.json`, media
+`{media}-{subject}-{action}[-{pack}]-{UTC}-{hash}.{ext}` — all from
+`runtime/names.py`, `pipeline.gen_dir`, `jobs.job_dir`.
 
-Request → plan (G1) → sheet → stills (G2) → video sheet → video → animations (G4) → pack (G5). Batch folders: `out/G###-<slug>-<UTC>/` (`slices/`, `source/`, `result.json`, `prompts.json`). A human approves at every gate; blocks are technical-only or have a "Use it anyway".
+---
 
-## The Studio screen (what you click → where it posts)
+## Studio → API wiring (click → post → backend)
 
-- Batch header (Resize, Size, Download .zip, Export to collection): `studio-core.js` (`motionRow`, `ACT.gzipdl`, `ACT.colsend` via `packs.js`)
-- Tiles + per-tile Size/X/Y sliders + Reset: `studio-core.js` (`vsizeRow`, `vslSend`, `ACT.vslreset`) → `POST /api/generations/{id}/position`
-- Frame editor (grid/scrubber/Centre): `studio-core.js` (`vzCard`) → same `/position`, preview via `/anim_preview`
-- Library / pack / Reactions tab / 3 reaction tabs: `library.js`, `packs.js`, `particles.js`, `reactions.js`, `lottiestyle.js`
-- Import dialogs: `console/imports.js` → `POST /api/import` → `flow/imports.py` (no duplicate check: a used file is cut fresh)
-- All action names are inventoried: `console/inventory.py` + `mirsal/tests/data/ui_baseline.json` (a removed action needs a `retired` entry or tests fail)
+| you click | in | it posts | backend |
+|---|---|---|---|
+| Resize / Size stepper | `studio-core.js` `motionRow` | `/resize`, `/video_size` | `flow/pipeline.py` |
+| Tile Size / X / Y sliders, Reset | `studio-core.js` `vsizeRow` | `/position {index, offset, scale}` | `flow/pipeline.py` |
+| Frame editor Apply | `studio-core.js` `vzCard` | `/position` + `/anim_preview` (one-frame test) | same |
+| Download .zip | batch header | `/generations/{id}/export.zip` | `flow/batches.py` |
+| Export to collection | pack / batch menu | `/export-collection` (queued) | `services/collection.py` |
+| Send to Telegram | pack screen | Telegram routes | `services/telegram.py` |
+| Use my own sheet | import dialog | `/api/import` (raw bytes) | `flow/imports.py` — a used file is cut fresh, no duplicate check |
+| Use it anyway (any rejected picture) | tile / sheet cell / chat card | `/generations/{id}/allow` | `engine/verify.py` catalogue |
 
-## Exports — "update the export field" recipes
+Every `data-act=<name>` in markup has an `ACT.<name>` handler posting a URL —
+search the action name to trace any click end to end. Removed actions must be
+listed under `renamed`/`retired` in `mirsal/tests/data/ui_baseline.json`
+(tests enforce it).
 
-**Download .zip (batch):** `flow/batches.py` `export_zip` builds `manifest.json` (`assets[]` per sticker + `grey[]`). **Pack zip:** same shape in `media/library.py` `export_zip`.
-→ Per-sticker manifest field? Edit the row dicts in those two functions. Telegram/zip limits are checks in `engine/verify.py`, stage `telegram`.
+---
 
-**Grey stand-ins:** `media/grey.py` (`alpha_of` = animation's first visible frame, `grey_png` = #BFBFBF silhouette). One `{stem}_grey.png` beside every animation; listed under `grey`, never `assets`.
+## Exports
 
-**Export to collection (the CMS):** `services/collection.py` — reads the zip's manifest, sends `Media` (files) + `MediaThumbnails` (PNG: sticker as-is, `.webm` → grey) + `MediaMetadata` (one JSON `[{emoji_utf, tags}]`, tags via `tags_of`). CMS reference: `docs/Api/AddCollection-API .md`. The CMS shows our thumbnail PNG at `user_media/Emoji_Assets/{emoji}.png` — so a wrong picture there means our `thumbnail()` sent it, not a CMS bug. Sends are queued (`enqueue` → background thread), state in `out/collection_exports/`, log in `out/collection_exports.jsonl`.
+```
+ batch/pack ──► export_zip ──┬──► manifest.json ──► assets[] (stickers)
+                             │                      grey[]   ({stem}_grey.png)
+                             │
+                             ├──► Download .zip ──► you / Telegram
+                             │
+                             └──► Export to collection ──► CMS
+                                      Media           = the files
+                                      MediaThumbnails = PNG (sticker as-is,
+                                                        .webm → grey)
+                                      MediaMetadata   = [{emoji_utf, tags}]
+```
 
-**Send to Telegram:** `services/telegram.py` (urllib, token from env/Settings, never logged).
+| piece | file | what to change when backend says "update the export field" |
+|---|---|---|
+| Zip manifest rows | `flow/batches.py` `export_zip` (batch), `media/library.py` `export_zip` (pack) | per-sticker fields |
+| Grey PNG | `media/grey.py` (`alpha_of` → first visible frame, `grey_png` → #BFBFBF) | silhouette logic |
+| CMS emoji/tags | `services/collection.py` (`tags_of`, `items_from_zip`, `thumbnail`) | metadata + thumbnail bytes |
+| CMS reference | `docs/Api/AddCollection-API .md` | field docs |
+| Telegram send | `services/telegram.py` | delivery |
+| Size/codec/duration rules | `engine/verify.py` (stage `telegram`) | limits |
+| API shape | `console/app_models.py` + `console/openapi.py` + `docs/api-parts/` + label in `console/*.js` | contract end to end |
 
-**API shape change:** `console/app_models.py` (pydantic) + `console/openapi.py` (document it) + the area doc under `docs/api-parts/` + UI label in `console/*.js`.
+> Debugging rule: the CMS shows **our** thumbnail PNG at
+> `user_media/Emoji_Assets/{emoji}.png` — a wrong picture there means our
+> `thumbnail()` sent it, never a CMS bug. Sends are queued; state in
+> `out/collection_exports/`, log in `out/collection_exports.jsonl`.
 
-## Finding anything fast
+---
 
-- Code: `rg <name>` from repo root (functions are unique-ish: `vsizeRow`, `export_zip`, `thumbnail`, `spLibHtml`).
-- UI action → backend: search the `data-act=<name>` string, then `ACT.<name>` in the same file for its `post(...)` URL.
-- Contract doubt? `docs/http_route_inventory.md` (every route) and `docs/api.md`.
-- Behavior doubt? `docs/<area>.md` index → read only the section file you need. Design questions → `docs/design.md`.
+## Find anything fast
+
+| question | do this |
+|---|---|
+| Where is feature X? | `rg <DistinctiveName>` from root (`vsizeRow`, `export_zip`, `spLibHtml`…) |
+| What does this button do? | search `data-act=<name>` → `ACT.<name>` → its `post(...)` URL |
+| Is this route real? | `docs/http_route_inventory.md`, then `console/app.py` |
+| What should this screen do? | `docs/<area>.md` index → read only that section file |
+| Which actions exist? | `console/inventory.py` + `tests/data/ui_baseline.json` |
+| How is this tested? | `mirsal/tests/test_<area>.py`, `mirsal/tests/js/*.test.js` (browser-less UI) |
 
 ## Run it
 
-`mirsal/.venv` (Windows), server `python -m mirsal serve` (owner :8770 — don't disturb it; use your own `--port` + `MIRSAL_OUT=<copy>`). Providers off for checks: `MIRSAL_NO_REAL_CLI=1`, `MIRSAL_LLM_PROVIDER=none`. Tests: narrowest only (`mirsal test fast|focused|area <module>`); full `unittest discover` is retired.
+- venv `mirsal/.venv` (Windows). Server: `python -m mirsal serve` — owner runs `:8770`, use your own `--port` with `MIRSAL_OUT=<a copy>`.
+- Checks stay offline: `MIRSAL_NO_REAL_CLI=1`, `MIRSAL_LLM_PROVIDER=none` (tests never touch real providers; paid calls need a shown price + yes).
+- Tests: narrowest only — `mirsal test fast` / `focused` / `area <module>`. Full `unittest discover` is retired.
+- Health: `python -m mirsal doctor`.
