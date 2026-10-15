@@ -72,7 +72,7 @@ function load({ stored = null, connected = true, price = 12.5, ai = false, planO
     statement(gen, 'const gdOn='), statement(gen, 'function gdSave('), statement(gen, 'function gdHide('), statement(gen, 'function gdDrop('), statement(gen, 'const gdKey='),
     statement(gen, 'const gdNb='), statement(gen, 'ACT.gdnb='), statement(gen, 'function gdPriceLine('), statement(gen, 'function gdFoot('), statement(gen, 'function gdPaint('), statement(gen, 'async function gdPrice('), statement(gen, 'function gdView('),
     statement(gen, 'ACT.gdtab='), statement(gen, 'ACT.gddiscard='), statement(gen, 'ACT.gdpriceretry='), statement(gen, 'const gdEngineName='), statement(gen, 'ACT.gprompt='), statement(gen, 'ACT.gpromptfree='), statement(gen, 'async function gdPlan('), statement(gen, 'function gdNote('), statement(gen, 'ACT.gdsheet='), statement(gen, 'async function gdMore('),
-    statement(live, 'async function liveStart('),
+    statement(live, 'const cpGrid='), statement(live, 'async function liveStart('),
   ].join('\n');
   const f = new Function(...Object.keys(sb), 'const ACT={};\n' + body + '\nreturn {ACT,PD,pdText,pdCustom,gdOn,gdView,gdFoot,gdSave,gdPrice,gdNote,liveStart,get GD(){return GD},get GDP(){return GDP}};')(...Object.values(sb));
   return Object.assign(sb, { api: f });
