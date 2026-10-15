@@ -167,8 +167,8 @@ setInterval(()=>{if(route_==='generate'&&!document.hidden)spSecSync()},2500);
    The trash is listed (GET /api/particles/deleted): Restore is offered on the notice right after a delete AND from the "Deleted" list under the sets, long after. One set belongs to pack(s): the card says
    "used in: A, B" or "stand-alone", never per sticker. */
 const SPL={sets:null,busy:false,open:'',detail:{},pick:{},deleted:null,trash:null,poll:0,
- view:null,bank:null,bankBusy:false,bankQ:'',bankSel:null,build:[]};
-const spSetsForget=()=>{SPL.sets=null;SPL.detail={};SPL.open='';SPL.deleted=null;SPL.trash=null;SPL.view=null;SPL.bank=null;SPL.bankQ='';SPL.bankSel=null;SPL.build=[]};
+ view:null,bank:null,bankBusy:false,bankQ:'',bankSel:null,build:[],made:null,madeBusy:false};
+const spSetsForget=()=>{SPL.sets=null;SPL.detail={};SPL.open='';SPL.deleted=null;SPL.trash=null;SPL.view=null;SPL.bank=null;SPL.bankQ='';SPL.bankSel=null;SPL.build=[];SPL.made=null;};
 const spCredits=n=>n==null||+n===0?'nothing spent yet':`about ${+n} credit${+n===1?'':'s'} spent`;
 function spSetCard(s){const cells=s.cells||[],picked=cells.filter(c=>c.picked),strip=picked.slice(0,8),open=SPL.open===s.id,id=esc(s.id);
  return `<div class="ps-card${open?' open':''}" data-ps=${id}><div class=ps-hit>
@@ -192,13 +192,36 @@ function spSetDetail(s){const d=SPL.detail[s.id],full=d&&d.id===s.id?d:s,cells=f
   ${spBurstHtml(full)}
  </div>`}
 function spLibHtml(){const sets=SPL.sets;
- if(!sets)return `<div class=pk-pt-load><div class=spin></div><span class=mut>Reading the particle sets…</span></div>`;
+ spMadeSync();spRxTabSync();
+ const tabs=spRxTabs(),tab=spRxTab();
+ if(tab!=='packs')return tabs+(tab==='lottie'
+  ?(typeof lsHtml==='function'?lsHtml():'')
+  :(typeof RXS!=='undefined'&&RXS.bank?`${rxLibHtml()}${rxEditor()}${rxPick()}${rxHpHtml()}`:`<div class=fx-job><span class=spin></span> <span class=mut>Reading the emoji bank…</span></div>`));
+ if(!sets)return `${tabs}<div class=pk-pt-load><div class=spin></div><span class=mut>Reading the particle sets…</span></div>${spMadeHtml()}`;
  const del=SPL.deleted?`<div class=ps-del><span>Deleted ${esc(SPL.deleted.name)}: it is in the trash, nothing is destroyed.</span><button class="btn sm" data-act=psrestore data-id=${esc(SPL.deleted.id)}>Restore</button></div>`:'',trash=spTrashHtml(SPL.trash);
  const create=SPL.view==='choose'?spCreateChooseHtml():SPL.view==='bank'?(SPL.bank?`<div data-rosbank>${spBankHtml()}</div>`:`<div class=fx-job><span class=spin></span> <span class=mut>Reading the bank…</span></div>`):SPL.view==='build'?spBuildHtml():SPL.view==='stickers'?spScopePicker('rosscope'):'';
  const list=sets.length?`<div class=ps-lib>${sets.map(spSetCard).join('')}</div>`:'';
- const empty=!sets.length&&!SPL.view?`${del}<div class="card" style="text-align:center;padding:40px"><h2>No reaction sets yet</h2><p class=mut>Create one from the bank or from your stickers.</p><button class="btn pri" data-act=roscreate>${ic('fx')} Create</button></div>${trash}`:'';
- if(empty)return empty;
- return `${del}${spLibHead()}${create}${list}${trash}`}
+ const made=SPL.made||[];
+ const empty=!sets.length&&!SPL.view&&!made.length?`${del}<div class="card" style="text-align:center;padding:40px"><h2>No reaction sets yet</h2><p class=mut>Create one from the bank or from your stickers.</p><button class="btn pri" data-act=roscreate>${ic('fx')} Create</button></div>${trash}`:'';
+ if(empty)return tabs+empty+spMadeHtml();
+ return `${tabs}${del}${spLibHead()}${create}${list}${spMadeHtml()}${trash}`}
+/* the style tabs inside Library Reactions: the same switch as #/reactions (kept in rx.tab, so both screens always agree).
+   Emoji/Lottie views reuse the #/reactions renderers; their loaders refresh through spLibRefresh, which redraws this tab too.
+   "Made in Reaction effects" lists the created Lotties (GET /api/particles/emoji-lottie), newest first. */
+function spRxTab(){return (typeof rxTab==='function')?rxTab():'packs';}
+function spRxTabs(){return (typeof rxStyleBar==='function')?rxStyleBar():'';}
+async function spRxTabSync(){const t=spRxTab();if(t==='packs')return;
+ if(t==='lottie'){if(typeof lsLoad==='function'&&typeof LS!=='undefined'&&!LS.files){await lsLoad();spLibRefresh();}return;}
+ if(typeof rxBankEnsure==='function'&&typeof RXS!=='undefined'&&(!RXS.bank||!RXS.lib)){await rxBankEnsure();spLibRefresh();}}
+async function spMadeSync(force){if(SPL.madeBusy||(SPL.made&&!force))return;SPL.madeBusy=true;
+ try{const r=await api('/api/particles/emoji-lottie');if(r.ok){SPL.made=r.j.reactions||[];spLibRefresh()}}finally{SPL.madeBusy=false}}
+function spMadeCard(r){return `<div class=ps-card><div class=ps-main><b>${esc(r.emoji||'')} ${esc(r.token||'')}</b><small class=mut>${esc(r.preset||'')} · Lottie</small></div>`+
+ (r.preview?`<img src="${esc(r.preview)}" alt="" loading=lazy style="max-width:220px;border-radius:8px">`:'')+
+ `<div class=row><a class="btn sm" href="${esc(r.url||'')}" download="${esc((r.token||'reaction')+'.lottie.json')}">Download</a></div></div>`}
+function spMadeHtml(){const made=SPL.made;
+ if(!made)return '';
+ if(!made.length)return `<section class=ps-made><div class=ps-libh><h2>Made in Reaction effects</h2><span class=mut>none yet</span></div></section>`;
+ return `<section class=ps-made><div class=ps-libh><h2>Made in Reaction effects</h2><span class=mut>${made.length} Lottie</span></div><div class=ps-lib>${made.slice(0,24).map(spMadeCard).join('')}</div></section>`}
 const spBankSel=()=>SPL.bankSel||(SPL.bankSel=new Set());
 function spBankCounts(){const bank=SPL.bank||[];let f=0;for(const m of bank)if(m.state==='finished')f++;return{finished:f,unclaimed:bank.length-f}}
 function spLibHead(){const c=SPL.bank?spBankCounts():null;
@@ -260,7 +283,8 @@ ACT.rosapproveall=async el=>{el.disabled=true;
  for(const b of [...(SPL.build||[])].filter(x=>x.status==='ready')){await rosApproveItem(b);spLibRefresh()}
  el.disabled=false;SPL.bank=null;spBankSync();spLibSync(true);if(!(SPL.build||[]).length)SPL.view=null;spLibRefresh()};
 function spLibRefresh(){if(SP.set&&!SP.eid&&SP.alive())spDraw();if(typeof route_!=='undefined'&&route_==='library'&&typeof LIBTAB!=='undefined'&&LIBTAB==='particles'&&typeof RENDER!=='undefined'&&RENDER.library)RENDER.library();
- if(typeof route_!=='undefined'&&route_==='pack'&&typeof drawPack==='function')drawPack()}
+ if(typeof route_!=='undefined'&&route_==='pack'&&typeof drawPack==='function')drawPack();
+ if(typeof route_!=='undefined'&&route_==='reactions'&&typeof RENDER!=='undefined'&&RENDER.reactions)RENDER.reactions();}
 async function spLibSync(force){if(SPL.busy||(SPL.sets&&!force))return;SPL.busy=true;
  try{const r=await api('/api/particles');if(r.ok){SPL.sets=r.j.sets||[];
    for(const s of SPL.sets){const d=SPL.detail[s.id];if(d&&d.n_cells!==s.n_cells)delete SPL.detail[s.id]}          // cells arrived since the card was opened: it is read again
