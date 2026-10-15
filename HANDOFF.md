@@ -1,45 +1,30 @@
-# HANDOFF — 2026-10-15 (final; both branches pushed and clean)
+# HANDOFF — 2026-10-15 (save point; Claude stopped at Haitham's request: weekly budget at 99%)
 
-## Branch map
+Branch `handpicked-lottie`, everything below committed and pushed. No uncommitted source of mine. Other sessions' uncommitted data in `mirsal/out/` and `Custom_emojis/` is untouched.
 
-```
-origin/main @ 94bfb645  (stable base — merged implementation)
-origin/redesign-ui-ux @ 95d4b4a4  (checkout: G:/Haitham/VsCode/Mirsal-Builder-redesign)
-```
-
-Main has 44 uncommitted runtime files (`mirsal/out/*`, `Custom_emojis/*`) — never commit these.
-Redesign is fully clean. Dead `.worktrees/redesign-ui-ux` folder deleted.
-
-## What main carries (all session work)
+## Done this session (commits)
 
 | commit | what |
 |---|---|
-| 5ad67e2d | No duplicate check for manual uploads (same file = fresh batch; only retry finishes an old batch). Grey silhouette from the animation's first visible frame — in Download .zip AND Export-to-collection thumbnails. |
-| 9194bfc5 + 47817ab6 | Per-tile Size/X/Y sliders (readout on input, one `/position` POST 500ms after release, Reset clears). |
-| 2743bd7f → 09d62c8c | Reaction bridge → 3-tab merge (`#/reactions`: Emoji Style \| Lottie Style \| Packs) → same tabs in Library › Reactions. One tab state (`rx.tab`). |
-| cdeae419 | 409-busy retry (`postBusy`, 12×1s) — slider/frame-editor sends survive a running cut. |
-| 94bfb645 | All stale js tests repaired (372 pass, 0 fail); two `test_particle_set` test bugs fixed (gen_dir path, pack-nested history lookup). |
-| dc8c0c6b | `GUIDE.md` visual interview guide. |
+| 826cf70f | Repaired another session's broken import fix (JS syntax error in imports.js killed the import buttons; nonexistent ffmpeg call; `cut_sheet` VIDEO_RETURNED reverted). Grid-mismatch question: "Cut it as R×C anyway" (`grid_ok=1`). reslice/preview/reloop work on imported 3x3 videos. |
+| a9f16b93 | Proposal doc `docs/size-position-lottie-proposal.md`. |
+| f3b9ef52 | **Size/Position**: `[✓] Resize` + Size on the batch row; hot spot (pixels opaque in ≥50% of frames) sizing; per-sticker frame editor (Position drag/arrows/Centre, guide grid, frame scrubber); every test = ONE frame PNG (`engine/video.preview_frame`, `size_window`); native routes `POST /api/generations/{id}/resize`, `/position`. |
+| 7f1e4d17 | **Lottie style à la Trapcode Particular**: Emitter / Particle / Physics / Aux groups, presets, seed re-roll, time sampling (`tm`). Byte-identical for old bursts (second RNG; 9 cases compared). Fix: fresh preset library lacked `handpicked`. |
+| ec16244a | Import the same file again on purpose: "Again into G###" / "As a new batch" (`again=1`). |
 
-Tests on main: js 372/0, python narrow (imports + collection + library + ui_inventory + particle_cut) green.
-Redesign: js 388/0, same python gates green.
+Tests run (narrow): gates area 40, engine/video area 56, imports 14, live slicing test, lottie_reactions 22, emoji_lottie 12, ui_inventory 4 — all pass. Particle area: 2 pre-existing failures in `test_particle_set` (see plan.md).
 
-## What redesign carries (beyond main)
+## Not done / next (see plan.md)
 
-- Imports: duplicate-choice dialogs kept (`again`, "Again into / As a new batch") — deliberate divergence from main per Haitham. Never reconcile without Haitham.
-- Slider WIP committed (57c8850b), Adjust toggle (699a49a1), busy-retry (825f4dcc), stale-test repairs (eb0c4f83).
-- Reaction tabs ported (42a93282), plan/handoff/brief all record completion.
-- Grey .zip thumbnails already there (a439eec4).
+1. **No browser check of anything above** — restart the server from `mirsal/.venv` and look before judging.
+2. UI/UX plan review (`docs/uiux_review/plan-review.md`) not written. Facts already established:
+   - The uiux repair batch (T-001..T-004, T-065, T-086, T-074, T-072, T-073) IS in HEAD (`uiux-fixes` is an ancestor); every source marker present. T-001 is superseded by the Resize/frame editor. Browser acceptance outstanding for all.
+   - `docs/uiux_review/revalidation.md` (2026-10-14) predates the repairs and the Size/Position + Lottie work: its "still present" for F-01/F-05/F-06/F-24/F-26..F-28/F-30/F-36 is stale.
+   - plan.md items 1–9 (reaction/pack cleanup) were not checked this session: keep them.
+3. Proposal decisions 1–3 approved by Haitham 2026-10-15 (as built). UI/UX plan review done: docs/uiux_review/plan-review.md. Still open: "Use 2×2" for a mismatched grid was deliberately not offered (a 3×3 batch's stickers are its cells).
 
-## Still open (see plan.md for the full list)
-
-1. **Interactive browser acceptance** — tabs on both screens, sliders, frame editor, dark/light, ≤760 px. Needs a human or browser agent.
-2. **UI/UX redesign backlog** — `plan.md` items 1–9 (reaction/pack cleanup), T-056 tokens → T-066 44px targets → J1 Studio visual reference, journeys J2–J11. The visual redesign has not started.
-3. **Optional Lottie fields** — Pre-run, Time scale, sticker-silhouette emitter, blend modes (need a go-ahead).
-
-## How to pick up
-
-- Read `plan.md` (main) for the ordered remaining work. Read `docs/uiux_review/main-agent-brief-2026-10-15.md` (redesign) for the redesign lane status.
-- Tests: narrowest only (`mirsal test fast|focused|area <module>`). Full `unittest discover` retired.
-- Server: `python -m mirsal serve` from `mirsal/.venv`. Owner runs :8770; use your own `--port` with `MIRSAL_OUT=<copy>`.
-- Providers off for checks: `MIRSAL_NO_REAL_CLI=1`, `MIRSAL_LLM_PROVIDER=none`.
+## Merged into main (2026-10-15)
+Branch handpicked-lottie merged to main as fast-forward (main was its ancestor) and deleted, local and remote.
+Commits carried: no-dup import removal + grey everywhere (5ad67e2d), tile sliders (9194bfc5 + docs 47817ab6),
+reactions bridge + 3-tab merge + Library tabs (2743bd7f, d78d6605, 15da937d, docs 09d62c8c).
+Open work stays in plan.md; redesign continues on redesign-ui-ux.
