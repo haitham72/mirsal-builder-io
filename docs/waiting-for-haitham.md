@@ -114,3 +114,5 @@ An answer goes into `docs/deployment_plan.md` and deletes the question here.
 **48. Do the two new tables live in the same Supabase project as the mirror, or a separate one?** Recommendation: the same project, separate schema. Unblocks: the migration files.
 
 Also parked, not a question: rate limiting, deployment and OAuth are paused (2026-10-02); the engine's per-minute 429 (`console/server.py` `_wait`) stays as it is; the gateway, SQL, Docker and Render files stay untouched until Haitham asks.
+
+2026-10-15 redesign sync: per-tile Size/X/Y sliders are imported alongside the frame editor. Browser acceptance includes drag, one cut after release and Reset, in both themes and phone. The latest import-policy choice remains the redesign choice router; the forced-fresh-cut policy is not adopted.

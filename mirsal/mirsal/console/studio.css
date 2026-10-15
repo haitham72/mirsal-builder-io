@@ -1109,6 +1109,7 @@ button.gst{cursor:pointer}button.gst:hover:not(:disabled){background:#ffffff99;c
 /* Video size after the video is received (studio-core.js vsizeBatch / vsizeRow) */
 .vsize{display:inline-flex;align-items:center;gap:4px;font-size:var(--fs-xs)}.vsize b{min-width:3.2em;text-align:center}.gcap .vsize{margin-bottom:4px}
 /* the frame editor (studio-core.js vzCard): one frame, the guide grid and the hot spot drawn over it, drag to move */
+.vsl{display:flex;flex-direction:column;gap:2px;margin:2px 0 6px}.vsl .vsize{width:100%;margin-bottom:0}.vsl input[type=range]{flex:1;min-width:0;margin:0}.vsl b{min-width:3.4em}
 .vzstage{touch-action:none;cursor:grab}.vzstage:active{cursor:grabbing}.vzguide{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.vzguide .g1{stroke:var(--pri);stroke-opacity:.35;fill:none;stroke-width:1.5}.vzguide .g2{stroke:var(--pri);stroke-width:2;fill:none}.vzguide .g3{stroke:var(--mut);stroke-opacity:.5;stroke-dasharray:4 4;fill:none}.vzguide .g4{stroke:var(--pri);stroke-width:2;stroke-dasharray:8 6;fill:none}
 .vzframe{display:flex;align-items:center;gap:8px;margin:8px 2px 0}.vzframe input{flex:1}.vzctl{display:flex;flex-wrap:wrap;gap:6px 10px;margin:8px 2px 0}.vsize label{display:inline-flex;align-items:center;gap:4px}
 

@@ -784,10 +784,21 @@ function motionRow(g) {
   return `<span class=vsize><label title="${on ? 'On: each sticker is sized and placed by where it spends most of the video (its hot spot), matched to its approved still. Drops or sparks that fly out do not shrink it' : 'Off: every sticker is cut from its cell at one scale, so the sizes stay as they are on the sheet'}"><input type=checkbox data-act=gresize data-g=${g.number} ${on ? 'checked' : ''}> Resize</label>
     <span class=mut title="Size of every animation in this batch (a sticker with its own size keeps it)">Size</span><button class="btn sm" ${b} data-f=${(f - VSTEP).toFixed(2)} ${f <= 0.5 ? 'disabled' : ''} aria-label="Smaller">−</button><b>${pct(f)}</b><button class="btn sm" ${b} data-f=${(f + VSTEP).toFixed(2)} ${f >= 1.5 ? 'disabled' : ''} aria-label="Larger">+</button>${f !== 1 ? `<button class="btn sm" ${b} data-f=1 title="Back to 100%">Reset</button>` : ''}</span>`;
 }
-/* under each animated tile: one button that opens the frame editor on that sticker */
+/* under each animated tile: Size, X and Y sliders for that sticker (Haitham: position X/Y + resize under every animated emoji).
+   The readout moves on input; one POST /position goes out after the release (debounced), so a drag cuts the clip once, free.
+   The frame-editor button stays: grid, frame scrubber and Centre live only there. */
+const vslPend = {}, vslT = {}, vslBusy = new Set();
+const fmtOff = (v) => `${v > 0 ? '+' : ''}${Math.round(v * 100)}%`;
 function vsizeRow(g, t) {
   const own = t.anim_scale != null || !!t.anim_offset;
-  return `<div class=vsize><button class="btn sm" data-act=vzedit data-g=${g.number} data-i=${t.index} title="Size and position of this sticker, tried on one frame">${pct(stScale(g, t))}${t.anim_offset ? ' · moved' : ''}${own ? '' : ' · batch'}</button></div>`;
+  const key = `${g.number}:${t.index}`, pend = vslPend[key];
+  const o = pend ? [pend.dx, pend.dy] : stOff(t), f = pend ? pend.scale : stScale(g, t);
+  return `<div class=vsize><button class="btn sm" data-act=vzedit data-g=${g.number} data-i=${t.index} title="Size and position of this sticker, tried on one frame">${pct(f)}${t.anim_offset ? ' · moved' : ''}${own ? '' : ' · batch'}</button>${own ? `<button class="btn sm" data-act=vslreset data-g=${g.number} data-i=${t.index} title="Back to the batch's size and position">Reset</button>` : ''}</div>
+  <div class=vsl data-g=${g.number} data-i=${t.index}>
+   <label class=vsize><span class=mut>Size</span><input type=range min=50 max=150 step=5 value=${Math.round(f * 100)} data-k=scale aria-label="Size of this sticker in percent"><b>${pct(f)}</b></label>
+   <label class=vsize><span class=mut>X</span><input type=range min=-50 max=50 step=1 value=${Math.round(o[0] * 100)} data-k=dx aria-label="Move this sticker left and right"><b>${fmtOff(o[0])}</b></label>
+   <label class=vsize><span class=mut>Y</span><input type=range min=-50 max=50 step=1 value=${Math.round(o[1] * 100)} data-k=dy aria-label="Move this sticker up and down"><b>${fmtOff(o[1])}</b></label>
+  </div>`;
 }
 
 function vzTarget(g) {
@@ -920,6 +931,67 @@ ACT.vzapply = async () => {
   toast(`Applied to ${VZ.i ? 'S' + VZ.i : 'the batch'}${redo ? ': cutting again (free)' : ''}`); vzClear(); glast = ''; tick(true);
 };
 ACT.vzcancel = () => { vzClear(); glast = ''; tick(true); };
+/* tile sliders: readout on input (kept in vslPend so a poll redraw mid-drag does not reset the drag), one send after release */
+const vslBox = (el) => (el && el.closest ? el.closest('.vsl') : null);
+addEventListener('input', (e) => {
+  const t = e.target;
+  if (!t || t.tagName !== 'INPUT' || !t.matches('.vsl input[type=range]')) return;
+  const box = vslBox(t); if (!box) return;
+  const q = (k) => box.querySelector(`input[data-k=${k}]`);
+  vslPend[`${box.dataset.g}:${box.dataset.i}`] = { scale: +q('scale').value / 100, dx: +q('dx').value / 100, dy: +q('dy').value / 100 };
+  const b = t.parentElement.querySelector('b');
+  if (b) b.textContent = t.dataset.k === 'scale' ? pct(+t.value / 100) : fmtOff(+t.value / 100);
+});
+addEventListener('change', (e) => {
+  const t = e.target;
+  if (!t || t.tagName !== 'INPUT' || !t.matches('.vsl input[type=range]')) return;
+  const box = vslBox(t); if (!box) return;
+  const key = `${box.dataset.g}:${box.dataset.i}`;
+  clearTimeout(vslT[key]);
+  const value = vslPend[key];
+  if (value) vslT[key] = setTimeout(() => vslSend(box, value), 500);
+});
+async function vslSend(box, value) {
+  const key = `${box.dataset.g}:${box.dataset.i}`;
+  if (!value) return;
+  if (vslBusy.has(key)) { vslT[key] = setTimeout(() => vslSend(box, value), 500); return; }
+  const g = GM.get(+box.dataset.g);
+  if (!g) return;
+  const i = +box.dataset.i, t = (g.stickers || [])[i - 1];
+  if (!t) return;
+  const v = value;
+  const cur = stOff(t);
+  if (Math.abs(v.scale - stScale(g, t)) < 0.001 && Math.abs(v.dx - cur[0]) < 0.0005 && Math.abs(v.dy - cur[1]) < 0.0005) { if (vslPend[key] === v) delete vslPend[key]; return; }
+  vslBusy.add(key);
+  const redo = (g.stickers || []).some((s) => s.anim_status === 'READY');
+  try {
+    const offset = v.dx || v.dy ? [v.dx, v.dy] : null;
+    const r = await post(`/api/generations/${g.number}/position`, { index: i, offset, scale: v.scale, reslice: redo });
+    if (!r.ok) { toast(r.j.error || 'Could not change it', 1); return; }
+    // Cache the acknowledged values until tick reads the canonical server result.
+    t.anim_scale = v.scale; t.anim_offset = offset;
+    if (vslPend[key] === v) delete vslPend[key];
+    glast = ''; tick(true);
+  } catch (e) { toast('Could not change it: ' + e.message, 1); }
+  finally { vslBusy.delete(key); }
+}
+ACT.vslreset = async (el) => {
+  const g = GM.get(+el.dataset.g);
+  if (!g) return;
+  const i = +el.dataset.i, key = `${g.number}:${i}`;
+  if (vslBusy.has(key)) return;
+  clearTimeout(vslT[key]); delete vslPend[key];
+  vslBusy.add(key);
+  const redo = (g.stickers || []).some((s) => s.anim_status === 'READY');
+  try {
+    let r = await post(`/api/generations/${g.number}/position`, { index: i, offset: null, reslice: false });
+    if (r.ok) r = await post(`/api/generations/${g.number}/video_size`, { index: i, scale: null, reslice: redo });
+    if (!r.ok) return toast(r.j.error || 'Could not reset it', 1);
+    const t = (g.stickers || [])[i - 1]; if (t) { delete t.anim_scale; t.anim_offset = null; }
+    toast('Back to the batch'); glast = ''; tick(true);
+  } catch (e) { toast('Could not reset it: ' + e.message, 1); }
+  finally { vslBusy.delete(key); }
+};
 addEventListener('scroll', () => { if (document.getElementById('vzcard') && !VZ.drag) vzCard(true); }, { passive: true });
 addEventListener('resize', () => { if (document.getElementById('vzcard')) vzCard(true); });
 

@@ -31,7 +31,7 @@ The Packs side panel lists newest-created packs first; a batch group takes the p
 
 Add to a pack uses the included generations currently in view, preserving each generation’s still/animation state. Its default destination is a pack already containing those generations, otherwise a new pack.
 
-The project map and journey organize the batch's Prompt, Stickers, Motion, Particles and delivery views. The toolbar offers Stickers / Sheet / Both, background, size, Next batch and a compact menu. Each rejected picture keeps its override; a click opens the docked sticker panel (§9). Prepared batches have a staff-only chip and a zero-credit explanation; Make a new one uses the live price.
+The project map and journey organize the batch's Prompt, Stickers, Motion, Particles and delivery views. The toolbar offers Stickers / Sheet / Both, background, size, Next batch and a compact menu. Each rejected picture keeps its override; a click opens the docked sticker panel (§9). Every animated tile carries its own Size, X and Y sliders underneath (readout on drag, one cut on release, Reset back to the batch; `docs/size-position-lottie-proposal.md` §C). Prepared batches have a staff-only chip and a zero-credit explanation; Make a new one uses the live price.
 
 The composer uses the shared surface and tokens. Style presets are 84px wrapping tiles opened by the Style chip; picking closes the tiles and updates the chip. Selection uses a ring and check. Presets come from `generation/styles.py`; real art from `console/assets/styles/` wins, otherwise a deliberate abstract swatch is generated. The enhancer uses the shared engine/model rows. Feature ownership is listed in `docs/architecture.md` §6.
 
