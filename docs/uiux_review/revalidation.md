@@ -1,5 +1,8 @@
 # Findings revalidated against newest implementation
 
+> **2026-10-15:** superseded in part by [plan-review.md](plan-review.md): the repair batch (T-001–T-004, T-065, T-072–T-074, T-086) landed after this revalidation, and T-001 is superseded by the Resize box. The rows below are historical.
+
+
 2026-10-14. Audit source: `170f26e`. Revalidated checkout HEAD: `94fd14b` (latest implementation commit `76952eb`; later commits are review documentation). Relevant source working tree was clean at start. The four implementation commits were prepared-grid handling, emoji-free preset library, Unicode manifest and collapsed/selectable motion rows.
 
 ## Result and limits

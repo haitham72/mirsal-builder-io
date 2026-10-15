@@ -1,5 +1,8 @@
 # UI/UX review — grouped journeys
 
+> **Current status (2026-10-15):** [plan-review.md](plan-review.md) reconciles this review with the implementation; read it before the journeys.
+
+
 > **Latest source validation:** [revalidation.md](revalidation.md) checks all 36 findings against newer source: 21 retain their source basis; 15 changed scope. Task status is updated in tasks.json. Browser acceptance for the rewritten reaction screen remains unrun.
 
 Start with [concurrent-work.md](concurrent-work.md): another LLM edited the shared checkout while this review was running. This folder contains a review and proposed fixes; it did not implement source changes.

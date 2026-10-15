@@ -23,9 +23,10 @@
       "size": 100,
       "risk": "low",
       "trace": "CT-001",
-      "review_status": "source_evidence_validated_check_exact_task_scope",
+      "review_status": "superseded",
       "finding_status": "still_present",
-      "preserve_current_fix": "vzPreview reads r.j.url; do not revert to src"
+      "preserve_current_fix": "vzPreview reads r.j.url; do not revert to src",
+      "status_note": "2026-10-15 plan-review.md: Keep approved size retired; Resize box + one-frame editor (f3b9ef52). Rewrite size_preview.test.js."
     },
     {
       "id": "T-002",
@@ -46,8 +47,9 @@
       "size": 160,
       "risk": "medium",
       "trace": "CT-002",
-      "review_status": "source_evidence_validated_check_exact_task_scope",
-      "finding_status": "still_present"
+      "review_status": "implemented_browser_acceptance_open",
+      "finding_status": "still_present",
+      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3)."
     },
     {
       "id": "T-003",
@@ -67,8 +69,9 @@
       "size": 80,
       "risk": "low",
       "trace": "CT-003",
-      "review_status": "source_evidence_validated_check_exact_task_scope",
-      "finding_status": "still_present"
+      "review_status": "implemented_browser_acceptance_open",
+      "finding_status": "still_present",
+      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3)."
     },
     {
       "id": "T-004",
@@ -88,8 +91,9 @@
       "size": 170,
       "risk": "medium",
       "trace": "CT-004",
-      "review_status": "source_evidence_validated_check_exact_task_scope",
-      "finding_status": "still_present"
+      "review_status": "implemented_browser_acceptance_open",
+      "finding_status": "still_present",
+      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3)."
     },
     {
       "id": "T-005",
@@ -160,7 +164,8 @@
       "trace": "CT-007",
       "review_status": "revise_scope_before_implementation",
       "finding_status": "still_present",
-      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows"
+      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows",
+      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
     },
     {
       "id": "T-008",
@@ -276,8 +281,9 @@
       "size": 140,
       "risk": "medium",
       "trace": "CT-020",
-      "review_status": "source_evidence_validated_check_exact_task_scope",
-      "finding_status": "still_present"
+      "review_status": "revise_scope_before_implementation",
+      "finding_status": "still_present",
+      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
     },
     {
       "id": "T-013",
@@ -415,7 +421,8 @@
       "trace": "CT-026",
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
-      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows"
+      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows",
+      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
     },
     {
       "id": "T-019",
@@ -553,7 +560,8 @@
       "risk": "medium",
       "trace": "CT-032",
       "review_status": "revise_scope_before_implementation",
-      "finding_status": "changed"
+      "finding_status": "changed",
+      "status_note": "2026-10-15 plan-review.md: merge with plan.md items 1, 2, 4 (saved-set card)."
     },
     {
       "id": "T-025",
@@ -577,7 +585,8 @@
       "trace": "CT-033",
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
-      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows"
+      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows",
+      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
     },
     {
       "id": "T-026",
@@ -689,7 +698,8 @@
       "risk": "low",
       "trace": "CT-041",
       "review_status": "revise_scope_before_implementation",
-      "finding_status": "changed"
+      "finding_status": "changed",
+      "status_note": "2026-10-15 plan-review.md: merge with plan.md items 1, 2, 4 (saved-set card)."
     },
     {
       "id": "T-031",
@@ -713,7 +723,8 @@
       "trace": "CT-042",
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
-      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows"
+      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows",
+      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
     },
     {
       "id": "T-032",
@@ -759,7 +770,8 @@
       "risk": "high",
       "trace": "CT-044",
       "review_status": "revise_scope_before_implementation",
-      "finding_status": "changed"
+      "finding_status": "changed",
+      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
     },
     {
       "id": "T-034",
@@ -783,7 +795,8 @@
       "trace": "CT-045",
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
-      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows"
+      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows",
+      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
     },
     {
       "id": "T-035",
@@ -808,7 +821,8 @@
       "trace": "CT-046",
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
-      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows"
+      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows",
+      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
     },
     {
       "id": "T-036",
@@ -832,7 +846,8 @@
       "risk": "high",
       "trace": "CT-047",
       "review_status": "revise_scope_before_implementation",
-      "finding_status": "changed"
+      "finding_status": "changed",
+      "status_note": "2026-10-15 plan-review.md: merge with plan.md items 1, 2, 4 (saved-set card)."
     },
     {
       "id": "T-037",
@@ -1091,7 +1106,8 @@
       "trace": "CT-058",
       "review_status": "revise_scope_before_implementation",
       "finding_status": "still_present",
-      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows"
+      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows",
+      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
     },
     {
       "id": "T-048",
@@ -1480,8 +1496,9 @@
       "manual": "J3 first cover-card Timeline native pointer click opens #/animate for that same id; Preview/Edit/Cover/Delete remain hit-testable, keyboard and selection unchanged.",
       "size": 25,
       "trace": "UX-01",
-      "review_status": "source_evidence_validated_check_exact_task_scope",
-      "finding_status": "still_present"
+      "review_status": "implemented_browser_acceptance_open",
+      "finding_status": "still_present",
+      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3)."
     },
     {
       "id": "T-066",
@@ -1614,7 +1631,8 @@
       "trace": "UX-06",
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
-      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows"
+      "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows",
+      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
     },
     {
       "id": "T-071",
@@ -1642,7 +1660,8 @@
       "size": 300,
       "trace": "UX-07",
       "review_status": "revise_scope_before_implementation",
-      "finding_status": "changed"
+      "finding_status": "changed",
+      "status_note": "2026-10-15 plan-review.md: merge with plan.md items 1, 2, 4 (saved-set card)."
     },
     {
       "id": "T-072",
@@ -1669,8 +1688,9 @@
       "manual": "J8 every visible shortcut scrolls to a real card; Tickets reachable without traversing allTrash; non-LAN0dead Account; fake-LAN/member/admin fixtures preserve privacy.",
       "size": 200,
       "trace": "UX-08",
-      "review_status": "source_evidence_validated_check_exact_task_scope",
-      "finding_status": "still_present"
+      "review_status": "implemented_browser_acceptance_open",
+      "finding_status": "still_present",
+      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3)."
     },
     {
       "id": "T-073",
@@ -1693,8 +1713,9 @@
       "manual": "Tab reaches issue/queue/FAQ titles and Enter/Space opens the same record; mouse selection unchanged; no support submission/FAQ publish during acceptance.",
       "size": 190,
       "trace": "UX-09",
-      "review_status": "source_evidence_validated_check_exact_task_scope",
-      "finding_status": "still_present"
+      "review_status": "implemented_browser_acceptance_open",
+      "finding_status": "still_present",
+      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3)."
     },
     {
       "id": "T-074",
@@ -1717,8 +1738,9 @@
       "manual": "Settled One idea slide is readable inboth themes, measured4.5:1 normal/3:1large text; dot hit rect≥44px and no overlap; reduced-motion and Escape still work.",
       "size": 90,
       "trace": "UX-10",
-      "review_status": "source_evidence_validated_check_exact_task_scope",
-      "finding_status": "still_present"
+      "review_status": "implemented_browser_acceptance_open",
+      "finding_status": "still_present",
+      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3)."
     },
     {
       "id": "T-075",
@@ -1990,8 +2012,9 @@
       "manual": "At390×844 the metadata title area is≥240px wide instead of a word column; all4background choices/browse/Close are native hit targets; viewer/footer can scroll; no page horizontal scroll. Zero new unit tests for this CSS-only layout change.",
       "size": 65,
       "trace": "UX-15",
-      "review_status": "source_evidence_validated_check_exact_task_scope",
-      "finding_status": "still_present"
+      "review_status": "implemented_browser_acceptance_open",
+      "finding_status": "still_present",
+      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3)."
     },
     {
       "id": "T-087",
@@ -2123,5 +2146,6 @@
       "changed": 15
     },
     "report": "revalidation.md"
-  }
+  },
+  "plan_review": "2026-10-15 plan-review.md"
 }

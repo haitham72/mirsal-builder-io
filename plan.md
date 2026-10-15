@@ -68,6 +68,11 @@ Use copied data/providers off and your own server, never owner port 8770. No pai
 - [ ] Not built from D, waiting for a go: Pre-run, Time scale, sticker-silhouette emitter, blend modes.
 - [ ] Two failing tests found, NOT caused by this work (they fail in committed code): `tests.test_particle_set.ParticleCutTests.test_a_sparse_sheet_that_gutter_detection_mis_reads_is_cut_into_exact_equal_cells` (builds `out / "G###"` by hand, rule 9) and `...test_the_kind_is_only_written_for_a_particle_batch_and_only_that_value_is_accepted` (history lookup). Fix the tests.
 
-### UI/UX plan review (requested 2026-10-15, not done)
+### UI/UX plan review: done 2026-10-15
 
-- [ ] Write `docs/uiux_review/plan-review.md` per Haitham's reconcile prompt (verdict, requirement → implementation → remaining table, reaction + Size/Position corrections, visual gaps, browser checks, sequence, decisions), then update tasks.json / journey statuses. Starting facts are in `HANDOFF.md`.
+[docs/uiux_review/plan-review.md](docs/uiux_review/plan-review.md) is the current reconciliation (tasks.json statuses updated). Next, in order:
+- [ ] Rewrite `mirsal/tests/js/size_preview.test.js` (still tests the retired `gkeepsize`); fix the two stale `test_particle_set` tests above.
+- [ ] Browser acceptance checks 1–4 of plan-review.md.
+- [ ] T-056 tokens → T-066 44 px targets → J1 Studio visual reference (T-068/T-069).
+- [ ] Items 1, 2, 4 above together with T-071; then 5, 6, 7; then 8, 9.
+- [ ] Remaining journeys J2, J3, J6–J9 with J10/J11 acceptance; reaction tasks only after re-scoping against `docs/reaction/15-17`.
