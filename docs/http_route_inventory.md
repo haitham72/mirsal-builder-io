@@ -186,6 +186,8 @@ Auth labels refer to the shared guard above; “owner / own batch/job/chat” in
 | `GET /api/packs/{id}/export.zip` | — | 200 application/zip bytes + Content-Disposition | owner | no |
 | `POST /api/packs/{id}/export-collection` | {name?, description?, retime?} | 202 {id, state: queued, position}; 400 over a limit; 503 not set up | owner (own pack) | no |
 | `POST /api/generations/{id}/export-collection` | {name?, description?, retime?} | 202 {id, state: queued, position}; 400 over a limit; 503 not set up | owner | no |
+| `POST /api/generations/{id}/resize` | {on, reslice?} | 200 {id, resize, resliced?}; 400 not a boolean; 409 busy | member (own batch) | no |
+| `POST /api/generations/{id}/position` | {index, offset: [dx, dy] \| null, scale?, reslice?} | 200 {id, index, anim_offset, anim_scale?, resliced?}; 400 out of range; 409 busy | member (own batch) | no |
 | `GET /api/collection` | — | 200 {configured, url} | owner | no |
 | `GET /api/collection/exports/{xid}` | — | 200 {id, state: queued\|preparing\|sending\|done\|failed, what, collection, by, ok?, status?, count?, response?, result?, error?}; 404 not the sender's | owner (its sender) | no |
 | `GET /api/packs/{id}/telegram.zip` | — | 200 application/zip bytes + Content-Disposition | owner | no |
@@ -357,6 +359,8 @@ Table: 158 documented operations. Additional static/source routes are enumerated
 - **`GET /api/packs/{id}/telegram`** — Dry run: what would be created and every problem
 - **`GET /api/packs/{id}/stickers/{sid}/particles`** — The particles of one sticker, newest first: {sticker, pack_id, created: [{effect, result, mode, status, bytes, warnings, url, added_to (the library's word), shared, cell?, usable, missing}], saved: [library stickers made from them, any pack], effects: [ids], can_make}; a member gets it empty
 - **`GET /api/packs/{id}/particles`** — The pack's particle studio in one read: {pack_id, sets[] (the sets assigned to it, cards as in GET /api/particles), bursts[] (every burst rendered for it, with its warnings and whether it is in the pack), counts: {sticker id: {created, saved}}} (docs/particles.md sections 5-6); a member gets {}
+- **`POST /api/generations/{id}/resize`** — Native FastAPI (2026-10-15). The batch's Resize box: on sizes each animation by its hot spot, off cuts every sticker at one scale (flow/pipeline.set_resize); reslice cuts again, free.
+- **`POST /api/generations/{id}/position`** — Native FastAPI (2026-10-15). One sticker's Position (+ optional Size), applied by moving the cut's window (flow/pipeline.set_position); reslice cuts that sticker again, free.
 - **`POST /api/packs/{id}/export-collection`** — Native FastAPI. Send the pack's Download .zip stickers to the AddCollection API as one collection (services/collection.py)
 - **`POST /api/generations/{id}/export-collection`** — Native FastAPI. The same for one Studio batch
 - **`GET /api/collection`** — Native FastAPI. Where Export to collection sends and whether credentials are set

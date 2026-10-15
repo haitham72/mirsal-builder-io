@@ -1,7 +1,7 @@
-# Proposal: Size, Position and Lottie style settings (2026-10-15, waiting for a go)
+# Proposal: Size, Position and Lottie style settings (2026-10-15; Haitham: "do it")
 
 Haitham, 2026-10-15: "this is just way too cluttered — `Size: Approved size | Fit motion | Same scale · Video size − 80% +`. Let's redesign this."
-Nothing here is built. Each part (A-D) can be approved on its own.
+**A, B and C are built** (2026-10-15, with the recommended answers: Resize off = one scale, on = the hot spot matched to the approved still; Approved size / Fit motion / Same scale leave the screen; their details now live in `docs/engine-and-studio/09-engine.md` and `docs/api-parts/05-…`). D is in progress.
 
 ## A. One-frame previews (the speed fix, everything else rests on it)
 

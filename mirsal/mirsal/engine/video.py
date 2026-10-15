@@ -109,12 +109,27 @@ def keep_window(keyed: list, ref_rgba, cfg) -> tuple | None:
     The first frame's subject is mapped onto the still's subject: the same longest side and the same centre, so the animation starts exactly as the
     still that was approved and keeps that size however far it moves (what leaves the frame is cut off). Returns ((x0, y0, side), scale) in video
     pixels, the square window that becomes the 512 canvas, or None when there is no still or no subject to match (the clip is then fitted, the old way)."""
-    if ref_rgba is None or getattr(ref_rgba, "ndim", 0) != 3 or ref_rgba.shape[2] != 4:
+    if not has_still(ref_rgba):
         return None
-    rb = bbox_of(ref_rgba[..., 3])
     fb = next((b for b in (bbox_of(k[..., 3]) for k in keyed) if b), None)
-    if not rb or not fb:
-        return None
+    return still_window(fb, None, ref_rgba, cfg) if fb else None
+
+
+def has_still(ref_rgba) -> bool:
+    """An approved still (RGBA with a subject) to match the animation to."""
+    return ref_rgba is not None and getattr(ref_rgba, "ndim", 0) == 3 and ref_rgba.shape[2] == 4 and bbox_of(ref_rgba[..., 3]) is not None
+
+
+def still_window(fb, centre, ref_rgba, cfg) -> tuple | None:
+    """keep_window from a box measured on the video (`fb`, x0 y0 x1 y1) and the point that lands on the still's centre (`centre`, None = the box's).
+    Without an approved still the box fills `hot_fill` of the canvas, centred."""
+    if not has_still(ref_rgba):
+        side_v = max(fb[2] - fb[0], fb[3] - fb[1], 1)
+        s = cfg.hot_fill * cfg.size / side_v
+        cx, cy = centre or ((fb[0] + fb[2]) / 2, (fb[1] + fb[3]) / 2)
+        side = cfg.size / s
+        return (cx - side / 2, cy - side / 2, side), s
+    rb = bbox_of(ref_rgba[..., 3])
     o = cfg.outline_px                                   # the still carries the stroke, the video's subject does not
     if rb[2] - rb[0] > 2 * o + 4 and rb[3] - rb[1] > 2 * o + 4:
         rb = (rb[0] + o, rb[1] + o, rb[2] - o, rb[3] - o)
@@ -122,9 +137,61 @@ def keep_window(keyed: list, ref_rgba, cfg) -> tuple | None:
     if s <= 0:
         return None
     side = cfg.size / s
-    cx_f, cy_f = (fb[0] + fb[2]) / 2, (fb[1] + fb[3]) / 2
+    cx_f, cy_f = centre or ((fb[0] + fb[2]) / 2, (fb[1] + fb[3]) / 2)
     cx_r, cy_r = (rb[0] + rb[2]) / 2, (rb[1] + rb[3]) / 2
     return (cx_f - cx_r / s, cy_f - cy_r / s, side), s
+
+
+def hot_spot(keyed: list, share: float = 0.5) -> dict | None:
+    """Where the subject spends its time (Haitham, 2026-10-15): the share of frames each pixel is opaque in; the CORE is the pixels opaque in at least
+    `share` of them, so a face present all along is core and tear drops scattering out (a few frames each) are not. Returns {core_bbox (x0 y0 x1 y1),
+    core_centre (the occupancy-weighted centroid), core_share (of the cell)} in cell pixels, or None when no pixel is that steady."""
+    if not keyed:
+        return None
+    occ = np.zeros(keyed[0].shape[:2], np.float32)
+    for k in keyed:
+        occ += k[..., 3] > 127
+    occ /= len(keyed)
+    core = occ >= share
+    ys, xs = np.nonzero(core)
+    if not len(xs):
+        return None
+    w = occ[ys, xs]
+    return {"core_bbox": [int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1],
+            "core_centre": [round(float((xs * w).sum() / w.sum()), 1), round(float((ys * w).sum() / w.sum()), 1)],
+            "core_share": round(float(core.mean()), 4)}
+
+
+def size_window(cfg, wh: tuple, m: dict, ref_alpha=None, same=None) -> tuple:
+    """How a cell becomes the canvas, from what was measured on it (`m`: first_bbox, core_bbox/core_centre, bbox = every frame's union) — the same
+    answer for the full cut (_finish) and for a one-frame preview (preview_frame), so the preview is what Apply makes.
+    Returns (mode, window, scale): mode same | hot | kept | fit; window (x0, y0, side) in cell pixels (None for fit, which renders the union box).
+    Video size (anim_scale) shrinks or grows the window about its centre; Position (anim_offset) moves it."""
+    w0, h0 = wh
+    win = None
+    if cfg.anim_same_scale:                    # Same scale / Resize off: the cell's centre square at the video's largest cell side, one scale for every cell
+        side = float(same or max(h0, w0))
+        win, mode = (((w0 - side) / 2, (h0 - side) / 2, side), cfg.size / side), "same"
+    elif cfg.anim_hotspot and m.get("core_bbox"):
+        win, mode = still_window(m["core_bbox"], tuple(m["core_centre"]), ref_alpha, cfg), "hot"
+    if win is None and (cfg.anim_keep_size or cfg.anim_hotspot) and m.get("first_bbox"):
+        win, mode = still_window(m["first_bbox"], None, ref_alpha, cfg) if has_still(ref_alpha) else None, "kept"
+    f = float(cfg.anim_scale or 1.0)
+    if not win:                                # fit the whole motion inside the frame (the old way): the clip shrinks when the subject moves far
+        union = m["bbox"]
+        scale = min(fit_scale(union, cfg), cfg.max_fit * cfg.size / max(union[2] - union[0], union[3] - union[1])) * f
+        return "fit", None, scale
+    (x0, y0, side), s = win
+    side2 = side / f
+    dx, dy = (cfg.anim_offset or (0.0, 0.0))
+    return mode, (x0 + (side - side2) / 2 - dx * side2, y0 + (side - side2) / 2 - dy * side2, side2), s * f
+
+
+def window_box(window, scale_box: list) -> list:
+    """A box in cell pixels (x0 y0 x1 y1) as canvas pixels through `window` (x0, y0, side) -> 512: where the preview draws the hot spot."""
+    x0, y0, side = window
+    k = 512 / side
+    return [round((scale_box[0] - x0) * k, 1), round((scale_box[1] - y0) * k, 1), round((scale_box[2] - x0) * k, 1), round((scale_box[3] - y0) * k, 1)]
 
 
 def render_kept(keyed: list, window: tuple, cfg) -> np.ndarray:
@@ -333,6 +400,74 @@ def _one_cell(mp4, idx, rect, fps, cap_fps, max_frames, cfg, slot=False, ref_alp
     return _finish(idx, keyed, fps, cfg, {"source": "video sheet" if slot else "3x3 mp4", "threshold": round(calib[1], 1), "ms": {"decode": t_dec, "key": _ms(t1)}}, slot, ref_alpha, waive, same)
 
 
+def cell_rects(mp4, rects=None, sheet_wh=None, layout=None) -> tuple[list, dict]:
+    """The cell rectangles on this video, exactly as process_video maps them (a video sheet's slots, the still's measured rects, else thirds)."""
+    from .grid import scale_rects
+    if layout:
+        rects, sheet_wh = [tuple(sl["rect"]) for sl in layout["slots"]], tuple(layout["canvas"])
+    info = ff.probe(mp4)
+    W, H = info["width"], info["height"]
+    if rects and sheet_wh:
+        return scale_rects(rects, sheet_wh, (W, H)), info
+    cw, ch = W // 3, H // 3
+    return [(c * cw, r * ch, cw, ch) for r in range(3) for c in range(3)], info
+
+
+def preview_frame(path, cfg, index: int, frame: int = 0, m: dict | None = None, ref_rgba=None, rects=None, sheet_wh=None, layout=None,
+                  clip: bool = False) -> tuple[np.ndarray, dict]:
+    """ONE frame of one cell as the real cut would draw it (Haitham, 2026-10-15: "any modification should be done on 1 frame of the video to speed up
+    the preview"): decode up to `frame`, key it with the cut's own calibration (frame 0), size it with size_window from what the last cut measured
+    (`m`, the sticker's anim_metrics: first_bbox, core_bbox, bbox), render that frame only. No encode. A clip cut before 2026-10-15 has no
+    measurements: they are taken once here from every frame (the slow path). `clip` = `path` is a pre-sliced transparent clip, not a sheet video.
+    Returns (the 512 RGBA frame, {frame, frames, mode, px_scale (video px -> canvas px), core_canvas, centre_canvas, measured})."""
+    m = dict(m or {})
+    if clip:
+        info = ff.probe(path)
+        vr, rect = None, None
+    else:
+        vr, info = cell_rects(path, rects, sheet_wh, layout)
+        rect = vr[int(index) - 1]
+    fps = info["fps"] or 24.0
+    cap_fps = cfg.video_max_fps if fps > cfg.video_max_fps else None
+    fps = cfg.video_max_fps if cap_fps else fps
+    max_frames = int(math.floor(cfg.video_max_seconds * fps))
+    total = max(1, min(max_frames, int(round((info.get("duration") or 0) * fps)) or max_frames))
+    k = max(0, min(int(frame), total - 1))
+    measured = "cell_wh" in m
+    upto = max_frames if not measured else k + 1
+
+    def decode(n):
+        if clip:
+            return [_clean_clip(f, cfg) for f in ff.decode_full(path, info["width"], info["height"], n, cap_fps)]
+        return keyed_cell(path, rect, cap_fps, n, cfg)
+    keyed = decode(upto)
+    if not keyed:
+        raise ValueError("no frame could be read from this video")
+    k = min(k, len(keyed) - 1)
+    h0, w0 = keyed[0].shape[:2]
+    if not measured:                           # an older cut: measure what size_window reads, from every frame, once
+        union = None
+        for f in keyed:
+            b = bbox_of(f[..., 3])
+            if b:
+                union = b if union is None else (min(union[0], b[0]), min(union[1], b[1]), max(union[2], b[2]), max(union[3], b[3]))
+        m.update(bbox=list(union) if union else None, first_bbox=next((list(b) for b in (bbox_of(f[..., 3]) for f in keyed) if b), None), cell_wh=[w0, h0])
+        m.update(hot_spot(keyed, cfg.hot_share) or {})
+        total = len(keyed)
+    if not m.get("bbox"):
+        raise ValueError("this cell has no subject to preview")
+    same = max(max(r[2], r[3]) for r in vr) if (cfg.anim_same_scale and vr) else None
+    mode, window, scale = size_window(cfg, (w0, h0), m, ref_rgba, same)
+    one = keyed[k]
+    img = render_kept([one], window, cfg)[0] if window else render_sticker(one, tuple(m["bbox"]), scale, cfg)
+    out = {"frame": k, "frames": total, "mode": mode, "px_scale": round(scale, 4), "measured": not measured}
+    if window and m.get("core_bbox"):
+        out["core_canvas"] = window_box(window, m["core_bbox"])
+        cx, cy = m["core_centre"]
+        out["centre_canvas"] = window_box(window, [cx, cy, cx, cy])[:2]
+    return img, out
+
+
 def keyed_cell(mp4, rect, cap_fps, max_frames, cfg) -> list:
     """One cell of the prepared 3x3 video as keyed RGBA frames (decode + key only: no render, no encode)."""
     x, y, cw, ch = rect
@@ -452,23 +587,25 @@ def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None, waive=(), same=
         rep = Report(pre)
         return AnimationResult(idx, "FAILED", rep.first_failure, rep, m)
     h0, w0 = keyed[0].shape[:2]
-    if cfg.anim_same_scale:                    # Same scale: the cell's centre square at the video's largest cell side, the same for every cell (a clip: its own frame)
-        side = float(same or max(h0, w0))
-        kept = ((w0 - side) / 2, (h0 - side) / 2, side), cfg.size / side
-    else:
-        kept = keep_window(keyed, ref_alpha, cfg) if cfg.anim_keep_size else None
+    m["cell_wh"] = [int(w0), int(h0)]
+    m["first_bbox"] = next((list(b) for b in (bbox_of(k[..., 3]) for k in keyed) if b), None)
+    m.update(hot_spot(keyed, cfg.hot_share) or {})          # measured always (cheap), so a later preview in any mode needs no second pass
+    if same:
+        m["same_side"] = int(same)
     t = time.perf_counter()
-    f = float(cfg.anim_scale or 1.0)           # Video size (anim_scale): one more factor on top of same / keep / fit, about the canvas centre
+    f = float(cfg.anim_scale or 1.0)           # Video size (anim_scale): one more factor on top of the mode, about the canvas centre
     if f != 1.0:
         m["video_size"] = round(f, 3)
-    if kept:                                   # the approved still's size and place (anim_keep_size); what moves past the frame is cut off
-        (x0, y0, side), s = kept
-        side2 = side / f
-        out = render_kept(keyed, (x0 + (side - side2) / 2, y0 + (side - side2) / 2, side2), cfg)
-        m["scale"], m["size_mode"] = round(s * f, 4), "same" if cfg.anim_same_scale else "kept"
-    else:                                      # fit the whole motion inside the frame: the clip shrinks when the subject moves far
-        scale = min(fit_scale(union, cfg), cfg.max_fit * cfg.size / max(union[2] - union[0], union[3] - union[1])) * f
-        m["scale"], m["size_mode"] = round(scale, 4), "fit"
+    if any(cfg.anim_offset or ()):
+        m["offset"] = [round(float(v), 4) for v in cfg.anim_offset]
+    mode, window, scale = size_window(cfg, (w0, h0), m, ref_alpha, same)
+    kept = window is not None                  # what moves past the frame is cut off (cut_off_frames below)
+    m["scale"], m["size_mode"] = round(scale, 4), mode
+    if window:
+        out = render_kept(keyed, window, cfg)
+        if m.get("core_bbox"):
+            m["core_canvas"] = window_box(window, m["core_bbox"])
+    else:
         out = np.stack([render_sticker(k, union, scale, cfg) for k in keyed])       # ONE transform per clip
     ms["render"] = _ms(t); t = time.perf_counter()
     # A seam is only visible if it is bigger than the clip's own normal frame-to-frame change.

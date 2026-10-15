@@ -24,7 +24,7 @@ from . import pipeline as pl
 from ..generation import prompter
 from ..engine import verify
 from ..engine.config import EngineConfig
-from ..engine.video import check_returned_video, process_video, process_clips, AnimCache
+from ..engine.video import check_returned_video, process_video, AnimCache
 from ..engine.video_sheet import build_video_sheet
 
 GATES = ("plan", "still", "video_sheet", "anim", "pack")
@@ -857,13 +857,15 @@ def attach_video(out: Path, gid: int, aid: str, data: bytes, filename: str = "vi
     return {"sheet": aid, "bytes": len(data)}
 
 
-def anim_preview(out: Path, gid: int, index: int, cfg: EngineConfig, scale=None, keep=None, same=None) -> tuple[bytes, dict]:
-    """ONE sticker's animation as it would be cut with this Video size (`scale`, None = what it has now) and Keep approved size (`keep`, None = the
-    batch's), from the stored video: the same process_video, layout, still and animation cache as the real re-cut, but nothing is written to the batch
-    (Haitham, 2026-10-14: a size change previews on one thumbnail with Apply / Cancel, instead of re-cutting all nine on every 5% step).
-    Returns (the WebM, {cut_off_frames, frames, scale, size_mode}); the route writes it to the batch's preview/ folder (never base64), and the cache
-    means Apply is then instant for this sticker. The source is the sliced video sheet, else the prepared 3x3 video or clip (an imported video too)."""
+def anim_preview(out: Path, gid: int, index: int, cfg: EngineConfig, scale=None, resize=None, offset=None, frame: int = 0) -> tuple[bytes, dict]:
+    """ONE FRAME of one sticker's animation as it would be cut with this Size (`scale`, None = what it has now), Resize (`resize`, None = the batch's)
+    and Position (`offset` (dx, dy), None = the sticker's), from the stored video: the same rects, key and size_window as the real re-cut, but one
+    frame and no encode (Haitham, 2026-10-15: "any modification should be done on 1 frame of the video to speed up the preview, not entire video").
+    Nothing is written to the batch. Returns (the PNG, {index, frame, frames, mode, scale, offset, core_canvas, centre_canvas}); the route writes it
+    to the batch's preview/ folder (never base64). The source is the sliced video sheet, else the prepared 3x3 video or clip (an imported video too)."""
+    import io
     from dataclasses import replace
+    from ..engine.video import preview_frame
     res = pl.read_result(out, gid)
     v = cut_sheet(res)
     if not v and not prepared_source(res):
@@ -873,28 +875,34 @@ def anim_preview(out: Path, gid: int, index: int, cfg: EngineConfig, scale=None,
     st, d = res["stickers"][int(index) - 1], pl.gen_dir(out, gid)
     if scale is not None and not pl.VIDEO_SIZE[0] <= float(scale) <= pl.VIDEO_SIZE[1]:
         raise pl.PipelineError("scale must be from 0.5 to 1.5")
+    if offset is not None and (len(offset) != 2 or any(not -pl.OFFSET_MAX <= float(x) <= pl.OFFSET_MAX for x in offset)):
+        raise pl.PipelineError(f"offset must be [dx, dy], each {-pl.OFFSET_MAX:g} to {pl.OFFSET_MAX:g}")
     c_cfg = pl.cfg_for(res, cfg)
     own = st.get("anim_scale")
     f = float(scale) if scale is not None else float(own if own is not None else c_cfg.anim_scale)
-    c_cfg = replace(c_cfg, anim_scale=round(f, 2), **({"anim_keep_size": bool(keep)} if keep is not None else {}), **({"anim_same_scale": bool(same)} if same is not None else {}))
-    refs = {int(index): _read_rgba(d / st["png"])} if st.get("png") else {}
-    waive, cache, src = {int(index): set(st.get("anim_override") or [])}, AnimCache(out / "cache" / "anim"), res.get("source") or {}
+    off = tuple(float(x) for x in (offset if offset is not None else st.get("anim_offset") or (0.0, 0.0)))
+    c_cfg = replace(c_cfg, anim_scale=round(f, 2), anim_offset=off,
+                    **({"anim_hotspot": bool(resize), "anim_same_scale": not resize} if resize is not None else {}))
+    ref = _read_rgba(d / st["png"]) if st.get("png") else None
+    m, src = st.get("anim_metrics") or {}, res.get("source") or {}
     clip = (src.get("clips") or {}).get(str(int(index)))
-    if v:
-        layout = json.loads((d / v["layout"]).read_text(encoding="utf-8"))
-        r = process_video(d / v["video"], c_cfg, cells=[int(index)], layout=layout, refs=refs, cache=cache, waive=waive)[0]
-    elif clip:                             # a pre-sliced clip: the same process_clips as animate_cells
-        r = process_clips({int(index): {k: Path(x) for k, x in clip.items()}}, c_cfg, cache=cache, waive=waive)[0]
-    else:                                  # the prepared 3x3 video, cut with the image sheet's rects like animate_cells
-        if not src.get("video_path") or not Path(src["video_path"]).is_file():
-            raise pl.PipelineError("The stored video of this batch is missing", 409)
-        g = src.get("grid")
-        r = process_video(Path(src["video_path"]), c_cfg, cells=[int(index)], rects=g["rects"] if g else None,
-                          sheet_wh=tuple(src["sheet_size"]) if g else None, refs=refs, cache=cache, waive=waive)[0]
-    if not r.data:
-        raise pl.PipelineError(f"S{index} could not be cut with this size: {r.reason or 'no animation'}", 422)
-    m = r.metrics or {}
-    return r.data, {"index": int(index), "scale": round(f, 2), "keep": c_cfg.anim_keep_size, "same": c_cfg.anim_same_scale, "status": r.status, "cut_off_frames": m.get("cut_off_frames"), "frames": m.get("frames_out")}
+    try:
+        if v:
+            img, meta = preview_frame(d / v["video"], c_cfg, int(index), frame, m, ref, layout=json.loads((d / v["layout"]).read_text(encoding="utf-8")))
+        elif clip:
+            from ..engine.video import pick_clip
+            img, meta = preview_frame(pick_clip({k: Path(x) for k, x in clip.items()}, c_cfg)[1], c_cfg, int(index), frame, m, ref, clip=True)
+        else:
+            if not src.get("video_path") or not Path(src["video_path"]).is_file():
+                raise pl.PipelineError("The stored video of this batch is missing", 409)
+            g = src.get("grid")
+            img, meta = preview_frame(Path(src["video_path"]), c_cfg, int(index), frame, m, ref, rects=g["rects"] if g else None,
+                                      sheet_wh=tuple(src["sheet_size"]) if g else None)
+    except ValueError as e:
+        raise pl.PipelineError(f"S{index} cannot be previewed: {e}", 422)
+    buf = io.BytesIO()
+    Image.fromarray(img, "RGBA").save(buf, "PNG")
+    return buf.getvalue(), {**meta, "index": int(index), "scale": round(f, 2), "offset": list(off)}
 
 
 def slice_video(out: Path, gid: int, aid: str, cfg: EngineConfig, pace: float = 0.0, only: list | None = None,

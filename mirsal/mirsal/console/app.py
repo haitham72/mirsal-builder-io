@@ -527,6 +527,64 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
         except lr.SetError as e:
             return _lr_err(request, e)
 
+    # ---------- Motion size (docs/size-position-lottie-proposal.md, built 2026-10-15): the batch's Resize box and one sticker's Position + Size
+    from .app_models import PositionBody, ResizeBody
+    from ..flow import gates as _gates
+
+    async def _own_gen(request, gid, path):
+        user, resp = await _member(request, path)
+        if resp:
+            return None, resp
+        try:
+            n = int(str(gid).upper().lstrip("G"))
+        except ValueError:
+            return None, _j(request, 404, {"error": "not found"})
+        if not c.visible(user, n) or not pl.gen_dir(c.out, n).is_dir():
+            return None, _j(request, 404, {"error": "not found"})
+        if c.lock.locked():
+            return None, _j(request, 409, {"error": "busy: a job is running, wait for it to finish"})
+        return n, None
+
+    def _recut(n, only=None):
+        if _gates.can_reslice(pl.read_result(c.out, n)):
+            c.submit(lambda: _gates.reslice(c.out, n, pl.cfg_for(pl.read_result(c.out, n), c.cfg), c.pace, only=only))
+            return True
+        return False
+
+    @app.post("/api/generations/{gid}/resize", include_in_schema=False)
+    async def generation_resize(request: Request, gid: str):
+        n, resp = await _own_gen(request, gid, "/api/generations/resize")
+        if resp:
+            return resp
+        body, err = await _body(request, ResizeBody)
+        if err:
+            return _j(request, 400, {"error": err})
+        try:
+            out = await asyncio.to_thread(pl.set_resize, c.out, n, body.on)
+            if body.reslice:
+                out["resliced"] = _recut(n)
+            return _j(request, 200, out)
+        except pl.PipelineError as e:
+            return _j(request, e.code, {"error": str(e)})
+
+    @app.post("/api/generations/{gid}/position", include_in_schema=False)
+    async def generation_position(request: Request, gid: str):
+        n, resp = await _own_gen(request, gid, "/api/generations/position")
+        if resp:
+            return resp
+        body, err = await _body(request, PositionBody)
+        if err:
+            return _j(request, 400, {"error": err})
+        try:
+            out = await asyncio.to_thread(pl.set_position, c.out, n, body.index, body.offset)
+            if body.scale is not None:
+                out["anim_scale"] = (await asyncio.to_thread(pl.set_video_size, c.out, n, body.scale, body.index))["stickers"].get(body.index)
+            if body.reslice:
+                out["resliced"] = _recut(n, [body.index])
+            return _j(request, 200, out)
+        except pl.PipelineError as e:
+            return _j(request, e.code, {"error": str(e)})
+
     from ..flow import user_report as ur
 
     @app.get("/api/users/overview", include_in_schema=False)

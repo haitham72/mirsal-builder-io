@@ -169,6 +169,33 @@ def _grid_sheet(size, centres, r=40, seed=7):
     return s
 
 
+class HotSpotTests(unittest.TestCase):
+    """Resize on (anim_hotspot, 2026-10-15): the pixels opaque in at least half the frames size the sticker, so tear drops flying out do not shrink the face."""
+
+    def test_drops_flying_out_do_not_change_the_hot_spot(self):
+        from mirsal.engine.video import hot_spot, size_window
+        cfg = EngineConfig(outline_px=0, anim_hotspot=True)
+        frames = []
+        for i in range(10):
+            f = np.zeros((400, 400, 4), np.uint8)
+            f[150:250, 150:250] = (230, 200, 40, 255)                     # the face: there in every frame
+            d = 20 + i * 18                                                 # a drop flying out to the corner, a new place every frame
+            f[150 - d:160 - d, 150 - d:160 - d] = (60, 120, 230, 255)
+            frames.append(f)
+        h = hot_spot(frames, 0.5)
+        self.assertEqual(h["core_bbox"], [150, 150, 250, 250])             # only the face
+        self.assertEqual(h["core_centre"], [199.5, 199.5])
+        union = [0, 0, 250, 250]
+        mode, window, scale = size_window(cfg, (400, 400), {"core_bbox": h["core_bbox"], "core_centre": h["core_centre"], "bbox": union, "first_bbox": [130, 130, 250, 250]})
+        self.assertEqual(mode, "hot")
+        self.assertAlmostEqual(scale, cfg.hot_fill * cfg.size / 100)       # the face fills hot_fill of the canvas, whatever the drops do
+        _, fit_window, fit = size_window(EngineConfig(anim_keep_size=False), (400, 400), {"bbox": union})
+        self.assertIsNone(fit_window)
+        self.assertLess(fit, scale / 2)                                    # the old fit shrank it to make room for the drop
+        moved = size_window(EngineConfig(outline_px=0, anim_hotspot=True, anim_offset=(0.1, 0.0)), (400, 400), {"core_bbox": h["core_bbox"], "core_centre": h["core_centre"], "bbox": union})[1]
+        self.assertAlmostEqual(window[0] - moved[0], 0.1 * window[2])       # Position moves the window, so the subject moves right by 10% of the canvas
+
+
 class KeepSizeTests(unittest.TestCase):
     """Keep approved size (anim_keep_size): the animation starts exactly as its approved still, at its size and place, however far it moves."""
 

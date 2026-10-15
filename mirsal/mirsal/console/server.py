@@ -1210,22 +1210,24 @@ def make_handler(c: Console):
                 q = parse_qs(urlparse(self.path).query)
                 png = pl.edge_preview(c.out, int(path.split("/")[3]), int(q.get("index", ["1"])[0]), int(q.get("outline", ["0"])[0]), int(q.get("erode", ["0"])[0]), int(q.get("px", ["420"])[0]))
                 return self._send(200, png, "image/png")
-            if path.startswith("/api/generations/") and path.endswith("/anim_preview"):        # ONE sticker re-cut with a Video size / Keep approved size, not stored (gates.anim_preview)
+            if path.startswith("/api/generations/") and path.endswith("/anim_preview"):        # ONE FRAME of one sticker re-cut with a Size / Resize / Position, not stored (gates.anim_preview)
                 q = parse_qs(urlparse(self.path).query)
-                sc, kp, sm = q.get("scale", [""])[0], q.get("keep", [""])[0], q.get("same", [""])[0]
+                g1 = lambda k: q.get(k, [""])[0]
                 try:
-                    scale = float(sc) if sc not in ("", "null") else None
+                    scale = float(g1("scale")) if g1("scale") not in ("", "null") else None
+                    offset = (float(g1("dx") or 0), float(g1("dy") or 0)) if (g1("dx") or g1("dy")) else None
+                    frame = int(g1("frame") or 0)
                 except ValueError:
-                    raise pl.PipelineError("scale must be a number")
-                webm, meta = gates.anim_preview(c.out, int(path.split("/")[3]), int(q.get("index", ["1"])[0]), c.cfg, scale,
-                                                {"1": True, "0": False}.get(kp), {"1": True, "0": False}.get(sm))
+                    raise pl.PipelineError("scale, dx, dy and frame must be numbers")
+                png, meta = gates.anim_preview(c.out, int(path.split("/")[3]), int(q.get("index", ["1"])[0]), c.cfg, scale,
+                                               {"1": True, "0": False}.get(g1("resize")), offset, frame)
                 # a file in the batch's folder (one per sticker, overwritten by the next test), never base64 (Haitham, 2026-10-14)
                 import hashlib
                 gid_ = int(path.split("/")[3])
-                f = pl.gen_dir(c.out, gid_) / "preview" / f"anim-S{meta['index']}.webm"
+                f = pl.gen_dir(c.out, gid_) / "preview" / f"anim-S{meta['index']}.png"
                 f.parent.mkdir(parents=True, exist_ok=True)
-                f.write_bytes(webm)
-                return self._json(200, {**meta, "url": f"/out/G{gid_:03d}/preview/{f.name}?v={hashlib.sha256(webm).hexdigest()[:12]}"})
+                f.write_bytes(png)
+                return self._json(200, {**meta, "url": f"/out/G{gid_:03d}/preview/{f.name}?v={hashlib.sha256(png).hexdigest()[:12]}"})
             if path.startswith("/api/generations/") and path.endswith("/sheet_preview"):      # the video sheet at a given fill, small and not stored
                 q = parse_qs(urlparse(self.path).query)
                 fill = min(0.92, max(0.5, float(q.get("fill", [c.cfg.slot_fill])[0])))

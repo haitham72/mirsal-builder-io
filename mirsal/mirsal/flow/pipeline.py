@@ -516,6 +516,8 @@ def cfg_for(res: dict, cfg: EngineConfig) -> EngineConfig:
         kw["anim_keep_size"] = bool(res["keep_size"])
     if res.get("same_scale"):                 # ... or Same scale, which wins: every sticker at one scale from its cell
         kw["anim_same_scale"] = True
+    if res.get("resize") is not None:         # the batch's Resize box (Haitham 2026-10-15), which wins over both: on = each sticker by its hot spot, off = one scale
+        kw["anim_hotspot"], kw["anim_same_scale"] = bool(res["resize"]), not res["resize"]
     if res.get("key_colour") == "blue":       # the sheet came with a blue screen (green is the default and is never written): keyer, despill and video sheet follow it
         kw["chroma"] = "blue"
     return cfg if not kw else replace(cfg, **kw)
@@ -1120,12 +1122,15 @@ VIDEO_SIZE = (0.5, 1.5)          # Video size: from half to one and a half times
 
 def cell_cfgs(res: dict, cfg: EngineConfig, cells: list[int]) -> list[tuple[EngineConfig, list[int]]]:
     """The cells grouped by the config each one is animated with: the batch's (cfg, from cfg_for) unless the sticker has its own Video size
-    (`anim_scale` on the sticker), which replaces the batch's for that sticker. One group per distinct size, in cell order."""
-    groups: dict[float, list[int]] = {}
+    (`anim_scale` on the sticker) or Position (`anim_offset`), which replace the batch's for that sticker. One group per distinct pair, in cell order."""
+    groups: dict[tuple, list[int]] = {}
     for i in cells:
-        own = res["stickers"][i - 1].get("anim_scale")
-        groups.setdefault(float(own) if own is not None else float(cfg.anim_scale), []).append(i)
-    return [(cfg if f == float(cfg.anim_scale) else replace(cfg, anim_scale=f), cs) for f, cs in groups.items()]
+        st = res["stickers"][i - 1]
+        own = st.get("anim_scale")
+        off = tuple(float(v) for v in st.get("anim_offset") or cfg.anim_offset)
+        groups.setdefault((float(own) if own is not None else float(cfg.anim_scale), off), []).append(i)
+    base = (float(cfg.anim_scale), tuple(float(v) for v in cfg.anim_offset))
+    return [(cfg if k == base else replace(cfg, anim_scale=k[0], anim_offset=k[1]), cs) for k, cs in groups.items()]
 
 
 def set_video_size(out: Path, gid: int, scale, index: int | None = None) -> dict:
@@ -1154,6 +1159,38 @@ def set_video_size(out: Path, gid: int, scale, index: int | None = None) -> dict
     write_result(out, gid, res)
     return {"id": gid, "anim_scale": res.get("anim_scale", 1.0),
             "stickers": {s["index"]: s["anim_scale"] for s in res["stickers"] if s.get("anim_scale") is not None}}
+
+
+OFFSET_MAX = 0.5                                 # Position: at most half the canvas each way
+
+
+def set_position(out: Path, gid: int, index: int, offset) -> dict:
+    """One sticker's Position (Haitham, 2026-10-15): (dx, dy) as a share of the canvas, + = right / down, applied by moving the cut's window, so the
+    stored video is enough (`gates.reslice`, free). None or (0, 0) clears it."""
+    res = read_result(out, gid)
+    n = len(res["stickers"])
+    if not 1 <= int(index) <= n:
+        raise PipelineError(f"index 1..{n} required")
+    st = res["stickers"][int(index) - 1]
+    if offset is None or not any(float(v) for v in offset):
+        st.pop("anim_offset", None)
+    else:
+        if len(offset) != 2 or any(not -OFFSET_MAX <= float(v) <= OFFSET_MAX for v in offset):
+            raise PipelineError(f"offset must be [dx, dy], each {-OFFSET_MAX:g} to {OFFSET_MAX:g}")
+        st["anim_offset"] = [round(float(v), 4) for v in offset]
+    write_result(out, gid, res)
+    return {"id": gid, "index": int(index), "anim_offset": st.get("anim_offset")}
+
+
+def set_resize(out: Path, gid: int, on: bool) -> dict:
+    """The batch's Resize box (Haitham, 2026-10-15: "resize [ ] or resize [✓], simple and clean"). On: each animation is sized and placed by its HOT
+    SPOT (the pixels opaque in at least half the frames) matched to its approved still, so drops flying out no longer shrink the face. Off: every
+    sticker is cut from its cell at ONE scale, as on the sheet. It replaces Keep approved size / Fit motion / Same scale (still read on older batches).
+    Stored only: the animations change when they are cut again (`gates.reslice`, free, from the stored video)."""
+    res = read_result(out, gid)
+    res["resize"] = bool(on)
+    write_result(out, gid, res)
+    return {"id": gid, "resize": bool(on)}
 
 
 def set_keep_size(out: Path, gid: int, on: bool, same: bool | None = None) -> dict:

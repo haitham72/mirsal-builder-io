@@ -11,7 +11,7 @@ function animCreate(gs) {
         live = typeof liveReadyNow === 'function' && liveReadyNow(),
         base = `/out/${g.generation_id}/`;
       return `<section class=gbatch><div class=gbhead><b>${esc(g.generation_id)}</b><span class=mut>${kept.length ? `${kept.length} kept sticker${kept.length === 1 ? '' : 's'} to animate` : 'Keep at least one sticker on the Stickers view first'}</span>
-    <span class=gbact>${typeof impBatchBtn === 'function' ? impBatchBtn(g, 'anim') : ''}${typeof keepSizeBtn === 'function' ? keepSizeBtn(g) : ''}${live ? '' : `<button class="btn sm" data-act=gvideo data-g=${g.number} ${kept.length ? '' : 'disabled'} title="Higgsfield is not connected: make the video from the sheet in your own tool">${ic('film')} Make a video…</button>`}</span></div>
+    <span class=gbact>${typeof impBatchBtn === 'function' ? impBatchBtn(g, 'anim') : ''}${typeof motionRow === 'function' ? motionRow(g) : ''}${live ? '' : `<button class="btn sm" data-act=gvideo data-g=${g.number} ${kept.length ? '' : 'disabled'} title="Higgsfield is not connected: make the video from the sheet in your own tool">${ic('film')} Make a video…</button>`}</span></div>
    <div class=ganew><div class=ganew-l>${typeof sheetPanel === 'function' ? sheetPanel(g, 'anim', { noPrompt: true }) : ''}</div>
     <div class=ganew-r>${copyBox('Video prompt', pdText(g, 'video'), 'ap' + g.number, 6, { kind: 'video', g: g.number, foot: `<div class=pdfoot><button class="btn sm" data-act=pgreset data-g=${g.number} data-kind=video>Reset</button><small class=mut>Sent exactly as written when you press Generate.</small></div>` })}
      <div class=ganew-sts>${kept
