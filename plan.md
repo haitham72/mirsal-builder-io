@@ -41,7 +41,7 @@ Each new control is read by the backend (rule 6), and `tests/test_ui_inventory.p
 Start with [review index](docs/uiux_review/README.md), [execution record](docs/uiux_review/implementation-log.md), then the relevant [journey folder](docs/uiux_review/journeys/). Use [uiux_plan.md](docs/uiux_plan.md) as a searchable task catalog, not mandatory whole-file startup reading. The earlier [revalidation](docs/uiux_review/revalidation.md) and tasks.json statuses predate the implemented repair batch and newer handpicked-Lottie work: do not treat them as today's open-bug list.
 
 - [ ] Reconcile the selected finding/task with current source and implementation markers. Skip completed repairs; revise obsolete scopes. Update status evidence as work is accepted. Preserve the other LLM's changes; use an isolated worktree if its checkout is active, and check branch before commits.
-- [ ] Complete focused browser acceptance of the implemented repair batch: staged Keep size (T-001), dialog dismissal (T-002), queue/Studio clocks (T-003/004), badge hit testing (T-065), phone viewer (T-086), welcome contrast (T-074), Settings navigation (T-072), Help keyboard controls (T-073). Source anchors and reported narrow tests exist; real-browser acceptance remains open. Reopen a repair only for a reproduced failure, not because the historical review calls it open.
+- [ ] Complete focused browser acceptance of the implemented repair batch (in HEAD: `uiux-fixes` 902a917b + 84718cd3 are ancestors of `handpicked-lottie`): dialog dismissal (T-002), queue/Studio clocks (T-003/004), badge hit testing (T-065), phone viewer (T-086), welcome contrast (T-074), Settings navigation (T-072), Help keyboard controls (T-073). **T-001 (staged Keep size) is superseded** (2026-10-15): `gkeepsize` and Keep approved size are gone from the screen, replaced by the Resize box + one-frame editor (below). Reopen a repair only for a reproduced failure, not because the historical review calls it open.
 
 ### A visible redesign is required, beyond bug fixes
 
@@ -58,6 +58,16 @@ Keep shell/rail, approximately 90% of information architecture, stable JSON/rout
 
 Use copied data/providers off and your own server, never owner port 8770. No paid calls or sends; guard Telegram mutations before opening its entry. DOM-first, focused browser evidence; no repeat full audit. One narrow test run per changed source area, zero tests for docs; no full discovery. Exact mechanical tasks: ≤2 files/150 total changed lines; bounded design/shared tasks: ≤6 files; ≤2 dependencies. Commit/push explicit owned paths only, with area docs; no merge/deployment or unrelated media changes.
 
-### Separate proposal remains pending
+### Size/Position and Lottie style: BUILT 2026-10-15 (Haitham: "do it"), browser acceptance open
 
-[Size/Position, one-frame previews and Particular-style Lottie settings](docs/size-position-lottie-proposal.md) explicitly says **waiting for a go**, parts A–D separately. Keep it visible and unimplemented until approved; this visual-system plan does not approve its new sizing/position algorithms or retire its controls.
+[docs/size-position-lottie-proposal.md](docs/size-position-lottie-proposal.md) A–D are implemented and tested by narrow suites (commits f3b9ef52, 7f1e4d17 on `handpicked-lottie`); details in `docs/engine-and-studio/09-engine.md` and `docs/reaction/17-17-lottie-style-reactions.md`. Built with Claude's recommended answers, which Haitham has **not explicitly confirmed**: Resize off = one scale, on = hot spot matched to the approved still; the three old size modes left the screen (still read on old batches).
+
+- [ ] Browser acceptance (own server, copied `out/`): batch row `[✓] Resize · Size`, per-sticker frame editor (drag, arrows, Centre, Grid, frame scrubber, Apply), on a video-sheet batch AND an imported 3x3 video; dark/light and ≤760 px.
+- [ ] Browser acceptance of Lottie style: collapsible groups, presets, seed re-roll, time sampling in lottie-web (loop / random still).
+- [ ] Haitham to confirm decisions 1–3 of the proposal (Resize meaning, hot spot target, retiring the old modes).
+- [ ] Not built from D, waiting for a go: Pre-run, Time scale, sticker-silhouette emitter, blend modes.
+- [ ] Two failing tests found, NOT caused by this work (they fail in committed code): `tests.test_particle_set.ParticleCutTests.test_a_sparse_sheet_that_gutter_detection_mis_reads_is_cut_into_exact_equal_cells` (builds `out / "G###"` by hand, rule 9) and `...test_the_kind_is_only_written_for_a_particle_batch_and_only_that_value_is_accepted` (history lookup). Fix the tests.
+
+### UI/UX plan review (requested 2026-10-15, not done)
+
+- [ ] Write `docs/uiux_review/plan-review.md` per Haitham's reconcile prompt (verdict, requirement → implementation → remaining table, reaction + Size/Position corrections, visual gaps, browser checks, sequence, decisions), then update tasks.json / journey statuses. Starting facts are in `HANDOFF.md`.
