@@ -108,12 +108,16 @@ document.addEventListener('click', (e) => {
 /* ---------- dialogs */
 /* one active dismissal callback: retimeAsk registers here so every close path
    (backdrop, Cancel, replacement dialog) settles its promise exactly once */
-let DLG_CB = null;
+let DLG_CB = null, DLG_FOCUS = null;
 function dlg(html, opt) {
   if (DLG_CB) { const f = DLG_CB; DLG_CB = null; try { f('replaced'); } catch (e) {} }
-  $('dlg').innerHTML = `<div class=dbox>${html}</div>`;
+  if (typeof document !== 'undefined' && !document.activeElement?.closest?.('#dlg')) DLG_FOCUS = document.activeElement;
+  $('dlg').innerHTML = `<div class=dbox role=dialog aria-modal=true tabindex=-1>${html}</div>`;
   $('dlg').classList.add('on');
   if (opt && typeof opt.onDismiss === 'function') DLG_CB = opt.onDismiss;
+  const box=$('dlg').querySelector?.('.dbox'),title=box?.querySelector('h1,h2,h3');
+  if(title){title.id=title.id||'dlg-title';box.setAttribute('aria-labelledby',title.id)}
+  box?.focus();
 }
 /* forget the dismissal without firing it: an explicit answer settles its own promise */
 function dlgForget() { DLG_CB = null; }
@@ -122,6 +126,11 @@ function closeDlg(reason) {
   const f = DLG_CB; DLG_CB = null;
   $('dlg').classList.remove('on');
   $('dlg').innerHTML = '';
+  if (DLG_FOCUS?.isConnected) {
+    const folded = DLG_FOCUS.closest?.('details:not([open])');
+    (folded?.querySelector('summary') || DLG_FOCUS).focus();
+  }
+  DLG_FOCUS = null;
   if (f) { try { f(reason === undefined ? 'dismiss' : reason); } catch (e) {} }
 }
 
@@ -356,12 +365,20 @@ document.addEventListener('click', (e) => {
   if (d && (!e.target.closest('.ct-new') || e.target.closest('[role=menuitem]'))) d.open = false;
 });
 
+function dlgTab(e) {
+  if(e.key!=='Tab'||!$('dlg').classList.contains('on')||$('welcome').classList.contains('on'))return false;
+  const box=$('dlg').querySelector('.dbox'),items=[...box.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),a[href],[tabindex="0"]')].filter(el=>el.getClientRects().length);
+  const first=items[0],last=items[items.length-1],active=document.activeElement;
+  if(!first){e.preventDefault();return true}
+  if(active===box||!box.contains(active)||e.shiftKey&&active===first||!e.shiftKey&&active===last){e.preventDefault();(e.shiftKey?last:first).focus();return true}
+  return false;
+}
 function dlgEscape(e) {
   if (e.key !== 'Escape' || !$('dlg').classList.contains('on') || $('welcome').classList.contains('on')) return false;
   closeDlg('escape'); e.preventDefault(); e.stopImmediatePropagation(); return true;
 }
 document.addEventListener('keydown', (e) => {
-  if (dlgEscape(e)) return;
+  if (dlgEscape(e) || dlgTab(e)) return;
   if (e.key === 'Escape' && RME) {
     rmeClose();
     const b = document.querySelector('#rail .rme');

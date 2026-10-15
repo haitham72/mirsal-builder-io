@@ -10,7 +10,7 @@ A sun/moon button at the top-right of every screen switches Dark / Light immedia
 
 ### 3.2 Type, spacing, motion
 
-Inter is self-hosted. The five type roles are footnote12 / body15 / headline17 / title22 / large title28px; legacy --fs-* names map to these roles. The spacing grid is8px (with4px internal half-steps). The shared radius steps are8 /12 /16 /24px. Previously, type steps were11.5 /12.5 /14 /16 /20 /24px, with a pill radius retained. `--gutter` governs page spacing. Home's headline sizes remain a scoped exception; some inline script font sizes still await the scale sweep in the backlog.
+Inter is self-hosted. Five type roles define footnote (12px), body (15px), headline (17px), title (22px) and large title (28px); legacy `--fs-*` names alias those roles. Spacing follows an 8px grid with 4px internal half-steps; radii are 8, 12, 16 and 24px plus the existing pill. `--gutter` governs page spacing. Home headlines remain a scoped exception; legacy inline font sizes still need a separate sweep.
 
 Interactive elements share hover, press, selected and `:focus-visible` states. Click-opened dialogs, menus and panels use a short entrance animation; content redrawn by polling has none. `prefers-reduced-motion` disables transitions, entrances and film autoplay. Every keyboard control retains a visible focus ring.
 

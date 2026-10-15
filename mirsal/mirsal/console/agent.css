@@ -318,3 +318,13 @@ button.ai-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 .ag-engine{position:relative;display:inline-flex}
 .ai-set.ai-engine-pop{left:auto;right:0;top:calc(100% + 10px);bottom:auto;width:min(340px,calc(100vw - 80px));z-index:20}
+
+/* Shared redesign roles, scoped to the Chat surface. */
+#s-agent .ai-top{gap:var(--space-1);padding:var(--space-2) var(--space-3)}
+#s-agent .ai-scroll{padding:var(--space-2) var(--space-3)}
+#s-agent .ai-card,#s-agent .ai-set{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);box-shadow:var(--elevation-card);backdrop-filter:none}
+#s-agent .ai-card{padding:var(--space-2)}
+#s-agent .ai-dock-in{gap:var(--space-1);padding:var(--space-2);border-radius:var(--r-l)}
+#s-agent button,#s-agent summary{min-height:var(--control-min);min-width:var(--control-min)}
+#s-agent .ai-seg{flex-wrap:wrap;gap:var(--space-half)}
+@media(max-width:760px){#s-agent .ai-top,#s-agent .ai-scroll{padding-inline:var(--space-2)}#s-agent .ai-dock-in{padding:var(--space-1)}#s-agent .ai-card{max-width:100%;min-width:0}}

@@ -234,3 +234,6 @@ html[data-theme=dark] .su-st.resolved,html[data-theme=dark] .su-st.fixed,html[da
 
 /* Semantic status pairs; diagnostic issue colours remain unchanged. */
 html[data-theme=dark]{--elevation-sheet:0 16px 48px #0009;--focus-ring:#67e8f9;--status-positive-ink:#86efac;--status-positive-bg:#102e21;--status-warning-ink:#fde68a;--status-warning-bg:#35280f;--status-negative-ink:#fca5a5;--status-negative-bg:#381b20;--status-info-ink:#bfdbfe;--status-info-bg:#142b48}
+
+html[data-theme=dark] #col2{background:var(--sf);backdrop-filter:none}
+html[data-theme=dark] #s-agent .ai-card,html[data-theme=dark] #s-agent .ai-set{background:var(--sf)}

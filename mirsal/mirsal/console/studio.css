@@ -1210,3 +1210,25 @@ details.lv-edge{display:block;padding:var(--space-1) var(--space-2);margin:0}
 .pk-reactions,.pk-ps{margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px solid var(--bd)}
 .packrow{flex-wrap:wrap;gap:var(--space-1)}.packrow>.btn{margin-left:auto}
 @media(max-width:760px){.ps-card-open{min-width:0;flex-basis:100%}.ps-act{width:100%}.ps-act>.btn{flex:1}.packrow>.btn{flex-basis:100%;justify-content:center}}
+
+/* Cross-journey surfaces: opaque content, clear sections and bounded export sheets. */
+#col2{background:var(--sf);backdrop-filter:none}
+.lib-pk,.pk-grp,.ps-card,.tr-card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r-l);box-shadow:var(--elevation-card)}
+.lib-pkh,.pk-grph{padding:var(--space-1) 0;gap:var(--space-1);flex-wrap:wrap;border-bottom:1px solid var(--bd);margin-bottom:var(--space-2)}
+#s-settings .card,#s-help .su-conv{padding:var(--space-3);border:1px solid var(--bd);border-radius:var(--r-l);background:var(--sf);box-shadow:var(--elevation-card)}
+#s-settings .card+.card{margin-top:var(--space-2)}
+.set-nav{gap:var(--space-half);padding:var(--space-1);border-radius:var(--r)}
+#s-help .su-in{padding:var(--space-2);gap:var(--space-1);border-radius:var(--r)}
+#s-library .ph,#s-settings .ph{padding-bottom:var(--space-2);margin-bottom:var(--space-3);border-bottom:1px solid var(--bd)}
+#s-library .tabs{gap:var(--space-half);padding:var(--space-half);border-radius:var(--r);background:var(--fill)}
+#dlg .dbox{padding:var(--space-3);max-width:calc(100vw - 24px);max-height:calc(100dvh - 48px);overflow:auto;overscroll-behavior:contain;border-radius:var(--r-l);box-shadow:var(--elevation-sheet)}
+#dlg .dbox:focus{outline:none}#dlg .dbox h2{font-size:var(--type-title);margin-bottom:var(--space-2)}
+#dlg .dbox .row{gap:var(--space-1)}#dlg .dbox .fld{margin-bottom:var(--space-2)}
+.gcap .gwarn{line-height:1.5;text-wrap:pretty}.gcap .gwarn button{margin-top:var(--space-half)}
+@media(max-width:760px){
+ #s-settings .card,#s-help .su-conv{padding:var(--space-2)}
+ #dlg.on{align-items:flex-end;padding:12px}
+ #dlg .dbox{width:100%;max-height:calc(100dvh - 24px);border-radius:var(--r-l)}
+ #dlg .dbox .row{flex-wrap:wrap}#dlg .dbox .row>.btn{flex:1;justify-content:center}
+ .tr-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+}

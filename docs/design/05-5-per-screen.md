@@ -76,3 +76,9 @@ An existing project starts with New request and Edge folded behind native summar
 ### Saved reactions and pack flow (redesign)
 
 Saved-set names/previews are native open buttons; metadata appears on hover, keyboard focus or expansion. Zero spend omits the cost line. Attach and Open and save remain visible; Duplicate/Rename/Delete use Set options. Manage stickers discloses the attachment/unlink list. Motion shows the selected preset with Change; one Advanced section summarizes count, spin and resolution and includes Erosion. Open and save uses an explicit Save as a new row and never overwrites the original. Packs always show the sticker grid/selection first, then added reactions and the Reaction studio. pktab is retired per Haitham’s item6; all section controls remain. Eligible Library pack cards open their source batches directly in Studio.
+
+### Cross-journey finish (redesign, 2026-10-15)
+
+Content cards in Chat, Library, Trending, Settings and Help share opaque surface, border, radius and spacing tokens. Translucency stays on bars/sheets. Dialogs have a labelled modal role, bounded scroll area and a phone bottom-sheet layout. Tab/Shift+Tab wrap within the shared dialog; Escape returns focus to its opener, or its visible summary if the action menu has folded. Preview placement measures rendered height so wrapped 44px controls keep Apply/Cancel inside the viewport.
+
+Home, Library and Trending consume backend sticker/reaction counts, preserving legacy totals and neutral item fallback. Allowed Studio pictures retain the original available diagnostic reason beside allowed by you and their visible Take it back action. No decision is moved into a menu or recomputed in the browser.
