@@ -111,3 +111,9 @@ Reviewed5ad67e2d before finalizing its no-commit cherry-pick. Haitham then expli
 Imported unchanged from5ad67e2d: media/grey.py, services/collection.py, the batches comment, collection tests and grey/export documentation. Animation alpha is taken from its first visible frame (within the supplied scan window), still fallback; collection WebM thumbnails and ZIP grey PNGs use the same grey encoder. No Lottie export or visual structure changed. Requested verification is run against this selected combination, not against forced-fresh-cut behavior. No runtime data was ported.
 
 Integration verification: exact requested unittest command (test_imports, test_collection, library.NamingTests, ui_inventory) passed32 tests in46s. Retained import/Trending UI suite passed5. Grey source/tests/batches comment compare byte-for-byte to5ad67e2d; no data directories in the staged paths.
+
+## Redesign finish — current Emoji editor and handoff
+
+Re-scoped T-070 to today's preset library: Motion/Size first, one Advanced with current-value summary; all13descriptors and payload keys retained. Lottie groups and the two export contracts remain distinct. Reaction/override14 tests pass; final summary regression1 passes. Four native Emoji theme/width states: closed Advanced by default, one disclosure, no page overflow. Real screenshots saved under redesign-shots/ and visually inspected.
+
+plan.md now removes the original nine completed/accepted requirements while keeping broader catalog extractions, extended browser acceptance and optional Lottie fields explicit. Every journey has a current redesign-status.md alongside its historical issue/proposed-fix/checklist files. F-31 wording and cloud pricing remain owner choices. No merge/deployment, paid calls or sends.

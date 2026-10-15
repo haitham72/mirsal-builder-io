@@ -1,11 +1,11 @@
 # UI/UX review — grouped journeys
 
-> **Current status (2026-10-15):** [plan-review.md](plan-review.md) reconciles this review with the implementation; read it before the journeys.
+> **Current implementation (2026-10-15):** [current-status.md](current-status.md), [execution evidence](implementation-log.md), [real redesign images](redesign-shots/README.md), and [remaining work](../../plan.md). These override historical review status below.
 
 
-> **Latest source validation:** [revalidation.md](revalidation.md) checks all 36 findings against newer source: 21 retain their source basis; 15 changed scope. Task status is updated in tasks.json. Browser acceptance for the rewritten reaction screen remains unrun.
+> **Historical source validation (pre-redesign):** [revalidation.md](revalidation.md) checks all 36 findings against newer source: 21 retain their source basis; 15 changed scope. Task status is updated in tasks.json. Browser acceptance for the rewritten reaction screen remains unrun.
 
-Start with [concurrent-work.md](concurrent-work.md): another LLM edited the shared checkout while this review was running. This folder contains a review and proposed fixes; it did not implement source changes.
+For the original audit context, see [concurrent-work.md](concurrent-work.md): another LLM edited the shared checkout while this review was running. The original audit recorded proposed fixes; subsequent source implementation is documented in current-status.md and implementation-log.md.
 
 Each journey has an overview, detailed **issue → proposed fix** document, and an implementation checklist linking the bounded task catalog. Shared findings intentionally appear in more than one journey; the same finding/task ID means one implementation, not repeated work. Screenshots remain in a single shared shots folder to avoid copies.
 
@@ -35,6 +35,6 @@ Each journey has an overview, detailed **issue → proposed fix** document, and 
 - [Before/after sketches](mocks/sketches.md).
 - [Manifest](manifest.json): 48 source screenshots + 11 contact sheets = 59 images.
 
-No source implementation was performed by this reviewer. Other sessions own the concurrent source commits/edits.
+The original audit performed no source implementation. The later redesign phases are now recorded in implementation-log.md; historical audit files remain unchanged as evidence.
 
 [Ready-to-use reviewer/coder prompt](reviewer-coder-prompt.md).

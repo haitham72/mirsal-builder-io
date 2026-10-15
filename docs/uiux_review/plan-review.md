@@ -1,5 +1,7 @@
 # UI/UX plan review against the current implementation (2026-10-15)
 
+> Historical pre-redesign reconciliation. Read [current status](current-status.md) and [implementation log](implementation-log.md) for what was subsequently implemented and accepted. Latest user choice retains the import choice router; grey changes from5ad67e2d are integrated.
+
 Branch `handpicked-lottie` @ `a993b4a2`. Historical audit: `170f26e`; revalidation (2026-10-14, `revalidation.md`) predates the repair batch below, the Size/Position redesign and Lottie style's Particular settings. Source only; no browser run in this pass, no app source changed.
 
 ## Verdict

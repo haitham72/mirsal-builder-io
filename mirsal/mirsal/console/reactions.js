@@ -119,13 +119,20 @@ function rxSlider(k,o){
 function rxGroup(title,g,body){
  return `<div class=rx-grp><div class=rx-gh><b>${title}</b><button class=link data-act=rxreset data-g=${g}>Reset</button></div>${body}</div>`}
 function rxStage(k){const url=RXS.pv[rxKey(rxBody(k))]||k.shown;return rxStageHtml(rxRow(k.token).emoji,url,(k.id||k.motion)+' preview',(k.own||{}).origin)+(url||k.err?'':'<span class=spin></span>')}
+const rxAdvSummary=k=>['spin','spread','size_var'].map(key=>{const o=rxOpt(key);return o[1].toLowerCase()+' '+rxFmt(o,rxVal(k,o))}).join(' · ');
 function rxEditor(){
  const k=RXS.ek;if(!k)return '<div data-rxed></div>';const m=rxRow(k.token);
+ const basic=new Set(['magnitude','gravity','count']),shape=new Set(['particle_size']);
+ const summary=rxAdvSummary(k);
  return `<section class=rx-ed data-rxed><div class=rx-stage data-rxstage>${rxStage(k)}</div><div class=rx-ctl>
   <div class=rx-h><b>${esc(k.id||'new '+k.motion+' variation')}</b><span class=fx-chip>${esc(k.motion)}</span><small class=mut>${esc(k.name||'')} · on ${esc(m.emoji)} ${esc(m.token)}</small>${rxDbgToggle()}<button class=link data-act=rxclose aria-label="Close">${ic('x')}</button></div>
   <div class=rx-groups>
-   ${rxGroup('Simulation','sim',RXSIM.map(o=>rxSlider(k,o)).join(''))}
-   ${rxGroup('Shape','shape',RXO.map(o=>rxSlider(k,o)).join('')+'<small class=mut>The chat app shows the emoji in its own colours: a preset carries no picture.</small>')}
+   ${rxGroup('Motion','sim',RXSIM.filter(o=>basic.has(o[0])).map(o=>rxSlider(k,o)).join(''))}
+   ${rxGroup('Size','shape',RXO.filter(o=>shape.has(o[0])).map(o=>rxSlider(k,o)).join(''))}
+   <details class=rx-grp data-rxadvanced><summary class=rx-gh><b>Advanced</b><small class=mut>${summary}</small></summary>
+    ${RXSIM.filter(o=>!basic.has(o[0])).map(o=>rxSlider(k,o)).join('')}
+    ${RXO.filter(o=>!shape.has(o[0])).map(o=>rxSlider(k,o)).join('')}
+    <small class=mut>The chat app shows the emoji in its own colours: a preset carries no picture.</small></details>
   </div>${k.err?`<span class=fx-warn>${esc(k.err)}</span>`:''}
   <div class=rx-foot>${k.id?`<button class="btn pri" data-act=rxsave ${k.busy?'disabled':''}>Save ${esc(k.id)}</button>`:''}<button class="btn${k.id?'':' pri'}" data-act=rxcreate ${k.busy?'disabled':''}>Save as new ${esc(k.motion)} variation</button>`+
   `${k.id?`<button class=btn data-act=rxdl data-id="${esc(k.id)}">${ic('download')} JSON</button><span class=sp></span><button class="btn dng" data-act=rxpdel data-id="${esc(k.id)}">Remove</button>`:''}</div></div></section>`}
@@ -169,6 +176,7 @@ function rxManyRedraw(){rxSwap('[data-rxmany]',rxMany())}
 function rxEdRedraw(){if(RXS.ek)rxSwap('[data-rxed]',rxEditor());else rxDraw()}
 function rxEdSync(){
  const k=RXS.ek,el=document.querySelector&&document.querySelector('[data-rxed]');if(!k||!el)return rxDraw();
+ const summary=el.querySelector('[data-rxadvanced] summary small');if(summary)summary.textContent=rxAdvSummary(k);
  const st=el.querySelector('[data-rxstage]');if(st)st.innerHTML=rxStage(k);
  el.querySelectorAll('[data-rxo]').forEach(i=>{
   const o=rxOpt(i.dataset.rxo);if(!o||i===document.activeElement)return;

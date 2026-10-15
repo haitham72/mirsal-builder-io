@@ -114,3 +114,11 @@ test('a pack sticker finds its predefined emoji (the longest match) and asks for
   assert.equal(body.fit, true);
   assert.equal(r("RXS.pv[rxHovKey('laugh')]"), '/l.webp', 'one cache shared with the wall');
 });
+
+test('current Emoji editor discloses advanced controls without changing its payload or losing a descriptor',()=>{
+ const r=screen();r("ACT.rxpick({dataset:{t:'kiss'}})");const before=r('JSON.stringify(rxBody(RXS.ek))');const html=r('rxEditor()');
+ assert.match(html,/<b>Motion<\/b>/);assert.match(html,/<b>Size<\/b>/);assert.match(html,/<details class=rx-grp data-rxadvanced>/);
+ const advanced=html.slice(html.indexOf('<details class=rx-grp data-rxadvanced>'));assert.match(advanced,/rotation/);assert.match(advanced,/data-rxo=spin/);assert.match(advanced,/data-rxo=size_var/);
+ const keys=J(r,'RXSIM.concat(RXO).map(o=>o[0])');for(const key of keys)assert.equal((html.match(new RegExp('data-rxo='+key+'(?=[ >])','g'))||[]).length,1,key);
+ assert.equal(r('JSON.stringify(rxBody(RXS.ek))'),before);r('RXS.ek.sim.spin=2');assert.match(r('rxAdvSummary(RXS.ek)'),/rotation ×2/);
+});

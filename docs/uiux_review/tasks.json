@@ -50,8 +50,8 @@
       "trace": "CT-002",
       "review_status": "implemented_browser_acceptance_open",
       "finding_status": "still_present",
-      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3).",
-      "status": "implemented_browser_checked",
+      "status_note": "2026-10-15 redesign branch: narrow checks and sampled native desktop/phone dark/light acceptance recorded in implementation-log.md; see redesign-shots/ for visuals.",
+      "status": "implemented_browser_accepted",
       "browser_evidence": "2026-10-15 redesign phase2, implementation-log.md"
     },
     {
@@ -74,7 +74,8 @@
       "trace": "CT-003",
       "review_status": "implemented_browser_acceptance_open",
       "finding_status": "still_present",
-      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3)."
+      "status_note": "Single clock interval and polling guard narrow tests pass; native clock progresses. Full slow-response/off-route matrix remains a follow-up, not falsely marked exhaustive.",
+      "status": "implemented_checked"
     },
     {
       "id": "T-004",
@@ -96,7 +97,8 @@
       "trace": "CT-004",
       "review_status": "implemented_browser_acceptance_open",
       "finding_status": "still_present",
-      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3)."
+      "status_note": "Single clock interval and polling guard narrow tests pass; native clock progresses. Full slow-response/off-route matrix remains a follow-up, not falsely marked exhaustive.",
+      "status": "implemented_checked"
     },
     {
       "id": "T-005",
@@ -168,7 +170,8 @@
       "review_status": "revise_scope_before_implementation",
       "finding_status": "still_present",
       "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows",
-      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
+      "status_note": "2026-10-15: Old rxWatch/rxRun batch watcher is not the current preset-assignment workflow. Do not recreate batch generation. Shared watcher migration remains a separate catalog task.",
+      "status": "superseded_current_library"
     },
     {
       "id": "T-008",
@@ -427,7 +430,8 @@
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
       "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows",
-      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
+      "status_note": "2026-10-15: All/Done/Not done was replaced by Holding preset selection (RXQ.f is a preset id). Preserve this current filter; no obsolete segment migration.",
+      "status": "superseded_current_library"
     },
     {
       "id": "T-019",
@@ -566,7 +570,8 @@
       "trace": "CT-032",
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
-      "status_note": "2026-10-15 plan-review.md: merge with plan.md items 1, 2, 4 (saved-set card)."
+      "status_note": "2026-10-15: spBSlider still owns nullable overrides and now includes erosion_px; visual tokens/Advanced are delivered. Generic range-presenter extraction remains separate.",
+      "status": "rescoped_pending_shared_refactor"
     },
     {
       "id": "T-025",
@@ -591,7 +596,8 @@
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
       "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows",
-      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
+      "status_note": "2026-10-15: Current rxSlider descriptors and Lottie lsSlider choice controls remain distinct. Visual grouping delivered; generic scalar presenter migration remains separate.",
+      "status": "rescoped_pending_shared_refactor"
     },
     {
       "id": "T-026",
@@ -729,7 +735,8 @@
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
       "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows",
-      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
+      "status_note": "2026-10-15: Current exports are preset id.json/reaction-presets.zip versus self-contained Lottie style. Old selected-token ZIP query is obsolete; optional shared download wrapper is not implemented.",
+      "status": "rescoped_pending_shared_refactor"
     },
     {
       "id": "T-032",
@@ -803,7 +810,8 @@
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
       "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows",
-      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
+      "status_note": "2026-10-15: Current rxPlay key guards and shared hover cache preserved. Generic preview-session extraction is not implemented.",
+      "status": "rescoped_pending_shared_refactor"
     },
     {
       "id": "T-035",
@@ -829,7 +837,8 @@
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
       "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows",
-      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
+      "status_note": "2026-10-15: Current motion variation previews retain their own ordering/cache; generic capped preview-session migration remains pending.",
+      "status": "rescoped_pending_shared_refactor"
     },
     {
       "id": "T-036",
@@ -1114,7 +1123,8 @@
       "review_status": "revise_scope_before_implementation",
       "finding_status": "still_present",
       "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows",
-      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
+      "status_note": "2026-10-15: Old rxPresetMenu does not define the current variation library; native variation open/select/delete/download and Save/Save as new retained. No obsolete menu recreated.",
+      "status": "superseded_current_library"
     },
     {
       "id": "T-048",
@@ -1323,8 +1333,9 @@
       "trace": "CT-068",
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
-      "status": "implemented_pending_cross_journey_acceptance",
-      "implementation": "Semantic foundation tokens, shared control target floors and responsive preview sheets."
+      "status": "implemented_browser_accepted",
+      "implementation": "Semantic foundation tokens, shared control target floors and responsive preview sheets.",
+      "status_note": "2026-10-15 redesign branch: narrow checks and sampled native desktop/phone dark/light acceptance recorded in implementation-log.md; see redesign-shots/ for visuals."
     },
     {
       "id": "T-057",
@@ -1507,8 +1518,8 @@
       "trace": "UX-01",
       "review_status": "implemented_browser_acceptance_open",
       "finding_status": "still_present",
-      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3).",
-      "status": "implemented_browser_checked",
+      "status_note": "2026-10-15 redesign branch: narrow checks and sampled native desktop/phone dark/light acceptance recorded in implementation-log.md; see redesign-shots/ for visuals.",
+      "status": "implemented_browser_accepted",
       "browser_evidence": "2026-10-15 redesign phase2, implementation-log.md"
     },
     {
@@ -1536,8 +1547,9 @@
       "trace": "UX-02",
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
-      "status": "implemented_pending_cross_journey_acceptance",
-      "implementation": "Semantic foundation tokens, shared control target floors and responsive preview sheets."
+      "status": "implemented_browser_accepted",
+      "implementation": "Semantic foundation tokens, shared control target floors and responsive preview sheets.",
+      "status_note": "2026-10-15 redesign branch: narrow checks and sampled native desktop/phone dark/light acceptance recorded in implementation-log.md; see redesign-shots/ for visuals."
     },
     {
       "id": "T-067",
@@ -1563,7 +1575,9 @@
       "size": 220,
       "trace": "UX-03",
       "review_status": "source_evidence_validated_check_exact_task_scope",
-      "finding_status": "still_present"
+      "finding_status": "still_present",
+      "status": "implemented_browser_accepted",
+      "status_note": "2026-10-15 redesign branch: narrow checks and sampled native desktop/phone dark/light acceptance recorded in implementation-log.md; see redesign-shots/ for visuals."
     },
     {
       "id": "T-068",
@@ -1592,8 +1606,9 @@
       "trace": "UX-04",
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
-      "status": "implemented_browser_checked",
-      "implementation": "Studio reference grouping and progressive disclosure, one visible current-stage primary in desktop/phone dark/light."
+      "status": "implemented_browser_accepted",
+      "implementation": "Studio reference grouping and progressive disclosure, one visible current-stage primary in desktop/phone dark/light.",
+      "status_note": "2026-10-15 redesign branch: narrow checks and sampled native desktop/phone dark/light acceptance recorded in implementation-log.md; see redesign-shots/ for visuals."
     },
     {
       "id": "T-069",
@@ -1621,8 +1636,9 @@
       "trace": "UX-05",
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
-      "status": "implemented_browser_checked",
-      "implementation": "Studio reference grouping and progressive disclosure, one visible current-stage primary in desktop/phone dark/light."
+      "status": "implemented_browser_accepted",
+      "implementation": "Studio reference grouping and progressive disclosure, one visible current-stage primary in desktop/phone dark/light.",
+      "status_note": "2026-10-15 redesign branch: narrow checks and sampled native desktop/phone dark/light acceptance recorded in implementation-log.md; see redesign-shots/ for visuals."
     },
     {
       "id": "T-070",
@@ -1649,7 +1665,8 @@
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
       "current_contract": "preset library; no Hue; no per-emoji render/version/batch creation; preserve manifest and collapsed rows",
-      "status_note": "2026-10-15 plan-review.md: re-scope against the current screens (frame editor / two-style reactions, docs/reaction/15-17)."
+      "status_note": "2026-10-15: Current Emoji editor: Motion/Size + one Advanced summary, all descriptors/payload keys preserved. Current wall/select/assign kept; old generation/batch/filter instructions excluded.",
+      "status": "implemented_current_scope"
     },
     {
       "id": "T-071",
@@ -1678,8 +1695,8 @@
       "trace": "UX-07",
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
-      "status_note": "2026-10-15 plan-review.md: merge with plan.md items 1, 2, 4 (saved-set card).",
-      "status": "implemented_pending_cross_journey_acceptance",
+      "status_note": "2026-10-15 redesign branch: narrow checks and sampled native desktop/phone dark/light acceptance recorded in implementation-log.md; see redesign-shots/ for visuals.",
+      "status": "implemented_browser_accepted",
       "implementation": "Merged original plan1–4 saved-set requirements; backend-supported independent-row editor and erosion added under original8–9."
     },
     {
@@ -1709,8 +1726,8 @@
       "trace": "UX-08",
       "review_status": "implemented_browser_acceptance_open",
       "finding_status": "still_present",
-      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3).",
-      "status": "implemented_browser_checked",
+      "status_note": "2026-10-15 redesign branch: narrow checks and sampled native desktop/phone dark/light acceptance recorded in implementation-log.md; see redesign-shots/ for visuals.",
+      "status": "implemented_browser_accepted",
       "browser_evidence": "2026-10-15 redesign phase2, implementation-log.md"
     },
     {
@@ -1736,8 +1753,8 @@
       "trace": "UX-09",
       "review_status": "implemented_browser_acceptance_open",
       "finding_status": "still_present",
-      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3).",
-      "status": "implemented_browser_checked",
+      "status_note": "2026-10-15 redesign branch: narrow checks and sampled native desktop/phone dark/light acceptance recorded in implementation-log.md; see redesign-shots/ for visuals.",
+      "status": "implemented_browser_accepted",
       "browser_evidence": "2026-10-15 redesign phase2, implementation-log.md"
     },
     {
@@ -1763,8 +1780,8 @@
       "trace": "UX-10",
       "review_status": "implemented_browser_acceptance_open",
       "finding_status": "still_present",
-      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3).",
-      "status": "implemented_browser_checked",
+      "status_note": "2026-10-15 redesign branch: narrow checks and sampled native desktop/phone dark/light acceptance recorded in implementation-log.md; see redesign-shots/ for visuals.",
+      "status": "implemented_browser_accepted",
       "browser_evidence": "2026-10-15 redesign phase2, implementation-log.md"
     },
     {
@@ -1788,7 +1805,9 @@
       "size": 280,
       "trace": "UX-11",
       "review_status": "source_evidence_validated_check_exact_task_scope",
-      "finding_status": "still_present"
+      "finding_status": "still_present",
+      "status": "implemented_browser_accepted",
+      "status_note": "2026-10-15 redesign branch: narrow checks and sampled native desktop/phone dark/light acceptance recorded in implementation-log.md; see redesign-shots/ for visuals."
     },
     {
       "id": "T-076",
@@ -1811,7 +1830,9 @@
       "size": 80,
       "trace": "UX-12",
       "review_status": "source_evidence_validated_check_exact_task_scope",
-      "finding_status": "still_present"
+      "finding_status": "still_present",
+      "status": "implemented_browser_accepted",
+      "status_note": "2026-10-15 redesign branch: narrow checks and sampled native desktop/phone dark/light acceptance recorded in implementation-log.md; see redesign-shots/ for visuals."
     },
     {
       "id": "T-077",
@@ -2041,8 +2062,8 @@
       "trace": "UX-15",
       "review_status": "implemented_browser_acceptance_open",
       "finding_status": "still_present",
-      "status_note": "2026-10-15 plan-review.md: in HEAD (902a917b / 84718cd3).",
-      "status": "implemented_browser_checked",
+      "status_note": "2026-10-15 redesign branch: narrow checks and sampled native desktop/phone dark/light acceptance recorded in implementation-log.md; see redesign-shots/ for visuals.",
+      "status": "implemented_browser_accepted",
       "browser_evidence": "2026-10-15 redesign phase2, implementation-log.md"
     },
     {

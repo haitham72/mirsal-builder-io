@@ -1,3 +1,11 @@
+# Current handoff — redesign-ui-ux, 2026-10-15
+
+Read [current status](docs/uiux_review/current-status.md), [remaining plan](plan.md), [implementation log](docs/uiux_review/implementation-log.md) and [real images](docs/uiux_review/redesign-shots/README.md). The redesign is isolated under `.worktrees/redesign-ui-ux`, based on handpicked-lottie2fb92c3e. All source phases are pushed on redesign-ui-ux; main and the shared checkout were not switched or merged.
+
+Latest user choice: retain the duplicate choice router, not forced fresh cuts. Grey/export code from5ad67e2d was reviewed and imported unchanged in a439eec4; the contradictory import-policy portion was excluded. Requested32 Python tests and5 UI tests pass. Optional Lottie fields and broader catalog refactors remain explicitly open in plan.md. Historical notes below describe earlier sessions.
+
+---
+
 # HANDOFF — 2026-10-15 (save point; Claude stopped at Haitham's request: weekly budget at 99%)
 
 Branch `handpicked-lottie`, everything below committed and pushed. No uncommitted source of mine. Other sessions' uncommitted data in `mirsal/out/` and `Custom_emojis/` is untouched.
