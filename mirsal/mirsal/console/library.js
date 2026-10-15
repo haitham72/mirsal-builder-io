@@ -397,7 +397,7 @@ function libBody() {
     shown
       .map((e) => {
         const row = (p) =>
-          `<div class=packrow data-act=openpack data-id=${p.id}><div class=cover>${coverMedia(p)}</div><div style="flex:1"><b>${esc(p.name)}</b><br><small>${(()=>{const r=(p.stickers||[]).filter(s=>(s.source||{}).particle_set).length,n=(p.stickers||[]).length-r;return n+' sticker'+(n===1?'':'s')+(r?' · '+r+' reaction'+(r===1?'':'s'):'')})()}</small></div>${ic('chev')}</div>`;
+          `<div class=packrow data-act=openpack data-id=${p.id}><div class=cover>${coverMedia(p)}</div><div style="flex:1"><b>${esc(p.name)}</b><br><small>${(()=>{const r=(p.stickers||[]).filter(s=>(s.source||{}).particle_set).length,n=(p.stickers||[]).length-r;return n+' sticker'+(n===1?'':'s')+(r?' · '+r+' reaction'+(r===1?'':'s'):'')})()}</small></div><button class=btn data-act=libpackstudio data-id=${p.id} ${(p.stickers||[]).some(s=>(s.source||{}).generation)?'':'disabled'}>Open in Studio</button>${ic('chev')}</div>`;
         return e.pack
           ? row(e.pack)
           : `<div class=pkgroup><div class=pkgh>${e.group.startsWith('P-') ? esc(e.packs[0].name) : `Group ${esc(e.group)}`} · ${e.packs.length} packs</div>${e.packs.map(row).join('')}</div>`;

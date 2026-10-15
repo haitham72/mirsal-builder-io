@@ -503,3 +503,31 @@ class TrimSpriteTests(unittest.TestCase):
         self.assertIsNone(trim_sprite(np.zeros((20, 20, 4), np.uint8)))
         with self.assertRaises(ValueError):
             trim_sprite(np.zeros((20, 20, 3), np.uint8))
+
+
+class ErosionTests(unittest.TestCase):
+    def test_erosion_is_default_off_and_strictly_validated(self):
+        self.assertEqual(pt.ParticleParams().erosion_px, 0)
+        self.assertEqual(pt.ParticleParams.from_dict({"erosion_px": 99}).clamped().erosion_px, 6)
+        with self.assertRaises(ValueError):
+            pt.ParticleParams(erosion_px=float("nan")).clamped()
+
+    def test_keyed_alpha_is_eroded_without_mutating_the_source(self):
+        image = np.zeros((20, 20, 4), np.uint8)
+        image[3:17, 3:17] = (220, 80, 40, 255)
+        original = image.copy()
+        self.assertIs(pt.erode_sprites([image], 0)[0], image)
+        result = pt.erode_sprites([image], 1)[0]
+        self.assertLess(np.count_nonzero(result[..., 3]), np.count_nonzero(image[..., 3]))
+        self.assertTrue(np.array_equal(image, original))
+        self.assertTrue(np.array_equal(result[10, 10], image[10, 10]))
+
+    def test_every_animated_frame_keeps_its_fps_and_receives_the_same_trim(self):
+        image = np.full((2, 20, 20, 4), 255, np.uint8)
+        image[:, :3, :, 3] = 0
+        animation = pt.AnimatedSprite(image, 24)
+        result = pt.erode_sprites([animation], 1)[0]
+        self.assertEqual(result.fps, 24)
+        self.assertEqual(result.frames.shape, image.shape)
+        self.assertTrue(np.array_equal(result.frames[0], result.frames[1]))
+        self.assertLess(np.count_nonzero(result.frames[..., 3]), np.count_nonzero(image[..., 3]))

@@ -65,6 +65,7 @@ class ParticleParams:
     size_min: float = 0.10          # sprite's longest side, fraction of the canvas (0.02..0.8)
     size_max: float = 0.22
     particle_size: float = 1.0      # 0.25..3: how big the particles look, a multiplier on size_min/size_max (the "Size" slider)
+    erosion_px: int = 0             # 0..6: alpha fringe erosion on keyed sprites before preparation; off preserves old bytes
     spin: float = 1.0               # 0..3: rotation speed (0 = never rotates)
     lifetime: float = 2.2           # seconds a particle lives (<= duration - 0.4)
     spread: float = 360.0           # degrees of emission arc, centred upward when < 360
@@ -178,6 +179,7 @@ class ParticleParams:
             size_min=size_min, size_max=size_max,
             particle_size=lim(num("particle_size", self.particle_size), 0.25, 3.0),
             spin=lim(num("spin", self.spin), 0.0, 3.0),
+            erosion_px=int(lim(round(num("erosion_px", self.erosion_px)), 0, 6)),
             lifetime=lifetime,
             spread=lim(num("spread", self.spread), 10.0, 360.0),
             pop=lim(num("pop", self.pop), 1.0 / fps, max(1.0 / fps, lifetime / 2)),
@@ -633,12 +635,27 @@ def _prepare(img, max_long: int, keep_canvas: bool = False) -> _Sprite | None:
     return _Sprite(levels, content)
 
 
+def erode_sprites(sprites, px: int) -> list:
+    """Trim keyed RGBA alpha using the existing edge morphology, before sprite preparation.
+
+    Already-keyed cached art keeps its prior despill; RGB is never keyed again. Each animated
+    frame is processed identically. Zero returns the original inputs without copying or RNG draws.
+    """
+    if not px:
+        return sprites
+    from .render import apply_edge
+    def erode(img):
+        return apply_edge(img[..., :3].astype(np.float32), img[..., 3].astype(np.float32) / 255, 0, px)
+    return [AnimatedSprite(np.stack([erode(frame) for frame in img.frames]), img.fps)
+            if isinstance(img, AnimatedSprite) else erode(img) for img in sprites]
+
+
 def _prepare_all(sprites, p: ParticleParams) -> list:
     if sprites is None or len(sprites) == 0:
         raise ValueError("no sprites given")
     max_long = max(8, math.ceil(min(p.size_max * p.particle_size, 0.9) * p.size * 1.5))      # the biggest a particle gets: size_max x Size x pop overshoot x growth
     ready = []
-    for img in sprites:
+    for img in erode_sprites(sprites, p.erosion_px):
         if isinstance(img, AnimatedSprite):
             trimmed = trim_animation(img, pad=0)
             if trimmed is not None:

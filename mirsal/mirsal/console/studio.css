@@ -1198,3 +1198,15 @@ details.lv-edge{display:block;padding:var(--space-1) var(--space-2);margin:0}
 .lv-edge>summary small{font-size:var(--type-footnote);color:var(--mut);font-weight:400}
 .lv-edge-controls{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap;border-top:1px solid var(--bd);padding-top:var(--space-2);margin-top:var(--space-1)}
 @media(max-width:760px){.cp-summary{align-items:flex-start;flex-direction:column;gap:var(--space-half)}.gbody{gap:var(--space-2)}}
+
+/* Saved reaction sets and pack sections use the same grouped surface. */
+.ps-hit{display:flex;align-items:center;gap:var(--space-2);flex-wrap:wrap}
+.ps-card-open{display:flex;align-items:center;flex:1;min-width:200px;text-align:left;border:0;background:none;padding:var(--space-1);gap:var(--space-2);cursor:pointer}
+.ps-main{display:flex;flex-direction:column;gap:var(--space-half)}
+.ps-detail-meta{display:none}.ps-card:hover .ps-detail-meta,.ps-card:focus-within .ps-detail-meta,.ps-card.open .ps-detail-meta{display:inline}
+.ps-act{display:flex;align-items:center;gap:var(--space-1);flex-wrap:wrap}
+.ps-manage,.ps-motion-choice{padding:var(--space-1) var(--space-2);background:var(--fill);border-radius:var(--r-m);margin-block:var(--space-1)}
+.ps-manage summary,.ps-motion-choice summary,.fx-adv summary{min-height:var(--control-min);display:flex;align-items:center;cursor:pointer}
+.pk-reactions,.pk-ps{margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px solid var(--bd)}
+.packrow{flex-wrap:wrap;gap:var(--space-1)}.packrow>.btn{margin-left:auto}
+@media(max-width:760px){.ps-card-open{min-width:0;flex-basis:100%}.ps-act{width:100%}.ps-act>.btn{flex:1}.packrow>.btn{flex-basis:100%;justify-content:center}}

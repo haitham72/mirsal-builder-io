@@ -161,7 +161,7 @@ job) → the MAP node of that job + PILL (Retry shows its price first, as today)
 |---|---|
 | `app.js` (21) | shell: rail of four + avatar menu; Library; dialogs and pickers SAME |
 | `agent.js` (28) | Create > Chat, restyled; the stage slider is built (`ag-stage`'s route `settings.stage` unchanged, plus `settings.models`) |
-| `packs.js` (35) | the pack screen (`pack.html`): header with Send to Telegram, tabs Stickers · Particles · History |
+| `packs.js` (35) | the pack screen (`pack.html`): header with Send to Telegram, stickers grouped by batch followed by added reactions and Reaction studio (no pack tabs) |
 | `particles.js` (54), `effects.js` (29) | pack > Particles tab; PANEL Particles; Create "+ New" › Particle effects (`#/effects` SAME) |
 | `editor.js` (27), `prepare.js` (24), `animate.js` (8) | full-screen tools SAME, opened from PANEL / Library |
 | `chat.js` (9) | pack "Try it in a chat" (`#/chat` SAME) |
@@ -219,3 +219,5 @@ Check, against the code on this branch: (1) is any action, screen or route in `d
 do what it does today; (2) does §2's tree match the data (`pipeline._packs`, `flow/groups.py`, `result.json` `video_sheets`); (3) does any phase
 break rule 10's override on a surface; (4) is §6 the smallest backend that avoids logic in the browser; (5) is the phase order safe (each phase
 leaves a working app); (6) anything in `docs/architecture.md` that is wrong.
+
+2026-10-15: pack `pktab` retired with Haitham’s original plan item6/redesign prompt authorization; baseline retirement records the replacement always-visible sections. No section action or route is retired.

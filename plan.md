@@ -73,3 +73,7 @@ Use copied data/providers off and your own server, never owner port 8770. No pai
 - [ ] T-056 tokens → T-066 44 px targets → J1 Studio visual reference (T-068/T-069).
 - [ ] Items 1, 2, 4 above together with T-071; then 5, 6, 7; then 8, 9.
 - [ ] Remaining journeys J2, J3, J6–J9 with J10/J11 acceptance; reaction tasks only after re-scoping against `docs/reaction/15-17`.
+
+### Redesign branch progress
+
+On redesign-ui-ux, original items1–9 now have implementation and narrow checks; selected native browser checks pass (implementation-log.md phase5). Keep their descriptions above until cross-journey phone/theme/keyboard acceptance is complete. Next: phase6 remaining screens and residual browser fixtures; then remove only accepted steps. Do not replay the superseded code tasks.

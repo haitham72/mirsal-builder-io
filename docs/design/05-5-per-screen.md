@@ -72,3 +72,7 @@ Dialog Escape closes the top shared dialog through its dismissal callback and st
 ### Studio reference (redesign)
 
 An existing project starts with New request and Edge folded behind native summaries. New request stays open for an empty session/draft. Composer model/style remain primary choices; Options groups Stroke/Loop/Grid/Reactions/AI settings, and Prompt engine is a separate disclosure. Batch identity/version controls, import/tools and Motion have separate rows. Generation and folder/removal actions remain available in labelled menus; reversible picture recovery stays outside those menus. The current stage retains its one primary action in the bottom bar. All layout uses the shared semantic tokens; phone controls wrap without page overflow.
+
+### Saved reactions and pack flow (redesign)
+
+Saved-set names/previews are native open buttons; metadata appears on hover, keyboard focus or expansion. Zero spend omits the cost line. Attach and Open and save remain visible; Duplicate/Rename/Delete use Set options. Manage stickers discloses the attachment/unlink list. Motion shows the selected preset with Change; one Advanced section summarizes count, spin and resolution and includes Erosion. Open and save uses an explicit Save as a new row and never overwrites the original. Packs always show the sticker grid/selection first, then added reactions and the Reaction studio. pktab is retired per Haitham’s item6; all section controls remain. Eligible Library pack cards open their source batches directly in Studio.

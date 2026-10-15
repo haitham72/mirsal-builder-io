@@ -1678,7 +1678,9 @@
       "trace": "UX-07",
       "review_status": "revise_scope_before_implementation",
       "finding_status": "changed",
-      "status_note": "2026-10-15 plan-review.md: merge with plan.md items 1, 2, 4 (saved-set card)."
+      "status_note": "2026-10-15 plan-review.md: merge with plan.md items 1, 2, 4 (saved-set card).",
+      "status": "implemented_pending_cross_journey_acceptance",
+      "implementation": "Merged original plan1–4 saved-set requirements; backend-supported independent-row editor and erosion added under original8–9."
     },
     {
       "id": "T-072",

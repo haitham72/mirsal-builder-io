@@ -170,20 +170,21 @@ const SPL={sets:null,busy:false,open:'',detail:{},pick:{},deleted:null,trash:nul
  view:null,bank:null,bankBusy:false,bankQ:'',bankSel:null,build:[]};
 const spSetsForget=()=>{SPL.sets=null;SPL.detail={};SPL.open='';SPL.deleted=null;SPL.trash=null;SPL.view=null;SPL.bank=null;SPL.bankQ='';SPL.bankSel=null;SPL.build=[]};
 const spCredits=n=>n==null||+n===0?'nothing spent yet':`about ${+n} credit${+n===1?'':'s'} spent`;
-function spSetCard(s){const cells=s.cells||[],picked=cells.filter(c=>c.picked),strip=picked.slice(0,8),used=s.used_in||[],open=SPL.open===s.id;
- return `<div class="ps-card${open?' open':''}" data-ps=${esc(s.id)}>
-  <div class=ps-hit data-act=psopen data-id=${esc(s.id)} aria-expanded=${open} title="${open?'Close':'Open'} ${esc(s.name||s.id)}"><div class=ps-strip>${strip.map(c=>`<span class=ps-cell title="${esc(c.key||('cell '+c.n))}">${spCellMedia(c)}</span>`).join('')||'<span class=mut>No cells yet</span>'}${picked.length>8?`<span class=ps-more>+${picked.length-8}</span>`:''}</div>
-  <div class=ps-main><b>${esc(s.name||s.id)}</b><small class=mut>${esc(s.id)} · ${s.n_cells} cell${s.n_cells===1?'':'s'} · ${picked.length} picked${s.kind?' · '+esc(spKindChip(s)):''}</small>
-  <div class=ps-used>${(s.owner||[]).length?`made for ${(s.owner||[]).length} sticker${s.owner.length===1?'':'s'}`:'Detached · attach to a sticker'}</div>
-  <div class=ps-cost>${esc(spCredits(s.credits))}${(s.source||{}).job?' · '+esc(s.source.job):''}</div>
-  <div class=ps-act><button class="btn sm" data-act=psassign data-id=${esc(s.id)}>Attach to stickers</button><button class="btn sm" data-act=psdup data-id=${esc(s.id)}>Duplicate</button><button class="btn sm" data-act=psrename data-id=${esc(s.id)}>Rename</button><button class="btn sm dng" data-act=psdel data-id=${esc(s.id)}>Delete</button></div></div></div>
-  ${open?spSetDetail(s):''}</div>`}
+function spSetCard(s){const cells=s.cells||[],picked=cells.filter(c=>c.picked),strip=picked.slice(0,8),open=SPL.open===s.id,id=esc(s.id);
+ return `<div class="ps-card${open?' open':''}" data-ps=${id}><div class=ps-hit>
+ <button class=ps-card-open data-act=psopen data-id=${id} aria-expanded=${open} title="Open ${esc(s.name||s.id)}"><span class=ps-strip>${strip.map(c=>`<span class=ps-cell>${spCellMedia(c)}</span>`).join('')||'<span class=mut>No cells yet</span>'}</span>
+ <span class=ps-main><b>${esc(s.name||s.id)}</b><small class=mut>${id}<span class=ps-detail-meta> · ${s.n_cells} cells · ${picked.length} picked${s.kind?' · '+esc(spKindChip(s)):''}</span></small>
+ <span class="ps-used ps-detail-meta">${(s.owner||[]).length?'made for '+s.owner.length+' sticker'+(s.owner.length===1?'':'s'):'Detached · attach to a sticker'}</span>
+ ${+s.credits>0?`<span class=ps-cost>${esc(spCredits(s.credits))}${(s.source||{}).job?' · '+esc(s.source.job):''}</span>`:''}</span></button>
+ <div class=ps-act><button class="btn sm" data-act=psassign data-id=${id}>Attach to stickers</button><button class="btn sm" data-act=psopennew data-id=${id}>Open and save</button>
+ <details class=gh-more><summary class="btn sm" aria-label="Set options">⋯</summary><div class=gh-pop role=menu><button class="btn sm" data-act=psdup data-id=${id}>Duplicate</button><button class="btn sm" data-act=psrename data-id=${id}>Rename</button><button class="btn sm dng" data-act=psdel data-id=${id}>Delete</button></div></details></div></div>${open?spSetDetail(s):''}</div>`}
+
 function spSetDetail(s){const d=SPL.detail[s.id],full=d&&d.id===s.id?d:s,cells=full.cells||[],els=full.elements||[],mo=full.motion||{},src=full.source||{},pick=SPL.pick[s.id]||null;
  return `<div class=ps-det>
   ${els.length?`<div class=ps-els>${els.map(x=>`<span class=fx-chip>${esc(x)}</span>`).join('')}</div>`:''}
   ${src&&src.kind?`<div class=mut>from ${esc(src.kind)}${src.effect?` · ${esc(src.effect)}`:''}${src.generation?` · ${esc(src.generation)}`:''}</div>`:''}
   ${mo&&mo.preset?`<div class=mut>motion: ${esc(mo.preset)}</div>`:''}
-  ${(full.owner||[]).map(o=>`<div class=ps-on><span class=mut>sticker ${esc(o.sticker_id)}</span><button class=link data-act=psunassign data-id=${esc(s.id)} data-s=${esc(o.sticker_id)}>unlink</button></div>`).join('')}
+  <details class=ps-manage><summary>Manage stickers · Attached to ${(full.owner||[]).length} stickers</summary>${(full.owner||[]).map(o=>`<div class=ps-on><span class=mut>sticker ${esc(o.sticker_id)}</span><button class=link data-act=psunassign data-id=${esc(s.id)} data-s=${esc(o.sticker_id)}>unlink</button></div>`).join('')}</details>
   ${cells.length?`<div class=ps-cells>${cells.map(c=>{const on=pick?pick.has(c.n):!!c.picked;
    return `<button class="ps-pick${on?' on':''}" data-act=pspickcell data-id=${esc(s.id)} data-n=${c.n} aria-pressed=${on} title="cell ${c.n}${on?' (kept)':' (not kept)'}">${spCellMedia(c)}<span class=ps-tick>${on?'✓':''}</span></button>`}).join('')}</div>
   ${pick?`<div class=row><button class="btn pri sm" data-act=pspicksave data-id=${esc(s.id)}>Keep ${pick.size} picked</button><button class=link data-act=pspickcancel data-id=${esc(s.id)}>cancel</button></div>`:`<div class=mut>Tick the cells to keep.</div>`}`:''}
@@ -374,9 +375,10 @@ function spBurstCard(s,b,r){const ok=r.status==='READY'&&!!r.url,ws=(r.warnings|
 ACT.psbnewpack=async el=>{const s=SPBS[el.dataset.id]||{},r=await post(`/api/particles/${encodeURIComponent(el.dataset.id)}/add`,{renders:[el.dataset.r],new_pack:s.name||el.dataset.id});
  if(!r.ok)return toast(r.j.error||'Could not make the pack',1);if(typeof loadLib==='function')await loadLib();toast(`A pack “${(packById(r.j.pack_id)||{}).name||''}” holds the burst`);location.hash='#/pack/'+r.j.pack_id};
 /* the editor opened on one stand-alone set (the Studio's Particles choice, a particle batch, the chat): no sticker scope, the set itself */
-async function spOpenSet(id){const r=await api('/api/particles/'+encodeURIComponent(id));if(!r.ok)return toast(r.j.error||'Could not open the reactions',1);
+async function spOpenSet(id){SP.saveAsNew=false;const r=await api('/api/particles/'+encodeURIComponent(id));if(!r.ok)return toast(r.j.error||'Could not open the reactions',1);
  spEnter({set:id});SP.entry=(SP.entry||0)+1;SP.set=r.j;SP.target=id;SP.eid='';SPL.detail[id]=r.j;spDraw();spBurstPreview(id)}
 globalThis.spOpenSet=spOpenSet;
+ACT.psopennew=async el=>{await spOpenSet(el.dataset.id);SP.saveAsNew=el.dataset.id;spDraw()};
 function spBurstHtml(s){SPBS[s.id]=s;const b=spBurstState(s,spHint()),own=s.packs||[],kind=(s.source||{}).kind,has=(s.n_picked||0)>0||kind==='stickers',id=esc(s.id);
  const head=`<div class=ps-genh><b>Motion</b></div>`;
  if(!has)return `<div class=ps-burst data-psb=${id}>${head}<div class=mut>Add sprites to preview.</div></div>`;
@@ -385,11 +387,11 @@ function spBurstHtml(s){SPBS[s.id]=s;const b=spBurstState(s,spHint()),own=s.pack
  return `<div class=ps-burst data-psb=${id}>${head}
   <div class=row>${choose}${kind==='stickers'&&!(s.n_cells>0)?'<span class=mut>the pack’s own stickers fly out as the particles</span>':''}</div>
   <div class=ps-sim><div class=fx-pvbox><img id=psbpv-${id} ${b.pv?`src="${esc(b.pv)}"`:''} alt="">${b.pv?'':'<span class=spin></span>'}<small>${esc(s.name||s.id)}</small></div>
-   <div class=fx-ctl><div class=fx-pre>${FXPRESETS.map(n=>`<button class="tab${spPresetOf(s,b)===n?' on':''}" data-act=psbpreset data-id=${id} data-n=${n}>${n}</button>`).join('')}<button class=tab data-act=psbshuffle data-id=${id}>shuffle</button></div>
+   <div class=fx-ctl><details class=ps-motion-choice><summary>Motion: ${esc(spPresetOf(s,b))} · Change</summary><div class=fx-pre>${FXPRESETS.map(n=>`<button class="tab${spPresetOf(s,b)===n?' on':''}" data-act=psbpreset data-id=${id} data-n=${n}>${n}</button>`).join('')}<button class=tab data-act=psbshuffle data-id=${id}>shuffle</button></div></details>
     ${FXMAIN.map(k=>spBSlider(s.id,b,k)).join('')}
-    <details class=fx-adv><summary>Advanced: reactions, spin</summary>${['count','spin'].map(k=>spBSlider(s.id,b,k)).join('')}</details>
-    <details class=fx-adv><summary>Advanced: sprite resolution</summary><div class=fx-size><span class=mut>Sprite resolution</span><label class=fx-px><input type=number min=32 max=512 step=4 value="${b.size.px}" data-psbpx data-id=${id} aria-label="Sprite resolution in pixels"> px</label><small class=mut>sharpness of each sprite; Size changes how big they look</small></div></details>
-    <div class=row><button class="btn pri sm" data-act=psbrender data-id=${id}>Render</button><button class="btn sm" data-act=psblottie data-id=${id} title="Optional web export: motion keyframes as Lottie JSON (Telegram stays WebM)">Lottie</button><button class="btn sm${spSaved(s)?'':' pri'}" data-act=psbsave data-id=${id}>${spSaved(s)?'Save':'Save as a row'}</button>${spSaved(s)?`<button class=link data-act=psbsaveas data-id=${id}>Save as new</button>`:''}<button class=link data-act=psassign data-id=${id}>Assign to stickers</button><button class=link data-act=pschat data-id=${id}>Test in chat</button></div></div></div>
+    <details class=fx-adv><summary>Advanced: ${b.par.count??b.shown.count??28} reactions, spin ${b.par.spin??b.shown.spin??1}, ${b.size.px} px</summary>${['count','spin','erosion_px'].map(k=>spBSlider(s.id,b,k)).join('')}
+    <div class=fx-size><span class=mut>Sprite resolution</span><label class=fx-px><input type=number min=32 max=512 step=4 value="${b.size.px}" data-psbpx data-id=${id} aria-label="Sprite resolution in pixels"> px</label><small class=mut>sharpness of each sprite; Size changes how big they look</small></div></details>
+    <div class=row><button class="btn pri sm" data-act=psbrender data-id=${id}>Render</button><button class="btn sm" data-act=psblottie data-id=${id} title="Optional web export: motion keyframes as Lottie JSON (Telegram stays WebM)">Lottie</button><button class="btn sm${spSaved(s)?'':' pri'}" data-act=psbsave data-id=${id}>${SP.saveAsNew===s.id?'Save as a new row':spSaved(s)?'Save':'Save as a row'}</button>${spSaved(s)?`<button class=link data-act=psbsaveas data-id=${id}>Save as new</button>`:''}<button class=link data-act=psassign data-id=${id}>Assign to stickers</button><button class=link data-act=pschat data-id=${id}>Test in chat</button></div></div></div>
   ${rs.length?`<div class=ps-brs>${rs.map(r=>spBurstCard(s,b,r)).join('')}</div>`:''}</div>`}
 function spBurstRedraw(id){const s=SPBS[id],el=typeof document!=='undefined'&&document.querySelector?document.querySelector(`[data-psb="${id}"]`):null;if(s&&el)el.outerHTML=spBurstHtml(s)}
 const spBurstPreviewKey=b=>JSON.stringify([b.pack,b.preset,fxClean(b.par),spBurstSize(b)]);
@@ -415,8 +417,8 @@ document.addEventListener('change',ev=>{const t=ev.target;if(!t||!t.dataset||t.d
 const spSavedMotion=(s,b)=>({preset:spPresetOf(s,b),params:{...fxClean(b.shown),...fxClean(b.par),...spBurstSize(b)}});
 const spSaved=s=>!!s&&(!('saved_at' in s)||s.saved_at!=null);
 const spSavedDone=()=>{if(typeof ptForget==='function')ptForget();if(typeof LCI!=='undefined'&&LCI!==null&&typeof ptLoad==='function'){const cur=LCL[LCI];if(cur)ptLoad(cur)}};
-ACT.psbsave=async el=>{const [s,b]=spBurstSet(el);if(!s)return;const was=spSaved(s),r=await post(`/api/particles/${s.id}`,{motion:spSavedMotion(s,b),save:true});if(!r.ok)return toast(r.j.error||'Could not save particles',1);if(SP.set&&SP.set.id===s.id)SP.set=r.j;SPL.detail[s.id]=r.j;SPBS[s.id]=r.j;spLibRefresh();spBurstRedraw(s.id);spSavedDone();toast(was?'Saved: this row now has the new motion':'Saved as a new row under the sticker')};
-ACT.psbsaveas=async el=>{const [s,b]=spBurstSet(el);if(!s)return;const r=await post(`/api/particles/${s.id}/save-as-new`,{motion:spSavedMotion(s,b)});if(!r.ok)return toast(r.j.error||'Could not save a new row',1);SP.entry=(SP.entry||0)+1;SP.set=r.j;SP.target=r.j.id;SP.eid='';SPL.detail[r.j.id]=r.j;if(SPL.sets)SPL.sets.push(r.j);spBurstState(r.j,SP.pack);spDraw();spBurstPreview(r.j.id);spSavedDone();toast('Saved as a new row; the first one is unchanged')};
+ACT.psbsave=async el=>{if(SP.saveAsNew===el.dataset.id)return ACT.psbsaveas(el);const [s,b]=spBurstSet(el);if(!s)return;const was=spSaved(s),r=await post(`/api/particles/${s.id}`,{motion:spSavedMotion(s,b),save:true});if(!r.ok)return toast(r.j.error||'Could not save particles',1);if(SP.set&&SP.set.id===s.id)SP.set=r.j;SPL.detail[s.id]=r.j;SPBS[s.id]=r.j;spLibRefresh();spBurstRedraw(s.id);spSavedDone();toast(was?'Saved: this row now has the new motion':'Saved as a new row under the sticker')};
+ACT.psbsaveas=async el=>{const [s,b]=spBurstSet(el);if(!s)return;const r=await post(`/api/particles/${s.id}/save-as-new`,{motion:spSavedMotion(s,b)});if(!r.ok)return toast(r.j.error||'Could not save a new row',1);SP.saveAsNew=false;SP.entry=(SP.entry||0)+1;SP.set=r.j;SP.target=r.j.id;SP.eid='';SPL.detail[r.j.id]=r.j;if(SPL.sets)SPL.sets.push(r.j);spBurstState(r.j,SP.pack);spDraw();spBurstPreview(r.j.id);spSavedDone();toast('Saved as a new row; the first one is unchanged')};
 ACT.pschat=async el=>{const [s,b]=spBurstSet(el);if(!s)return;const saved=await post(`/api/particles/${s.id}`,{motion:spSavedMotion(s,b)});if(!saved.ok)return toast(saved.j.error||'Could not save particles',1);if(SP.set&&SP.set.id===s.id)SP.set=saved.j;SPL.detail[s.id]=saved.j;
  const owners=saved.j.owner||[];let target;for(const o of owners){const p=packById(o.pack_id),st=p&&(p.stickers||[]).find(x=>x.id===o.sticker_id);if(st){target={...st,pack_id:p.id};break}}if(!target)return ACT.psassign({dataset:{id:s.id}});CH.pending=target;location.hash='#/chat'};
 ACT.psbrender=async el=>{const [s,b]=spBurstSet(el);if(!s)return;if(!b.pack)return toast('Choose the pack this burst is for',1);

@@ -179,17 +179,17 @@ test('a set card: the picked cells as a strip, the name, where it is used, what 
   const h = run(`spSetCard(${JSON.stringify(SET())})`);
   assert.match(h, /data-ps=P001/);
   assert.match(h, /Barbie &lt;hearts&gt;/, 'names are escaped');
-  assert.match(h, /P001 · 4 cells · 3 picked · From AI sheet/);
+  assert.match(h.replace(/<[^>]+>/g,''), /P001 · 4 cells · 3 picked · From AI sheet/);
   assert.match(h, /made for 1 sticker/);
   assert.match(h, /about 2\.5 credits spent/);
   assert.equal((h.match(/class=ps-cell/g) || []).length, 3, 'the strip is the picked cells only');
   assert.match(h, /\/out\/particles\/P001\/cells\/c01\.png/);
   for (const a of ['psopen', 'psassign', 'psdup', 'psrename', 'psdel']) assert.match(h, new RegExp(`data-act=${a} data-id=P001`), `${a} is on the card`);
-  assert.match(h, /class=ps-hit data-act=psopen/, 'a click on the card itself opens it (Haitham, 2026-10-05)');
+  assert.match(h, /class=ps-card-open data-act=psopen/, 'the native card button opens it; options have independent targets');
   assert.doesNotMatch(h, />Open<\/button>/, 'no Open button');
   const lone = run(`spSetCard(${JSON.stringify(SET({ id: 'P002', name: 'Lone', packs: [], owner: [], used_in: [], credits: 0 }))})`);
   assert.match(lone, /Detached · attach to a sticker/);
-  assert.match(lone, /nothing spent yet/);
+  assert.doesNotMatch(lone, /nothing spent yet|class=ps-cost/);
 });
 
 test('the open card: elements, source, motion, every cell with what is kept, and the packs it can leave', () => {
@@ -440,11 +440,12 @@ test('Motion: ONE preview for the pack, the five presets, Energy / Float / Swirl
   for (const l of ['Energy', 'Float', 'Swirl', 'Size']) assert.match(h, new RegExp(`<span>${l}<\\/span>`));
   assert.doesNotMatch(h, /Explosion|Gravity/);
   assert.match(h, /data-psbp=magnitude data-id=P001/, 'the engine’s keys travel unchanged: only the labels were renamed');
-  assert.match(h, /<details class=fx-adv><summary>Advanced: reactions, spin<\/summary>/);
+  assert.match(h, /<details class=fx-adv><summary>Advanced: [^<]*reactions, spin/);
+  assert.equal((h.match(/class=fx-adv/g)||[]).length,1,'one Advanced disclosure');
   assert.match(h, /data-psbp=count/);
   assert.match(h, /data-psbp=spin/);
   assert.match(h, /data-psbp=particle_size data-id=P001/, 'Size is a main slider: how big the particles look (engine particle_size)');
-  assert.match(h, /Advanced: sprite resolution/);
+  assert.match(h, /Sprite resolution/);
   assert.match(h, /value="100" data-psbpx/, 'sprites are fitted to 100 px by default');
   assert.doesNotMatch(h, /data-act=psbscale|Advanced: particle size/, 'one input-size control, not two that mean the same');
   assert.match(h, /for Fruits &lt;b&gt;/, 'a set in one pack is a burst for that pack');

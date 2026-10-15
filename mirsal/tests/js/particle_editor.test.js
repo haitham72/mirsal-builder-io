@@ -99,3 +99,18 @@ test('recovery without a parent has a reachable create action',()=>{
 test('mixed sources keep their Kling provenance visible',()=>{
  const run=setup();assert.match(run("spKindChip({source:{kind:'drawn'},cells:[{clip_url:'/clip.webm',job:'J039'}]})"),/Mixed sprites.*Kling/);
 });
+
+
+test('Open and save mode writes a new row and leaves the source row unchanged',async()=>{
+ const run=setup();run(owner+`;SPBS.P001=${set};spBurstState(SPBS.P001,'parent');SP.saveAsNew='P001';POSTREPLIES.push({ok:true,j:{...SPBS.P001,id:'P002'}})`);
+ await run("ACT.psbsave({dataset:{id:'P001'}})");
+ assert.equal(run("POSTS.filter(([u])=>!u.endsWith('/preview')).length"),1);assert.equal(run('POSTS[0][0]'),'/api/particles/P001/save-as-new');
+ assert.equal(run('SPBS.P001.id'),'P001');assert.equal(run('SP.set.id'),'P002');assert.equal(run('SP.saveAsNew'),false);
+});
+test('saved set disclosure keeps controls, omits zero spend and combines Advanced',()=>{
+ const run=setup();const html=run(`spSetCard(${set})`);
+ for(const act of ['psassign','psopennew','psdup','psrename','psdel'])assert.ok(html.includes('data-act='+act));
+ assert.doesNotMatch(html,/nothing spent yet/);assert.match(html,/aria-label="Set options"/);
+ run(`SPL.detail.P001=${set};SPL.open='P001'`);const open=run(`spSetCard(${set})`);
+ assert.match(open,/Manage stickers/);assert.equal((open.match(/class=fx-adv/g)||[]).length,1);assert.match(open,/Motion: burst · Change/);
+});

@@ -2,14 +2,12 @@
 'use strict';
 let DRAG=null;
 RENDER.pack=async id=>{await loadLib();PACK_ID=id;drawCol2();drawPack()};
-const PKTAB={id:null,t:'stickers'};
-ACT.pktab=el=>{PKTAB.id=PACK_ID;PKTAB.t=el.dataset.t;drawPack()};
 function drawPack(){
  const p=packById(PACK_ID),el=$('s-pack');
  if(!p){el.innerHTML='<div class=card>Pack not found. <a href="#/library">Back to library</a></div>';return}
  const{stickers,reactions}=pkSplit(p);
  const n=stickers.length,nr=reactions.length,total=n+nr,anim=stickers.filter(s=>s.type==='animated').length;
- const owner=typeof ME==='undefined'||!ME||ME.role==='owner',tab=PKTAB.id===p.id?PKTAB.t:'stickers';
+ const owner=typeof ME==='undefined'||!ME||ME.role==='owner';
  /* the pack screen (Haitham, 2026-10-14): one header (cover, name, counts; Open in Studio, Download .zip, Send to Telegram; ⋯ Rename, Make public,
     Export to collection, Preview, Full-quality zip, Try it in a chat, Add sticker, Delete pack), then two tabs: Stickers (one group per batch, each
     with its own ⋯: Open in Studio, Remove this batch from the pack) and Reactions. Every button is the one it always was, only moved. */
@@ -28,15 +26,14 @@ function drawPack(){
      <button class=btn data-act=nav data-to=chat title="Try the stickers in a phone chat preview">${ic('chat')} Try it in a chat</button>
      <button class=btn data-act=pkadd>${ic('plus')} Add sticker</button>
      <button class="btn dng" data-act=pkdel title="Move this pack to the trash. You can restore it, or delete it for good, from Settings, Trash.">${ic('trash')} Delete pack</button></div></details></div></header>
-  <div class="gseg pk-tabs" role=tablist aria-label="This pack"><button type=button role=tab data-act=pktab data-t=stickers aria-pressed=${tab==='stickers'}>Stickers <small>${n}</small></button><button type=button role=tab data-act=pktab data-t=particles aria-pressed=${tab==='particles'}>Reactions</button></div>
-  ${tab==='particles'?pkPsHtml(p):`  <div class=row><span class=mut>Click a sticker to view it. Drag to reorder, or drop one on another pack in the Packs column to move it. Tick the square or drag a box to select several (Shift adds, Ctrl un-selects).</span></div>${selBarHtml(n)}
+    <div class=row><span class=mut>Click a sticker to view it. Drag to reorder, or drop one on another pack in the Packs column to move it. Tick the square or drag a box to select several (Shift adds, Ctrl un-selects).</span></div>${selBarHtml(n)}
    ${n?`<div class="selgrid pk-bybatch ${SEL.size?'selmode':''}" id=pkgrid>${groups.map(g=>pkGroupHead(g)+`<div class=grid>${g.items.map(s=>`<div class="cell ${s.id===p.cover?'cov':''} ${SEL.has(selKey(p.id,s.id))?'sel':''}" draggable=true data-act=stview data-id=${s.id} title="Click to view, drag to reorder"><span class="selbox ${SEL.has(selKey(p.id,s.id))?'on':''}" data-act=lsel data-p=${p.id} data-id=${s.id} title="Select"></span>${s.id===p.cover?'<span class=badge2>cover</span>':''}${ptBadge(p.id,s.id)}${media(s)}
     <div class=hov><button data-act=stview data-id=${s.id} title=Preview>${ic('eye')}</button><button data-act=stedit data-id=${s.id} title="${(s.source&&s.source.generation)?'Edit in the Studio (text, emoji; image and animation together)':s.type==='static'?'Edit a copy in the editor':'Edit: add text or emoji, trim'}">${ic('edit')}</button>${s.type==='animated'?`<button data-act=stanim data-id=${s.id} title="Timeline (trim, frame rate, export)">${ic('play')}</button>`:''}<button data-act=stcover data-id=${s.id} title="Set as cover">${ic('star')}</button><button data-act=stdel data-id=${s.id} title=Delete>${ic('trash')}</button></div>
     <div class=cap data-act=stname data-id=${s.id} title="Rename / change emoji">${esc(s.emoji)} ${esc(s.name)} · ${s.kb}KB</div></div>`).join('')}</div></section>`).join('')}</div>`
    :nr?'':`<div class=card style="text-align:center;padding:40px"><h2>This pack is empty</h2><p class=mut>Make stickers in the Studio, or create one from a photo.</p><button class="btn pri" data-act=pkadd>${ic('plus')} Add sticker</button> <button class=btn data-act=nav data-to=generate>${ic('gen')} Generate</button></div>`}
    ${nr?`<section class=pk-reactions><div class=pk-ps-h><h2>${ic('fx')} Reactions in this pack</h2></div><div class="grid" id=pkreactions>${reactions.map(s=>`<div class="cell" data-act=stview data-id=${s.id} title="Reaction burst: click to view"><span class=badge2>reaction</span>${media(s)}
     <div class=hov><button data-act=stview data-id=${s.id} title=Preview>${ic('eye')}</button><button data-act=stdel data-id=${s.id} title=Delete>${ic('trash')}</button></div>
-    <div class=cap data-act=stname data-id=${s.id} title="Rename / change emoji">${esc(s.emoji)} ${esc(s.name)} · ${s.kb}KB</div></div>`).join('')}</div></section>`:''}`}</div>`;
+    <div class=cap data-act=stname data-id=${s.id} title="Rename / change emoji">${esc(s.emoji)} ${esc(s.name)} · ${s.kb}KB</div></div>`).join('')}</div></section>`:''}${pkPsHtml(p)}</div>`;
  ptCounts(p.id);pkWallLoad(p.id);pkReactionsLoad(p.id)}
 /* Export to collection (services/collection.py, docs/api.md "Export to the AddCollection API"): the same stickers as Download .zip, in the same order, sent to the
    external emoji CMS as one collection. Owner only, like Telegram; free but outward, so it always asks first (name, optional description, where it goes). */
@@ -96,6 +93,7 @@ function pkGroupHead(g){const n=g.items.length;
 async function pkOpenStudio(gens){const ids=gens.map(g=>+String(g).replace(/\D/g,'')).filter(Boolean);if(!ids.length)return;
  const r=await api('/api/generations/'+ids[0]);if(!r.ok)return toast('That batch is not available any more',1);
  SES={prompt:r.j.prompt||'',gens:ids,off:[],pack:''};saveSes();GS.tab=(r.j.stickers||[]).some(t=>t.anim_status==='READY')?'anim':'stickers';glast='';location.hash='#/studio'}
+ACT.libpackstudio=el=>{const p=packById(el.dataset.id);if(p)return pkOpenStudio(pkGroups(pkSplit(p).stickers).map(g=>g.gen).filter(Boolean))};
 ACT.pkstudio=()=>{const p=packById(PACK_ID);if(p)pkOpenStudio(pkGroups(pkSplit(p).stickers).map(g=>g.gen).filter(Boolean))};
 ACT.pkgstudio=el=>pkOpenStudio([el.dataset.g]);
 ACT.pkgdel=el=>{const p=packById(PACK_ID);if(!p)return;const g=pkGroups(pkSplit(p).stickers).find(x=>x.gen===el.dataset.g);if(!g)return;
@@ -278,9 +276,9 @@ function pkPsHtml(p){const sets=PKPT.sets[p.id];
   ${bursts.length?`<div class=pk-ps-sh>Bursts rendered for this pack</div><div class=pk-ps-bursts>${bursts.map(b=>pkBurst(b,p.id)).join('')}</div>`:''}</section>`}
 function pkBurst(b,pid){const ws=b.warnings||[],bl=b.blocks||[],ok=b.status==='READY'&&b.url&&!b.missing;
  return `<div class=pk-ps-b><div class=pk-pt-m>${b.url&&!b.missing?`<video src="${esc(b.url)}" autoplay loop muted playsinline preload=metadata></video>`:'<span class=mut>file missing</span>'}</div>
-  <div class=pk-pt-id><b>${esc(b.set_name||b.set||'')}</b><small>${esc(b.preset||'')} · ${esc(String(b.status||'').toLowerCase())}${b.added_to?` · in ${esc(ptPackName(b.added_to))}`:''}</small></div>
+  <div class=pk-pt-id><b>${esc(b.set_name||b.set||'')}</b><small>burst · ${esc(String(b.status||'').toLowerCase())}${b.added_to?` · in ${esc(ptPackName(b.added_to))}`:''}</small></div>
   ${ws.length||bl.length?`<ul class=pk-pt-w>${[...bl,...ws].map(w=>`<li>${esc(ptWhy(w))}</li>`).join('')}</ul>`:''}
-  ${!b.added_to&&ok?`<button class="btn sm pri" data-act=psbadd data-id=${esc(b.set)} data-r=${esc(b.id)} data-p=${esc(pid||'')}>${ws.length?'Add anyway':'Add to this pack'}</button>`:''}</div>`}
+  ${ok?`<a class="btn sm" href="${esc(b.url)}" download>Download</a>`:''}${!b.added_to&&ok?`<button class="btn sm pri" data-act=psbadd data-id=${esc(b.set)} data-r=${esc(b.id)} data-p=${esc(pid||'')}>${ws.length?'Add anyway':'Add to this pack'}</button>`:''}</div>`}
 /* one line on the sticker, linking to the pack's reaction studio (the gallery lives there now) */
 function pkStickerLine(s){if(!s.pack_id)return '<span class=mut>No pack.</span>';
  if(pkIsReaction(s))return `<span>Reaction burst${s.source&&s.source.preset?' · '+esc(s.source.preset):''}${s.source&&s.source.particle_set?' · from '+esc(s.source.particle_set):''}</span> <span class=mut>Reactions do not get reactions.</span>`;

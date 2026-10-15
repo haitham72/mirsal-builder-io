@@ -21,3 +21,7 @@ The authoritative shapes and errors are in [api.md](../api.md) and the OpenAPI d
 | `POST /api/particles/{id}/duplicate`, `/delete`, `/restore` | Independent copy; soft delete; restoration |
 
 Legacy `/api/effects/*`, `packs` input and `/assign`/`unassign` remain for one release. Pack input maps to its library stickers. It does not restore pack ownership. Member reads preserve their authorization boundaries; writes remain owner-only.
+
+### Sprite erosion and independent editing (2026-10-15)
+
+ParticleParams accepts erosion_px (integer0–6, default0); strict numeric validation/clamping stays in the engine. The saved-set Advanced slider sends it through existing motion params. Raster preview/render and sprite Lottie export apply the same existing elliptical alpha morphology to keyed static/animated RGBA before sprite preparation; cached art retains its earlier despill and is never re-keyed. Zero bypasses processing and RNG draws, preserving default frames/Lottie bytes. Open and save uses the existing save-as-new endpoint on explicit Save; the source row is unchanged.
