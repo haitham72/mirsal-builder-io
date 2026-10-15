@@ -18,7 +18,7 @@
 | ZIP exports, emoji bank resolution | `docs/export to team/mirsal-export-architecture.md` |
 | redesign (no action may disappear without a `renamed`/`retired` entry in `mirsal/tests/data/ui_baseline.json`) | `docs/redesign_plan.md`, `docs/ui_inventory.md` |
 | the whole app on one page | `docs/architecture.md` |
-| proposals waiting for a go | `docs/burst_plan.md`, `docs/chat-interaction-proposal.md` |
+| proposals waiting for a go | `docs/burst_plan.md`, `docs/chat-interaction-proposal.md`, `docs/size-position-lottie-proposal.md` (Size/Position redesign, one-frame preview, Lottie style à la Particular) |
 | numbers, audits | `docs/measurements.md`, `docs/review-prompt.md` (whole repo), `docs/uiux-review-prompt.md` (UI/UX + duplication, for an orchestrating LLM), `docs/review.md`; reference inputs `docs/inputs/` |
 
 ## Standing instructions
