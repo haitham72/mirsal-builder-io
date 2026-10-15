@@ -47,6 +47,30 @@ class ImportTests(unittest.TestCase):
         (self.out / "imports.jsonl").write_text("null\n[]\nmalformed\n", encoding="utf-8")
         self.assertIsNone(im.known(self.out, job_id=TICKET))
 
+    def test_import_grid_auto_and_manual_override(self):
+        rgb = synth.make_sheet()[:400, :400].copy()
+        rgb[:] = (0, 255, 0)
+        for y in (100, 300):
+            for x in (100, 300):
+                cv2.circle(rgb, (x, y), 50, (255, 210, 0), -1)
+        data = cv2.imencode('.png', cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR))[1].tobytes()
+        for grid, expected in ((None, [2, 2]), ('3x3', [3, 3])):
+            _, got = im.import_file(self.c, self.user, 'two.png', data, grid=grid, again=True)
+            self.wait()
+            result = pl.read_result(self.out, got['id'])
+            self.assertEqual(result['grid'], expected)
+            self.assertEqual(len(result['stickers']), expected[0] * expected[1])
+
+    def test_batch_manual_grid_creates_new_batch_and_preserves_original(self):
+        _, original = im.import_file(self.c, self.user, 'sheet.png', self.data)
+        self.wait()
+        _, got = im.import_file(self.c, self.user, 'sheet.png', self.data,
+                                batch=f"G{original['id']:03d}", grid='2x2', again=True)
+        self.wait()
+        self.assertNotEqual(got['id'], original['id'])
+        self.assertEqual(pl.read_result(self.out, original['id'])['grid'], [3, 3])
+        self.assertEqual(pl.read_result(self.out, got['id'])['grid'], [2, 2])
+
     def test_filenames_and_ledger_ids_do_not_collide(self):
         with patch.object(im.time, "strftime", return_value="fixed"):
             a = im.save(self.out, "same.png", b"first")

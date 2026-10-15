@@ -415,6 +415,9 @@ function libBody() {
     h = `<div class=mut style="margin-bottom:8px">Tick the square, or drag a box over the stickers (Shift adds, Ctrl un-selects). Then delete them together.</div>${selBarHtml(all.length)}${libByPackHtml(all)}`;
   }
   $('libbody').innerHTML = h;
+  if(LIBTAB==='particles'&&typeof rxTab==='function'&&rxTab()==='lottie'){
+    lsThumbs();lsMount();
+  }
 }
 
 ACT.openpack = (el) => {

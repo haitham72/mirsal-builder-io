@@ -1,5 +1,7 @@
 # Import an existing sheet or video (native FastAPI)
 
+`POST /api/import` also accepts optional query `grid=2x2|3x3`; omit it for automatic layout detection from the image or first video frame. Invalid grid values return 400. Manual selection wins over detection when creating a batch. When importing into an existing `batch` or destination `generation`, choosing a different grid creates a separate batch and preserves the original. A matching manual batch grid explicitly permits cutting that layout even when the video detector disagrees. The native model, legacy adapter and OpenAPI expose the same option.
+
 <sub>Part of [api.md](../api.md).</sub>
 
 The Studio offers **Use my own sheet** and **Import from Higgsfield** to the owner. These routes never generate or spend credits and also have `/api/v1/` aliases.

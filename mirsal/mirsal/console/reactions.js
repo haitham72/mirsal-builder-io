@@ -163,6 +163,7 @@ function rxHtml(){
 
 /* ---------- page updates: repaint only what changed ---------- */
 function rxDraw(){
+ if(typeof route_!=='undefined'&&route_==='library'){spLibRefresh();return;}
  const el=$('s-reactions');if(!el)return;
  const q=document.activeElement&&document.activeElement.dataset&&document.activeElement.dataset.rxq!==undefined,
   w=el.querySelector&&el.querySelector('[data-rxwall]'),top=w?w.scrollTop:0;

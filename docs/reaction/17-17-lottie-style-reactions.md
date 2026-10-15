@@ -1,5 +1,7 @@
 # 17. Lottie style reactions (2026-10-14)
 
+**Visible editor lifecycle (2026-10-15):** Library and Create share the selected file and saved settings. Selection redraws the current screen; thumbnails, error messages and the preview player mount inside that screen only. Hidden editors cannot capture a preview update. Changing or closing a file invalidates older preview requests and pending slider timers. Library mounts its thumbnails and player after inserting its markup. Browser acceptance on copied settings confirmed the selected tile changes across three saved files, the SVG player advances frames, and playback continues when returning from Library to Create.
+
 <sub>Part of [reaction.md](../reaction.md).</sub>
 
 **The decision (Haitham, 2026-10-14):** Reaction effects has two permanent styles, chosen by the **Style: Emoji style | Lottie style** tabs at the top of `#/reactions` (kept in the browser as `rx.style`; Emoji is the default). **Emoji style** is everything in sections 13-16, unchanged. **Lottie style** ignores the emoji bank, the glyphs and the motion presets: every Lottie file dropped in `mirsal/lottie/` (`MIRSAL_LOTTIE_DIR`; the section 16 scan, so >2 MB or non-Lottie files are skipped) is one reaction, named by its file, and **every particle is a whole instance of that Lottie** (its own playhead from its birth, never a raster).

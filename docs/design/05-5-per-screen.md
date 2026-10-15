@@ -1,5 +1,9 @@
 # 5. Per screen
 
+### Create photo/video entry points (2026-10-15)
+
+The + New menu offers From a photo, From a video and Reaction effects. From a photo asks Sticker or Emojis: Sticker uses the existing photo editor; Emojis opens the image-sheet import dialog. From a video opens the video-sheet import dialog. Both sheet paths go straight to Studio after upload. Every sheet import dialog offers Auto detect plus optional 2 × 2 and 3 × 3 choices; changing a destination batch's grid explicitly starts a separate batch. Library's Lottie selection, thumbnail players and main preview update in the visible Library container; Create uses its own visible container.
+
 <sub>Part of [design.md](../design.md).</sub>
 
 ### Home (built 2026-10-10, `home.js`, `studio.css` `.hm-*`)

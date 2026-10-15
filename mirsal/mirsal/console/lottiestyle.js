@@ -74,9 +74,10 @@ function lsEditor(){
 /* ---------- the player (lottie-web, bundled: no CDN) ---------- */
 let lsLib=null;
 LS.raw={};LS.th=[];
+const lsRoot=()=>$(typeof route_!=='undefined'&&route_==='library'?'s-library':'s-reactions');
 async function lsThumbs(){
  LS.th.forEach(a=>{try{a.destroy()}catch(e){}});LS.th=[];
- const boxes=[...(document.querySelectorAll?document.querySelectorAll('[data-lsthumb]'):[])];if(!boxes.length)return;
+ const root=lsRoot(),boxes=[...(root&&root.querySelectorAll?root.querySelectorAll('[data-lsthumb]'):[])];if(!boxes.length)return;
  const L=await lsLottie().catch(()=>null);if(!L)return;
  for(const box of boxes){const f=box.dataset.lsthumb;
   if(!LS.raw[f]){const r=await api(rxHpUrl(f));LS.raw[f]=r.ok?r.j:null}
@@ -89,12 +90,12 @@ function lsLottie(){if(window.lottie)return Promise.resolve(window.lottie);
  if(!lsLib)lsLib=new Promise((ok,no)=>{const s=document.createElement('script');s.src='/ui/vendor/lottie-5.12.2.min.js';s.onload=()=>ok(window.lottie);s.onerror=no;document.head.appendChild(s)});
  return lsLib}
 async function lsMount(){
- const box=document.querySelector&&document.querySelector('[data-lsplayer]');
+ const root=lsRoot(),box=root&&root.querySelector&&root.querySelector('[data-lsplayer]'),doc=LS.doc,n=LS.seq;
  if(LS.anim){try{LS.anim.destroy()}catch(e){}LS.anim=null}
  if(!box||!LS.doc)return;
  const L=await lsLottie().catch(()=>null);if(!L){LS.err='The Lottie player could not be loaded.';return lsEdSync()}
- if(!box.isConnected)return;
- LS.anim=L.loadAnimation({container:box,renderer:'svg',loop:true,autoplay:true,animationData:JSON.parse(JSON.stringify(LS.doc))})}
+ if(!box.isConnected||root!==lsRoot()||n!==LS.seq||doc!==LS.doc)return;
+ LS.anim=L.loadAnimation({container:box,renderer:'svg',loop:true,autoplay:true,animationData:JSON.parse(JSON.stringify(doc))})}
 
 /* ---------- server ---------- */
 async function lsLoad(){const r=await api('/api/particles/lottie-reactions');
@@ -107,12 +108,13 @@ async function lsPreview(){
  LS.err='';LS.doc=r.j;lsEdSync(true)}
 const lsSoon=()=>{clearTimeout(LS.t);LS.t=setTimeout(lsPreview,250)};
 function lsEdSync(remount){
- const ed=document.querySelector&&document.querySelector('[data-lsed]');if(!ed)return rxDraw();
+ const root=lsRoot(),ed=root&&root.querySelector&&root.querySelector('[data-lsed]');if(!ed)return rxDraw();
  const h=ed.querySelector('.rx-h small');if(h)h.textContent=`2 s · 512 × 512${LS.doc?` · ${LS.doc.layers.length} layers`:''}`;
  const e=ed.querySelector('[data-lserr]');if(e){e.className=LS.err?'fx-warn':'';e.textContent=LS.err}
  const dl=ed.querySelector('[data-act=lsdl]');if(dl)dl.disabled=!LS.doc;
  if(remount){const st=ed.querySelector('[data-lsstage]');if(st){st.innerHTML=lsStage();lsMount()}}}
 function lsOpen(file){const f=lsFile(file);if(!f)return;
+ clearTimeout(LS.t);++LS.seq;
  LS.sel=file;LS.ed={settings:{...(LS.start||{}),...(f.settings||{})},morph_targets:[...(f.morph_targets||[])]};LS.doc=null;LS.err='';rxDraw();lsPreview()}
 
 /* ---------- actions ---------- */
@@ -122,7 +124,7 @@ ACT.rxstyle=el=>{const s=el.dataset.s;RXS.tab=s==='lottie'||s==='packs'?s:'emoji
 ACT.lspick=el=>lsOpen(el.dataset.f);
 ACT.lstg=el=>{if(!LS.ed)return;const f=el.dataset.f,m=LS.ed.morph_targets.filter(x=>x!==f);if(!LS.ed.morph_targets.includes(f))m.push(f);LS.ed.morph_targets=m;rxDraw();lsPreview()};
 ACT.lsmode=el=>{if(!LS.ed)return;LS.ed.settings.morph_burst=+el.dataset.v?1:0;rxDraw();lsPreview()};
-ACT.lsclose=()=>{LS.sel='';LS.ed=null;LS.doc=null;if(LS.anim){try{LS.anim.destroy()}catch(e){}LS.anim=null}rxDraw()};
+ACT.lsclose=()=>{clearTimeout(LS.t);++LS.seq;LS.sel='';LS.ed=null;LS.doc=null;if(LS.anim){try{LS.anim.destroy()}catch(e){}LS.anim=null}rxDraw()};
 ACT.lspreset=el=>{if(!LS.ed)return;const pr=(LS.presets||{})[el.dataset.p];if(!pr)return;LS.ed.settings={...(LS.start||{}),...pr,seed:LS.ed.settings.seed};rxDraw();lsPreview()};
 ACT.lsseed=()=>{if(!LS.ed)return;LS.ed.settings.seed=1+Math.floor(Math.random()*99999);rxDraw();lsPreview()};
 document.addEventListener('toggle',ev=>{const d=ev.target;if(!d||!d.dataset||d.dataset.lsg===undefined)return;

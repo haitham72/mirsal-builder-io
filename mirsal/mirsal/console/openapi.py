@@ -368,7 +368,7 @@ def build(server_url: str = "http://127.0.0.1:8770") -> dict:
         params = _params(path)
         if path == "/api/import":
             op["requestBody"] = {"required": True, "content": {"application/octet-stream": {"schema": {"type": "string", "format": "binary"}}}}
-            params += [{"name": name, "in": "query", "required": False, "schema": BOOL if name in ("retry", "as_new", "again", "grid_ok") else STR} for name in ("name", "prompt", "generation", "sheet", "retry", "job", "as_new", "batch", "again", "grid_ok")]
+            params += [{"name": name, "in": "query", "required": False, "schema": BOOL if name in ("retry", "as_new", "again", "grid_ok") else STR} for name in ("name", "prompt", "generation", "sheet", "retry", "job", "as_new", "batch", "again", "grid_ok", "grid")]
             op["responses"]["200"] = {"description": "duplicate", "content": {"application/json": {"schema": OBJ}}}
         if path == "/api/higgsfield/import":
             op["responses"]["200"] = {"description": "duplicate", "content": {"application/json": {"schema": OBJ}}}

@@ -1,5 +1,7 @@
 # Remaining work
 
+Lottie selection/playback browser acceptance completed 2026-10-15 on saved settings copied to temporary storage: active file highlight, advancing SVG player and Library → Create return all verified. Create photo/video sheet paths also browser checked, including automatic 2×2 and manual video grid. The remaining wider acceptance below is still pending.
+
 1. **Slider integration committed** (57c8850b: scheduling/Reset/error fixes + tile_sliders.test.js). Adjust toggle built (699a49a1: tiles compact, `ACT.vslopen`, aria-expanded; toggle covered in tile_sliders). 409-busy retry built (825f4dcc: `postBusy`, 12×1s, slider/frame-editor sends survive a running cut; same fix ported to main as cdeae419).
 2. **Complete native slider acceptance.** The full video-sheet/imported3×3 × desktop/phone × dark/light sweep still times out waiting for a response. Root cause class fixed in code (quick second edits now wait out the lock instead of erroring); verify drag/readout, pending values through redraw, one cut after release, untouched release0POST and Reset with one re-cut. Respect async writer-lock behavior (a full-batch reslice past ~12 s still answers busy — by design). Keep the frame editor intact.
 3. **Record and publish.** Update area/design docs, implementation log and journey status with actual evidence; commit explicit paths, push, restart only the localhost8796 server, and give Haitham its revision/address. No runtime data/media commits or main merge. (Done for sliders/tabs/busy-retry/stale-tests; docs carry each.)

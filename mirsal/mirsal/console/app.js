@@ -310,7 +310,7 @@ function drawCtabs() {
   }
   const tab = (k, i, l) => `<button role=tab aria-selected=${route_ === k} data-act=nav data-to=${k}>${ic(i)}${l}</button>`;
   el.innerHTML = `<div class=ct-tabs role=tablist aria-label=Create>${tab('agent', 'chat', 'Chat')}${tab('generate', 'gen', 'Studio')}</div>
-  <details class=ct-new><summary class="btn sm">${ic('plus')} New</summary><div class=ct-menu role=menu><button role=menuitem data-act=nav data-to=create class="${route_ === 'create' ? 'on' : ''}">${ic('photo')} From a photo</button><button role=menuitem data-act=nav data-to=reactions class="${route_ === 'reactions' ? 'on' : ''}">${ic('fx')} Reaction effects</button></div></details>
+  <details class=ct-new><summary class="btn sm">${ic('plus')} New</summary><div class=ct-menu role=menu><button role=menuitem data-act=newphoto class="${route_ === 'create' ? 'on' : ''}">${ic('photo')} From a photo</button><button role=menuitem data-act=newvideo>${ic('film')} From a video</button><button role=menuitem data-act=nav data-to=reactions class="${route_ === 'reactions' ? 'on' : ''}">${ic('fx')} Reaction effects</button></div></details>
   ${route_ === 'create' || route_ === 'effects' || route_ === 'reactions' ? `<span class=ct-here>${route_ === 'create' ? 'From a photo' : route_ === 'effects' ? 'Particle effects' : 'Reaction effects'}</span>` : ''}`;
 }
 

@@ -1,5 +1,13 @@
 # HANDOFF — 2026-10-15 (final; pushed and clean)
 
+## Latest user fixes (2026-10-15)
+
+- Lottie selection redraws the active screen; the player and thumbnails mount within that screen. Browser verified saved-file switching and advancing playback in Library and Create, including returning to Create.
+- Create > + New > From a photo asks Sticker / Emojis; Sticker keeps the cutout/editor, Emojis imports an image sheet into Studio. From a video imports a video sheet into Studio.
+- All sheet import dialogs offer Auto detect / 2×2 / 3×3. Manual grids override detection; a different destination grid starts a separate batch. In-batch video mismatches can also start a batch using the detected grid. Duplicate dialogs stay.
+- Focused imports pass (automatic/manual image grid, separate batch preservation, standalone video, existing in-batch image/video). Node suite passes (389 checks). Broader Python console checks have one existing stale assertion for removed `data-act=rxedit`; do not describe that suite as green.
+- Browser imports on temporary storage finished READY: automatic 2×2 image and a 3×3 video manually cut as 2×2. User server: http://127.0.0.1:8796/.
+
 ## Branch map
 
 ```

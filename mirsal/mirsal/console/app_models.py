@@ -26,6 +26,7 @@ class ChatDoneEvent(BaseModel):
 
 class ImportOptions(BaseModel):
     model_config = ConfigDict(extra="forbid")
+    grid: Literal["2x2", "3x3"] | None = None
     name: str = Field(default="import.png", max_length=200)
     prompt: str = Field(default="", max_length=2000)
     generation: str | int | None = None

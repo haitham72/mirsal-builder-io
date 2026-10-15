@@ -1804,7 +1804,7 @@ def make_handler(c: Console):
 
         def _import_bytes(self, name: str, data: bytes, q: dict, job_id: str | None = None):
             from ..flow import imports as im
-            options = {k: q[k][0] for k in ("prompt", "generation", "sheet", "job", "batch") if q.get(k)}
+            options = {k: q[k][0] for k in ("prompt", "generation", "sheet", "job", "batch", "grid") if q.get(k)}
             options["retry"] = q.get("retry", ["false"])[0].lower() in ("1", "true")
             options["as_new"] = q.get("as_new", ["false"])[0].lower() in ("1", "true")
             options["grid_ok"] = q.get("grid_ok", ["false"])[0].lower() in ("1", "true")
