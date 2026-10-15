@@ -1111,3 +1111,44 @@ button.gst{cursor:pointer}button.gst:hover:not(:disabled){background:#ffffff99;c
 /* the frame editor (studio-core.js vzCard): one frame, the guide grid and the hot spot drawn over it, drag to move */
 .vzstage{touch-action:none;cursor:grab}.vzstage:active{cursor:grabbing}.vzguide{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.vzguide .g1{stroke:var(--pri);stroke-opacity:.35;fill:none;stroke-width:1.5}.vzguide .g2{stroke:var(--pri);stroke-width:2;fill:none}.vzguide .g3{stroke:var(--mut);stroke-opacity:.5;stroke-dasharray:4 4;fill:none}.vzguide .g4{stroke:var(--pri);stroke-width:2;stroke-dasharray:8 6;fill:none}
 .vzframe{display:flex;align-items:center;gap:8px;margin:8px 2px 0}.vzframe input{flex:1}.vzctl{display:flex;flex-wrap:wrap;gap:6px 10px;margin:8px 2px 0}.vsize label{display:inline-flex;align-items:center;gap:4px}
+
+/* Redesign foundations: semantic roles retain legacy aliases for incremental migration. */
+:root{
+ --space-half:4px;--space-1:8px;--space-2:16px;--space-3:24px;--space-4:32px;--space-5:40px;--space-6:48px;
+ --type-large-title:28px;--type-title:22px;--type-headline:17px;--type-body:15px;--type-footnote:12px;
+ --fs-xs:var(--type-footnote);--fs-s:var(--type-footnote);--fs-m:var(--type-body);--fs-l:var(--type-headline);--fs-xl:var(--type-title);--fs-2xl:var(--type-large-title);
+ --control-min:44px;--r-s:8px;--r-m:12px;--r:16px;--r-l:24px;--gutter:var(--space-3);
+ --elevation-card:var(--sh);--elevation-sheet:0 16px 48px #0f172a26;--focus-ring:var(--pri-d);
+ --motion-fast:150ms;--motion-base:200ms;--motion-slow:250ms;--motion-ease:cubic-bezier(.2,.7,.2,1);
+ --status-positive-ink:#166534;--status-positive-bg:#f0fdf4;--status-warning-ink:#854d0e;--status-warning-bg:#fefce8;
+ --status-negative-ink:#991b1b;--status-negative-bg:#fef2f2;--status-info-ink:#1e40af;--status-info-bg:#eff6ff;
+}
+body{font-size:var(--type-body)}
+:where(button,[role=button],a.btn,summary,select,input[type=range],input[type=number],input[type=text],input[type=search]){min-height:var(--control-min);min-width:var(--control-min)}
+:where(button,[role=button],a.btn,summary):focus-visible{outline:2px solid var(--focus-ring);outline-offset:3px}
+:where(button,[role=button],a.btn){touch-action:manipulation}
+label:has(>input[type=checkbox]),label:has(>input[type=radio]){display:inline-flex;align-items:center;gap:var(--space-1);min-height:var(--control-min);min-width:var(--control-min);cursor:pointer}
+:where(button,.btn,.tab,.iconbtn,.cp-chip,.rbtn){transition-duration:var(--motion-base);transition-timing-function:var(--motion-ease)}
+.btn,.btn.sm{min-height:var(--control-min);padding:var(--space-1) var(--space-2)}
+.gseg button,.seg button,.tabs button,.rx-x,.rx-vsel,.rx-h .link,.rx-gh .link,.iconbtn{min-height:var(--control-min);min-width:var(--control-min)}
+.gseg{max-width:100%;flex-wrap:wrap;gap:var(--space-half)}
+.tabs{flex-wrap:wrap;row-gap:var(--space-half)}
+.cell .hov{flex-wrap:wrap;justify-content:center;gap:var(--space-half);max-width:100%}
+.test-card{max-height:calc(100dvh - var(--space-3));overflow:auto;overscroll-behavior:contain;box-shadow:var(--elevation-sheet)}
+.test-card .egcbtn{gap:var(--space-1)}
+.test-card .egcbtn .btn{flex:1;justify-content:center}
+.test-card .vzctl{display:flex;flex-wrap:wrap;gap:var(--space-1)}
+.test-card .vsize{flex-wrap:wrap;gap:var(--space-half)}
+.test-card .vzframe{display:flex;align-items:center;gap:var(--space-1)}
+.test-card .vzframe input{min-width:0;flex:1}
+:where(.card,.fx-card,.rx-mrow,.rx-ed,.su-conv){border-radius:var(--r);background:var(--sf)}
+@media(max-width:760px){
+ :root{--gutter:var(--space-2)}
+ .screen{padding:var(--space-2)}
+ #egcard.test-card,#vzcard.test-card{left:12px!important;right:12px;bottom:12px;top:auto!important;width:auto!important;max-height:calc(100dvh - 24px);border-radius:var(--r-l)}
+ .test-card .egcimg{max-height:40dvh;aspect-ratio:1;min-height:0}
+ .test-card .egcimg img{max-height:40dvh}
+ .vsize,.row{flex-wrap:wrap}
+ .rx-vars{scroll-snap-type:x proximity}.rx-var{scroll-snap-align:start}
+}
+@media(prefers-reduced-motion:reduce){:root{--motion-fast:0ms;--motion-base:0ms;--motion-slow:0ms}}

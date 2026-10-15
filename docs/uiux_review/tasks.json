@@ -1322,7 +1322,9 @@
       "risk": "medium",
       "trace": "CT-068",
       "review_status": "revise_scope_before_implementation",
-      "finding_status": "changed"
+      "finding_status": "changed",
+      "status": "implemented_pending_cross_journey_acceptance",
+      "implementation": "Semantic foundation tokens, shared control target floors and responsive preview sheets."
     },
     {
       "id": "T-057",
@@ -1533,7 +1535,9 @@
       "size": 180,
       "trace": "UX-02",
       "review_status": "revise_scope_before_implementation",
-      "finding_status": "changed"
+      "finding_status": "changed",
+      "status": "implemented_pending_cross_journey_acceptance",
+      "implementation": "Semantic foundation tokens, shared control target floors and responsive preview sheets."
     },
     {
       "id": "T-067",

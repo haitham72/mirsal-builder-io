@@ -231,3 +231,6 @@ html[data-theme=dark] .su-st.awaiting_admin,html[data-theme=dark] .su-st.open,ht
 html[data-theme=dark] .su-st.resolved,html[data-theme=dark] .su-st.fixed,html[data-theme=dark] .su-st.published{color:#6ee7b7}
 /* ---------- responsive leftovers (same rules, dark values) ---------- */
 @media (prefers-reduced-motion:reduce){html[data-theme=dark] .cp-halo{animation:none}}
+
+/* Semantic status pairs; diagnostic issue colours remain unchanged. */
+html[data-theme=dark]{--elevation-sheet:0 16px 48px #0009;--focus-ring:#67e8f9;--status-positive-ink:#86efac;--status-positive-bg:#102e21;--status-warning-ink:#fde68a;--status-warning-bg:#35280f;--status-negative-ink:#fca5a5;--status-negative-bg:#381b20;--status-info-ink:#bfdbfe;--status-info-bg:#142b48}
