@@ -50,6 +50,10 @@ Clicking a sticker's size opens the **frame editor** on that one thumbnail, a ca
 - Stored per sticker as `anim_offset: [dx, dy]` (a share of the canvas) beside the existing `anim_scale`. It is applied by shifting the render window at slice time, so it costs nothing extra and needs no new video. The engine stays deterministic, and both values go into the animation cache key.
 - Apply cuts this sticker's clip once (free, from the stored video).
 
+### Inline sliders under every animated tile (built 2026-10-15; Haitham: "each animated emoji -> add position x,y sliders and resize slider under every one")
+
+Under every animated tile (`vsizeRow`, `studio-core.js`), three sliders for that sticker: **Size** 50–150%, **X** and **Y** −50%…+50% of the canvas. The readout moves on input (kept across poll redraws, so a drag is never reset mid-drag); one `POST /api/generations/{id}/position` (`{index, offset, scale, reslice}`, the existing route — rule 6: no new backend) goes out 500 ms after the release, so a drag cuts the clip once, free. An untouched release sends nothing. **Reset** (shown when the sticker has its own values) clears both through `/position` (`offset: null`) + `/video_size` (`scale: null`) with a single re-cut. The frame-editor button stays beside them: guide grid, frame scrubber and Centre live only there.
+
 ## D. Lottie style: settings modelled on Trapcode Particular
 
 Today's sliders: Motion (Speed, Speed variation, Speed pulse, Pulse rate, Gravity, Swirl, Spread, Amount), Spin (Rotation, Flip, Flip variation), Shape (Size, Size variation, Size in/out), Fade out (start, duration, variation), Morph, Children. They are one flat list, and every particle is born at once from one point.
