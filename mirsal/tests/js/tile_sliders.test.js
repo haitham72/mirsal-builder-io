@@ -14,6 +14,7 @@ function setup(){
 }
 test('a changed release sends once after 500ms; untouched release does not write',async()=>{
  const h=setup();h.release();await h.flush();assert.equal(h.writes.length,0);h.input(110);assert.equal(h.writes.length,0);assert.match(h.readout.textContent,/110%/);
+ h.run(`ACT.vslopen({dataset:{g:'7',i:'1'}})`);
  assert.match(h.run('vsizeRow(GM.get(7),GM.get(7).stickers[0])'),/value=110/,'pending values survive a redraw');h.release();assert.equal([...h.timers.values()][0].ms,500);await h.flush();assert.deepEqual(h.writes,[['/api/generations/7/position',{index:1,offset:null,scale:1.1,reslice:true}]]);
 });
 test('a second released value is retained while the first request is in flight',async()=>{
@@ -31,4 +32,14 @@ test('a network failure releases the busy guard so the next edit can be sent',as
 test('a newer unreleased drag is not applied by a queued earlier release',async()=>{
  const h=setup();let resolve;h.reply(()=>new Promise(r=>resolve=r));h.input(110);h.release();const first=h.fire();h.input(120);h.release();await h.fire();h.input(130);
  h.reply(async()=>({ok:true,j:{}}));resolve({ok:true,j:{}});await first;await h.flush();assert.deepEqual(h.writes.map(x=>x[1].scale),[1.1,1.2]);assert.equal(h.run('vslPend["7:1"].scale'),1.3);h.release();await h.flush();assert.deepEqual(h.writes.map(x=>x[1].scale),[1.1,1.2,1.3]);
+});
+test('sliders hide behind Adjust per sticker; toggling reveals them',()=>{
+ const h=setup(),tile=()=>h.run('vsizeRow(GM.get(7),GM.get(7).stickers[0])');
+ assert.doesNotMatch(tile(),/data-k=scale/,'compact by default');
+ assert.match(tile(),/data-act=vslopen/);
+ h.run(`ACT.vslopen({dataset:{g:'7',i:'1'}})`);
+ assert.match(tile(),/data-k=scale/,'revealed');
+ assert.match(tile(),/aria-expanded=true/);
+ h.run(`ACT.vslopen({dataset:{g:'7',i:'1'}})`);
+ assert.doesNotMatch(tile(),/data-k=scale/,'hidden again');
 });

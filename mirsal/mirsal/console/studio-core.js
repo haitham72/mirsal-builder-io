@@ -786,20 +786,23 @@ function motionRow(g) {
 }
 /* under each animated tile: Size, X and Y sliders for that sticker (Haitham: position X/Y + resize under every animated emoji).
    The readout moves on input; one POST /position goes out after the release (debounced), so a drag cuts the clip once, free.
-   The frame-editor button stays: grid, frame scrubber and Centre live only there. */
-const vslPend = {}, vslT = {}, vslBusy = new Set();
+   The frame-editor button stays: grid, frame scrubber and Centre live only there.
+   Tiles stay compact: the sliders hide behind an Adjust toggle per sticker (Haitham, 2026-10-15). */
+const vslPend = {}, vslT = {}, vslBusy = new Set(), vslOpen = new Set();
 const fmtOff = (v) => `${v > 0 ? '+' : ''}${Math.round(v * 100)}%`;
 function vsizeRow(g, t) {
   const own = t.anim_scale != null || !!t.anim_offset;
-  const key = `${g.number}:${t.index}`, pend = vslPend[key];
+  const key = `${g.number}:${t.index}`, pend = vslPend[key], open = vslOpen.has(key);
   const o = pend ? [pend.dx, pend.dy] : stOff(t), f = pend ? pend.scale : stScale(g, t);
-  return `<div class=vsize><button class="btn sm" data-act=vzedit data-g=${g.number} data-i=${t.index} title="Size and position of this sticker, tried on one frame">${pct(f)}${t.anim_offset ? ' · moved' : ''}${own ? '' : ' · batch'}</button>${own ? `<button class="btn sm" data-act=vslreset data-g=${g.number} data-i=${t.index} title="Back to the batch's size and position">Reset</button>` : ''}</div>
+  return `<div class=vsize><button class="btn sm" data-act=vzedit data-g=${g.number} data-i=${t.index} title="Size and position of this sticker, tried on one frame">${pct(f)}${t.anim_offset ? ' · moved' : ''}${own ? '' : ' · batch'}</button><button class="btn sm" data-act=vslopen data-g=${g.number} data-i=${t.index} aria-expanded=${open} title="Show this sticker's Size, X and Y sliders">Adjust</button>${own ? `<button class="btn sm" data-act=vslreset data-g=${g.number} data-i=${t.index} title="Back to the batch's size and position">Reset</button>` : ''}</div>`+
+  (open ? `
   <div class=vsl data-g=${g.number} data-i=${t.index}>
    <label class=vsize><span class=mut>Size</span><input type=range min=50 max=150 step=5 value=${Math.round(f * 100)} data-k=scale aria-label="Size of this sticker in percent"><b>${pct(f)}</b></label>
    <label class=vsize><span class=mut>X</span><input type=range min=-50 max=50 step=1 value=${Math.round(o[0] * 100)} data-k=dx aria-label="Move this sticker left and right"><b>${fmtOff(o[0])}</b></label>
    <label class=vsize><span class=mut>Y</span><input type=range min=-50 max=50 step=1 value=${Math.round(o[1] * 100)} data-k=dy aria-label="Move this sticker up and down"><b>${fmtOff(o[1])}</b></label>
-  </div>`;
+  </div>` : '');
 }
+ACT.vslopen = (el) => { const key = `${+el.dataset.g}:${+el.dataset.i}`; if (vslOpen.has(key)) vslOpen.delete(key); else vslOpen.add(key); glast = ''; tick(true); };
 
 function vzTarget(g) {
   const ok = (i) => { const t = g.stickers[i - 1]; return !!(t && t.anim_status === 'READY'); };
