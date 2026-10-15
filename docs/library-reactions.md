@@ -25,4 +25,3 @@ One tab state, three views, no new route or engine function. Emoji Style and Lot
 ## Open
 
 - Browser acceptance (own server, copied `out/`, providers off): make a Lottie in Reaction effects → open Library › Reactions → the card is there with its preview → Download works; both links; dark/light; ≤760 px.
-- Known pre-existing failure nearby, not caused by this work: `tests/js/lottiestyle.test.js` "the grid lists every dropped file…" expects the old `<b>Motion` group; the screen has the Particular groups since the Lottie-style build. It waits with the other stale js tests for the redesign branch.

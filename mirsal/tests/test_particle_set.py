@@ -114,7 +114,7 @@ class ParticleCutTests(Scratch):
         self.assertNotIn("sheet_size", ids)
         self.assertEqual([s["status"] for s in res["stickers"]], ["READY"] * 4)
         self.assertEqual([s["metrics"]["cell"] for s in res["stickers"]], [list(r) for r in equal_2x2(1200)])
-        self.assertTrue(all(s["png"] and (self.out / f"G{gid:03d}" / s["png"]).is_file() for s in res["stickers"]))
+        self.assertTrue(all(s["png"] and (pl.gen_dir(self.out, gid) / s["png"]).is_file() for s in res["stickers"]))
 
     def test_a_small_sheet_is_not_a_layout_problem_either(self):
         res = pl.read_result(self.out, new_batch(self.out, self.inp, blobs(800, [(100, 100), (500, 100), (100, 500), (500, 500)], r=40), kind="particles"))
@@ -165,9 +165,10 @@ class ParticleCutTests(Scratch):
         self.assertNotIn("kind", plain, "a sticker batch is written exactly as before")
         self.assertNotIn("inset_px", plain["source"]["grid"])
         gid = new_batch(self.out, self.inp, sheet, kind="particles")
-        item = next(i for i in pl.history(self.out)["items"] if i["id"] == gid)
+        batches = [b for pack in pl.history(self.out)["items"] for b in pack["batches"]]
+        item = next(b for b in batches if b["id"] == gid)
         self.assertEqual(item["kind"], "particles")
-        self.assertNotIn("kind", next(i for i in pl.history(self.out)["items"] if i["id"] != gid))
+        self.assertNotIn("kind", next(b for b in batches if b["id"] != gid))
         with self.assertRaises(pl.PipelineError):
             new_batch(self.out, self.inp, sheet, kind="stickers")
 

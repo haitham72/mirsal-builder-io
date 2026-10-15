@@ -23,9 +23,9 @@ test('the grid lists every dropped file by name; a click opens the editor on the
   assert.match(h, /title="Star · 512×512 · 30 fps · 45 frames"><span class=ls-th data-lsthumb="Star.json" aria-hidden=true><\/span><b>Star<\/b><small class=mut>1.5 s · saved<\/small>/);
   r("LS.sel='Star.json';LS.ed={settings:{...LS.start,...LS.files[1].settings},morph_targets:[]}");
   h = r('lsEditor()');
-  for (const g of ['Motion', 'Spin', 'Shape', 'Fade out', 'Morph', 'Children']) assert.match(h, new RegExp(`<b>${g}`));
-  for (const k of ['speed_var', 'speed_pulse', 'flip', 'fade_dur', 'morph_at', 'children', 'child_size', 'child_size_var']) assert.match(h, new RegExp(`data-lso=${k}`));
-  assert.match(h, /data-lso=count aria-label="Amount"><output>10<\/output>/, 'the saved value, not the start');
+ for (const g of ['Emitter', 'Particle', 'Physics', 'Morph', 'Aux system']) assert.match(h, new RegExp(`<b>${g}`));
+ for (const k of ['emitter', 'lifetime', 'gravity', 'morph_at', 'aux_at', 'children']) assert.match(h, new RegExp(`data-lso=${k}`));
+ assert.match(h, /data-lso=count aria-label="Particles"><output>10<\/output>/, 'the saved value, not the start');
   assert.match(h, /data-act=lstg data-f="Sad Emoji.json"/, 'the other files are the morph targets, as thumbnail tiles');
   assert.doesNotMatch(h, /data-act=lstg data-f="Star.json"/, 'never itself');
   assert.match(h, /data-act=lsmode data-v=0[^>]*>Turns into \(1:1\)/);

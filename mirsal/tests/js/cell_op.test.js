@@ -103,7 +103,7 @@ test('taking an animation permission back keeps its finished clip dimmed with th
   const g = G([]);
   const html = h.tileHtml(g, T(4, { anim_status: 'FAILED', anim_reason: 'loop_seam', webm: 'slices/S4.webm', review: { still: 'APPROVED', anim: 'BLOCKED' } }), 'anim');
   assert.match(html, /class="gt [^"]*nx[^"]*"/, 'the existing .gt.nx rule dims the clip');
-  assert.match(html, /<video src="\/out\/G007\/slices\/S4\.webm"/, 'the picture never disappears while the clip is still on disk');
+  assert.match(html, /<video src="\/out\/G007\/slices\/S4\.webm\?v=\d+"/, 'the picture never disappears while the clip is still on disk');
   assert.match(html, /class=gblockover>[\s\S]*the loop does not close/, 'the reason is laid over the clip');
   assert.match(html, /Use it anyway/);
   assert.match(html, /data-act=gcell data-g=7 data-i=4 data-stage=anim/, 'the overlay uses the one cell decision handler');

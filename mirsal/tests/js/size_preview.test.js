@@ -1,25 +1,33 @@
 const {readConsoleFile,statement:consoleStatement}=require('./console_source');
-// F-01 (T-001): Keep approved size is a staged preview until Apply. Only one
-// ACT.gkeepsize definition may exist: the staged one that flips VZ.keep and
-// re-cuts on the fly (vzPreview), with no keep_size/video_size POST. Apply
-// (ACT.vzapply) sends the stored change once; Cancel (ACT.vzcancel) sends none.
+// Motion size (Resize box + frame editor, built 2026-10-15; T-001 Keep approved size
+// is retired): the Resize toggle and the Size stepper stage into a one-frame test
+// preview (vzPreview, GET anim_preview); Apply sends the stored change once;
+// Cancel sends nothing. Run: node --test tests/js
 const test=require('node:test'),assert=require('node:assert/strict'),path=require('node:path');
 const src=readConsoleFile(path.join(__dirname,'../../mirsal/console/studio-core.js'),'utf8');
 function statement(marker){return consoleStatement(src,marker);}
 
-test('exactly one Keep approved size handler exists, and it stages instead of storing',()=>{
-  const defs=src.match(/ACT\.gkeepsize\s*=/g)||[];
-  assert.equal(defs.length,1,'the late immediate POST assignment is gone; the staged one stays');
-  const h=statement('ACT.gkeepsize=');
-  assert.match(h,/VZ\.keep\s*=\s*!vzKeep\(g\)/,'click flips the staged keep flag');
-  assert.match(h,/vzPreview\(\)/,'click re-cuts the one test sticker on the fly');
-  assert.doesNotMatch(h,/post\s*\(/,'no stored POST before Apply (reading g.keep_size to compare is fine)');
+test('the Resize toggle stages into the one-frame preview, never a stored POST',()=>{
+  const h=statement('ACT.gresize=');
+  assert.match(h,/VZ\.resize\s*=/,'click flips the staged resize flag');
+  assert.match(h,/vzPreview\(\)/,'click re-cuts the one test frame on the fly');
+  assert.doesNotMatch(h,/post\s*\(/,'no stored POST before Apply');
 });
 
-test('Apply sends the staged change once; Cancel sends nothing',()=>{
+test('the batch Size stepper stages too; Apply sends video_size once',()=>{
+  const size=statement('ACT.gvsize=');
+  assert.match(size,/VZ\.scale\s*=/,'click stages the scale');
+  assert.doesNotMatch(size,/post\s*\(/,'no stored POST before Apply');
   const apply=statement('ACT.vzapply=');
-  assert.match(apply,/vzSend\(g,/,'Apply goes through the single send path');
+  assert.match(apply,/\/video_size/,'Apply stores the batch size');
+});
+
+test('the sticker editor Applies one position POST with offset and scale; Cancel sends nothing',()=>{
+  const apply=statement('ACT.vzapply=');
+  assert.match(apply,/\/position/,'Apply stores position');
+  assert.match(apply,/offset/,'with the offset');
+  assert.match(apply,/scale/,'with the scale');
   const cancel=statement('ACT.vzcancel=');
   assert.match(cancel,/vzClear\(\)/,'Cancel drops the staged preview');
-  assert.doesNotMatch(cancel,/post\(/,'Cancel makes zero mutation calls');
+  assert.doesNotMatch(cancel,/post\s*\(/,'Cancel makes zero mutation calls');
 });
