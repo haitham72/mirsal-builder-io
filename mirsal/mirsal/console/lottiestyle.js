@@ -116,7 +116,9 @@ function lsOpen(file){const f=lsFile(file);if(!f)return;
  LS.sel=file;LS.ed={settings:{...(LS.start||{}),...(f.settings||{})},morph_targets:[...(f.morph_targets||[])]};LS.doc=null;LS.err='';rxDraw();lsPreview()}
 
 /* ---------- actions ---------- */
-ACT.rxstyle=el=>{const s=el.dataset.s;RXS.tab=s==='lottie'||s==='packs'?s:'emoji';try{localStorage.setItem('rx.tab',RXS.tab)}catch(e){}RENDER.reactions()};
+ACT.rxstyle=el=>{const s=el.dataset.s;RXS.tab=s==='lottie'||s==='packs'?s:'emoji';try{localStorage.setItem('rx.tab',RXS.tab)}catch(e){}
+ if(typeof route_!=='undefined'&&route_==='library'){if(typeof spLibRefresh==='function')spLibRefresh();}
+ else if(typeof RENDER!=='undefined'&&RENDER.reactions)RENDER.reactions();};
 ACT.lspick=el=>lsOpen(el.dataset.f);
 ACT.lstg=el=>{if(!LS.ed)return;const f=el.dataset.f,m=LS.ed.morph_targets.filter(x=>x!==f);if(!LS.ed.morph_targets.includes(f))m.push(f);LS.ed.morph_targets=m;rxDraw();lsPreview()};
 ACT.lsmode=el=>{if(!LS.ed)return;LS.ed.settings.morph_burst=+el.dataset.v?1:0;rxDraw();lsPreview()};

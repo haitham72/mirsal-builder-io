@@ -191,15 +191,26 @@ function spSetDetail(s){const d=SPL.detail[s.id],full=d&&d.id===s.id?d:s,cells=f
   ${spBurstHtml(full)}
  </div>`}
 function spLibHtml(){const sets=SPL.sets;
- spMadeSync();
- if(!sets)return `<div class=pk-pt-load><div class=spin></div><span class=mut>Reading the particle sets…</span></div>${spMadeHtml()}`;
+ spMadeSync();spRxTabSync();
+ const tabs=spRxTabs(),tab=spRxTab();
+ if(tab!=='packs')return tabs+(tab==='lottie'
+  ?(typeof lsHtml==='function'?lsHtml():'')
+  :(typeof RXS!=='undefined'&&RXS.bank?`${rxLibHtml()}${rxEditor()}${rxPick()}${rxHpHtml()}`:`<div class=fx-job><span class=spin></span> <span class=mut>Reading the emoji bank…</span></div>`));
+ if(!sets)return `${tabs}<div class=pk-pt-load><div class=spin></div><span class=mut>Reading the particle sets…</span></div>${spMadeHtml()}`;
  const del=SPL.deleted?`<div class=ps-del><span>Deleted ${esc(SPL.deleted.name)}: it is in the trash, nothing is destroyed.</span><button class="btn sm" data-act=psrestore data-id=${esc(SPL.deleted.id)}>Restore</button></div>`:'',trash=spTrashHtml(SPL.trash);
  const create=SPL.view==='choose'?spCreateChooseHtml():SPL.view==='bank'?(SPL.bank?`<div data-rosbank>${spBankHtml()}</div>`:`<div class=fx-job><span class=spin></span> <span class=mut>Reading the bank…</span></div>`):SPL.view==='build'?spBuildHtml():SPL.view==='stickers'?spScopePicker('rosscope'):'';
  const list=sets.length?`<div class=ps-lib>${sets.map(spSetCard).join('')}</div>`:'';
  const made=SPL.made||[];
  const empty=!sets.length&&!SPL.view&&!made.length?`${del}<div class="card" style="text-align:center;padding:40px"><h2>No reaction sets yet</h2><p class=mut>Create one from the bank or from your stickers.</p><button class="btn pri" data-act=roscreate>${ic('fx')} Create</button></div>${trash}`:'';
- if(empty)return empty+spMadeHtml();
- return `${del}${spLibHead()}${create}${list}${spMadeHtml()}${trash}`}
+ if(empty)return tabs+empty+spMadeHtml();
+ return `${tabs}${del}${spLibHead()}${create}${list}${spMadeHtml()}${trash}`}
+/* the style tabs inside Library Reactions: the same switch as #/reactions (kept in rx.tab, so both screens always agree).
+   Emoji/Lottie views reuse the #/reactions renderers; their loaders refresh through spLibRefresh, which redraws this tab too. */
+function spRxTab(){return (typeof rxTab==='function')?rxTab():'packs';}
+function spRxTabs(){return (typeof rxStyleBar==='function')?rxStyleBar():'';}
+async function spRxTabSync(){const t=spRxTab();if(t==='packs')return;
+ if(t==='lottie'){if(typeof lsLoad==='function'&&typeof LS!=='undefined'&&!LS.files){await lsLoad();spLibRefresh();}return;}
+ if(typeof rxBankEnsure==='function'&&typeof RXS!=='undefined'&&(!RXS.bank||!RXS.lib)){await rxBankEnsure();spLibRefresh();}}
 /* reactions made in Reaction effects (#/reactions): the created Lottie of each emoji, read-only here (GET /api/particles/emoji-lottie).
    Before this bridge they were visible nowhere else, which is why the two screens looked disconnected. */
 async function spMadeSync(force){if(SPL.madeBusy||(SPL.made&&!force))return;SPL.madeBusy=true;
@@ -272,7 +283,8 @@ ACT.rosapproveall=async el=>{el.disabled=true;
  for(const b of [...(SPL.build||[])].filter(x=>x.status==='ready')){await rosApproveItem(b);spLibRefresh()}
  el.disabled=false;SPL.bank=null;spBankSync();spLibSync(true);if(!(SPL.build||[]).length)SPL.view=null;spLibRefresh()};
 function spLibRefresh(){if(SP.set&&!SP.eid&&SP.alive())spDraw();if(typeof route_!=='undefined'&&route_==='library'&&typeof LIBTAB!=='undefined'&&LIBTAB==='particles'&&typeof RENDER!=='undefined'&&RENDER.library)RENDER.library();
- if(typeof route_!=='undefined'&&route_==='pack'&&typeof drawPack==='function')drawPack()}
+ if(typeof route_!=='undefined'&&route_==='pack'&&typeof drawPack==='function')drawPack();
+ if(typeof route_!=='undefined'&&route_==='reactions'&&typeof RENDER!=='undefined'&&RENDER.reactions)RENDER.reactions();}
 async function spLibSync(force){if(SPL.busy||(SPL.sets&&!force))return;SPL.busy=true;
  try{const r=await api('/api/particles');if(r.ok){SPL.sets=r.j.sets||[];
    for(const s of SPL.sets){const d=SPL.detail[s.id];if(d&&d.n_cells!==s.n_cells)delete SPL.detail[s.id]}          // cells arrived since the card was opened: it is read again

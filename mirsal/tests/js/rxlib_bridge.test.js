@@ -42,3 +42,25 @@ test('Emoji and Lottie views render as before', () => {
   r("RXS.tab='lottie';LS.files=null");
   assert.match(r('rxHtml()'), /Reading mirsal\/lottie/, 'the Lottie files');
 });
+
+test('Library Reactions shows the same three tabs', () => {
+  const r = screen();
+  r("SPL.sets=[];SPL.made=[];RXS.tab='emoji';RXS.bank=[];RXS.lib={presets:[],assign:{},handpicked:{}}");
+  let h = r('spLibHtml()');
+  assert.match(h, /data-act=rxstyle data-s=packs/, 'the switch is there');
+  assert.match(h, /Animation presets/, 'showing the Emoji style view');
+  assert.doesNotMatch(h, /No reaction sets yet/, 'not the dumped list');
+  r("RXS.tab='lottie';LS.files=null");
+  h = r('spLibHtml()');
+  assert.match(h, /data-s=lottie[^>]*aria-selected=true/, 'the Lottie tab is on');
+  assert.match(h, /Reading mirsal\/lottie/, 'with its files');
+  r("RXS.tab='packs'");
+  assert.match(r('spLibHtml()'), /No reaction sets yet/, 'Packs is the dumped list, as before');
+});
+
+test('switching tabs inside the Library redraws the Library, not #/reactions', () => {
+  const r = screen();
+  r("route_='library';RXS.tab='packs'");
+  r("ACT.rxstyle({dataset:{s:'emoji'}})");
+  assert.equal(r('RXS.tab'), 'emoji');
+});
