@@ -27,13 +27,12 @@ origin/main @ 53f5a7f5 (stable, merged, handpicked-lottie deleted)
 
 ## Verification done here (no browser available to this session)
 
-- `tests/js/rxlib_bridge.test.js` (6) + neighbours (`reactions`, `particles`, `tile_sliders`): 61/61 green. `node --check` clean on all touched scripts. `test_ui_inventory`: green.
+- Full js suite on this branch: 388 pass, 0 fail (stale suite repaired: prompt_step cpGrid stub, cell_op ?v= cache-buster, home railcreate entry, lottiestyle Particular groups; size_preview rewritten for Resize + frame editor). `node --check` clean on all touched scripts. `test_ui_inventory`: green.
 - The tab loaders call only pre-existing endpoints, each covered by existing suites: `GET /api/particles` (test_particle_sets), `/api/particles/bank` (test_particles), `/api/particles/emoji-lottie` (test_emoji_lottie), `/api/particles/lottie-reactions` (test_lottie_reactions). No backend changed.
-- Full js suite on this branch: 10 failures, every one also failing on main (cell_op, home, lottiestyle:17, prompt_step ×7) — the port introduced none. Stale suite repair is this branch's lane, per Haitham.
+- Tabs server-verified 2026-10-15 (temp 8797, redesign code): all four tab endpoints 200 with real data (9 sets, 1898 bank, 4 Lottie files), all four JS bundles 200; shell renders, no login wall on local routes.
+- Slider busy-retry built (825f4dcc: `postBusy`, 12×1s, slider/frame-editor sends survive a running cut; same fix on main cdeae419). Adjust toggle built (699a49a1).
 
-## Still open on this branch (other agent's lane)
+## Still open on this branch
 
-- Commit the slider WIP (explicit paths + `tile_sliders.test.js`), then the writer-lock slider-timeout acceptance.
-- Tabs browser acceptance (both screens, both routes, dark/light, ≤760 px).
-- Tile-slider toggle (decision 2) and any Packs/Library dedup the redesign wants — proposals only, no instruction to remove either home.
-- Delete the dead `.worktrees/redesign-ui-ux` folder in the main repo once its holding terminal closes (unregistered already, files partly removed, one empty dir left).
+- Interactive browser acceptance only (both screens, both routes, dark/light, ≤760 px) — needs a human or browser agent; no browser tooling in this session.
+- UI/UX redesign backlog (plan.md items 4–9, journeys) — the visual redesign work, untouched.
