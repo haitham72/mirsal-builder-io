@@ -1,0 +1,28 @@
+{
+ "id": "X1a13e6f116a339e",
+ "what": "G154",
+ "collection": "Generic Test - 4",
+ "by": "local",
+ "state": "done",
+ "at": 1792048828.778,
+ "ok": true,
+ "status": 200,
+ "count": 4,
+ "response": {
+  "Success": true,
+  "Message": null,
+  "TotalCount": 0,
+  "Result": {
+   "insertedCount": 4,
+   "updatedCount": 0,
+   "existingList": []
+  },
+  "ErrorMessages": []
+ },
+ "result": {
+  "insertedCount": 4,
+  "updatedCount": 0,
+  "existingList": []
+ },
+ "finished": 1792048845.08
+}

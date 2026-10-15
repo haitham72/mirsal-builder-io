@@ -1,0 +1,132 @@
+{
+ "files": {
+  "Star Strike Emoji.json": {
+   "settings": {
+    "magnitude": 0.5,
+    "speed_var": 0.3,
+    "speed_pulse": 0.35,
+    "pulse_hz": 3.4,
+    "gravity": 0.55,
+    "vortex": 0,
+    "spin": 2.1,
+    "flip": 0,
+    "flip_var": 0.45,
+    "count": 28,
+    "spread": 360,
+    "particle_size": 1.75,
+    "size_var": 0.375,
+    "size_in_dur": 0.55,
+    "size_out_dur": 0.6,
+    "fade_start": 1.6,
+    "fade_dur": 0.75,
+    "fade_var": 0.1,
+    "morph_at": 0.85,
+    "morph_var": 0.45,
+    "morph_burst": 1,
+    "children": 3,
+    "child_size": 0.4,
+    "child_size_var": 0,
+    "seed": 1
+   },
+   "morph_targets": [
+    "Sad Emoji.json"
+   ],
+   "updated": 1792044069.283
+  },
+  "Sad Emoji.json": {
+   "settings": {
+    "magnitude": 0.5,
+    "speed_var": 0.4,
+    "speed_pulse": 0,
+    "pulse_hz": 2,
+    "gravity": -0.05,
+    "vortex": 0.35,
+    "spin": 1,
+    "flip": 0,
+    "flip_var": 0,
+    "count": 28,
+    "spread": 360,
+    "particle_size": 1.55,
+    "size_var": 0.6,
+    "size_in_dur": 0.55,
+    "size_out_dur": 1.5,
+    "fade_start": 0,
+    "fade_dur": 0,
+    "fade_var": 0,
+    "morph_at": 0,
+    "morph_var": 0,
+    "morph_burst": 0,
+    "children": 0,
+    "child_size": 0.5,
+    "child_size_var": 0,
+    "seed": 1
+   },
+   "morph_targets": [],
+   "updated": 1792044275.011
+  },
+  "Burn calories.json": {
+   "settings": {
+    "magnitude": 0.7,
+    "speed_var": 0,
+    "speed_pulse": 0,
+    "pulse_hz": 0.3,
+    "gravity": 0.8,
+    "vortex": 0,
+    "spin": 1,
+    "flip": 0,
+    "flip_var": 0,
+    "count": 7,
+    "spread": 70,
+    "particle_size": 1.3,
+    "size_var": 0.75,
+    "size_in_dur": 0,
+    "size_out_dur": 0.6,
+    "fade_start": 1.05,
+    "fade_dur": 2,
+    "fade_var": 1,
+    "morph_at": 0,
+    "morph_var": 0,
+    "morph_burst": 0,
+    "children": 0,
+    "child_size": 0.5,
+    "child_size_var": 0,
+    "seed": 1
+   },
+   "morph_targets": [],
+   "updated": 1792044761.808
+  },
+  "like button.json": {
+   "settings": {
+    "magnitude": 0.7,
+    "speed_var": 0,
+    "speed_pulse": 0,
+    "pulse_hz": 2,
+    "gravity": 0.5,
+    "vortex": 0.85,
+    "spin": 1,
+    "flip": 0,
+    "flip_var": 0,
+    "count": 12,
+    "spread": 130,
+    "particle_size": 2.1,
+    "size_var": 0.9,
+    "size_in_dur": 0.2,
+    "size_out_dur": 0.45,
+    "fade_start": 1.75,
+    "fade_dur": 0.95,
+    "fade_var": 0.4,
+    "morph_at": 0.6,
+    "morph_var": 0.5,
+    "morph_burst": 0,
+    "children": 0,
+    "child_size": 0.5,
+    "child_size_var": 0,
+    "seed": 1
+   },
+   "morph_targets": [
+    "Burn calories.json"
+   ],
+   "updated": 1792044692.693
+  }
+ }
+}

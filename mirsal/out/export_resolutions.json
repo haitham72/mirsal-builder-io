@@ -1734,6 +1734,81 @@
       "resolution_reason": "unmapped",
       "candidates": [],
       "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "933208bb4337940e07ad4ff88ee82521390231b0769c2c46b03e703efa07d87a": {
+      "emoji": "💃",
+      "emojis": [
+        "💃"
+      ],
+      "tag": "dance_dancing",
+      "tokens": [
+        "dance",
+        "dancing"
+      ],
+      "action": "dance",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "32c7b447f05586b6fc449a77c526c86ce558aec9a89db51e9010c3303ed52621": {
+      "emoji": "😞",
+      "emojis": [
+        "😞"
+      ],
+      "tag": "sad_unhappy_disappointed_repeatsinglebutton_repeat_single_button",
+      "tokens": [
+        "sad",
+        "unhappy",
+        "disappointed",
+        "repeatsinglebutton",
+        "repeat",
+        "single",
+        "button"
+      ],
+      "action": "sad",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "bb7a33072299ed6da01bc20f88326d4325ece7b14177d166490559f8fb783b23": {
+      "emoji": "🤦",
+      "emojis": [
+        "🤦"
+      ],
+      "tag": "personfacepalming_person_facepalming_eyes_eye",
+      "tokens": [
+        "personfacepalming",
+        "person",
+        "facepalming",
+        "eyes",
+        "eye"
+      ],
+      "action": "person-facepalming",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
+    },
+    "a58454262ec7926645063bd3e5799ba61e0c3ee658edd70d7cdc6be2ffa4007b": {
+      "emoji": "😵‍💫",
+      "emojis": [
+        "😵‍💫"
+      ],
+      "tag": "dizzy_facewithspiraleyes_spiral_eyes_eye",
+      "tokens": [
+        "dizzy",
+        "facewithspiraleyes",
+        "spiral",
+        "eyes",
+        "eye"
+      ],
+      "action": "dizzy",
+      "unresolved": false,
+      "resolution_reason": null,
+      "candidates": [],
+      "bank_version": "core-36-unicode-15.1-v2"
     }
   }
 }

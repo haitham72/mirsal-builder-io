@@ -16,3 +16,7 @@
 {"ts": 1791784814.106, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 9, "note": "approved by Add"}, "actor": "human", "decision": "APPROVE"}
 {"ts": 1791784814.107, "stage": "stills_reviewed", "status": "done", "ms": 0, "detail": {"approved": [1, 2, 3, 4, 5, 6, 7, 8, 9]}, "actor": "human", "decision": "APPROVE"}
 {"ts": 1791784814.636, "stage": "added_to_pack", "status": "done", "ms": 0, "detail": {"pack": "701a899d", "kind": "static", "stickers": [1, 2, 3, 4, 5, 6, 7, 8, 9], "replaced_stills": 0}, "actor": "human", "decision": "APPROVE"}
+{"ts": 1792039979.796, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 7, "note": "dropped from the set"}, "actor": "human", "decision": "REJECT"}
+{"ts": 1792039980.893, "stage": "stills_reviewed", "status": "done", "ms": 0, "detail": {"approved": [1, 2, 3, 4, 5, 6, 8, 9]}, "actor": "human", "decision": "REJECT"}
+{"ts": 1792040073.211, "stage": "review", "status": "done", "ms": 0, "detail": {"gate": "still", "index": 8, "note": "dropped from the set"}, "actor": "human", "decision": "REJECT"}
+{"ts": 1792040073.213, "stage": "stills_reviewed", "status": "done", "ms": 0, "detail": {"approved": [1, 2, 3, 4, 5, 6, 9]}, "actor": "human", "decision": "REJECT"}

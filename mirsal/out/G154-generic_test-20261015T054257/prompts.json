@@ -1,0 +1,137 @@
+{
+  "task": "generic test",
+  "task_slug": "generic_test",
+  "subject": "generic test",
+  "scene": "",
+  "described": "generic test",
+  "context": "",
+  "kind": "default",
+  "grid": [
+    2,
+    2
+  ],
+  "template_id": "sheet_2x2",
+  "template_version": 3,
+  "slots": {
+    "subject_description": "generic test",
+    "style_id": "flat_vector",
+    "mode": "sheet_2x2",
+    "cells": [
+      {
+        "pos": 1,
+        "label": "dancing with joyful moves, eyes closed, big smile",
+        "tags": [
+          "generic_test_dancing",
+          "dancing",
+          "joyful",
+          "moves"
+        ],
+        "emoji": "💃",
+        "motion": "shimmies the hips, arms swing, spins once"
+      },
+      {
+        "pos": 2,
+        "label": "sad and drooping, a single tear, slumped shoulders",
+        "tags": [
+          "generic_test_sad",
+          "sad",
+          "drooping",
+          "single"
+        ],
+        "emoji": "😞",
+        "motion": "sighs, shoulders sag, droops slowly lower"
+      },
+      {
+        "pos": 3,
+        "label": "facepalming in disbelief, eyes closed, sighing",
+        "tags": [
+          "generic_test_facepalm",
+          "facepalming",
+          "disbelief",
+          "eyes"
+        ],
+        "emoji": "🤦",
+        "motion": "slowly drops the face into the palm, shakes the head"
+      },
+      {
+        "pos": 4,
+        "label": "dizzy with spiral eyes, wobbling on the spot",
+        "tags": [
+          "generic_test_dizzy",
+          "dizzy",
+          "spiral",
+          "eyes"
+        ],
+        "emoji": "😵‍💫",
+        "motion": "sways in circles, little stars orbit the head"
+      }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "face": false,
+    "preset": null
+  },
+  "guidelines": {
+    "sheet": "2x2 sticker sheet, 4 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 4 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+  },
+  "sheet_prompt": "One illustration of 4 separate characters arranged in 2 rows of 2, evenly spaced across a single seamless background.\nSubject: generic test.\nStyle: flat vector illustration, bold clean shapes, solid vibrant colours, friendly proportions.\nOutline: none. Draw every character directly on the background with no outline, border, stroke, die-cut edge or halo around it.\nReading left to right, top to bottom, every character is a different moment: a wide range of emotions AND different states of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two characters share a pose, a body position or a silhouette:\nCharacter 1: dancing with joyful moves, eyes closed, big smile\nCharacter 2: sad and drooping, a single tear, slumped shoulders\nCharacter 3: facepalming in disbelief, eyes closed, sighing\nCharacter 4: dizzy with spiral eyes, wobbling on the spot\nMake every expression big and readable at small size: exaggerated eyes, eyebrows, mouth and body language.\nConsistency: the same character design, proportions and colours for all 4 characters.\nBackground: a single, seamless, solid pure green (#00FF00) background covering the whole image in exactly one shade, with no tiled panels, no shading variations, no tint, gradient, vignette or glow, no shadows, no floor, no noise.\nSpacing: every character is full body with a generous empty margin on every side (at least 20% of its own size), clearly separated from the others, none touching or crossing another.",
+  "video_prompt": "Animate this 2x2 sheet of characters as a 3-second clip.\nCreate a very expressive animation of each character, each having its own personality with a wide range of emotions.\n1. shimmies the hips, arms swing, spins once\n2. sighs, shoulders sag, droops slowly lower\n3. slowly drops the face into the palm, shakes the head\n4. sways in circles, little stars orbit the head\nEach character moves only inside its own cell. Empty cells stay empty. Static camera.\nKeep the flat green background and every character's design unchanged.",
+  "stickers": [
+    {
+      "index": 1,
+      "id": "prompt01",
+      "prompt": "generic test dancing with joyful moves, eyes closed, big smile, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_test_dancing",
+      "tags": [
+        "generic_test_dancing",
+        "dancing",
+        "joyful",
+        "moves"
+      ],
+      "emoji": "💃"
+    },
+    {
+      "index": 2,
+      "id": "prompt02",
+      "prompt": "generic test sad and drooping, a single tear, slumped shoulders, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_test_sad",
+      "tags": [
+        "generic_test_sad",
+        "sad",
+        "drooping",
+        "single"
+      ],
+      "emoji": "😞"
+    },
+    {
+      "index": 3,
+      "id": "prompt03",
+      "prompt": "generic test facepalming in disbelief, eyes closed, sighing, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_test_facepalm",
+      "tags": [
+        "generic_test_facepalm",
+        "facepalming",
+        "disbelief",
+        "eyes"
+      ],
+      "emoji": "🤦"
+    },
+    {
+      "index": 4,
+      "id": "prompt04",
+      "prompt": "generic test dizzy with spiral eyes, wobbling on the spot, full body, centred, generous empty margin on every side (at least 20% of the cell), nothing touching or crossing the cell edge",
+      "key": "generic_test_dizzy",
+      "tags": [
+        "generic_test_dizzy",
+        "dizzy",
+        "spiral",
+        "eyes"
+      ],
+      "emoji": "😵‍💫"
+    }
+  ]
+}

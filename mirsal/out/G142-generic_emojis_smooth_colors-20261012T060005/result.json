@@ -1860,7 +1860,7 @@
       "anim_metrics": {},
       "webm": null,
       "review": {
-        "still": "APPROVED",
+        "still": "REJECTED",
         "anim": "NONE"
       },
       "history": [
@@ -1881,6 +1881,15 @@
           "actor": "human",
           "decision": "APPROVE",
           "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1792039979.796,
+          "stage": "still",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "dropped from the set",
           "ref": null,
           "detail": null
         }
@@ -2078,7 +2087,7 @@
       "anim_metrics": {},
       "webm": null,
       "review": {
-        "still": "APPROVED",
+        "still": "REJECTED",
         "anim": "NONE"
       },
       "history": [
@@ -2099,6 +2108,15 @@
           "actor": "human",
           "decision": "APPROVE",
           "reason": "approved by Add",
+          "ref": null,
+          "detail": null
+        },
+        {
+          "ts": 1792040073.211,
+          "stage": "still",
+          "actor": "human",
+          "decision": "REJECT",
+          "reason": "dropped from the set",
           "ref": null,
           "detail": null
         }
@@ -2337,5 +2355,15 @@
       "static:8",
       "static:9"
     ]
-  }
+  },
+  "group": "G142",
+  "group_history": [
+    {
+      "ts": 1792043655.531,
+      "actor": "local",
+      "decision": "JOIN",
+      "to": "G142",
+      "via": "G153 removed"
+    }
+  ]
 }

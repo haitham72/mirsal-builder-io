@@ -1,0 +1,46 @@
+{
+  "id": "J113",
+  "kind": "sheet",
+  "task": "073",
+  "generation": "G153",
+  "provider": "higgsfield-cli",
+  "model": "nano_banana_flash",
+  "request": {
+    "model": "nano_banana_flash",
+    "options": {
+      "resolution": "2k"
+    },
+    "prompt": "use same exact images, keep shine of each emoji, add orange border",
+    "label": "generic emojis smooth colors gradient shiny",
+    "refs": [],
+    "outline": 0,
+    "erode": null,
+    "custom_prompt": true,
+    "parent": "G142",
+    "regen_of": "G142",
+    "user": "local"
+  },
+  "status": "DONE",
+  "external_task_id": "e08c8d15-8ad9-46f2-9fe5-9e48f2281750",
+  "result": {
+    "file": "jobs/J113-generic_emojis_smooth_colors-sheet/result.png",
+    "sha256": "966afcc442ad6ddd2af36ab79d89cf2fee050c3ca53355fba7053ed5cd6c967e",
+    "bytes": 6111893
+  },
+  "cost": 2.0,
+  "error": null,
+  "created_at": 1792040017.246,
+  "claimed_at": 1792040018.782,
+  "completed_at": 1792040042.044,
+  "params": {
+    "aspect_ratio": "1:1",
+    "resolution": "2k"
+  },
+  "cost_estimate": 2.0,
+  "stage": "downloading",
+  "waiting_pid": null,
+  "dismissed": {
+    "at": 1792040060.047,
+    "by": "local"
+  }
+}

@@ -1,0 +1,28 @@
+{
+ "id": "X1a13de6034d9983",
+ "what": "G146",
+ "collection": "Generic Emojis Mirsal - higher quality",
+ "by": "local",
+ "state": "done",
+ "at": 1792039846.734,
+ "ok": true,
+ "status": 200,
+ "count": 9,
+ "response": {
+  "Success": true,
+  "Message": null,
+  "TotalCount": 0,
+  "Result": {
+   "insertedCount": 9,
+   "updatedCount": 0,
+   "existingList": []
+  },
+  "ErrorMessages": []
+ },
+ "result": {
+  "insertedCount": 9,
+  "updatedCount": 0,
+  "existingList": []
+ },
+ "finished": 1792039876.762
+}
