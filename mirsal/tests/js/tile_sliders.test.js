@@ -43,3 +43,15 @@ test('sliders hide behind Adjust per sticker; toggling reveals them',()=>{
  h.run(`ACT.vslopen({dataset:{g:'7',i:'1'}})`);
  assert.doesNotMatch(tile(),/data-k=scale/,'hidden again');
 });
+test('a 409 busy waits and sends once more instead of erroring',async()=>{
+ const h=setup();let n=0;
+ h.reply(()=> (++n===1)?{ok:false,status:409,j:{error:'busy: a job is running, wait for it to finish'}}:{ok:true,j:{}});
+ const tick=()=>new Promise(r=>setImmediate(r));
+ h.input(110);h.release();
+ const p=h.fire();await tick();await tick();
+ assert.equal(h.writes.length,1,'first attempt refused');
+ h.fire();await tick();await tick();await p;
+ assert.equal(h.writes.length,2,'retried once it cleared');
+ assert.deepEqual(h.writes[1][1],{index:1,offset:null,scale:1.1,reslice:true});
+ assert.equal(h.run('vslBusy.size'),0);
+});

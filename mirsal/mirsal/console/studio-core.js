@@ -924,10 +924,10 @@ ACT.vzapply = async () => {
   let r = { ok: true };
   if (VZ.i) {
     const o = vzOff(g, VZ.i);
-    r = await post(`/api/generations/${g.number}/position`, { index: VZ.i, offset: o[0] || o[1] ? o : null, ...(VZ.scale != null ? { scale: VZ.scale } : {}), reslice: redo });
+    r = await postBusy(`/api/generations/${g.number}/position`, { index: VZ.i, offset: o[0] || o[1] ? o : null, ...(VZ.scale != null ? { scale: VZ.scale } : {}), reslice: redo });
   } else {
-    if (VZ.resize != null && VZ.resize !== gResize(g)) r = await post(`/api/generations/${g.number}/resize`, { on: VZ.resize, reslice: redo && VZ.scale == null });
-    if (r.ok && VZ.scale != null) r = await post(`/api/generations/${g.number}/video_size`, { scale: VZ.scale, reslice: redo });
+    if (VZ.resize != null && VZ.resize !== gResize(g)) r = await postBusy(`/api/generations/${g.number}/resize`, { on: VZ.resize, reslice: redo && VZ.scale == null });
+    if (r.ok && VZ.scale != null) r = await postBusy(`/api/generations/${g.number}/video_size`, { scale: VZ.scale, reslice: redo });
   }
   VZ.busy = false;
   if (!r.ok) return toast(r.j.error || 'Could not change it', 1), vzCard(true);
@@ -954,6 +954,15 @@ addEventListener('change', (e) => {
   const value = vslPend[key];
   if (value) vslT[key] = setTimeout(() => vslSend(box, value), 500);
 });
+/* a 409 busy means a cut is still running: wait for it and send once more (bounded), so a quick second
+   edit after a release is not lost with an error. Only 409 retries: anything else, and the server did its job. */
+async function postBusy(url, body, tries = 12) {
+  for (let n = 0; ; n++) {
+    const r = await post(url, body);
+    if (r.ok || r.status !== 409 || n >= tries) return r;
+    await new Promise((ok) => setTimeout(ok, 1000));
+  }
+}
 async function vslSend(box, value) {
   const key = `${box.dataset.g}:${box.dataset.i}`;
   if (!value) return;
@@ -969,7 +978,7 @@ async function vslSend(box, value) {
   const redo = (g.stickers || []).some((s) => s.anim_status === 'READY');
   try {
     const offset = v.dx || v.dy ? [v.dx, v.dy] : null;
-    const r = await post(`/api/generations/${g.number}/position`, { index: i, offset, scale: v.scale, reslice: redo });
+    const r = await postBusy(`/api/generations/${g.number}/position`, { index: i, offset, scale: v.scale, reslice: redo });
     if (!r.ok) { toast(r.j.error || 'Could not change it', 1); return; }
     // Cache the acknowledged values until tick reads the canonical server result.
     t.anim_scale = v.scale; t.anim_offset = offset;
@@ -987,8 +996,8 @@ ACT.vslreset = async (el) => {
   vslBusy.add(key);
   const redo = (g.stickers || []).some((s) => s.anim_status === 'READY');
   try {
-    let r = await post(`/api/generations/${g.number}/position`, { index: i, offset: null, reslice: false });
-    if (r.ok) r = await post(`/api/generations/${g.number}/video_size`, { index: i, scale: null, reslice: redo });
+    let r = await postBusy(`/api/generations/${g.number}/position`, { index: i, offset: null, reslice: false });
+    if (r.ok) r = await postBusy(`/api/generations/${g.number}/video_size`, { index: i, scale: null, reslice: redo });
     if (!r.ok) return toast(r.j.error || 'Could not reset it', 1);
     const t = (g.stickers || [])[i - 1]; if (t) { delete t.anim_scale; t.anim_offset = null; }
     toast('Back to the batch'); glast = ''; tick(true);
