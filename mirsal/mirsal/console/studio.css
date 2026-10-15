@@ -731,6 +731,9 @@ button.logo{border:0;padding:0;cursor:pointer;background:none}button.logo:hover 
 .rx-sl select{grid-column:2/4;padding:5px 8px;border-radius:var(--r-s);border:1px solid var(--bd);background:var(--sf);color:var(--ink);font-size:var(--fs-s)}
 .rx-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px 28px}
 .rx-grp{display:flex;flex-direction:column;gap:8px;min-width:0}
+/* Lottie style's Particular-style groups (lottiestyle.js): <details>; a closed one says what differs from the start; the preset row */
+details.rx-grp>summary{cursor:pointer;list-style:none;gap:8px}details.rx-grp>summary::-webkit-details-marker{display:none}details.rx-grp>summary small{font-size:var(--fs-xs);text-transform:none;letter-spacing:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}details.rx-grp[open]>summary small{display:none}
+.ls-pre{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0 10px}
 .rx-gh{display:flex;align-items:center;justify-content:space-between;max-width:420px;padding-bottom:6px;border-bottom:1px solid var(--aline)}.rx-gh b{font-size:var(--fs-s);letter-spacing:.04em;text-transform:uppercase;color:var(--ink2)}.rx-gh .link{font-size:var(--fs-xs)}.rx-gh .link:disabled{opacity:.4;cursor:default}
 .rx-made .sh{margin:0 0 10px}
 .rx-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}

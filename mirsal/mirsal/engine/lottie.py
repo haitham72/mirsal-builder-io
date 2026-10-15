@@ -199,11 +199,21 @@ def export_lottie_burst(p: ParticleParams, origin: dict, targets: list | None = 
     def layer(i: int, k: int, ip: int, op: int, start: int, fade) -> dict | None:
         src = info[k]
         sr = fps / src["fr"]                                         # the source plays at its own speed
-        end = start + int(math.ceil((src["op"] - src["ip"]) * sr))   # ... and ends when it ends
-        op = min(op, end)
+        ts = p.time_sampling                                         # 0 = from its birth, once; else a time remap (tm, in seconds of the main comp)
+        if not ts:
+            end = start + int(math.ceil((src["op"] - src["ip"]) * sr))   # ... and ends when it ends
+            op = min(op, end)
         if op <= ip:
             return None
         fr = list(range(ip, op))
+        tm = None
+        if ts:
+            n_src = max(1.0, float(src["op"] - src["ip"]))
+            off = float(tr.sample[i]) * n_src if ts >= 2 else 0.0
+            if ts == 3:                                              # random still: one frame of the source, held
+                tm = {"a": 0, "k": round((src["ip"] + math.floor(off)) / fps, 5)}
+            else:                                                    # loop (from its birth, or from a random point)
+                tm = keys(fr, [[round((src["ip"] + math.floor(((f - start) / sr + off) % n_src)) / fps, 5)] for f in fr])
         long_side = float(max(src["w"], src["h"]))
         k_scale = 100.0 * float(tr.size_frac[i]) * W / long_side
         return {
@@ -216,7 +226,7 @@ def export_lottie_burst(p: ParticleParams, origin: dict, targets: list | None = 
                 "a": {"a": 0, "k": [src["w"] / 2.0, src["h"] / 2.0, 0]},
                 "s": keys(fr, [[round(float(tr.scale[f, i]) * k_scale * float(tr.flipx[f, i]), 2), round(float(tr.scale[f, i]) * k_scale, 2), 100] for f in fr]),
             },
-            "ip": ip, "op": op, "st": round(start - src["ip"] * sr, 4),
+            "ip": ip, "op": op, "st": round(start - src["ip"] * sr, 4), **({"tm": tm} if tm else {}),
         }
 
     layers = []

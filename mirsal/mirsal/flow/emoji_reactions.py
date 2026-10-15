@@ -459,7 +459,7 @@ def _lib_read(out: Path) -> dict:
                 return d
         except (OSError, ValueError):
             pass
-    d = {"presets": _seed(), "assign": {}}
+    d = {"presets": _seed(), "assign": {}, "handpicked": {}}          # a fresh library has every key the readers use
     f.parent.mkdir(parents=True, exist_ok=True)
     atomic.write_text(f, json.dumps(d, ensure_ascii=False, indent=1))
     return d

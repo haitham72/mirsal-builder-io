@@ -95,6 +95,94 @@ class EngineTests(unittest.TestCase):
         np.testing.assert_array_equal(a.opacity, b.opacity)
 
 
+class ParticularTests(unittest.TestCase):
+    """The Trapcode Particular-style settings (2026-10-15): off by default, drawn from their own generator, each doing what its name says."""
+
+    def test_the_new_draws_never_move_an_older_burst(self):
+        a = p.trajectories(p.ParticleParams(seed=5, children=3, morph_at=0.5, duration=2))
+        b = p.trajectories(p.ParticleParams(seed=5, children=3, morph_at=0.5, duration=2, time_sampling=2))     # only draws from the second generator
+        np.testing.assert_array_equal(a.pos, b.pos)
+        np.testing.assert_array_equal(a.opacity, b.opacity)
+
+    def test_emitters_place_the_births(self):
+        box = p.trajectories(p.ParticleParams(seed=3, emitter=2, emitter_w=0.6, emitter_h=0.2, magnitude=0, gravity=0, duration=2))
+        born = box.pos[box.spawn, np.arange(len(box.spawn))]
+        self.assertTrue((np.abs(born[:, 0] - 0.5) <= 0.3 + 1e-9).all() and (np.abs(born[:, 1] - 0.5) <= 0.1 + 1e-9).all())
+        self.assertGreater(np.ptp(born[:, 0]), 0.3, "spread over the box, not a point")
+        ring = p.trajectories(p.ParticleParams(seed=3, emitter=1, emitter_w=0.5, magnitude=0, gravity=0, duration=2))
+        r = np.hypot(*(ring.pos[ring.spawn, np.arange(len(ring.spawn))] - 0.5).T)
+        np.testing.assert_allclose(r, 0.25, atol=1e-9)
+
+    def test_stream_spreads_births_and_direction_turns_the_arc(self):
+        burst = p.trajectories(p.ParticleParams(seed=3, duration=2))
+        stream = p.trajectories(p.ParticleParams(seed=3, duration=2, emit_dur=1.0))
+        self.assertGreater(np.ptp(stream.spawn), 2 * np.ptp(burst.spawn))          # 1 s of births against the 0.3 s burst window
+        right = p.trajectories(p.ParticleParams(seed=3, duration=2, spread=20, direction=90, gravity=0))
+        d = right.pos[-10] - 0.5
+        self.assertTrue((d[:, 0] > np.abs(d[:, 1])).all(), "90 degrees from up is to the right")
+
+    def test_air_wind_and_life_random(self):
+        calm = p.trajectories(p.ParticleParams(seed=3, gravity=0, duration=2))
+        thick = p.trajectories(p.ParticleParams(seed=3, gravity=0, duration=2, air=2))
+        self.assertLess(np.abs(thick.pos[40] - 0.5).mean(), np.abs(calm.pos[40] - 0.5).mean())
+        windy = p.trajectories(p.ParticleParams(seed=3, gravity=0, duration=2, wind_x=1.5))
+        self.assertGreater(windy.pos[40, :, 0].mean(), calm.pos[40, :, 0].mean() + 0.1)
+        self.assertGreater(np.ptp(p.trajectories(p.ParticleParams(seed=3, duration=2, life_var=0.8)).life), np.ptp(calm.life))
+
+    def test_bounce_keeps_particles_above_the_floor_and_can_start_children(self):
+        q = p.ParticleParams(seed=3, duration=2, gravity=2.5, magnitude=0.5, bounce=0.5, floor_y=0.8, children=2, aux_at=2)
+        t = p.trajectories(q)
+        roots = t.parent < 0
+        self.assertLessEqual(float(t.pos[:, roots, 1].max()), 0.8 + 1e-9)
+        kids = np.flatnonzero(t.parent >= 0)
+        self.assertGreater(len(kids), 0)
+        np.testing.assert_allclose(t.pos[t.spawn[kids], kids, 1], 0.8, atol=0.08)   # born on the floor, where the parent bounced
+
+    def test_trail_and_death_children(self):
+        q = p.ParticleParams(seed=3, duration=2, count=6, children=4, aux_at=3)
+        t = p.trajectories(q)
+        kids = np.flatnonzero(t.parent >= 0)
+        self.assertGreater(len(kids), 12)
+        for r in range(6):                                            # spread along the parent's life, not all at once
+            ks = kids[t.parent[kids] == r]
+            if len(ks) > 1:
+                self.assertGreater(np.ptp(t.spawn[ks]), 5)
+        d = p.trajectories(p.ParticleParams(seed=3, duration=2, count=6, children=2, aux_at=1, aux_life=0.3))
+        dk = np.flatnonzero(d.parent >= 0)
+        np.testing.assert_array_equal(d.spawn[dk], d.spawn[d.parent[dk]] + np.rint(d.life[d.parent[dk]] * 30).astype(int) - 1)
+        self.assertTrue((d.life[dk] <= 0.3 + 1e-9).all())
+
+    def test_over_life_curves(self):
+        base = p.trajectories(p.ParticleParams(seed=3, duration=2))
+        grow = p.trajectories(p.ParticleParams(seed=3, duration=2, size_curve=1))
+        i = 0
+        f0, f1 = int(base.spawn[i]) + 8, int(base.spawn[i]) + int(base.life[i] * 30) - 3
+        self.assertLess(grow.scale[f0, i] / base.scale[f0, i], grow.scale[f1, i] / base.scale[f1, i])
+        fin = p.trajectories(p.ParticleParams(seed=3, duration=2, opacity_curve=1))
+        self.assertLess(fin.opacity[int(fin.spawn[i]) + 1, i], 0.2)
+
+    def test_time_sampling_in_the_export(self):
+        src = tiny("o", fr=30, op=10)                                 # a 10-frame source in a 60-frame burst
+        once = lottie.export_lottie_burst(p.ParticleParams(seed=2, count=4, duration=2), src)
+        self.assertTrue(all(L["op"] - L["ip"] <= 10 and "tm" not in L for L in once["layers"]), "start at birth: plays once, ends with its source")
+        loop = lottie.export_lottie_burst(p.ParticleParams(seed=2, count=4, duration=2, time_sampling=1), src)
+        L = loop["layers"][0]
+        self.assertGreater(L["op"] - L["ip"], 10, "a loop lives its whole life")
+        vals = [k["s"][0] for k in L["tm"]["k"]]
+        self.assertEqual((min(vals), round(max(vals) * 30)), (0.0, 9), "the remap wraps inside the source")
+        still = lottie.export_lottie_burst(p.ParticleParams(seed=2, count=4, duration=2, time_sampling=3), src)
+        self.assertTrue(all(L["tm"]["a"] == 0 for L in still["layers"]))
+
+    def test_presets_and_position_reach_the_engine(self):
+        self.assertTrue(set(lr.PRESETS) >= {"Pop", "Fountain", "Confetti", "Snow", "Fireworks", "Orbit", "Trail"})
+        for name, pr in lr.PRESETS.items():
+            self.assertLessEqual(set(pr), set(lr.SETTINGS), name)
+            d = lottie.export_lottie_burst(lr.params(pr), tiny("o"), [])
+            self.assertTrue(0 < len(d["layers"]) <= lottie.MAX_PARTICLES * 2, name)
+        self.assertEqual(lr.params({"origin_x": 0.2, "origin_y": 0.9}).origin, (0.2, 0.9))
+        self.assertEqual(lr.params({}).to_dict()["lifetime"], 1.6)
+
+
 class ExportTests(unittest.TestCase):
     def test_the_export_embeds_origin_and_targets_once_with_unique_ids(self):
         q = p.ParticleParams(seed=2, count=12, morph_at=0.4, morph_var=0.1, duration=2.0)

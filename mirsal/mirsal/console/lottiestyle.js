@@ -4,15 +4,25 @@
    Routes: GET /api/particles/lottie-reactions, POST .../{file} (save), POST .../{file}/preview, GET .../{file}/export.json, GET .../lottie-reactions.zip.
    Engine fields: engine/particles.py ParticleParams; settings list: flow/lottie_reactions.py SETTINGS. */
 
-/* [key, label, min, max, step, unit], in groups */
+/* [key, label, min, max, step, unit, choices?], in Trapcode Particular's groups (Haitham 2026-10-15, docs/size-position-lottie-proposal.md D):
+   Emitter -> Particle -> Physics -> Aux system, plus Mirsal's Morph. A setting with choices is a drop-down (its value is the choice's index). */
+const LSC={emitter:['Point','Ring','Box','Line'],size_curve:['None','Grow','Shrink','Swell','Pulse'],opacity_curve:['None','Fade in','Flicker','Blink out'],
+ time_sampling:['Start at birth, once','Loop','Random start, loop','Random still'],aux_at:['At the morph','At death','At bounce','Trail (along its life)']};
 const LSG=[
- ['Motion',[['magnitude','Speed',0,3,.05,'×'],['speed_var','Speed variation',0,1,.05,'%'],['speed_pulse','Speed pulse',0,1,.05,'%'],['pulse_hz','Pulse rate',.2,6,.1,'/s'],
-  ['gravity','Gravity',-2,3,.05,''],['vortex','Swirl',-2,2,.05,''],['spread','Spread',10,360,5,'°'],['count','Amount',4,80,1,'']]],
- ['Spin',[['spin','Rotation',0,3,.05,'×'],['flip','Flip (cheap spin)',0,4,.05,'/s'],['flip_var','Flip variation',0,1,.05,'%']]],
- ['Shape',[['particle_size','Size',.25,3,.05,'×'],['size_var','Size variation',0,1,.05,'%'],['size_in_dur','Size in',0,1.5,.05,'s'],['size_out_dur','Size out',0,1.5,.05,'s']]],
- ['Fade out',[['fade_start','Fade out start',0,2,.05,'s'],['fade_dur','Fade out duration',0,2,.05,'s'],['fade_var','Fade out variation',0,1,.05,'s']]],
- ['Morph',[['morph_at','Morph at',0,2,.05,'s'],['morph_var','Morph variation',0,1,.05,'s']]],
- ['Children (born at the morph)',[['children','Children',0,12,1,''],['child_size','Child size',.1,3,.05,'×'],['child_size_var','Child size variation',0,1,.05,'%']]]];
+ ['Emitter',[['emitter','Type',0,3,1,'',LSC.emitter],['origin_x','Position X',0,1,.01,'%'],['origin_y','Position Y',0,1,.01,'%'],['emitter_w','Emitter size X',0,1,.01,'%'],['emitter_h','Emitter size Y',0,1,.01,'%'],
+  ['count','Particles',4,80,1,''],['emit_dur','Stream for',0,2,.05,'s'],['direction','Direction',-180,180,5,'°'],['spread','Direction spread',10,360,5,'°'],
+  ['magnitude','Velocity',0,3,.05,'×'],['speed_var','Velocity random',0,1,.05,'%'],['vel_dist','Velocity distribution',0,1,.05,'%']]],
+ ['Particle',[['lifetime','Life',.3,1.6,.05,'s'],['life_var','Life random',0,1,.05,'%'],['particle_size','Size',.25,3,.05,'×'],['size_var','Size random',0,1,.05,'%'],
+  ['size_curve','Size over life',0,4,1,'',LSC.size_curve],['size_in_dur','Size in',0,1.5,.05,'s'],['size_out_dur','Size out',0,1.5,.05,'s'],
+  ['opacity_curve','Opacity over life',0,3,1,'',LSC.opacity_curve],['fade_start','Fade out start',0,2,.05,'s'],['fade_dur','Fade out duration',0,2,.05,'s'],['fade_var','Fade out random',0,1,.05,'s'],
+  ['spin','Rotation',0,3,.05,'×'],['flip','Flip (cheap spin)',0,4,.05,'/s'],['flip_var','Flip random',0,1,.05,'%'],['time_sampling','Time sampling',0,3,1,'',LSC.time_sampling]]],
+ ['Physics',[['gravity','Gravity',-2,3,.05,''],['air','Air resistance',0,3,.05,''],['wind_x','Wind X',-2,2,.05,''],['wind_y','Wind Y',-2,2,.05,''],['vortex','Spin field',-2,2,.05,''],
+  ['turbulence','Turbulence: position',0,2,.05,''],['turb_size','Turbulence: size',0,1,.05,'%'],['turb_scale','Turbulence scale',.5,6,.1,''],['turb_speed','Evolution speed',0,3,.05,''],
+  ['speed_pulse','Speed pulse',0,1,.05,'%'],['pulse_hz','Pulse rate',.2,6,.1,'/s'],['bounce','Bounce',0,1,.05,'%'],['floor_y','Floor',.3,1,.01,'%'],['slide','Slide',0,1,.05,'%']]],
+ ['Morph',[['morph_at','Morph at',0,2,.05,'s'],['morph_var','Morph random',0,1,.05,'s']]],
+ ['Aux system',[['aux_at','Emit',0,3,1,'',LSC.aux_at],['children','Aux particles',0,12,1,''],['child_size','Aux size',.1,3,.05,'×'],['child_size_var','Aux size random',0,1,.05,'%'],
+  ['aux_inherit','Inherit velocity',0,1,.05,'%'],['aux_life','Aux life',0,2,.05,'s']]]];
+const LSOPEN=(()=>{try{return new Set(JSON.parse(localStorage.getItem('ls.open')||'["Emitter"]'))}catch(e){return new Set(['Emitter'])}})();
 const LSO=LSG.flatMap(g=>g[1]);
 const LS={files:null,start:null,sel:'',ed:null,doc:null,anim:null,t:0,err:'',busy:false,seq:0,lib:null};
 const rxStyle=()=>{try{return localStorage.getItem('rx.style')==='lottie'?'lottie':'emoji'}catch(e){return 'emoji'}};
@@ -32,7 +42,12 @@ function lsHtml(){
    `${lsThumb(f.file)}<b>${esc(f.name)}</b><small class=mut>${Math.round(f.frames/(f.fps||30)*10)/10} s${f.saved?' · saved':''}</small></button>`).join('')}</div>`
    :`<div class=mut>No files yet: drop Lottie .json files into <code>mirsal/lottie/</code>.</div>`)+`</section>`}
 function lsSlider(o){const v=LS.ed.settings[o[0]];
+ if(o[6])return `<label class=rx-sl><span class=mut>${o[1]}</span><select data-lso=${o[0]} aria-label="${o[1]}">${o[6].map((c,k)=>`<option value=${k} ${+v===k?'selected':''}>${c}</option>`).join('')}</select></label>`;
  return `<label class=rx-sl><span class=mut>${o[1]}</span><input type=range min=${o[2]} max=${o[3]} step=${o[4]} value="${v}" data-lso=${o[0]} aria-label="${o[1]}"><output>${rxFmt(o,v)}</output></label>`}
+/* a closed group says what in it differs from the start, so nothing hides */
+function lsSummary(os){const st=LS.start||{},d=os.filter(o=>LS.ed.settings[o[0]]!=null&&+LS.ed.settings[o[0]]!==+st[o[0]]);
+ return d.length?d.slice(0,3).map(o=>`${o[1].toLowerCase()} ${o[6]?o[6][+LS.ed.settings[o[0]]].toLowerCase():rxFmt(o,LS.ed.settings[o[0]])}`).join(' · ')+(d.length>3?` · +${d.length-3}`:''):'as default'}
+const lsPresets=()=>`<div class=ls-pre><small class=mut>Presets</small>${Object.keys(LS.presets||{}).map(n=>`<button class="btn sm" data-act=lspreset data-p="${esc(n)}" title="Fill the sliders with ${esc(n)} (the file and its morph targets stay)">${esc(n)}</button>`).join('')}</div>`;
 /* a file's own animation as a small tile picture: lottie-web, still on its middle frame, playing while pointed at (lsThumbs mounts them) */
 const lsThumb=f=>`<span class=ls-th data-lsthumb="${esc(f)}" aria-hidden=true></span>`;
 function lsTargets(){const others=(LS.files||[]).filter(f=>f.file!==LS.sel),b=+LS.ed.settings.morph_burst?1:0;
@@ -48,7 +63,9 @@ function lsEditor(){
  const f=lsFile(LS.sel)||{name:lsName(LS.sel)};
  return `<section class=rx-ed data-lsed><div class=rx-stage data-lsstage>${lsStage()}</div><div class=rx-ctl>
   <div class=rx-h><b>${esc(f.name)}</b><small class=mut>2 s · 512 × 512${LS.doc?` · ${LS.doc.layers.length} layers`:''}</small>${rxDbgToggle()}<button class=link data-act=lsclose aria-label="Close">${ic('x')}</button></div>
-  <div class=rx-groups>${LSG.map(([t,os])=>`<div class=rx-grp><div class=rx-gh><b>${t}</b></div>${os.map(lsSlider).join('')}${t==='Morph'?lsTargets():''}</div>`).join('')}</div>
+  ${lsPresets()}
+  <div class=rx-groups>${LSG.map(([t,os])=>`<details class=rx-grp data-lsg="${t}" ${LSOPEN.has(t)?'open':''}><summary class=rx-gh><b>${t}</b><small class=mut>${lsSummary(os)}</small></summary>${os.map(lsSlider).join('')}${t==='Morph'?lsTargets():''}</details>`).join('')}
+   <div class=rx-grp><label class=rx-sl><span class=mut>Random seed</span><b>${LS.ed.settings.seed}</b><button class="btn sm" data-act=lsseed title="The same settings with other random draws">Re-roll</button></label></div></div>
   ${LS.err?`<span class=fx-warn data-lserr>${esc(LS.err)}</span>`:'<span data-lserr></span>'}
   <div class=rx-foot><button class="btn pri" data-act=lssave ${LS.busy?'disabled':''}>Save</button><button class=btn data-act=lsdl ${LS.doc?'':'disabled'}>${ic('download')} JSON</button>`+
   `<button class=link data-act=lsreset>Reset to default</button></div></div></section>`}
@@ -80,7 +97,7 @@ async function lsMount(){
 
 /* ---------- server ---------- */
 async function lsLoad(){const r=await api('/api/particles/lottie-reactions');
- if(r.ok){LS.files=r.j.files||[];LS.start=r.j.start||{}}else{LS.files=[];LS.err=r.j.error||'The Lottie files could not be read.'}}
+ if(r.ok){LS.files=r.j.files||[];LS.start=r.j.start||{};LS.presets=r.j.presets||{}}else{LS.files=[];LS.err=r.j.error||'The Lottie files could not be read.'}}
 async function lsPreview(){
  if(!LS.ed)return;const n=++LS.seq;
  const r=await post(`/api/particles/lottie-reactions/${encodeURIComponent(LS.sel)}/preview`,{settings:LS.ed.settings,morph_targets:LS.ed.morph_targets});
@@ -103,6 +120,10 @@ ACT.lspick=el=>lsOpen(el.dataset.f);
 ACT.lstg=el=>{if(!LS.ed)return;const f=el.dataset.f,m=LS.ed.morph_targets.filter(x=>x!==f);if(!LS.ed.morph_targets.includes(f))m.push(f);LS.ed.morph_targets=m;rxDraw();lsPreview()};
 ACT.lsmode=el=>{if(!LS.ed)return;LS.ed.settings.morph_burst=+el.dataset.v?1:0;rxDraw();lsPreview()};
 ACT.lsclose=()=>{LS.sel='';LS.ed=null;LS.doc=null;if(LS.anim){try{LS.anim.destroy()}catch(e){}LS.anim=null}rxDraw()};
+ACT.lspreset=el=>{if(!LS.ed)return;const pr=(LS.presets||{})[el.dataset.p];if(!pr)return;LS.ed.settings={...(LS.start||{}),...pr,seed:LS.ed.settings.seed};rxDraw();lsPreview()};
+ACT.lsseed=()=>{if(!LS.ed)return;LS.ed.settings.seed=1+Math.floor(Math.random()*99999);rxDraw();lsPreview()};
+document.addEventListener('toggle',ev=>{const d=ev.target;if(!d||!d.dataset||d.dataset.lsg===undefined)return;
+ if(d.open)LSOPEN.add(d.dataset.lsg);else LSOPEN.delete(d.dataset.lsg);try{localStorage.setItem('ls.open',JSON.stringify([...LSOPEN]))}catch(e){}},true);
 ACT.lsreset=()=>{if(!LS.ed)return;LS.ed.settings={...(LS.start||{})};LS.ed.morph_targets=[];rxDraw();lsPreview()};
 ACT.lssave=async()=>{if(!LS.ed||LS.busy)return;LS.busy=true;
  const r=await post(`/api/particles/lottie-reactions/${encodeURIComponent(LS.sel)}`,{settings:LS.ed.settings,morph_targets:LS.ed.morph_targets});LS.busy=false;
@@ -113,4 +134,5 @@ ACT.lsdl=()=>{if(!LS.doc)return;const a=document.createElement('a');
 ACT.lszip=()=>{const a=document.createElement('a');a.href='/api/particles/lottie-reactions.zip';a.download='lottie-reactions.zip';a.click()};
 document.addEventListener('input',ev=>{const t=ev.target;if(!t||!t.dataset||t.dataset.lso===undefined||!LS.ed)return;
  const o=LSO.find(x=>x[0]===t.dataset.lso);if(!o)return;LS.ed.settings[o[0]]=+t.value;
- const out=t.parentNode.querySelector('output');if(out)out.textContent=rxFmt(o,+t.value);lsSoon()});
+ const out=t.parentNode.querySelector('output');if(out)out.textContent=rxFmt(o,+t.value);
+ const g=t.closest&&t.closest('details[data-lsg]'),sm=g&&g.querySelector('summary small'),grp=g&&LSG.find(x=>x[0]===g.dataset.lsg);if(sm&&grp)sm.textContent=lsSummary(grp[1]);lsSoon()});

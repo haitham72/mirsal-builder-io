@@ -21,14 +21,32 @@ from .particle_sets import SetError, sets_dir
 
 _LOCK = threading.Lock()
 SIZE = 512                                                                      # the export's canvas = the dashboard's viewer
-# The sliders, in the editor's order; every one is a ParticleParams field except size_var (re-spreads size_min / size_max around their middle).
+# The sliders, in the editor's order; every one is a ParticleParams field except size_var (re-spreads size_min / size_max around their middle)
+# and origin_x / origin_y (the emitter's Position, the engine's origin).
 SETTINGS = ("magnitude", "speed_var", "speed_pulse", "pulse_hz", "gravity", "vortex", "spin", "flip", "flip_var", "count", "spread",
             "particle_size", "size_var", "size_in_dur", "size_out_dur", "fade_start", "fade_dur", "fade_var",
-            "morph_at", "morph_var", "morph_burst", "children", "child_size", "child_size_var", "seed")
+            "morph_at", "morph_var", "morph_burst", "children", "child_size", "child_size_var", "seed",
+            # the Trapcode Particular-style groups (Haitham 2026-10-15, docs/size-position-lottie-proposal.md D): Emitter, Particle, Physics, Aux
+            "emitter", "origin_x", "origin_y", "emitter_w", "emitter_h", "emit_dur", "direction", "vel_dist", "lifetime", "life_var", "size_curve", "opacity_curve", "time_sampling",
+            "air", "wind_x", "wind_y", "turbulence", "turb_scale", "turb_speed", "turb_size", "bounce", "floor_y", "slide", "aux_at", "aux_inherit", "aux_life")
 # The neutral start (Haitham: "just pure default", no vortex / confetti / motion preset): the engine's own defaults.
 START = {"magnitude": 1.0, "speed_var": 0.0, "speed_pulse": 0.0, "pulse_hz": 2.0, "gravity": 1.0, "vortex": 0.0, "spin": 1.0, "flip": 0.0, "flip_var": 0.0,
          "count": 28, "spread": 360.0, "particle_size": 1.0, "size_var": 0.375, "size_in_dur": 0.0, "size_out_dur": 0.0,
-         "fade_start": 0.0, "fade_dur": 0.0, "fade_var": 0.0, "morph_at": 0.0, "morph_var": 0.0, "morph_burst": 0, "children": 0, "child_size": 0.5, "child_size_var": 0.0, "seed": 1}
+         "fade_start": 0.0, "fade_dur": 0.0, "fade_var": 0.0, "morph_at": 0.0, "morph_var": 0.0, "morph_burst": 0, "children": 0, "child_size": 0.5, "child_size_var": 0.0, "seed": 1,
+         "emitter": 0, "origin_x": 0.5, "origin_y": 0.5, "emitter_w": 0.0, "emitter_h": 0.0, "emit_dur": 0.0, "direction": 0.0, "vel_dist": 0.0, "lifetime": 1.6, "life_var": 0.0,
+         "size_curve": 0, "opacity_curve": 0, "time_sampling": 0, "air": 0.0, "wind_x": 0.0, "wind_y": 0.0, "turbulence": 0.0, "turb_scale": 2.0,
+         "turb_speed": 0.5, "turb_size": 0.0, "bounce": 0.0, "floor_y": 0.9, "slide": 0.0, "aux_at": 0, "aux_inherit": 0.0, "aux_life": 0.0}
+# Presets in the style of Particular Designer's gallery: a preset only fills the sliders (the origin and the morph targets stay), on top of START.
+PRESETS = {
+    "Pop": {"magnitude": 1.4, "gravity": 0.6, "count": 24, "size_curve": 3, "opacity_curve": 0, "spin": 1.2},
+    "Fountain": {"spread": 50.0, "magnitude": 2.0, "gravity": 1.6, "count": 40, "emitter": 3, "emitter_w": 0.1, "emit_dur": 1.0, "origin_y": 0.85, "life_var": 0.3},
+    "Confetti": {"count": 60, "spread": 120.0, "magnitude": 1.6, "gravity": 0.5, "air": 1.0, "flip": 2.0, "flip_var": 0.5, "turbulence": 0.6, "particle_size": 0.6, "life_var": 0.3},
+    "Snow": {"count": 40, "magnitude": 0.1, "gravity": 0.25, "emitter": 3, "emitter_w": 1.0, "origin_y": 0.05, "emit_dur": 1.2, "turbulence": 0.5, "turb_speed": 0.3, "spin": 0.3, "particle_size": 0.5},
+    "Fireworks": {"count": 8, "magnitude": 1.2, "gravity": 0.4, "spread": 40.0, "children": 8, "aux_at": 1, "aux_inherit": 0.3, "aux_life": 0.7, "child_size": 0.4, "opacity_curve": 3},
+    "Orbit": {"vortex": 1.6, "magnitude": 0.6, "gravity": 0.0, "count": 20, "emitter": 1, "emitter_w": 0.4, "time_sampling": 1},
+    "Rain of hearts": {"count": 36, "magnitude": 0.2, "gravity": 0.9, "emitter": 3, "emitter_w": 0.9, "origin_y": 0.05, "emit_dur": 1.0, "bounce": 0.4, "floor_y": 0.92, "slide": 0.3, "wind_x": 0.3},
+    "Trail": {"count": 10, "magnitude": 1.3, "gravity": 0.3, "children": 6, "aux_at": 3, "aux_life": 0.4, "child_size": 0.35, "size_curve": 2},
+}
 _SIZE_MID = 0.16                                                                # the middle of the engine's default size range (0.10 .. 0.22)
 
 
@@ -85,6 +103,7 @@ def params(settings=None):
     from ..engine import particles as _p
     s = {**START, **clean_settings(settings)}
     v = min(max(float(s.pop("size_var")), 0.0), 1.0)
+    s["origin"] = (float(s.pop("origin_x")), float(s.pop("origin_y")))         # the emitter's Position (Particular), the engine's origin
     try:
         return _p.ParticleParams.from_dict({**s, "size_min": _SIZE_MID * (1 - v) if v < 1 else 0.02, "size_max": _SIZE_MID * (1 + v),
                                             "duration": REACTION_SECONDS, "size": SIZE}).clamped()
@@ -99,7 +118,7 @@ def listing(out: Path) -> dict:
     for f in handpicked_files():
         rec = lib.get(f["file"]) or {}
         rows.append({**f, "saved": bool(rec), "settings": {**START, **(rec.get("settings") or {})}, "morph_targets": rec.get("morph_targets") or []})
-    return {"files": rows, "start": START, "keys": list(SETTINGS), "seconds": REACTION_SECONDS, "size": SIZE}
+    return {"files": rows, "start": START, "keys": list(SETTINGS), "presets": PRESETS, "seconds": REACTION_SECONDS, "size": SIZE}
 
 
 def save(out: Path, file: str, settings=None, morph_targets=None) -> dict:
