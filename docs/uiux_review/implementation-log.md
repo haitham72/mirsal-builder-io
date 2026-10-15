@@ -87,3 +87,11 @@ Browser: pack9ebb180c has grid plus Reaction studio, zero pktab controls, no pag
 Library snapshots and public Trending summaries now add sticker_count/reaction_count using one backend classifier, after existing owner/public filtering. Legacy totals and arrays remain intact. Home, grouped Library and Trending cards consume the additive fields; filtered subsets use neutral item wording. No client-only ownership or classification rule was added.
 
 Validation: two narrow Python cases cover empty/static/reaction/mixed packs, owner filtering and public-only visibility. Imports/Trending + Packs column8 node tests pass; five relevant Home cases pass. Browser initial surfaces at1440/390 in both themes have no page overflow or below44px fully visible sampled controls. This geometry sample does not claim every off-screen, opened or hover state.
+
+## Redesign phase 6b — reproduced integration gaps
+
+A real duplicate MP4 upload exposed FastAPI's ImportOptions rejecting again/grid_ok although the existing engine and legacy handler support them. Added those booleans and their OpenAPI descriptions; an unknown-option rejection remains. Native general duplicate retry now returns202 with again=1/as_new=1 and creates G156. The batch duplicate choices are present; running a second import while the first cut holds the writer lock correctly returns409, so that overlap is not treated as a UI regression.
+
+The 44px target pass made wrapped frame controls taller than the old placement reserve. Native Cancel reproduced an off-screen desktop action row. TESTCARD now measures rendered height. Real imported3×3 G155 has nine READY animations/36frames; Grid, End scrub, arrows, Centre, drag and native Cancel pass at1440/390 in both themes. Card bottom832 and Cancel bottom821 in844px viewport; no button below44; zero mutation POSTs during all four cancelled sessions.
+
+Narrow regressions: import schema/OpenAPI1 pass, preview placement2 pass, UIinventory5 pass. Baseline JSON formatting restored without changing semantics; pktab retirement retained. No full suite or provider call.

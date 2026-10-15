@@ -9,3 +9,7 @@ Manual nine-emoji batches use the same gates and templates, with saved pack-scop
 ### General duplicate upload
 
 A duplicate in the general sheet/video import dialog offers Open existing batch or Import again as a new batch. The latter resends the chosen file with again=1 and as_new=1, clearing destination generation/sheet; no provider job is created. The in-batch Again into/As a new batch question remains separate.
+
+### Redesign validation repair (2026-10-15)
+
+The general duplicate dialog offers Open existing batch or Import again as a new batch. The latter clears destination/sheet and sends again=1 and as_new=1. FastAPI ImportOptions now accepts again and grid_ok, matching the existing engine and legacy handler; OpenAPI declares both as booleans. Unknown options are still refused. A real 3×3 synthetic MP4 imported as G155, all nine animations READY; explicit duplicate retry returned202 and G156 on copied storage. Native batch retry remains subject to the existing writer lock: wait for the current cut before starting a second import.

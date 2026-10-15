@@ -22,6 +22,8 @@ const TESTCARD = {
     const r = anchor ? anchor.getBoundingClientRect() : null, w = Math.min(width, innerWidth - 24);
     card.style.width = w + 'px';
     card.style.left = Math.max(12, Math.min(innerWidth - w - 12, r ? r.left : 12)) + 'px';
-    card.style.top = Math.max(12, Math.min(innerHeight - w - reserve, r ? r.bottom + 8 : 90)) + 'px';
+    // Controls wrap at 44px targets; the rendered height can exceed width + reserve.
+    const h = Math.min(card.getBoundingClientRect().height || w + reserve, innerHeight - 24);
+    card.style.top = Math.max(12, Math.min(innerHeight - h - 12, r ? r.bottom + 8 : 90)) + 'px';
   }
 };

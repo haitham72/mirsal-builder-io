@@ -20,3 +20,7 @@ Video (`engine/video.py`): decode one cell at a time (`ffmpeg.decode_cell`: the 
 ### Preview presentation and canvas size (2026-10-15 redesign)
 
 The edge test and Resize/frame editor share `ui-testcard.js` (TESTCARD open/sync/place/close) for the checkerboard, loading/busy state, caption and Apply/Cancel actions. Their controllers retain distinct units, endpoints and staged state. Hot-spot canvas coordinates use EngineConfig.size rather than a fixed512; native generation endpoints and Apply semantics are unchanged.
+
+### Shared preview acceptance — redesign
+
+Edge/frame adapters share TESTCARD presentation. Placement uses the rendered height, including wrapped 44px controls, rather than a fixed size estimate; a tall card scrolls inside the viewport. Imported 3×3 G155 (36frames) passed Grid, scrubber, arrows, Centre, drag and Cancel at1440/390px in both themes; Cancel sent zero mutation requests. Earlier copied G154 Apply returned200 for one native position request.
