@@ -1,4 +1,6 @@
-# Reaction effects tabs: Emoji Style | Lottie Style | Packs (2026-10-15)
+# 18. Reaction tabs: Emoji Style | Lottie Style | Packs (2026-10-15)
+
+<sub>Part of [reaction.md](../reaction.md).</sub>
 
 `#/reactions` and Library › Reactions show the same three tabs, **Emoji Style | Lottie Style | Packs**, from the one tab state — so work made in Reaction effects is visible in the Library, and the Library's sets are one tab away from the authoring screen.
 

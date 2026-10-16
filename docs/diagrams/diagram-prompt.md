@@ -12,7 +12,7 @@ You are drawing the architecture of **Mirsal Builder**, a local app that makes a
 - `docs/engine-and-studio.md` ("Lifecycle", "Engine", "Batch groups", "Remove batch", "Emptying the trash")
 - `docs/generation.md` ("Prompts", "The Higgsfield CLI", "Jobs", "Credits and usage", "Several paid jobs at once")
 - `docs/agent-and-chat.md` ("One turn", "Memory", "Models", "The agentic creator", "Several subjects, per-subject feedback, taste", "Particle sets in the chat", "Edits by what they mean")
-- `docs/particles.md`, `docs/effects.md`, `docs/store-and-search.md`, `docs/api.md`
+- `docs/reaction.md`, `docs/effects.md`, `docs/store-and-search.md`, `docs/api.md`
 - `docs/api.md` "Office accounts on the LAN", "Trending", "Tickets" (built in v1.0); `docs/backlog.md` (what is still open: draw it only in diagram 7, dashed)
 - When a doc is unclear, open the code it names (`mirsal/mirsal/agent/graph.py`, `flow/pipeline.py`, `flow/gates.py`, `generation/jobs.py`, `flow/particle_sets.py`) and draw what the code does.
 

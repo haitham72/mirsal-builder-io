@@ -15,7 +15,7 @@ The final burst is an ordinary animated Telegram sticker in the selected parent 
 
 ## 2. Sprite sources, one simulator
 
-The editor offers three equal cards for every new version: **Sprites from the sticker** (selected slices/library artwork, free), **AI image sprites** and **Kling animated · from scratch**. All paths feed one simulator, and each saved pass is one row under the sticker (`docs/particles.md` §3). Add more retains both AI choices regardless of a set's initial source. Provider options live under Advanced, not in an extra creation screen.
+The editor offers three equal cards for every new version: **Sprites from the sticker** (selected slices/library artwork, free), **AI image sprites** and **Kling animated · from scratch**. All paths feed one simulator, and each saved pass is one row under the sticker (`docs/reaction.md` §3). Add more retains both AI choices regardless of a set's initial source. Provider options live under Advanced, not in an extra creation screen.
 
 | Source | Preparation | Simulation input |
 | --- | --- | --- |
