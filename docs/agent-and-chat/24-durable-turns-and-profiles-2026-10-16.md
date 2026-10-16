@@ -2,22 +2,46 @@
 
 <sub>Part of [agent-and-chat.md](../agent-and-chat.md).</sub>
 
-The graph finally uses two LangGraph powers: a checkpointer for durable turns, and per-user memory it reads back. Approvals are unchanged (cards and go-ahead buttons, not `interrupt()`).
+Implemented in `3f35dcd3`. The [review](../langgraph-memory-review.md) records five
+open findings, including two P1 replay-safety issues. Cards and go-ahead buttons
+remain the approval interface.
 
 ## Turn checkpoints (`SqliteSaver`, `out/checkpoints.sqlite`)
 
-Every turn checkpoints under `thread_id = <session id>` (`langgraph-checkpoint-sqlite`, in `requirements.txt`). The file is disposable and git-ignored, one per `out/` (a `MIRSAL_OUT` copy gets its own). `Turn` pickles with only JSON-native fields: `__getstate__` drops the live trace and lock; a node guard rebinds a restored turn's trace to its own sess/msg.
+Every turn checkpoints under `thread_id = <session id>` using
+`langgraph-checkpoint-sqlite`. The file is git-ignored under `mirsal/out/`, with
+one saver per output directory. `Turn.__getstate__` drops the live trace and lock;
+a node guard rebinds a restored turn's trace to its saved session and message.
 
-A restart resumes the dead turn only when it is provably safe: the pending node is in `SAFE_RESUME_NODES` (understand, resolve, clarify, ask, smalltalk, profile, search, names, finish — none of them spends or writes decisions) **and** the turn spent nothing (`spent == 0`). Anything else keeps the old interrupted message. `Agent.close()` / `Agent.close_all()` release the process-wide saver connections (tests must close, or temp dirs cannot be deleted on Windows).
+Resume currently checks that the next node is in `SAFE_RESUME_NODES` and
+`spent == 0`. This does not establish safety: resumed routing can enter spending
+or decision nodes, and allowlisted `ask`/`names` can invoke vision providers
+without updating `spent`. See review findings 1 and 2 before relying on replay.
 
-The last turn's stickers repair an emptied focus: when the session focus names a batch but no stickers (a paid batch just reset it), `_ctx` falls back to `_last_focus` — the newest earlier checkpoint with stickers for that batch — so "number 3" hits the new batch, not the old one.
+`Agent.close()` / `Agent.close_all()` release saver connections. Test cleanup
+must run after chat workers stop; the Telegram harness still leaves a connection
+open and fails Windows temporary-directory cleanup (review finding 5).
+
+When live focus has a generation but no stickers, `_ctx` uses `_last_focus` to
+look for the newest earlier checkpoint with stickers for that generation,
+scanning at most 40 checkpoints. A non-empty live selection takes precedence.
 
 ## Profiles (`out/profiles.sqlite`, `agent/profile.py`)
 
-One row per person: predefined columns for the stable core (`user_id`, `name`, `tone`), JSON columns for what grows (`likes`, `dislikes`, `preferences`, `edit_counts`). The JSON file stays the human-readable export (every table write mirrors into it; the first open imports it), the Postgres copy stays the mirror. Never committed, like the JSON.
+One row per person contains `user_id`, `name`, `tone`, and JSON columns for
+`likes`, `dislikes`, `preferences`, and `edit_counts`. `Profile.set_facts` writes
+name, likes, dislikes and extras to the table and JSON profile; tone and edit
+counts also write both. First open imports the existing JSON facts. Existing
+taste votes remain JSON-only, and Postgres fact synchronization remains in place.
 
-- Name, likes, dislikes, extras flow in through `set_facts` (validated as before); tone through `detect_tone` ("be brief" → `brief`) in `n_profile`, confirmed in the reply.
-- Every decided edit is counted in `n_editroute` (`tweak` / `action` / `redesign` / `editor`); `top_edit()` only names a kind when it is strictly ahead.
-- Reads with a visible effect: the greeting shortens for `brief` tone, and the unclear-edit reply nudges the phrasing the person uses most (`You usually ask for tweak — say it like '...'`).
+- `detect_tone` runs inside `n_profile`. Explicit tone requests currently lack
+  rule routing, and substring matching can mistake unrelated facts for tone
+  instructions (review findings 3 and 4).
+- Edit offers count `tweak`, `action`, `redesign`, or `editor`; `top_edit()` returns
+  a kind only when it has a strict lead.
+- A stored `brief` tone shortens the greeting. Unclear-edit replies can suggest
+  phrasing for the person's most frequent edit kind.
 
-Tests: `tests/test_agent_memory.py` (checkpoint per turn, safe resume, focus fallback, table growth/ranking, tone greeting, edit counting). Nothing here spends: providers stay `none` under tests.
+Verification results and limitations are kept in the review. The six memory tests
+pass, but the broader agent area is not green. Checks used disabled providers and
+fakes; no paid-provider validation was performed.
