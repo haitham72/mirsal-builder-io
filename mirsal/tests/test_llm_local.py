@@ -113,6 +113,8 @@ class LocalCase(unittest.TestCase):
             os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v)
         llm._ENV_LOADED = self._loaded
         self.reset()
+        from mirsal.agent.graph import Agent as _Ag
+        _Ag.close_all()
         self.td.cleanup()
 
     def age(self, seconds):
@@ -423,6 +425,7 @@ class BrainHonestyTests(LocalCase):
         cache = cachemod.Cache(force_memory=True)
         store = SessionStore(Path(self.td.name), cache)
         agent = Agent(store, FakeTools(), Brain(complete=failing), cache)
+        self.addCleanup(agent.close)
         sid = store.create()["id"]
         m = agent.run_turn(sid, "blorp zzz qqq vvv www xxx yyy zzz aaa bbb ccc")      # the rules are unsure: the model is asked, and cannot answer
         notes = [s for s in m["steps"] if s["kind"] == "note" and s["label"].startswith("answered by rules")]

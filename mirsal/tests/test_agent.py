@@ -27,9 +27,11 @@ class Base(unittest.TestCase):
         self.tools = FakeTools()
         self.said = []
         self.agent = Agent(self.store, self.tools, Brain(complete=self._llm), self.cache)
+        self.addCleanup(self.agent.close)
         self.sid = self.store.create()["id"]
 
     def tearDown(self):
+        Agent.close_all()
         self.td.cleanup()
 
     def _llm(self, system, user):
@@ -568,6 +570,7 @@ class AdoptStudioBatches(StudioFiles):
         member = SessionStore(self.out, self.cache, user="U001", see_all=False)
         sess = member.create()
         agent = Agent(member, self.tools, Brain(complete=self._llm), self.cache)
+        self.addCleanup(agent.close)
         agent.run_turn(sess["id"], "make G002/S3 happier")
         self.assertEqual(member.load(sess["id"])["subjects"], [])                                    # a stranger's batch is never pulled into this chat
         agent.run_turn(sess["id"], "make G077/S3 happier")                                           # nor one that does not exist

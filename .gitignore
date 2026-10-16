@@ -69,6 +69,9 @@ mirsal/out/tickets/
 mirsal/out/trending.json
 # what the chat knows about each person (name, place, age, likes): personal, never committed (agent/profile.py)
 mirsal/out/profile/
+mirsal/out/profiles.sqlite*
+# LangGraph turn checkpoints: disposable, rewritten every turn (agent/graph.py)
+mirsal/out/checkpoints.sqlite*
 
 # runtime temp (Haitham, 2026-10-05: commit the media and batch data, never the temp)
 mirsal/out/cache/

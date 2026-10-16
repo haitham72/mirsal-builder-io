@@ -22,7 +22,10 @@ Every node writes to the turn's STEP TRACE, the small queue the chat shows while
 from __future__ import annotations
 
 import re
+import sqlite3
+import threading
 import time
+from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Any, TypedDict
 
@@ -32,7 +35,7 @@ from . import creator, stages, manual_batches
 from .brain import Brain
 from .memory import DEFAULT_SETTINGS, SessionError, SessionStore, gid_of, slug
 from . import editroute, refine, subjects
-from .profile import Profile
+from .profile import EDIT_HINTS, Profile, detect_tone
 from .resolver import DESCRIBE, NAME_QUESTION, Resolution, batch_intent, beyond, classify, display_request, is_sticker_answer, particles_intent, polarity_of, resolve, settings_from, smalltalk_kind, profile_facts, request_text
 from .profile import profile_said
 from .tools import ConsoleTools, ToolError
@@ -46,6 +49,29 @@ def _interrupt_message(msg):
 CONTINUE_RX = r"^(?:continue|go on|go ahead|proceed|carry on|keep going|approve and continue|resume)\b"
 CREATION_INTENTS = {"NEW", "NEW_MULTI", "ANOTHER", "REFINE", "EDIT_STICKERS", "EDIT_ROUTE", "ANIMATE", "CONFIRM", "EFFECTS", "PARTICLES", "CREATOR", "RETRY", "BATCH_MORE", "REGENERATE"}
 SUGGESTIONS = ["a teddy bear waving", "falcon stickers", "my dog as a banana", "Eid mubarak greetings"]
+SAFE_RESUME_NODES = {"understand", "resolve", "clarify", "ask", "smalltalk", "profile", "search", "names", "finish"}
+TONE_ACK = {"brief": " I'll keep it short.", "warm": " I'll keep it warm and chatty.", "formal": " I'll keep it formal."}
+
+_SAVERS = {}
+_SAVERS_LOCK = threading.Lock()
+
+def _saver_for(outdir):
+    """One SqliteSaver per out/ for the life of the process (the server builds an Agent per message)."""
+    key = str(Path(outdir) / "checkpoints.sqlite")
+    with _SAVERS_LOCK:
+        hit = _SAVERS.get(key)
+        if hit is None:
+            from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+            from langgraph.checkpoint.sqlite import SqliteSaver
+            conn = sqlite3.connect(key, check_same_thread=False, timeout=30)
+            saver = SqliteSaver(conn, serde=JsonPlusSerializer(pickle_fallback=True))
+            setup = getattr(saver, "setup", None)
+            if callable(setup):
+                setup()
+            hit = _SAVERS[key] = [conn, saver, 1]
+        else:
+            hit[2] += 1
+        return hit[1], key
 STYLE_NAMES = {p["id"]: p["label"].lower() for p in styles.PRESETS}          # the names the cards and replies use: the real presets, never a list of the chat's own
 
 
@@ -115,6 +141,17 @@ class Turn:
     prefix: str = ""                             # what the profile node said, put before the rest of the turn's answer ("Nice to meet you, Sam! ..." then the plan)
     _lock: Any = None
 
+    def __getstate__(self):
+        d = dict(self.__dict__)
+        d.pop("trace", None)
+        d.pop("_lock", None)
+        return d
+
+    def __setstate__(self, d):
+        self.__dict__.update(d)
+        self.trace = None
+        self._lock = None
+
 
 class State(TypedDict, total=False):
     turn: Any
@@ -129,6 +166,7 @@ class Agent:
         self.store, self.tools = store, tools
         self.brain = brain or Brain()
         self.cache = cache or cachemod.default()
+        self.saver, self._saver_key = _saver_for(Path(self.store.out))
         self.graph = self._build()
 
     # ---- the graph ------------------------------------------------------------------------------------------------------------------
@@ -139,8 +177,15 @@ class Agent:
                   "edit": self.n_edit, "undo": self.n_undo, "animate": self.n_animate, "export": self.n_export, "feedback": self.n_feedback, "review": self.n_review, "ask": self.n_ask,
                  "settings": self.n_settings, "search": self.n_search, "confirm": self.n_confirm, "cancel": self.n_cancel,
                  "smalltalk": self.n_smalltalk, "profile": self.n_profile, "clarify": self.n_clarify, "retry": self.n_retry, "names": self.n_names, "names_decide": self.n_names_decide, "creator": self.n_creator, "batches": self.n_batches, "regenerate": self.n_regenerate, "emoji_batch": self.n_emoji_batch, "finish": self.n_finish}
+        def guard(fn):
+            def w(state):
+                t = state["turn"]
+                if getattr(t, "trace", None) is None:
+                    t.trace = Trace(self.store, t.sess, t.msg)
+                return fn(state)
+            return w
         for k, fn in nodes.items():
-            g.add_node(k, fn)
+            g.add_node(k, guard(fn))
         g.set_entry_point("understand")
         g.add_edge("understand", "resolve")
         targets = {k: k for k in nodes if k not in ("understand", "resolve")}
@@ -149,7 +194,7 @@ class Agent:
             if k not in ("understand", "resolve", "finish"):
                 g.add_conditional_edges(k, self.route, targets)
         g.add_edge("finish", END)
-        return g.compile()
+        return g.compile(checkpointer=self.saver)
 
     def route(self, state: State) -> str:
         t: Turn = state["turn"]
@@ -169,6 +214,8 @@ class Agent:
             raise SessionError("The assistant is still working on your last message.", 409)
         try:
             sess = self.store.load(sid)
+            if self._resume_dead_turn(sid, sess, lock):
+                sess = self.store.load(sid)
             for m in sess["messages"]:                           # we hold the lock, so nobody is running a turn: a "working" message is one that died with its server
                 if m.get("status") == "working":
                     _interrupt_message(m)
@@ -191,7 +238,7 @@ class Agent:
         self.brain.last_error = None                                  # per turn: `_finish` says "answered by rules" only for a failure of THIS turn
         try:
             try:
-                self.graph.invoke({"turn": t})
+                self.graph.invoke({"turn": t}, {"configurable": {"thread_id": t.sid}})
             except Exception as e:                                  # the user sees a calm sentence, never the internals
                 t.trace.end("something went wrong, nothing was spent", ok=False)
                 t.reply = "Something went wrong on my side, and nothing was spent. Try again, or tell me a little differently."
@@ -204,6 +251,80 @@ class Agent:
 
     def run_turn(self, sid: str, text: str, selected: list | None = None, action: dict | None = None) -> dict:
         return self.execute(self.prepare(sid, text, selected, action))
+
+    def close(self) -> None:
+        """Release this agent's checkpoint connection (tests; the server keeps one per out/ for its lifetime)."""
+        with _SAVERS_LOCK:
+            hit = _SAVERS.get(getattr(self, "_saver_key", ""))
+            if hit is not None:
+                hit[2] -= 1
+                if hit[2] > 0:
+                    hit = None
+                else:
+                    del _SAVERS[getattr(self, "_saver_key", "")]
+        if hit is not None:
+            try:
+                hit[0].close()
+            except Exception:
+                pass
+
+    @staticmethod
+    def close_all() -> None:
+        """Release every checkpoint connection (test tearDowns that never saw the Agent)."""
+        with _SAVERS_LOCK:
+            hits = list(_SAVERS.values())
+            _SAVERS.clear()
+        for hit in hits:
+            try:
+                hit[0].close()
+            except Exception:
+                pass
+
+    def _hello(self) -> str:
+        who = self._profile().name()
+        hi = f"Hi{' ' + who if who else ''}! "
+        return hi + ("What are we making?" if self._profile().tone() == "brief" else "What will you create today?")
+
+    def _edit_hint(self) -> str:
+        """Nudge the phrasing the person uses most (tracked per edit kind), so the retry parses first time."""
+        top = (self._profile().top_edit() or [None])[0]
+        return f" You usually ask for {top} -- say it like '{EDIT_HINTS[top]}'." if top in EDIT_HINTS else ""
+
+    def _last_focus(self, sid: str, gen: str, skip_msg) -> list:
+        """Newest earlier turn's stickers for this batch, from the checkpoints (never the live turn)."""
+        try:
+            history = list(self.graph.get_state_history({"configurable": {"thread_id": sid}}, limit=40))
+        except Exception:
+            return []
+        for snap in history:
+            try:
+                t = (snap.values or {}).get("turn")
+            except Exception:
+                continue
+            if t is None or (t.msg or {}).get("id") == skip_msg:
+                continue
+            focus = (getattr(t, "sess", None) or {}).get("focus") or {}
+            if focus.get("generation") == gen and focus.get("stickers"):
+                return list(focus["stickers"])
+        return []
+
+    def _resume_dead_turn(self, sid: str, sess: dict, lock) -> bool:
+        """Finish a turn that died with the server, iff it never spent: replay its remaining safe nodes on the saved
+        checkpoint, then let the new message run fresh. Anything else keeps the old interrupted message."""
+        try:
+            snap = self.graph.get_state({"configurable": {"thread_id": sid}})
+        except Exception:
+            return False
+        if not snap or not snap.next or set(snap.next) - SAFE_RESUME_NODES:
+            return False
+        t = (snap.values or {}).get("turn")
+        if t is None or getattr(t, "spent", 0):
+            return False
+        try:
+            self.graph.invoke(None, {"configurable": {"thread_id": sid}})
+            return True
+        except Exception:
+            return False
 
     # ---- nodes ----------------------------------------------------------------------------------------------------------------------------
     def _nm(self, sess: dict, gid) -> str:
@@ -363,6 +484,9 @@ class Agent:
         self.store.refresh(sess)
         focus = sess.get("focus") or {}
         gen = focus.get("generation") or (self.store.latest_pass(sess, with_generation=True) or {}).get("generation")
+        fstickers = focus.get("stickers") or []
+        if gen and not fstickers:
+            fstickers = self._last_focus(t.sid, gen, (t.msg or {}).get("id"))  # a paid batch emptied the focus: the last turn still names its stickers
         stickers, n, parent, known = [], 9, None, {}
         for subj in sess["subjects"]:
             for p in subj["passes"]:
@@ -379,7 +503,7 @@ class Agent:
             except Exception:
                 pass
         latest = (self.store.latest_pass(sess, with_generation=True) or {}).get("generation")
-        return {"generation": gen, "n": n, "stickers": stickers, "focus_stickers": focus.get("stickers") or [], "selected": t.selected,
+        return {"generation": gen, "n": n, "stickers": stickers, "focus_stickers": fstickers, "selected": t.selected,
                 "parent": parent, "latest": latest, "known": known}
 
     def n_resolve(self, state: State) -> dict:
@@ -1594,6 +1718,7 @@ class Agent:
             t.trace.end("asked what replacement means")
             return {}
         if er["route"] == "editor":
+            self._profile().count_edit("editor")
             return self._editor_offer(t, gen, er)
         interpreted = self.brain.edit_meaning(t.text, self.store.summary_text(t.sess)) if self.brain.available else None
         if interpreted and not interpreted["clear"]:
@@ -1605,7 +1730,7 @@ class Agent:
             er = {**er, "case": case, "subject": None, "action": None, "delta": None,
                   {"tweak": "delta", "action": "action", "redesign": "subject"}[case]: interpreted["change"]}
         elif not editroute.clear_change(t.text, er):
-            t.reply = "I couldn't confidently understand the whole change. What should I change, and on which sticker?"
+            t.reply = "I couldn't confidently understand the whole change. What should I change, and on which sticker?" + self._edit_hint()
             t.trace.end("asked what the edit means")
             return {}
         if re.match(r"\s*(?:replace|swap)\b", t.text, re.I) and not t.res.stickers:
@@ -1636,6 +1761,7 @@ class Agent:
 
     def _regen_offer(self, t: Turn, gen: str, er: dict) -> dict:
         case = er["case"]
+        self._profile().count_edit(case)
         what = {"tweak": er.get("delta"), "action": er.get("action"), "redesign": er.get("subject")}[case]
         try:
             base = self.tools.generation_plan(gen)
@@ -2318,7 +2444,7 @@ class Agent:
         kind = smalltalk_kind(t.text)
         t.trace.task({"thanks": "saying you're welcome", "bye": "saying goodbye", "ack": "noting that", "no": "noting that"}.get(kind, "saying hello"))
         t.reply = {"thanks": "You're welcome! Tell me what to change, or what to make next.", "bye": "Bye! Your stickers will be here when you come back.",
-                   "ack": "Anytime. Tell me what to change, or what to make next.", "no": "Okay. Tell me when you want to make something."}.get(kind, f"Hi{' ' + who if (who := self._profile().name()) else ''}! What will you create today?")
+                   "ack": "Anytime. Tell me what to change, or what to make next.", "no": "Okay. Tell me when you want to make something."}.get(kind, self._hello())
         t.chips = [{"label": s, "text": s} for s in SUGGESTIONS]
         t.trace.end("ready")
         return {}
@@ -2334,7 +2460,10 @@ class Agent:
             facts = self.brain.extract_profile(t.text, prof.facts_text()) or {}
         t.trace.task("remembering what you told me")
         saved = prof.set_facts(facts, t.text)
-        if not saved:
+        tone = detect_tone(t.text)
+        if tone:
+            prof.set_tone(tone, t.text)
+        if not saved and not tone:
             t.prefix = "I didn't catch what to remember. Say it like \"my name is Haitham\" or \"I live in Dubai\"."
             t.trace.end("nothing saved", ok=False)
             return {}
@@ -2346,7 +2475,9 @@ class Agent:
         said = profile_said(saved)
         hello = f"Nice to meet you, {saved['name']}! " if "name" in saved else "Got it! "
         more = "NEW" in t.intents                                       # "hi, I'm Sam, make me a falcon": the request goes on after this
-        t.prefix = hello + f"I'll remember {said}." + dropped + ("" if more else f" Your plan for {held} is still waiting: say \"create it\" when you're ready." if held else " What will you create today?")
+        t.prefix = hello + (f"I'll remember {said}." if saved else "Nothing new to remember.") + dropped + ("" if more else f" Your plan for {held} is still waiting: say \"create it\" when you're ready." if held else " What will you create today?")
+        if tone:
+            t.prefix += TONE_ACK[tone]
         if not held and not more:
             t.chips = [{"label": s, "text": s} for s in SUGGESTIONS]
         t.trace.end("saved: " + said)
