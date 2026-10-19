@@ -8,6 +8,7 @@ Ambiguity: when two candidates are equally plausible, ask ONE short question; wh
 from __future__ import annotations
 
 from .subjects import parse_multi as _parse_multi
+from .profile import detect_tone
 
 import re
 from dataclasses import dataclass, field
@@ -499,6 +500,8 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         return ["CONFIRM"], 0.95
     if has_pending and is_no(t):
         return ["CANCEL"], 0.95
+    if detect_tone(t):
+        return ["PROFILE"], 0.95
     polite = re.match(r"^(?:please\s+)?(?:can|could|would|will) you\s+(?:please\s+)?(.*?)\s*\??$", t)
     if polite and re.match(r"^(?:make|create|generate|give|draw|design|build|redo|regenerate|change|fix|replace|swap|improve|animate|add|remove|turn|put)\b", polite.group(1)):
         t = polite.group(1)                                          # "can you make me a falcon?" is a request, not a question about me

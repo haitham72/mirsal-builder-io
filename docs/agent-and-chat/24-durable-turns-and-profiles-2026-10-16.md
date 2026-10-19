@@ -22,8 +22,8 @@ Fake checkpoint regressions prove resolve cannot enter review/confirm ahead of
 a new cancel and a failed names invocation is called only once.
 
 `Agent.close()` / `Agent.close_all()` release saver connections. Test cleanup
-must run after chat workers stop; the Telegram harness still leaves a connection
-open and fails Windows temporary-directory cleanup (review finding 5).
+must run after chat workers stop; the Telegram harness now calls `close_all()`
+before temporary-directory cleanup (Windows lock regression reproduced and fixed).
 
 When live focus has a generation but no stickers, `_ctx` uses `_last_focus` to
 look for the newest earlier checkpoint with stickers for that generation,
@@ -37,9 +37,10 @@ name, likes, dislikes and extras to the table and JSON profile; tone and edit
 counts also write both. First open imports the existing JSON facts. Existing
 taste votes remain JSON-only, and Postgres fact synchronization remains in place.
 
-- `detect_tone` runs inside `n_profile`. Explicit tone requests currently lack
-  rule routing, and substring matching can mistake unrelated facts for tone
-  instructions (review findings 3 and 4).
+- Explicit tone requests route to `n_profile` by rules. `detect_tone` requires
+  a be/keep/stay/respond/reply/answer request with a whole style phrase and rejects
+  negations. Names such as Shorty and preferences such as warm colours do not
+  set reply tone. Fake regressions cover the full routing and stored profile.
 - Edit offers count `tweak`, `action`, `redesign`, or `editor`; `top_edit()` returns
   a kind only when it has a strict lead.
 - A stored `brief` tone shortens the greeting. Unclear-edit replies can suggest

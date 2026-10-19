@@ -244,9 +244,17 @@ EDIT_HINTS = {
 
 def detect_tone(text):
     """The reply tone the person asks for ("be brief", "keep it warm"), or None. First match in TONE_ORDER wins."""
-    t = " " + str(text or "").lower() + " "
+    t = str(text or "").lower()
+    # A style adjective in a name or preference is not a reply-style request.
+    request = re.fullmatch(
+        r"\s*(?:please\s+)?(?:(?:can|could|would|will) you\s+)?(?:please\s+)?"
+        r"(?:be|keep|stay|respond|reply|answer)\s+(?:(?:it|your replies|your answers|the replies|the answers)\s+)?"
+        r"(?:more\s+)?(.+?)\s*[.!?]*\s*", t)
+    if not request or re.search(r"\b(?:not|never|no|don'?t)\b", t):
+        return None
+    style = request.group(1).rstrip(".!? ")
     for tone in TONE_ORDER:
-        if any(w in t for w in TONE_WORDS[tone]):
+        if any(re.fullmatch(re.escape(w), style) for w in TONE_WORDS[tone]):
             return tone
     return None
 

@@ -132,6 +132,21 @@ class FocusFallback(Base):
 
 
 class ProfileTable(Base):
+    def test_explicit_tone_requests_route_to_profile(self):
+        for text in ("be brief", "keep it short", "stay formal", "be warm"):
+            self.say(text)
+            self.assertEqual(self.agent._profile().tone(), "formal" if "formal" in text else "warm" if "warm" in text else "brief")
+            self.assertFalse(self.sess().get("pending"))
+
+    def test_unrelated_and_negated_facts_do_not_set_tone(self):
+        from mirsal.agent.profile import detect_tone
+        for text in ("my name is Shorty", "I like warm colours", "don't be brief", "do not keep it short", "never stay formal", "be not warm", "be briefly"):
+            with self.subTest(text=text):
+                self.assertIsNone(detect_tone(text))
+        self.say("my name is Shorty")
+        self.say("I like warm colours")
+        self.assertIsNone(self.agent._profile().tone())
+
     def test_facts_edits_and_tone_grow_one_row(self):
         prof = self.agent._profile()
         self.assertEqual(prof.set_facts({"name": "Haitham", "likes": ["camels"]}, "said"), {"name": "Haitham", "likes": ["camels"]})
