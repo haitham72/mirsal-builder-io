@@ -13,10 +13,13 @@ Every turn checkpoints under `thread_id = <session id>` using
 one saver per output directory. `Turn.__getstate__` drops the live trace and lock;
 a node guard rebinds a restored turn's trace to its saved session and message.
 
-Resume currently checks that the next node is in `SAFE_RESUME_NODES` and
-`spent == 0`. This does not establish safety: resumed routing can enter spending
-or decision nodes, and allowlisted `ask`/`names` can invoke vision providers
-without updating `spent`. See review findings 1 and 2 before relying on replay.
+Resume advances one node per invocation (`interrupt_after="*"`), checking every
+checkpoint against `SAFE_RESUME_NODES` and `spent == 0`. It stops before spending
+or decision nodes. Provider-capable understand/profile/search/ask/names nodes
+are excluded; resolve with an ask/edit queue is excluded because it can use a
+model fallback. Interrupted provider calls require a fresh request, never replay.
+Fake checkpoint regressions prove resolve cannot enter review/confirm ahead of
+a new cancel and a failed names invocation is called only once.
 
 `Agent.close()` / `Agent.close_all()` release saver connections. Test cleanup
 must run after chat workers stop; the Telegram harness still leaves a connection

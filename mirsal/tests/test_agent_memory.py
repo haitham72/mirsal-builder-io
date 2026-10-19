@@ -66,6 +66,33 @@ class Base(unittest.TestCase):
 
 
 class Checkpoints(Base):
+    def test_resume_revalidates_routes_before_spending_or_deciding(self):
+        for node in ("review", "confirm"):
+            with self.subTest(node=node), mock.patch.object(Agent, "n_" + node) as unsafe:
+                agent = self.make_agent()
+                self.agent = agent
+                turn = agent.prepare(self.sid, "old approval")
+                turn.queue = [node]
+                agent.graph.update_state(self.cfg(), {"turn": turn}, as_node="understand")
+                turn._lock.__exit__(None, None, None)
+                self.say("cancel")
+                unsafe.assert_not_called()
+                self.assertTrue(any(m.get("status") == "error" for m in self.sess()["messages"]))
+
+    def test_failed_vision_names_is_not_replayed_by_the_next_message(self):
+        self.seed()
+        agent = self.make_agent()
+        turn = agent.prepare(self.sid, "check names")
+        turn.sess["settings"]["allow_vlm"] = True
+        turn.queue = ["names"]
+        agent.graph.update_state(self.cfg(), {"turn": turn}, as_node="resolve")
+        with mock.patch.object(self.tools, "name_proposals", side_effect=RuntimeError("recorded then failed")) as call:
+            with self.assertRaises(RuntimeError):
+                agent.graph.invoke(None, self.cfg())
+            turn._lock.__exit__(None, None, None)
+            self.say("thanks")
+            self.assertEqual(call.call_count, 1)
+
     def test_turn_is_checkpointed_under_the_session_id(self):
         self.say("hi")
         self.assertTrue((self.out / "checkpoints.sqlite").exists())

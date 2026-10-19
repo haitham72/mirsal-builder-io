@@ -49,7 +49,7 @@ def _interrupt_message(msg):
 CONTINUE_RX = r"^(?:continue|go on|go ahead|proceed|carry on|keep going|approve and continue|resume)\b"
 CREATION_INTENTS = {"NEW", "NEW_MULTI", "ANOTHER", "REFINE", "EDIT_STICKERS", "EDIT_ROUTE", "ANIMATE", "CONFIRM", "EFFECTS", "PARTICLES", "CREATOR", "RETRY", "BATCH_MORE", "REGENERATE"}
 SUGGESTIONS = ["a teddy bear waving", "falcon stickers", "my dog as a banana", "Eid mubarak greetings"]
-SAFE_RESUME_NODES = {"understand", "resolve", "clarify", "ask", "smalltalk", "profile", "search", "names", "finish"}
+SAFE_RESUME_NODES = {"resolve", "clarify", "smalltalk", "finish"}
 TONE_ACK = {"brief": " I'll keep it short.", "warm": " I'll keep it warm and chatty.", "formal": " I'll keep it formal."}
 
 _SAVERS = {}
@@ -309,8 +309,11 @@ class Agent:
         return []
 
     def _resume_dead_turn(self, sid: str, sess: dict, lock) -> bool:
-        """Finish a turn that died with the server, iff it never spent: replay its remaining safe nodes on the saved
-        checkpoint, then let the new message run fresh. Anything else keeps the old interrupted message."""
+        """Replay only safe nodes, checking every checkpoint before advancing one step.
+
+        Provider-capable nodes (including understand/profile/ask/names) and decisions
+        are never replayed. A new message always gets a fresh turn after this boundary.
+        """
         try:
             snap = self.graph.get_state({"configurable": {"thread_id": sid}})
         except Exception:
@@ -320,9 +323,20 @@ class Agent:
         t = (snap.values or {}).get("turn")
         if t is None or getattr(t, "spent", 0):
             return False
+        config = {"configurable": {"thread_id": sid}}
         try:
-            self.graph.invoke(None, {"configurable": {"thread_id": sid}})
-            return True
+            for _ in range(25):
+                if not snap.next:
+                    return True
+                t = (snap.values or {}).get("turn")
+                if set(snap.next) - SAFE_RESUME_NODES or t is None or getattr(t, "spent", 0):
+                    return False
+                # resolve's model fallback is not replayable either.
+                if "resolve" in snap.next and any(q in ("ask", "edit") for q in t.queue):
+                    return False
+                self.graph.invoke(None, config, interrupt_after="*")
+                snap = self.graph.get_state(config)
+            return False
         except Exception:
             return False
 
