@@ -31,6 +31,7 @@ test('the Packs tab dumps the Library Reactions content as is', () => {
   const r = screen();
   r("RXS.tab='packs';SPL.sets=[];SPL.made=[{id:'L001',token:'kiss',emoji:'😘',preset:'burst_01',url:'/out/particles/emoji/kiss/renders/L001.lottie.json',preview:'/out/particles/emoji/kiss/renders/L001.webp'}]");
   const h = r('rxHtml()');
+  assert.equal((h.match(/role=tablist/g)||[]).length, 1, 'one shared tab bar on Packs');
   assert.match(h, /data-s=packs[^>]*aria-selected=true/, 'the Packs tab is on');
   assert.match(h, /Made in Reaction effects/, 'with the made section');
   assert.match(h, /L001\.lottie\.json/, 'and the download');

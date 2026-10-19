@@ -12,6 +12,9 @@ One tab state, three views, no new route or engine function. Emoji Style and Lot
 - `#/reactions`: `rxHtml` renders the tab's view; `rxDraw` triggers `spLibSync()` on Packs and returns (style loaders only run for their own tab).
 - Library › Reactions: `spLibHtml()` (`mirsal/mirsal/console/particles.js`) renders the same bar (`spRxTabs`) plus the tab's view — its own sets/bank/made content on Packs, the `#/reactions` renderers (`rxLibHtml`, `rxEditor`, `rxPick`, `rxHpHtml`, `lsHtml`) on the style tabs. `spRxTabSync` loads what the shown tab needs (bank / Lottie files, once each) and refreshes; without `reactions.js` every `typeof` guard falls back to the dumped list, so older callers never break.
 - Refresh: `spLibRefresh` also redraws `#/reactions` when it is the current route, so bank builds, approvals and previews arriving late repaint both screens.
+- Packs includes the Library's tab bar exactly once. The 2026-10-19 interactive
+  sweep found Create prepending a second bar; a failing/passing VM regression
+  now requires one `role=tablist` on that view.
 - "Made in Reaction effects" (`spMadeHtml`): every created Lottie (`GET /api/particles/emoji-lottie`), newest first, preview image, token + preset, Download of the stored file, capped at 24. Data, unchanged: `/api/particles` (sets), `/api/particles/bank` (finished/unclaimed).
 
 ## Deliberately not changed

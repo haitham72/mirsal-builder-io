@@ -156,7 +156,7 @@ function rxPick(){
   `<span class=sp></span><button class="btn sm${RXS.multi?' pri':''}" data-act=rxmulti aria-pressed=${RXS.multi}>${ic('check')} Select</button></div>`+
   `<div class=rx-grid data-rxwall>${list.slice(0,RXS.shown).map(rxTile).join('')||'<span class=mut>No match.</span>'}</div>${rxMoreHtml(list.length)}${rxMany()}</section>`}
 function rxHtml(){
- if(rxTab()==='packs')return `<div class="page rx">${rxStyleBar()}${typeof spLibHtml==='function'?spLibHtml():''}</div>`;   /* Packs: the Library's Reactions, as is */
+ if(rxTab()==='packs')return `<div class="page rx">${typeof spLibHtml==='function'?spLibHtml():rxStyleBar()}</div>`;   /* Packs includes the shared tab bar. */
  if(rxTab()==='lottie')return `<div class="page rx">${rxStyleBar()}${lsHtml()}</div>`;      /* Lottie style: lottiestyle.js */
  if(!RXS.bank)return `<div class="page rx">${rxStyleBar()}<div class=fx-job><span class=spin></span> <span class=mut>Reading the emoji bank…</span></div></div>`;
  return `<div class="page rx">${rxStyleBar()}${rxLibHtml()}${rxEditor()}${rxPick()}${rxHpHtml()}</div>`}
