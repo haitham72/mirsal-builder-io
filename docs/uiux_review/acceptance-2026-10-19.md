@@ -103,3 +103,14 @@ in plan.md; paid-model quality and owner visual verdicts remain separate.
 - GUIDE.md reconciled from main; docs/library-reactions.md points to the canonical redesign contract. No merge.
 - Duplicate-choice imports, grid-mismatch consent, Resize, reversible decisions and separate Emoji/Lottie export contracts preserved.
 - Keep the existing source photo `Custom_emojis/Original_emojis/rashed 02.jpg`; see [structure review](../structure-review.md). No media/history rewrite.
+
+## Final follow-up save point
+
+Server restarted at `60b1529d`, `http://127.0.0.1:8797/`. Fresh browser/API checks
+confirm 2×2 Studio/Chat/plan defaults and four independent spatial action lines;
+G146/G156 stay 3×3 with nine cells. Agent remains 322 / 4 failures / 9 errors.
+Node JS is now 390/390; Python console wrapper 18/18. Its sandbox Node child
+timed out at 120 seconds; the approved outside-sandbox retry passed in 2.349s.
+
+Broad exhaustive populated-dialog/menu work remains explicit in plan.md; no
+new paid-model quality claim or owner verdict was made.

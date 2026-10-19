@@ -5,13 +5,14 @@ No merge until Haitham asks; verify branch before every commit. Main remains
 `0167761b`. Existing user deletions of `Recovered particles L002.lottie (2).json`
 and `smiling_face.json` were left untouched.
 
-Engineering save point: `5b6814df` (dark selected-tab hover fix), following
-`37fd9781` (provider-free resumed summaries). All five memory findings fixed.
-Agent area 322 / 4 failures / 9 errors (equal to base), Node JS 389/389, Python
+Engineering save point: `60b1529d` (2×2 defaults and independent-cell video),
+following `1675970d` (acceptance evidence). All five memory findings fixed.
+Agent area 322 / 4 failures / 9 errors (equal to base), Node JS 390/390, Python
 console wrapper 18/18. See docs/langgraph-memory-review.md for limits.
 
-Task-owned server `http://127.0.0.1:8797/`, Python revision `37fd9781` with final
-CSS `5b6814df`. Output is `%TEMP%/mirsal-final-acceptance-3khccysq/outcopy`, only
+Task-owned server `http://127.0.0.1:8797/`, revision `60b1529d`.
+Launcher `%TEMP%/mirsal-final-acceptance-3khccysq/serve.ps1`.
+Output is `%TEMP%/mirsal-final-acceptance-3khccysq/outcopy`, only
 copied G146 artwork + synthetic G156 and deterministic reaction/chat fixtures.
 All providers disabled. Do not touch the owner's :8770 server or other servers.
 
@@ -31,4 +32,7 @@ Follow-up implemented: 2×2 default for new generation plans and new
 concurrent independent paces. Explicit grids, old plans/templates and custom
 text are preserved. Agent remains 322 / 4 failures / 9 errors; JS now 390/390.
 See docs/generation/19-independent-cell-video-and-2x2.md. No paid quality proof.
+Final fresh browser/API checks confirmed 2×2 defaults and unchanged 3×3 fixture
+geometry. Python console wrapper passed 18/18 after an approved sandbox retry;
+the first child Node invocation timed out, although direct Node was green.
 No paid generation, Telegram/collection send, deployment or main merge authorized.

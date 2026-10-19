@@ -1367,5 +1367,59 @@
       "bg": "rgb(37, 99, 235)",
       "ratio": 5.168555560022562
     }
-  ]
+  ],
+  "final_server_revision": "60b1529d",
+  "generation_defaults_followup": {
+    "studio": "2x2",
+    "chat": "2x2",
+    "planGrid": [
+      2,
+      2
+    ],
+    "cells": 4,
+    "videoTemplate": {
+      "id": "video_independent",
+      "version": 1
+    },
+    "spatialLines": [
+      "Top-left (cell 1): State: bursting with excitement, star-sparkle eyes, huge open smile. Action 1: eyes sparkle. Then Action 2: the grin stretches.",
+      "Top-right (cell 2): State: sad and drooping face with a single tear. Action 1: sighs. Then Action 2: a tear slides down.",
+      "Bottom-left (cell 3): State: disbelief with squeezed-shut eyes and a deep sigh. Action 1: eyes squeeze shut. Then Action 2: the head shakes slowly.",
+      "Bottom-right (cell 4): State: dizzy with spiral eyes, wobbling on the spot. Action 1: sways in circles. Then Action 2: little stars orbit the head."
+    ],
+    "old": [
+      {
+        "n": 146,
+        "grid": [
+          3,
+          3
+        ],
+        "cells": 9
+      },
+      {
+        "n": 156,
+        "grid": [
+          3,
+          3
+        ],
+        "cells": 9
+      }
+    ]
+  },
+  "final_tests": {
+    "agent": {
+      "tests": 322,
+      "failures": 4,
+      "errors": 9
+    },
+    "node": {
+      "tests": 390,
+      "passed": 390
+    },
+    "python_console": {
+      "tests": 18,
+      "passed": 18,
+      "note": "sandbox child Node timed out; approved outside-sandbox retry passed in 2.349s"
+    }
+  }
 }

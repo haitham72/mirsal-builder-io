@@ -19,6 +19,9 @@ saved version targets the one retry cell (restore both width/theme arrays for a
 fresh full run). Nonempty reactions and a saved long synthetic session must be
 seeded in the scratch output as described in the acceptance report.
 
+`defaults.js` verifies fresh 2×2 browser/API defaults and unchanged 3×3 fixture
+geometry after the generation follow-up. It creates one scratch Chat and no turn.
+
 The versioned report and JSON evidence are in
 docs/uiux_review/acceptance-2026-10-19.md and .json. The scripts are evidence
 tools, not paid-model quality tests or owner visual approval.
