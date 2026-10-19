@@ -14,6 +14,10 @@ Inter is self-hosted. Five type roles define footnote (12px), body (15px), headl
 
 Interactive elements share hover, press, selected and `:focus-visible` states. Click-opened dialogs, menus and panels use a short entrance animation; content redrawn by polling has none. `prefers-reduced-motion` disables transitions, entrances and film autoplay. Every keyboard control retains a visible focus ring.
 
+Selected tabs retain their primary background on hover in dark mode. The generic
+dark hover surface must not replace that background while keeping `--on-pri`
+text; the browser regression reproduced 1.26:1 contrast on that combination.
+
 ### Shared test preview
 
 Edge and frame tests use one TESTCARD presentation, retaining their independent controls and API contracts. Frame controls (grid, scrubber and Position) remain in the frame adapter; both preview cards expose a labelled dialog, live caption and shared busy state.

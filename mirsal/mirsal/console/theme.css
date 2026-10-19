@@ -35,6 +35,7 @@ html[data-theme=dark] input:focus,html[data-theme=dark] select:focus,html[data-t
 html[data-theme=dark] .tab{color:var(--mut)}
 html[data-theme=dark] .tab.on{color:var(--on-pri)}
 html[data-theme=dark] .tab:hover{background:var(--fill)}
+html[data-theme=dark] .tab.on:hover{background:var(--pri-d);color:var(--on-pri)}
 html[data-theme=dark] .sw input[type=color]{background:var(--fill)}
 html[data-theme=dark] .srow input[type=number]{background:var(--fill)}
 html[data-theme=dark] .chipb{background:var(--sf)}
