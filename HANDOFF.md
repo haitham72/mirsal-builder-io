@@ -16,6 +16,14 @@ Output is `%TEMP%/mirsal-final-acceptance-3khccysq/outcopy`, only
 copied G146 artwork + synthetic G156 and deterministic reaction/chat fixtures.
 All providers disabled. Do not touch the owner's :8770 server or other servers.
 
+User viewing correction: the acceptance URL looked empty because it serves the
+test copy. A real-data viewer is now running at `http://127.0.0.1:8770/`, using
+`G:/Haitham/VsCode/Mirsal-Builder/mirsal/out`, with providers/CLI, DB writes and
+tracing disabled. Treat this as the user's server: do not stop/repoint it.
+Read-only local API checks confirmed 62 generations, 14 chats, nine reaction
+sets and six Emoji-style presets. Real data was never replaced by the copy.
+Port 8797 remains the separate test server, not the user's normal app URL.
+
 Slider/reaction matrices passed; frame editor, delayed off-route refresh,
 400-message saved synthetic chat, bounded editor/hover inventory and dark hover
 contrast passed. Per-cell screenshots and assertions:
