@@ -6,7 +6,7 @@ Status words: **open** (can be built now) · **needs Haitham** (a verdict first,
 
 ## Visual design (`docs/design.md`)
 
-- Confirmed interaction/layout defects and remaining audit scope: [root plan](../plan.md), [current app audit](uiux_review/app-audit-2026-10-19.md). Phone editing/Save, hover contrast, keyboard controls/labels, frame focus and ownership text remain **open**.
+- Confirmed interaction/layout defects and remaining audit scope: [root plan](../plan.md), [current app audit](uiux_review/app-audit-2026-10-19.md). Phone editing/Save, keyboard controls/labels, frame focus and ownership text remain **open**.
 
 - Real tile art for the twelve style presets: the swatches are abstract placeholders; drop `<id>.png` into `console/assets/styles/`. **needs Haitham** (the art).
 - Inline `style="font-size:..."` in the scripts is still off the type scale. **open**.

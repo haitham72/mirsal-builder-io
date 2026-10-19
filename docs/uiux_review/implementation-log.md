@@ -165,3 +165,19 @@ Added the minimal root [user app review guide](../../user%20app%20review%20guide
 for Haitham's later review. No owner verdict inferred. No unit tests for docs;
 inherited agent 322 / 4 failures / 9 errors, Node 390/390, wrapper 18/18 remain
 unchanged. No paid/provider/send/export/deployment/merge actions.
+
+
+## Neutral/cyan dark theme and composer visibility — 2026-10-19
+
+Haitham requested a deliberate dark rework, especially Chat, retaining cyan-blue.
+Neutral surface tiers replace the colored canvas; separate message/composer/menu
+surfaces and readable primary hover are implemented. New request is permanently
+open for new and reopened batches. The missing controls concern was resolved by
+finding Stickers/Sheet/Both; no imaginary removed-control fix was introduced.
+
+Four narrow fake regressions pass after real failing assertions. Browser evidence:
+36 core theme/width states and 24 view cases, no errors/failed responses/mutation
+POSTs, dark hover 13.24:1. [Evidence and limits](dark-rework-2026-10-19.md).
+Full suites were not rerun; owner visual approval and the other audit defects
+remain open. The left creation-panel layout is a separate proposal, not implemented.
+No paid call, send, export, deployment, merge or real-data-server restart.

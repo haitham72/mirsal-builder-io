@@ -27,8 +27,8 @@ const liveReady=()=>!!(LIVE.hf&&LIVE.hf.available&&!LIVE.hf.error&&LIVE.m);
 function composerMount(){const g=document.querySelector('.gen2');if(!g||!LIVE.m||document.getElementById('cpwrap'))return;
   const prev=$('prompt')?$('prompt').value:'';
   g.querySelectorAll(':scope > .sh, :scope > .gform, :scope > .gopts, #lvpanel').forEach(n=>n.remove());
-  const w=document.createElement('details');w.id='cpwrap';w.className='cp';w.open=!SES.gens.length||gdOn();g.insertBefore(w,g.firstChild);
-  w.innerHTML=`<summary class=cp-summary>New request <small>Describe and plan another sticker set</small></summary><div class=cp-halo></div>
+  const w=document.createElement('section');w.id='cpwrap';w.className='cp';w.setAttribute('aria-label','New request');g.insertBefore(w,g.firstChild);
+  w.innerHTML=`<div class=cp-summary>New request <small>Describe and plan another sticker set</small></div><div class=cp-halo></div>
    <header class=cp-head><img class=cp-orb src=/assets/brand/mirsal-logo.png alt=""><h1>Studio</h1><span class=cp-gap></span><div class=cp-top id=cptop></div></header>
    <div class=cp-box id=cpbox>
     <div class=cp-refs id=cprefs></div>

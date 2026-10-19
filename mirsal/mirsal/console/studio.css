@@ -1189,11 +1189,10 @@ label:has(>input[type=checkbox]),label:has(>input[type=radio]){display:inline-fl
  .gbar{max-width:calc(100vw - 24px);flex-wrap:wrap;justify-content:center;bottom:12px}
 }
 
-/* Existing-project tools disclose editing controls without competing with the stage action. */
-.cp-summary{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2);min-height:var(--control-min);cursor:pointer;font-size:var(--type-headline);font-weight:600}
+/* New request stays available; batch Edge controls remain a separate disclosure. */
+.cp-summary{display:flex;align-items:center;gap:var(--space-2);padding:var(--space-2);min-height:var(--control-min);font-size:var(--type-headline);font-weight:600}
 .cp-summary small{font-size:var(--type-footnote);font-weight:400;color:var(--mut)}
-.cp:not([open]){padding:0;box-shadow:none}
-.cp[open]>.cp-summary{border-bottom:1px solid var(--bd);margin-bottom:var(--space-2)}
+.cp>.cp-summary{border-bottom:1px solid var(--bd);margin-bottom:var(--space-2)}
 details.lv-edge{display:block;padding:var(--space-1) var(--space-2);margin:0}
 .lv-edge>summary{display:flex;align-items:center;gap:var(--space-2);cursor:pointer;min-height:var(--control-min);font-weight:600}
 .lv-edge>summary small{font-size:var(--type-footnote);color:var(--mut);font-weight:400}

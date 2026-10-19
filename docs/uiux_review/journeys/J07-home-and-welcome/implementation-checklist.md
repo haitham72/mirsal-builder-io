@@ -1,6 +1,6 @@
 # Home and welcome — remaining checklist
 
-- [ ] UX-02 dark primary-button hover contrast; UX-06 workspace identity.
+- [ ] UX-06 workspace identity; owner visual review of the revised neutral/cyan theme.
 - [ ] Owner verdict on films/art/wording and welcome playback; no new media generation authorized.
 
 Before implementation: reproduce against current source, preserve all contracts,

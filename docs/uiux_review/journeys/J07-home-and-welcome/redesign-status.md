@@ -2,7 +2,7 @@
 
 Updated 2026-10-19 against source `64d8b8a4`. No product fix in the audit.
 
-- UX-02 dark primary-button hover contrast; UX-06 workspace identity.
+- UX-06 workspace identity; owner visual review of the revised neutral/cyan theme.
 - Owner verdict on films/art/wording and welcome playback; no new media generation authorized.
 
 [Current audit and evidence](../../app-audit-2026-10-19.md) · [Remaining queue](../../../../plan.md)

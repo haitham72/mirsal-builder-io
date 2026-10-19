@@ -1,6 +1,6 @@
 # Studio — remaining checklist
 
-- [ ] UX-05 frame-card focus/Escape; UX-07 selected-work hierarchy.
+- [ ] UX-05 frame-card focus/Escape; review the left creation-panel proposal. New request must stay open.
 - [ ] Watcher/edge synchronization and shared preview/cache ownership (separate from slider tasks T-024/025).
 - [ ] Remaining route-wide states and owner visual verdict; preserve fresh Create and existing slider/frame semantics.
 

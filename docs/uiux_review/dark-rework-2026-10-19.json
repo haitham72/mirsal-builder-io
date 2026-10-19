@@ -1,0 +1,785 @@
+{
+  "rows": [
+    {
+      "name": "chat-history",
+      "w": 1440,
+      "theme": "light",
+      "horizontal": false,
+      "messages": 30,
+      "message": {
+        "bg": "rgb(234, 242, 255)",
+        "color": "rgb(11, 59, 74)",
+        "border": "rgba(0, 0, 0, 0)",
+        "shadow": "none"
+      },
+      "text": {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(11, 59, 74)",
+        "border": "rgb(11, 59, 74)",
+        "shadow": "none"
+      },
+      "base": {
+        "bg": "rgb(242, 251, 254)",
+        "color": "rgb(11, 59, 74)",
+        "border": "rgb(11, 59, 74)",
+        "shadow": "none"
+      },
+      "messageContrast": 10.722586319211466,
+      "textContrast": 11.506009007683579
+    },
+    {
+      "name": "chat-new",
+      "w": 1440,
+      "theme": "light",
+      "horizontal": false,
+      "messages": 0,
+      "composer": {
+        "bg": "rgb(255, 255, 255)",
+        "color": "rgb(11, 59, 74)",
+        "border": "rgb(11, 59, 74)",
+        "shadow": "rgb(59, 130, 246) 0px 0px 0px 1px, rgba(59, 130, 246, 0.2) 0px 0px 0px 4px"
+      },
+      "greeting": {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgba(0, 0, 0, 0)",
+        "border": "rgba(0, 0, 0, 0)",
+        "shadow": "none"
+      },
+      "shot": "after-chat-new-1440-light.jpg"
+    },
+    {
+      "name": "chat-controls",
+      "w": 1440,
+      "theme": "light",
+      "horizontal": false,
+      "messages": 30
+    },
+    {
+      "name": "home",
+      "w": 1440,
+      "theme": "light",
+      "horizontal": false,
+      "messages": null
+    },
+    {
+      "name": "studio",
+      "w": 1440,
+      "theme": "light",
+      "horizontal": false,
+      "messages": null,
+      "composer": {
+        "tag": "SECTION",
+        "summary": false,
+        "promptVisible": true,
+        "label": "New request"
+      },
+      "shot": "after-studio-1440-light.jpg"
+    },
+    {
+      "name": "library",
+      "w": 1440,
+      "theme": "light",
+      "horizontal": false,
+      "messages": null
+    },
+    {
+      "name": "reactions",
+      "w": 1440,
+      "theme": "light",
+      "horizontal": false,
+      "messages": null
+    },
+    {
+      "name": "pack",
+      "w": 1440,
+      "theme": "light",
+      "horizontal": false,
+      "messages": null
+    },
+    {
+      "name": "settings",
+      "w": 1440,
+      "theme": "light",
+      "horizontal": false,
+      "messages": null
+    },
+    {
+      "name": "chat-history",
+      "w": 390,
+      "theme": "light",
+      "horizontal": false,
+      "messages": 30,
+      "message": {
+        "bg": "rgb(234, 242, 255)",
+        "color": "rgb(11, 59, 74)",
+        "border": "rgba(0, 0, 0, 0)",
+        "shadow": "none"
+      },
+      "text": {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(11, 59, 74)",
+        "border": "rgb(11, 59, 74)",
+        "shadow": "none"
+      },
+      "base": {
+        "bg": "rgb(242, 251, 254)",
+        "color": "rgb(11, 59, 74)",
+        "border": "rgb(11, 59, 74)",
+        "shadow": "none"
+      },
+      "messageContrast": 10.722586319211466,
+      "textContrast": 11.506009007683579
+    },
+    {
+      "name": "chat-new",
+      "w": 390,
+      "theme": "light",
+      "horizontal": false,
+      "messages": 0,
+      "composer": {
+        "bg": "rgb(255, 255, 255)",
+        "color": "rgb(11, 59, 74)",
+        "border": "rgb(11, 59, 74)",
+        "shadow": "rgb(59, 130, 246) 0px 0px 0px 1px, rgba(59, 130, 246, 0.2) 0px 0px 0px 4px"
+      },
+      "greeting": {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgba(0, 0, 0, 0)",
+        "border": "rgba(0, 0, 0, 0)",
+        "shadow": "none"
+      },
+      "shot": "after-chat-new-390-light.jpg"
+    },
+    {
+      "name": "chat-controls",
+      "w": 390,
+      "theme": "light",
+      "horizontal": false,
+      "messages": 30
+    },
+    {
+      "name": "home",
+      "w": 390,
+      "theme": "light",
+      "horizontal": false,
+      "messages": null
+    },
+    {
+      "name": "studio",
+      "w": 390,
+      "theme": "light",
+      "horizontal": false,
+      "messages": null,
+      "composer": {
+        "tag": "SECTION",
+        "summary": false,
+        "promptVisible": true,
+        "label": "New request"
+      },
+      "shot": "after-studio-390-light.jpg"
+    },
+    {
+      "name": "library",
+      "w": 390,
+      "theme": "light",
+      "horizontal": false,
+      "messages": null
+    },
+    {
+      "name": "reactions",
+      "w": 390,
+      "theme": "light",
+      "horizontal": false,
+      "messages": null
+    },
+    {
+      "name": "pack",
+      "w": 390,
+      "theme": "light",
+      "horizontal": false,
+      "messages": null
+    },
+    {
+      "name": "settings",
+      "w": 390,
+      "theme": "light",
+      "horizontal": false,
+      "messages": null
+    },
+    {
+      "name": "chat-history",
+      "w": 1440,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": 30,
+      "message": {
+        "bg": "rgb(34, 52, 62)",
+        "color": "rgb(237, 241, 245)",
+        "border": "rgb(58, 83, 95)",
+        "shadow": "none"
+      },
+      "text": {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(237, 241, 245)",
+        "border": "rgb(237, 241, 245)",
+        "shadow": "none"
+      },
+      "base": {
+        "bg": "rgb(19, 23, 26)",
+        "color": "rgb(237, 241, 245)",
+        "border": "rgb(237, 241, 245)",
+        "shadow": "none"
+      },
+      "messageContrast": 11.359188029723244,
+      "textContrast": 15.878911400007716,
+      "shot": "after-chat-history-1440-dark.jpg"
+    },
+    {
+      "name": "chat-new",
+      "w": 1440,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": 0,
+      "composer": {
+        "bg": "rgb(32, 36, 40)",
+        "color": "rgb(237, 241, 245)",
+        "border": "rgb(34, 211, 238)",
+        "shadow": "rgba(34, 211, 238, 0.1) 0px 0px 0px 3px"
+      },
+      "greeting": {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(237, 241, 245)",
+        "border": "rgb(237, 241, 245)",
+        "shadow": "none"
+      },
+      "shot": "after-chat-new-1440-dark.jpg"
+    },
+    {
+      "name": "chat-controls",
+      "w": 1440,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": 30,
+      "shot": "after-chat-controls-1440-dark.jpg"
+    },
+    {
+      "name": "home",
+      "w": 1440,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": null,
+      "shot": "after-home-1440-dark.jpg"
+    },
+    {
+      "name": "studio",
+      "w": 1440,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": null,
+      "composer": {
+        "tag": "SECTION",
+        "summary": false,
+        "promptVisible": true,
+        "label": "New request"
+      },
+      "shot": "after-studio-1440-dark.jpg"
+    },
+    {
+      "name": "library",
+      "w": 1440,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": null,
+      "shot": "after-library-1440-dark.jpg"
+    },
+    {
+      "name": "reactions",
+      "w": 1440,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": null,
+      "shot": "after-reactions-1440-dark.jpg"
+    },
+    {
+      "name": "pack",
+      "w": 1440,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": null,
+      "shot": "after-pack-1440-dark.jpg"
+    },
+    {
+      "name": "settings",
+      "w": 1440,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": null,
+      "shot": "after-settings-1440-dark.jpg"
+    },
+    {
+      "name": "chat-history",
+      "w": 390,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": 30,
+      "message": {
+        "bg": "rgb(34, 52, 62)",
+        "color": "rgb(237, 241, 245)",
+        "border": "rgb(58, 83, 95)",
+        "shadow": "none"
+      },
+      "text": {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(237, 241, 245)",
+        "border": "rgb(237, 241, 245)",
+        "shadow": "none"
+      },
+      "base": {
+        "bg": "rgb(19, 23, 26)",
+        "color": "rgb(237, 241, 245)",
+        "border": "rgb(237, 241, 245)",
+        "shadow": "none"
+      },
+      "messageContrast": 11.359188029723244,
+      "textContrast": 15.878911400007716,
+      "shot": "after-chat-history-390-dark.jpg"
+    },
+    {
+      "name": "chat-new",
+      "w": 390,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": 0,
+      "composer": {
+        "bg": "rgb(32, 36, 40)",
+        "color": "rgb(237, 241, 245)",
+        "border": "rgb(34, 211, 238)",
+        "shadow": "rgba(34, 211, 238, 0.1) 0px 0px 0px 3px"
+      },
+      "greeting": {
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(237, 241, 245)",
+        "border": "rgb(237, 241, 245)",
+        "shadow": "none"
+      },
+      "shot": "after-chat-new-390-dark.jpg"
+    },
+    {
+      "name": "chat-controls",
+      "w": 390,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": 30,
+      "shot": "after-chat-controls-390-dark.jpg"
+    },
+    {
+      "name": "home",
+      "w": 390,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": null,
+      "shot": "after-home-390-dark.jpg"
+    },
+    {
+      "name": "studio",
+      "w": 390,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": null,
+      "composer": {
+        "tag": "SECTION",
+        "summary": false,
+        "promptVisible": true,
+        "label": "New request"
+      },
+      "shot": "after-studio-390-dark.jpg"
+    },
+    {
+      "name": "library",
+      "w": 390,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": null,
+      "shot": "after-library-390-dark.jpg"
+    },
+    {
+      "name": "reactions",
+      "w": 390,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": null,
+      "shot": "after-reactions-390-dark.jpg"
+    },
+    {
+      "name": "pack",
+      "w": 390,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": null,
+      "shot": "after-pack-390-dark.jpg"
+    },
+    {
+      "name": "settings",
+      "w": 390,
+      "theme": "dark",
+      "horizontal": false,
+      "messages": null,
+      "shot": "after-settings-390-dark.jpg"
+    }
+  ],
+  "errors": [],
+  "failed": [],
+  "writes": [],
+  "contrast": [
+    {
+      "w": 1440,
+      "theme": "light",
+      "bg": "rgb(37, 99, 235)",
+      "color": "rgb(255, 255, 255)",
+      "border": "rgb(59, 130, 246)",
+      "shadow": "rgba(59, 130, 246, 0.2) 0px 4px 12px 0px",
+      "ratio": 5.168555560022562
+    },
+    {
+      "w": 390,
+      "theme": "light",
+      "bg": "rgb(37, 99, 235)",
+      "color": "rgb(255, 255, 255)",
+      "border": "rgb(59, 130, 246)",
+      "shadow": "rgba(59, 130, 246, 0.2) 0px 4px 12px 0px",
+      "ratio": 5.168555560022562
+    },
+    {
+      "w": 1440,
+      "theme": "dark",
+      "bg": "rgb(103, 232, 249)",
+      "color": "rgb(7, 16, 21)",
+      "border": "rgb(103, 232, 249)",
+      "shadow": "none",
+      "ratio": 13.242727764540122
+    },
+    {
+      "w": 390,
+      "theme": "dark",
+      "bg": "rgb(103, 232, 249)",
+      "color": "rgb(7, 16, 21)",
+      "border": "rgb(103, 232, 249)",
+      "shadow": "none",
+      "ratio": 13.242727764540122
+    }
+  ],
+  "views": [],
+  "version": "neutral-cyan-reference",
+  "lightEvidence": "Retained passing states: later stylesheet edits are scoped to dark only.",
+  "light": {
+    "#app": {
+      "bg": "radial-gradient(1100px 700px at 12% -8%, rgb(227, 248, 255) 0%, rgba(0, 0, 0, 0) 62%) repeat scroll 0% 0% / auto padding-box border-box, radial-gradient(900px 620px at 104% 22%, rgb(220, 235, 255) 0%, rgba(0, 0, 0, 0) 62%) repeat scroll 0% 0% / auto padding-box border-box, radial-gradient(800px 560px at 38% 112%, rgb(238, 230, 255) 0%, rgba(0, 0, 0, 0) 64%) repeat scroll 0% 0% / auto padding-box border-box, rgba(0, 0, 0, 0) linear-gradient(rgb(246, 252, 255) 0%, rgb(237, 245, 255) 100%) repeat scroll 0% 0% / auto padding-box border-box",
+      "color": "rgb(30, 41, 59)",
+      "shadow": "none"
+    },
+    "#rail": {
+      "bg": "rgba(255, 255, 255, 0.72) none repeat scroll 0% 0% / auto padding-box border-box",
+      "color": "rgb(30, 41, 59)",
+      "shadow": "none"
+    },
+    "#s-agent": {
+      "bg": "rgb(242, 251, 254) none repeat scroll 0% 0% / auto padding-box border-box",
+      "color": "rgb(11, 59, 74)",
+      "shadow": "none"
+    },
+    ".ai-box": {
+      "bg": "rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box",
+      "color": "rgb(11, 59, 74)",
+      "shadow": "rgb(59, 130, 246) 0px 0px 0px 1px, rgba(59, 130, 246, 0.2) 0px 0px 0px 4px"
+    },
+    ".ai-send": {
+      "bg": "rgb(59, 130, 246) none repeat scroll 0% 0% / auto padding-box border-box",
+      "color": "rgb(255, 255, 255)",
+      "shadow": "none"
+    },
+    ".ai-greet": null,
+    ".ag-chip": {
+      "bg": "rgb(255, 255, 255) none repeat scroll 0% 0% / auto padding-box border-box",
+      "color": "rgb(53, 96, 110)",
+      "shadow": "none"
+    }
+  },
+  "reducedMotion": "none",
+  "studioViews": {
+    "rows": [
+      {
+        "w": 1440,
+        "theme": "dark",
+        "mode": "stickers",
+        "view": "stickers",
+        "tiles": 9,
+        "frameButtons": 0,
+        "adjustButtons": 0,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 1440,
+        "theme": "dark",
+        "mode": "stickers",
+        "view": "sheet",
+        "tiles": 0,
+        "frameButtons": 0,
+        "adjustButtons": 0,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 1440,
+        "theme": "dark",
+        "mode": "stickers",
+        "view": "both",
+        "tiles": 9,
+        "frameButtons": 0,
+        "adjustButtons": 0,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 1440,
+        "theme": "dark",
+        "mode": "anim",
+        "view": "stickers",
+        "tiles": 9,
+        "frameButtons": 9,
+        "adjustButtons": 9,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 1440,
+        "theme": "dark",
+        "mode": "anim",
+        "view": "sheet",
+        "tiles": 0,
+        "frameButtons": 0,
+        "adjustButtons": 0,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 1440,
+        "theme": "dark",
+        "mode": "anim",
+        "view": "both",
+        "tiles": 9,
+        "frameButtons": 9,
+        "adjustButtons": 9,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 1440,
+        "theme": "light",
+        "mode": "stickers",
+        "view": "stickers",
+        "tiles": 9,
+        "frameButtons": 0,
+        "adjustButtons": 0,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 1440,
+        "theme": "light",
+        "mode": "stickers",
+        "view": "sheet",
+        "tiles": 0,
+        "frameButtons": 0,
+        "adjustButtons": 0,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 1440,
+        "theme": "light",
+        "mode": "stickers",
+        "view": "both",
+        "tiles": 9,
+        "frameButtons": 0,
+        "adjustButtons": 0,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 1440,
+        "theme": "light",
+        "mode": "anim",
+        "view": "stickers",
+        "tiles": 9,
+        "frameButtons": 9,
+        "adjustButtons": 9,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 1440,
+        "theme": "light",
+        "mode": "anim",
+        "view": "sheet",
+        "tiles": 0,
+        "frameButtons": 0,
+        "adjustButtons": 0,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 1440,
+        "theme": "light",
+        "mode": "anim",
+        "view": "both",
+        "tiles": 9,
+        "frameButtons": 9,
+        "adjustButtons": 9,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 390,
+        "theme": "dark",
+        "mode": "stickers",
+        "view": "stickers",
+        "tiles": 9,
+        "frameButtons": 0,
+        "adjustButtons": 0,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 390,
+        "theme": "dark",
+        "mode": "stickers",
+        "view": "sheet",
+        "tiles": 0,
+        "frameButtons": 0,
+        "adjustButtons": 0,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 390,
+        "theme": "dark",
+        "mode": "stickers",
+        "view": "both",
+        "tiles": 9,
+        "frameButtons": 0,
+        "adjustButtons": 0,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 390,
+        "theme": "dark",
+        "mode": "anim",
+        "view": "stickers",
+        "tiles": 9,
+        "frameButtons": 9,
+        "adjustButtons": 9,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 390,
+        "theme": "dark",
+        "mode": "anim",
+        "view": "sheet",
+        "tiles": 0,
+        "frameButtons": 0,
+        "adjustButtons": 0,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 390,
+        "theme": "dark",
+        "mode": "anim",
+        "view": "both",
+        "tiles": 9,
+        "frameButtons": 9,
+        "adjustButtons": 9,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 390,
+        "theme": "light",
+        "mode": "stickers",
+        "view": "stickers",
+        "tiles": 9,
+        "frameButtons": 0,
+        "adjustButtons": 0,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 390,
+        "theme": "light",
+        "mode": "stickers",
+        "view": "sheet",
+        "tiles": 0,
+        "frameButtons": 0,
+        "adjustButtons": 0,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 390,
+        "theme": "light",
+        "mode": "stickers",
+        "view": "both",
+        "tiles": 9,
+        "frameButtons": 0,
+        "adjustButtons": 0,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 390,
+        "theme": "light",
+        "mode": "anim",
+        "view": "stickers",
+        "tiles": 9,
+        "frameButtons": 9,
+        "adjustButtons": 9,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 390,
+        "theme": "light",
+        "mode": "anim",
+        "view": "sheet",
+        "tiles": 0,
+        "frameButtons": 0,
+        "adjustButtons": 0,
+        "newRequestTag": "SECTION"
+      },
+      {
+        "w": 390,
+        "theme": "light",
+        "mode": "anim",
+        "view": "both",
+        "tiles": 9,
+        "frameButtons": 9,
+        "adjustButtons": 9,
+        "newRequestTag": "SECTION"
+      }
+    ],
+    "writes": []
+  },
+  "baseRevision": "6170c0ec",
+  "testedSourceHashes": {
+    "mirsal/mirsal/console/theme.css": "063b491cbe5a9c9ac3007b17955dc049e13998ad2e7e548e17c8a5c54ecdc4d1",
+    "mirsal/mirsal/console/composer.js": "08940eb80efd37ed7a31e3668dedfd0e300a2d965a08e550a1429aafac382718",
+    "mirsal/mirsal/console/studio.css": "88429404b05d99fe4106e79d60e3592b9909398954430a46f2599aa9f6bb12c1"
+  },
+  "narrowTests": {
+    "palette": 3,
+    "composerMount": 1,
+    "passed": 4,
+    "broaderSuitesRerun": false
+  },
+  "retainedScreenshots": [
+    "dark-rework-shots/before-chat-1440-dark.jpg",
+    "dark-rework-shots/after-chat-history-1440-dark.jpg",
+    "dark-rework-shots/after-chat-new-1440-dark.jpg",
+    "dark-rework-shots/after-chat-history-390-dark.jpg",
+    "dark-rework-shots/after-chat-controls-390-dark.jpg",
+    "dark-rework-shots/after-home-1440-dark.jpg",
+    "dark-rework-shots/after-library-1440-dark.jpg",
+    "dark-rework-shots/after-studio-individual-390-dark.jpg",
+    "dark-rework-shots/after-new-request-1440-dark.jpg",
+    "dark-rework-shots/after-new-request-390-dark.jpg"
+  ],
+  "limits": [
+    "Only copied/synthetic data.",
+    "Sidebar proposal not implemented.",
+    "Phone image/animation/Save layout is still an open separate defect.",
+    "18 light states remain valid from the first pass; subsequent palette changes were dark-scoped.",
+    "Corrected harness menu/disclosure state isolation before final screenshots.",
+    "Higgsfield reference inspection was public, no login or paid action."
+  ]
+}
