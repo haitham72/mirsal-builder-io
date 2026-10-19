@@ -377,10 +377,17 @@ class ShellTests(unittest.TestCase):
         self.assertIn("'reactions'", re.search(r"const SCREENS=\[(.*?)\]", app).group(1))
         self.assertIn("reactions:'agent'", app, "the rail keeps Create lit on Reaction effects")
         self.assertIn("data-to=reactions", app, "+ New > Reaction effects opens #/reactions, not the Studio's #/effects")
-        for act in ("data-act=rxpick ", "data-act=rxcreate", "data-act=rxdl", "data-act=rxedit", "data-act=rxclose"):
+        for act in ("data-act=rxpick ", "data-act=rxcreate", "data-act=rxsave", "data-act=rxdl", "data-act=rxclose"):
             self.assertIn(act, rx)
+        for group in ("rxGroup('Motion'", "rxGroup('Size'", "data-rxadvanced"):
+            self.assertIn(group, rx)
+        tabs = read_console(ui / "lottiestyle.js")
+        for tab in ("emoji", "lottie", "packs"):
+            self.assertIn(f"data-act=rxstyle data-s={tab}", tabs)
+        for label in ("Emoji style", "Lottie style", "Packs"):
+            self.assertIn(label, tabs)
         for route in ("/api/particles/emoji-motions", "/api/particles/emoji-preview", "/api/particles/emoji-lottie"):
-            self.assertIn(route, rx, "the bank, the preview, create and the created list are the server's")
+            self.assertIn(route, rx + read_console(ui / "particles.js"), "the bank, preview and shared Packs list use the server")
         for gone in ("data-act=fxek", "/api/particles/emoji-lottie"):
             self.assertNotIn(gone, fx, "the emoji screen left effects.js")
         for gone in ("data-act=fxpack", "data-act=fxgo", "data-act=fxst", "coverMedia", "fx-cv"):

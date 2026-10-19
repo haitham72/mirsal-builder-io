@@ -14,3 +14,7 @@
 ## Redesign disclosure — 2026-10-15
 
 The current Emoji-style preset editor presents Motion (Speed/Gravity/Amount) and Size first. Rotation, swirl, spread, fades, variation and size envelopes stay behind one Advanced disclosure, whose summary reflects rotation/spread/size variation. All thirteen original descriptors, values, reset actions and payload keys remain; no backend or export rule changed. This supersedes the historical per-emoji generation/batch instructions in T-070, not the current preset library.
+
+The Python console wiring assertion follows this contract: Motion/Size/Advanced,
+`rxsave`/`rxcreate`, the shared Emoji/Lottie/Packs tabs and the three emoji routes.
+It no longer requires the retired per-emoji `rxedit` action.
