@@ -1,17 +1,10 @@
-# Redesign status — 2026-10-15
+# Studio — remaining work
 
-**Issue:** Crowded controls and two independent test presentations.
+Updated 2026-10-19 against source `64d8b8a4`. No product fix in the audit.
 
-**Implemented fix:** Grouped identity/tools/Motion, folded New request/Edge, one stage primary and shared TESTCARD.
+- UX-05 frame-card focus/Escape; UX-07 selected-work hierarchy.
+- Watcher/edge synchronization and shared preview/cache ownership (separate from slider tasks T-024/025).
+- Remaining route-wide states and owner visual verdict; preserve fresh Create and existing slider/frame semantics.
 
-**Evidence:** G154 Apply200; G155 imported3×3 controls, four theme/width states, Cancel0POST; screenshots in gallery.
-
-**Remaining:** Generic watchers/segments/preview-session extraction remains separate.
-
-[Current status](../../current-status.md) · [Execution log](../../implementation-log.md) · [Images](../../redesign-shots/README.md). Historical issue/proposed-fix documents retain the original findings; they are not a claim that all catalog refactors shipped.
-
-### Engineering acceptance — 2026-10-19
-
-Eight slider cells and four frame-editor cells passed, including native redraw/release, Reset and real 409 retries.
-
-[2026-10-19 acceptance evidence](../../acceptance-2026-10-19.md).
+[Current audit and evidence](../../app-audit-2026-10-19.md) · [Remaining queue](../../../../plan.md)
+Earlier implementation evidence: [execution log](../../implementation-log.md), [acceptance](../../acceptance-2026-10-19.md).

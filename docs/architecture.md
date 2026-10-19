@@ -6,7 +6,7 @@ redesign has a map of what it must keep.
 
 ## 1. What it is
 
-Mirsal makes **animated Telegram stickers**: an idea becomes a 3×3 (or 2×2) sheet of stills (Nano Banana 2 through the Higgsfield CLI), the stills
+Mirsal makes **animated Telegram stickers**: a new idea defaults to a 2×2 sheet of stills (explicit and existing/imported 3×3 remain supported; Nano Banana 2 through the Higgsfield CLI), the stills
 are cut and checked, a video sheet of the approved stills is animated (Kling v3.0), each cell becomes a transparent looping WebM, and the approved
 stickers become a pack that can be sent to Telegram. A person approves at every gate; Python only blocks what Telegram itself would reject.
 

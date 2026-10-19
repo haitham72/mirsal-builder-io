@@ -1,11 +1,10 @@
-# Redesign status — 2026-10-15
+# Save and export — remaining work
 
-**Issue:** Dismissal can leave retime pending; focus escapes or returns to a hidden menu item.
+Updated 2026-10-19 against source `64d8b8a4`. No product fix in the audit.
 
-**Implemented fix:** Labelled bounded dialogs, focus trap/restoration, Escape dismissal; imported exact grey thumbnail behavior.
+- UX-01 phone Save sticker layout; remaining dialog/keyboard combinations.
+- Download lifecycle and unresolved bank-picker/short-code export work in backlog.
+- Collection/Telegram sends and paid quality proof remain owner-only.
 
-**Evidence:** Dialog6 pass; native wrapping/restoration; Escape/backdrop retime null; requested integration suite32 pass.
-
-**Remaining:** No real collection/Telegram send; generic download presenter migration remains.
-
-[Current status](../../current-status.md) · [Execution log](../../implementation-log.md) · [Images](../../redesign-shots/README.md). Historical issue/proposed-fix documents retain the original findings; they are not a claim that all catalog refactors shipped.
+[Current audit and evidence](../../app-audit-2026-10-19.md) · [Remaining queue](../../../../plan.md)
+Earlier implementation evidence: [execution log](../../implementation-log.md), [acceptance](../../acceptance-2026-10-19.md).

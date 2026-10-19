@@ -75,7 +75,7 @@ Dialog Escape closes the top shared dialog through its dismissal callback and st
 
 ### Studio reference (redesign)
 
-An existing project starts with New request and Edge folded behind native summaries. New request stays open for an empty session/draft. Composer model/style remain primary choices; Options groups Stroke/Loop/Grid/Reactions/AI settings, and Prompt engine is a separate disclosure. Batch identity/version controls, import/tools and Motion have separate rows. Generation and folder/removal actions remain available in labelled menus; reversible picture recovery stays outside those menus. The current stage retains its one primary action in the bottom bar. All layout uses the shared semantic tokens; phone controls wrap without page overflow.
+An existing project starts with New request and Edge folded behind native summaries. New request stays open for an empty session/draft. Composer model/style remain primary choices; Options groups Stroke/Loop/Grid/Reactions/AI settings, and Prompt engine is a separate disclosure. Batch identity/version controls, import/tools and Motion have separate rows. Generation and folder/removal actions remain available in labelled menus; reversible picture recovery stays outside those menus. The current stage retains its one primary action in the bottom bar. Studio uses shared semantic tokens and wrapping phone controls; this is not a guarantee for every populated editor. The [2026-10-19 app audit](../uiux_review/app-audit-2026-10-19.md) records collapsed image/animation canvases and clipped Save forms, keyboard/name gaps, dark primary hover and incorrect reaction ownership text. Those defects remain unimplemented.
 
 ### Saved reactions and pack flow (redesign)
 

@@ -1,17 +1,10 @@
-# Redesign status — 2026-10-15
+# Shared code and docs — remaining work
 
-**Issue:** Duplicated presentation and stale review starting assumptions.
+Updated 2026-10-19 against source `64d8b8a4`. No product fix in the audit.
 
-**Implemented fix:** Shared TESTCARD and explicit current-status/plan/evidence links; action retirement retained and served-script inventory guarded.
+- API routers/schemas and graph lifecycle; UI state/watchers/cache/presenters T-024/025/031/034/035.
+- Shared controls/styles, reading paths and remaining legacy-task reconciliation; inventory regenerated.
+- W29 runtime retention and W33 parked frontend need decisions before removal.
 
-**Evidence:** UIinventory5 pass; original changes preserved on isolated branch; grey source imported unchanged after user policy review.
-
-**Remaining:** Watcher/range/segment/download/preview/cache extractions and remaining inventory/docs catalog are explicitly pending.
-
-[Current status](../../current-status.md) · [Execution log](../../implementation-log.md) · [Images](../../redesign-shots/README.md). Historical issue/proposed-fix documents retain the original findings; they are not a claim that all catalog refactors shipped.
-
-### Engineering acceptance — 2026-10-19
-
-GUIDE.md and library-reactions.md were reconciled from main. The remaining watcher/presenter extractions and structure audit are explicit follow-ups; no broad refactor was claimed.
-
-[2026-10-19 acceptance evidence](../../acceptance-2026-10-19.md).
+[Current audit and evidence](../../app-audit-2026-10-19.md) · [Remaining queue](../../../../plan.md)
+Earlier implementation evidence: [execution log](../../implementation-log.md), [acceptance](../../acceptance-2026-10-19.md).

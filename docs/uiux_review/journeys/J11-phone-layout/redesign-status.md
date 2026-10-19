@@ -1,17 +1,9 @@
-# Redesign status — 2026-10-15
+# Phone layout — remaining work
 
-**Issue:** Small controls, overflowing headers and unreachable Apply/Cancel.
+Updated 2026-10-19 against source `64d8b8a4`. No product fix in the audit.
 
-**Implemented fix:** 44px floors, wrapping headers and bounded bottom sheets; preview placement measures real height.
+- UX-01 populated image/animation/Save; UX-09 watch-folder rows if retained.
+- UX-10 Chat density; remaining menu/keyboard/loaded Prepare states.
 
-**Evidence:** 390px phone: four frame-session variants remain in viewport, all frame buttons44px, Cancel0POST; saved-set and Emoji editor no overflow.
-
-**Remaining:** Populated multi-owner saved-set/pack dialogs and route-wide keyboard/menu combinations remain in the exhaustive-state follow-up.
-
-[Current status](../../current-status.md) · [Execution log](../../implementation-log.md) · [Images](../../redesign-shots/README.md). Historical issue/proposed-fix documents retain the original findings; they are not a claim that all catalog refactors shipped.
-
-### Engineering acceptance — 2026-10-19
-
-390px slider/reaction matrices passed in both themes; frame editor remained within viewport and Cancel made zero position/video-size POSTs. Route-wide keyboard/menu combinations remain a bounded follow-up.
-
-[2026-10-19 acceptance evidence](../../acceptance-2026-10-19.md).
+[Current audit and evidence](../../app-audit-2026-10-19.md) · [Remaining queue](../../../../plan.md)
+Earlier implementation evidence: [execution log](../../implementation-log.md), [acceptance](../../acceptance-2026-10-19.md).

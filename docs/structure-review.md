@@ -1,5 +1,10 @@
 # Structure and naming review — 2026-10-19
 
+Expanded by the [current measured app audit](uiux_review/app-audit-2026-10-19.md),
+including browser defects, actual source/coupling counts, naming targets and
+acceptance gates. This earlier summary uses nonblank line counts; the expanded
+audit labels physical line counts. Neither document describes an implemented refactor.
+
 Scope: read-only follow-up to redesign acceptance. These are proposed extractions,
 not changes included in the redesign fixes. Counts below are nonblank lines.
 
@@ -14,7 +19,7 @@ legacy adapter, application state and frontend assets in one flat directory.
 | 1 | `agent/graph.py` (~2502) | graph construction + checkpoint lifecycle + intent-specific node modules | Replay policy belongs in one small lifecycle module. Nodes should delegate to existing tools/flow; preserve gates, confirmation and cancellation semantics. |
 | 2 | `console/studio-core.js` (~1026), `chat-core.js` (~770), `particles.js` (~495) | feature folders for Studio, Chat and Reactions; shared request/lifecycle/preview modules | Separate controllers, state and renderers. First complete T-024/025/031/034/035 watcher, cache and presenter extractions; moving files alone leaves shared-global coupling intact. |
 | 2 | `console/app_models.py`, `console/openapi.py` | `api/schemas/` per domain + one contract registry | Name HTTP request/response schemas explicitly; distinguish them from domain models and LLM/provider models. Preserve route inventory and OpenAPI parity. |
-| 3 | flat `console/*.css`, scripts, fonts and vendor assets | `web/{features,shared,styles,assets,vendor}` | Update `UI_FILES`, load order, inventory tests and local serving together. Avoid a new framework or bundler merely to move files. |
+| 3 | flat `console/*.css`, scripts, fonts and vendor assets | `console/ui/{shell,features,shared,styles,assets,vendor}` | Update `UI_FILES`, load order, inventory tests and local serving together. Keep distinct from parked `mirsal/web/`; avoid a new framework or bundler merely to move files. |
 | 3 | `docs/Api/`, space-bearing filenames, `obs`, `tg_chat.py` | consistent documentation paths; optionally `observability`, `telegram_chat.py` | Cosmetic changes have lower value. Update links/import strings and keep compatibility shims where required. |
 
 For HTTP endpoints, use **`api/routers/`** and domain names; reserve **routing**

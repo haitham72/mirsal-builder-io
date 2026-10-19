@@ -1,8 +1,9 @@
-# docs/redesign_plan.md — one clean app, with nothing lost (branch `edit-design`)
+# Redesign contracts and remaining decisions
 
-**Status (2026-10-11): every phase of §5 is built on `edit-design`** (one commit each, `docs/design.md` §5-§7 hold the result); what is open is §5's
-last list: Haitham's look in the browser, the outside review (§9), D3 / D4, with the built implementation merged into `main` by Haitham's instruction; the dark-mode plan stays on `edit-design`. This file is deleted once those
-are done; §4 stays until the review has checked it against the code.
+Current execution queue: [root plan](../plan.md), [app audit](uiux_review/app-audit-2026-10-19.md).
+This reference retains the action map and accepted design constraints; it is not
+a second list of completed phases. Active branch: `redesign-ui-ux`; owner merge
+and visual verdicts remain open. Older branch names below describe history.
 
 Haitham, 2026-10-10: the app grew in increments and is "a little bit chaotic, so many informations everywhere"; the Home page he designed is the
 direction ("simpler and cleaner"); the logic of batches, sheets and videos is "highly confusing" (make more videos from a sheet, go back and edit
@@ -172,17 +173,9 @@ job) → the MAP node of that job + PILL (Retry shows its price first, as today)
 | `trending.js` (8) | Library > Trending tab SAME |
 | `welcome.js` (7), `home.js` (6) | Home SAME |
 
-## 5. Phases — all built 2026-10-11
+## 5. Remaining decisions
 
-1 the rail of four, the avatar menu, Create's tabs · 2 the Studio's journey track · 3 the project map's data (`flow/projects.py`,
-`GET /api/generations/{id}/map`) · 4 the map column, the project switcher, the breadcrumb (`projmap.js`) · 5 the toolbar and Stickers · Sheet · Both ·
-6 the sticker panel · 7 the floating bottom bar and the density pass · 8 the pack screen · 9 Settings' section bar · 10 the chat restyle · 11 the polish.
-Also built: the chat's task slider, separate left creation selectors and top-right LLM selector (`agent/stages.py` `api`), `serve --reload`. Nothing was renamed or retired: the
-inventory test passes against the untouched baseline.
-
-**Open:**
 - **Haitham's look in the browser** (`docs/waiting-for-haitham.md` item 1).
-- **The outside review** (§9), now against the built code.
 - **D3 / D4** (accepted, not yet done): Animate / Add act on the selected batch only with "Animate every batch" in a project menu, and "take out of
   this view" (`gbdrop`) retired. Today a whole project opened at once (`hopenpack`) still shows every batch with its include box (`ginc`); retiring
   `gbdrop` needs its `retired` entry in `ui_baseline.json`.

@@ -1,5 +1,12 @@
 # UI/UX review of Mirsal Builder — a prompt for an orchestrating LLM
 
+> Historical workflow reference (2026-10-14). Its branch/server/task assumptions
+> are superseded by current CLAUDE.md, HANDOFF.md and plan.md. Do not execute its
+> checkout/delegation steps as current instructions. The current review is
+> [app-audit-2026-10-19.md](uiux_review/app-audit-2026-10-19.md); remaining work is
+> [plan.md](../plan.md), and Haitham's later checklist is
+> [user app review guide.md](../user%20app%20review%20guide.md).
+
 Paste everything below the line into a fresh session that has this repository, a shell, Playwright (or a browser tool) and the ability to start
 subagents. Written 2026-10-14 by the session that built the reaction branch; every path, command and rule here was checked against the repo that day.
 

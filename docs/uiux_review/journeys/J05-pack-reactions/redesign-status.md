@@ -1,17 +1,9 @@
-# Redesign status — 2026-10-15
+# Pack reactions — remaining work
 
-**Issue:** Saved-set cards expose metadata/tools, two Advanced groups and tab-separated content.
+Updated 2026-10-19 against source `64d8b8a4`. No product fix in the audit.
 
-**Implemented fix:** All nine original plan requirements implemented; explicit independent save-as-new and backend erosion default0.
+- UX-08 owner-aware heading; UX-11 recognizable owner names/thumbnails.
+- Optional Lottie fields and shared adapters; remaining route-wide/destructive combinations.
 
-**Evidence:** P010 focused metadata, Manage stickers, one Advanced and save-as-new label at1440/390 both themes; P012 save201; erosion preview200; default fingerprints unchanged.
-
-**Remaining:** Optional new Lottie physics fields and generic shared adapters remain separate.
-
-[Current status](../../current-status.md) · [Execution log](../../implementation-log.md) · [Images](../../redesign-shots/README.md). Historical issue/proposed-fix documents retain the original findings; they are not a claim that all catalog refactors shipped.
-
-### Engineering acceptance — 2026-10-19
-
-Create and Library Packs content matched the nonempty server set list in every width/theme state. Populated multi-owner saved-set/pack dialogs remain in the explicit exhaustive-state follow-up.
-
-[2026-10-19 acceptance evidence](../../acceptance-2026-10-19.md).
+[Current audit and evidence](../../app-audit-2026-10-19.md) · [Remaining queue](../../../../plan.md)
+Earlier implementation evidence: [execution log](../../implementation-log.md), [acceptance](../../acceptance-2026-10-19.md).

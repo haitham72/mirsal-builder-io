@@ -1,11 +1,9 @@
-# Redesign status — 2026-10-15
+# Home and welcome — remaining work
 
-**Issue:** Home totals use total entries as stickers; welcome contrast/targets require acceptance.
+Updated 2026-10-19 against source `64d8b8a4`. No product fix in the audit.
 
-**Implemented fix:** Backend sticker/reaction totals, existing showcase kept; shared tokens and44px welcome dots.
+- UX-02 dark primary-button hover contrast; UX-06 workspace identity.
+- Owner verdict on films/art/wording and welcome playback; no new media generation authorized.
 
-**Evidence:** Relevant Home5 tests; initial phone/desktop both themes no page overflow; dark welcome ink/dot geometry checked.
-
-**Remaining:** Exhaustive showcase/empty/loading states and legacy inline type sweep remain.
-
-[Current status](../../current-status.md) · [Execution log](../../implementation-log.md) · [Images](../../redesign-shots/README.md). Historical issue/proposed-fix documents retain the original findings; they are not a claim that all catalog refactors shipped.
+[Current audit and evidence](../../app-audit-2026-10-19.md) · [Remaining queue](../../../../plan.md)
+Earlier implementation evidence: [execution log](../../implementation-log.md), [acceptance](../../acceptance-2026-10-19.md).

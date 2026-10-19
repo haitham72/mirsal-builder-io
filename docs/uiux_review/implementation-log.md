@@ -139,3 +139,29 @@ paces. Old template files, explicit/custom prompts and existing/imported geometr
 are preserved. Default and spatial-sequence regressions failed before and passed
 after; the real HTTP preview and fake video CLI integration pass. Agent area
 322 / 4 failures / 9 errors; Node JS 390/390. No paid model proof was attempted.
+
+## App audit and documentation cleanup — 2026-10-19
+
+Reviewed source `64d8b8a4` on a fresh copied-data :8798 server: 96 sampled
+screen states (24 × desktop/phone × light/dark), with supplemental editor
+geometry, hover, keyboard, two-owner saved-set, assignment, Save-as-new and
+preset/Lottie editor checks. No page errors/failed responses in the broad
+sweep; this does not establish exhaustive acceptance. One new saved row was
+created only in the disposable fixture. Real-data :8770 and earlier :8797 were
+untouched. [Report, evidence and limitations](app-audit-2026-10-19.md), 14 retained
+screenshots and numeric/source measurements accompany this documentation phase.
+
+No product fix was made. New phone editor/Save, primary-hover, keyboard/name,
+frame-focus and ownership-heading defects remain in plan.md. Source/API/UI
+structure and naming proposals are ranked separately from confirmed defects.
+Current status, plans and all journey indexes/checklists/status notes now contain
+remaining work rather than completed phase catalogs. Older task specifications
+remain historical/unreconciled, not silently accepted or closed. Backlog removes
+the obsolete no-checkpointer claim and undecided 2×2 default, keeps unproven
+older issues as reproduction leads, and preserves owner decisions. UI inventory
+regenerated: 514 action names / 515 definitions / 183 browser API patterns.
+
+Added the minimal root [user app review guide](../../user%20app%20review%20guide.md)
+for Haitham's later review. No owner verdict inferred. No unit tests for docs;
+inherited agent 322 / 4 failures / 9 errors, Node 390/390, wrapper 18/18 remain
+unchanged. No paid/provider/send/export/deployment/merge actions.

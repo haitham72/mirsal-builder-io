@@ -1,11 +1,10 @@
-# Redesign status — 2026-10-15
+# Settings, Help and Trending — remaining work
 
-**Issue:** Inconsistent content surfaces, navigation semantics and misleading public pack counts.
+Updated 2026-10-19 against source `64d8b8a4`. No product fix in the audit.
 
-**Implemented fix:** Opaque token cards, current mounted section registry, native Help buttons and backend Trending counts.
+- UX-09 watch-folder phone layout if W34 retains the screen.
+- LAN roles, populated Trending, all Settings/Help substates and FAQ publishing remain unverified/owner-dependent.
+- Settings spending requires a real API route before UI controls; no guessed settings.
 
-**Evidence:** Settings Tickets/local Account checks; Help Enter toFAQ; initial phone/desktop both themes; counts retain public-only visibility.
-
-**Remaining:** Owner-only mutations/sends not exercised; cloud pricing copy remains an owner decision.
-
-[Current status](../../current-status.md) · [Execution log](../../implementation-log.md) · [Images](../../redesign-shots/README.md). Historical issue/proposed-fix documents retain the original findings; they are not a claim that all catalog refactors shipped.
+[Current audit and evidence](../../app-audit-2026-10-19.md) · [Remaining queue](../../../../plan.md)
+Earlier implementation evidence: [execution log](../../implementation-log.md), [acceptance](../../acceptance-2026-10-19.md).
