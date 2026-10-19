@@ -66,6 +66,19 @@ class Base(unittest.TestCase):
 
 
 class Checkpoints(Base):
+    def test_resumed_finish_does_not_call_the_summary_provider(self):
+        turn = self.agent.prepare(self.sid, "hi")
+        turn.queue = ["smalltalk"]
+        self.agent.graph.update_state(self.cfg(), {"turn": turn}, as_node="resolve")
+        turn._lock.__exit__(None, None, None)
+        def reduce(sess, summarise=None):
+            if summarise:
+                summarise(sess)
+            return False
+        with mock.patch.object(self.store, "reduce", side_effect=reduce), mock.patch.object(self.agent.brain, "summarise") as provider:
+            self.assertTrue(self.agent._resume_dead_turn(self.sid, self.sess(), None))
+            provider.assert_not_called()
+
     def test_resume_revalidates_routes_before_spending_or_deciding(self):
         for node in ("review", "confirm"):
             with self.subTest(node=node), mock.patch.object(Agent, "n_" + node) as unsafe:

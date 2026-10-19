@@ -2,8 +2,9 @@
 
 <sub>Part of [agent-and-chat.md](../agent-and-chat.md).</sub>
 
-Implemented in `3f35dcd3`. The [review](../langgraph-memory-review.md) records five
-open findings, including two P1 replay-safety issues. Cards and go-ahead buttons
+Implemented in `3f35dcd3`, with replay and profile fixes in `dd8ee1bd` / `afc0f3f6`.
+The [review](../langgraph-memory-review.md) records fixes and evidence for all five
+findings. Cards and go-ahead buttons
 remain the approval interface.
 
 ## Turn checkpoints (`SqliteSaver`, `out/checkpoints.sqlite`)
@@ -20,6 +21,9 @@ are excluded; resolve with an ask/edit queue is excluded because it can use a
 model fallback. Interrupted provider calls require a fresh request, never replay.
 Fake checkpoint regressions prove resolve cannot enter review/confirm ahead of
 a new cancel and a failed names invocation is called only once.
+Resumed `finish` uses the deterministic reducer: a thread-local replay flag
+disables its optional model summarizer, including when a long history reaches
+the reduction window. A fake summary-provider regression failed then passed.
 
 `Agent.close()` / `Agent.close_all()` release saver connections. Test cleanup
 must run after chat workers stop; the Telegram harness now calls `close_all()`
@@ -46,6 +50,12 @@ taste votes remain JSON-only, and Postgres fact synchronization remains in place
 - A stored `brief` tone shortens the greeting. Unclear-edit replies can suggest
   phrasing for the person's most frequent edit kind.
 
-Verification results and limitations are kept in the review. The six memory tests
-pass, but the broader agent area is not green. Checks used disabled providers and
+Verification results and limitations are kept in the review. Targeted memory tests
+pass, but the broader agent area retains baseline failures. Checks used disabled providers and
 fakes; no paid-provider validation was performed.
+
+The vision configuration regression test isolates both dotenv loading and the
+persisted cloud-model preference. Clearing environment variables alone does not
+isolate this checkout from its saved model; this is test isolation, not a change
+to the precedence of user settings. It failed with the saved model, then passed
+with both configuration sources mocked out.

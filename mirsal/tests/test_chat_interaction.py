@@ -186,7 +186,7 @@ class DescriptionTests(unittest.TestCase):
 
     def test_cloud_vision_inherits_the_configured_model_unless_explicitly_overridden(self):
         from mirsal.vision import judge
-        with patch.dict("os.environ", {"MIRSAL_VISION_PROVIDER": "openai", "MIRSAL_LLM_MODEL": "router-vision"}, clear=True):
+        with patch.object(llm, "_load_dotenv"), patch.object(llm, "preferred_cloud_model", return_value=""), patch.dict("os.environ", {"MIRSAL_VISION_PROVIDER": "openai", "MIRSAL_LLM_MODEL": "router-vision"}, clear=True):
             self.assertEqual(judge.target()["model"], "router-vision")
             with patch.dict("os.environ", {"MIRSAL_VISION_OPENAI_MODEL": "vision-override"}):
                 self.assertEqual(judge.target()["model"], "vision-override")

@@ -166,6 +166,7 @@ class Agent:
         self.store, self.tools = store, tools
         self.brain = brain or Brain()
         self.cache = cache or cachemod.default()
+        self._resume_mode = threading.local()
         self.saver, self._saver_key = _saver_for(Path(self.store.out))
         self.graph = self._build()
 
@@ -324,6 +325,7 @@ class Agent:
         if t is None or getattr(t, "spent", 0):
             return False
         config = {"configurable": {"thread_id": sid}}
+        self._resume_mode.active = True
         try:
             for _ in range(25):
                 if not snap.next:
@@ -339,6 +341,8 @@ class Agent:
             return False
         except Exception:
             return False
+        finally:
+            self._resume_mode.active = False
 
     # ---- nodes ----------------------------------------------------------------------------------------------------------------------------
     def _nm(self, sess: dict, gid) -> str:
@@ -2579,7 +2583,7 @@ class Agent:
             t.trace.end("done" if ok else "stopped", ok=ok)
         self.store.add_interaction(sess, t.text or (t.action or {}).get("type", ""), t.reply, t.intents,
                                    {**t.res.to_dict(), "spent_estimate": t.spent}, t.generation or t.res.generation)
-        if self.store.reduce(sess, summarise=(self.brain.summarise if self.brain.available else None)):
+        if self.store.reduce(sess, summarise=(self.brain.summarise if self.brain.available and not getattr(self._resume_mode, "active", False) else None)):
             t.trace.note("summarised the earlier part of this chat")
         self.store.save(sess)
 

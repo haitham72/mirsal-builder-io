@@ -1,12 +1,15 @@
 # Durable turns and SQLite profiles: review (2026-10-16)
 
 Reviewed implementation: `3f35dcd3` on `redesign-ui-ux`, against base
-`6b3f297f`. The findings below remain open; no fixes were applied. The safe-resume claim is not
-established; the two P1 findings must be resolved before relying on it.
+`6b3f297f`. The original findings below are retained as history. All five were
+fixed on 2026-10-19; the evidence and limits below supersede the original status.
 
 ## Findings
 
 1. **[P1] Resume can enter spending and decision nodes.**
+   **Fixed:** `dd8ee1bd` advances one node at a time and rechecks every checkpoint.
+   Fake resolve → review/confirm regressions failed before and passed after;
+   the old confirmation never runs ahead of the new cancel.
    `mirsal/mirsal/agent/graph.py:320` checks only the pending `snap.next`, then
    resumes the unrestricted graph. An allowlisted `resolve` can route to `review`
    or `confirm`. Fake-only reproductions observed both paths, including the old
@@ -15,6 +18,10 @@ established; the two P1 findings must be resolved before relying on it.
    only its first node.
 
 2. **[P1] Allowlisted nodes can repeat paid vision calls.**
+   **Fixed:** ask/names and other provider-capable nodes are excluded from replay;
+   resolve's ask/edit fallback is excluded too. A fake invocation that records
+   then raises was called twice before and once after. A follow-up fake found
+   finish's optional model summarizer; replay now uses the deterministic reducer.
    `mirsal/mirsal/agent/graph.py:52` includes `ask` and `names`. The former can
    call `_describe`; the latter calls `_run_names`. Both can reach vision
    providers without updating `Turn.spent`. A fake `name_proposals` call that
@@ -23,6 +30,9 @@ established; the two P1 findings must be resolved before relying on it.
    spend-free and cannot safely replay on that predicate.
 
 3. **[P2] Ordinary tone requests do not reach profile handling.**
+   **Fixed:** `afc0f3f6` routes explicit requests to PROFILE by rules. End-to-end
+   fake turns for be brief / keep it short / stay formal / be warm persist tone
+   and create no sticker plan (failing then passing).
    `mirsal/mirsal/agent/graph.py:2463` detects tone only inside `n_profile`, but
    the rule router does not recognize explicit tone requests. In fake-only turns,
    `be brief` and `keep it short` each produced a sticker plan and left tone
@@ -30,12 +40,17 @@ established; the two P1 findings must be resolved before relying on it.
    sets tone directly and does not cover this input path.
 
 4. **[P2] Unrelated profile facts silently change reply tone.**
+   **Fixed:** `afc0f3f6` requires a request verb and a whole style phrase, rejecting
+   negations. Shorty, warm colours, negations and partial words failed before
+   and pass after, including persisted profile checks.
    `mirsal/mirsal/agent/profile.py:245` uses substring matching without requiring
    a request about reply style. Reproductions: `my name is Shorty` saved `brief`,
    and `I like warm colours` saved `warm`. Match explicit tone instructions,
    with word boundaries and negation handling, rather than arbitrary facts.
 
 5. **[P2] Saver cleanup is incomplete in the Telegram test harness.**
+   **Fixed:** `afc0f3f6` closes all savers after workers stop and before temporary
+   cleanup. The real fake-Telegram turn test reproduced WinError 32 then passed.
    The saver acquired by `Agent.__init__` at
    `mirsal/mirsal/agent/graph.py:169` remains open for agents created through
    the Telegram test server. The agent-area run errors in
@@ -43,7 +58,7 @@ established; the two P1 findings must be resolved before relying on it.
    while deleting `out/checkpoints.sqlite`. Close these saver connections after
    chat workers stop and before temporary-directory cleanup.
 
-## Verification and limits
+## Historical verification and limits (2026-10-16)
 
 Providers were disabled (`MIRSAL_NO_REAL_CLI=1`, `MIRSAL_LLM_PROVIDER=none`);
 the targeted reproductions used fakes/mocks. No paid provider was called.
@@ -67,5 +82,5 @@ Other inspected properties: `Turn.__getstate__` removes `trace` and `_lock`;
 Brain/tools are held on Agent rather than Turn. Resume runs inside the same
 session-lock scope used by `drive_creator`. `_last_focus` requests at most 40
 checkpoints and returns an empty list if history retrieval fails. These checks
-do not resolve the replay-safety findings. A complete dual-write audit remains
+were supplemented by the fixes above. A complete dual-write audit remains
 open; existing taste votes still use the JSON profile.
