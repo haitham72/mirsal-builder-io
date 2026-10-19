@@ -6,6 +6,12 @@
 
 **Evidence:** 390px phone: four frame-session variants remain in viewport, all frame buttons44px, Cancel0POST; saved-set and Emoji editor no overflow.
 
-**Remaining:** Long-list and every opened/hover/editor state still require broader acceptance.
+**Remaining:** Populated multi-owner saved-set/pack dialogs and route-wide keyboard/menu combinations remain in the exhaustive-state follow-up.
 
 [Current status](../../current-status.md) · [Execution log](../../implementation-log.md) · [Images](../../redesign-shots/README.md). Historical issue/proposed-fix documents retain the original findings; they are not a claim that all catalog refactors shipped.
+
+### Engineering acceptance — 2026-10-19
+
+390px slider/reaction matrices passed in both themes; frame editor remained within viewport and Cancel made zero position/video-size POSTs. Route-wide keyboard/menu combinations remain a bounded follow-up.
+
+[2026-10-19 acceptance evidence](../../acceptance-2026-10-19.md).

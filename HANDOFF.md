@@ -1,30 +1,32 @@
-# HANDOFF - 2026-10-16
+# HANDOFF — 2026-10-19
 
-Active checkout: `G:/Haitham/VsCode/Mirsal-Builder`, branch `redesign-ui-ux`.
-Keep branches separate until Haitham asks for a merge; verify the branch before
-committing. Public deployment and Google OAuth remain paused.
+Active checkout `G:/Haitham/VsCode/Mirsal-Builder`, branch `redesign-ui-ux`.
+No merge until Haitham asks; verify branch before every commit. Main remains
+`0167761b`. Existing user deletions of `Recovered particles L002.lottie (2).json`
+and `smiling_face.json` were left untouched.
 
-## Current save point
+Engineering save point: `5b6814df` (dark selected-tab hover fix), following
+`37fd9781` (provider-free resumed summaries). All five memory findings fixed.
+Agent area 322 / 4 failures / 9 errors (equal to base), Node JS 389/389, Python
+console wrapper 18/18. See docs/langgraph-memory-review.md for limits.
 
-`3f35dcd3` contains durable agent checkpoints, SQLite profiles, six memory tests,
-and the review. Documentation cleanup removes the superseded review brief and
-incorrect safety claims. The five findings in
-[docs/langgraph-memory-review.md](docs/langgraph-memory-review.md) remain unfixed;
-the two P1 findings concern unrestricted resume routing and repeated vision calls.
-Implementation details live in
-[agent section 24](docs/agent-and-chat/24-durable-turns-and-profiles-2026-10-16.md).
+Task-owned server `http://127.0.0.1:8797/`, Python revision `37fd9781` with final
+CSS `5b6814df`. Output is `%TEMP%/mirsal-final-acceptance-3khccysq/outcopy`, only
+copied G146 artwork + synthetic G156 and deterministic reaction/chat fixtures.
+All providers disabled. Do not touch the owner's :8770 server or other servers.
 
-Memory tests: 6 passed. Agent area: 322 tests, 5 failures, 10 errors; isolated
-base: 322 tests, 4 failures, 9 errors. See the review for configuration limits and
-the new Telegram checkpoint file-lock error. No paid provider was called.
+Slider/reaction matrices passed; frame editor, delayed off-route refresh,
+400-message saved synthetic chat, bounded editor/hover inventory and dark hover
+contrast passed. Per-cell screenshots and assertions:
+docs/uiux_review/acceptance-2026-10-19.md. Remaining exhaustive populated
+saved-set/pack/menu states are explicit in plan.md. Owner wording, pricing,
+paid quality proof and visual/merge verdicts remain open.
 
-## Picking up
+GUIDE.md and library-reactions.md reconciled from main, preserving duplicate-choice
+imports and grid-mismatch consent. Keep the source photo rashed 02.jpg. Folder,
+refactor and naming audit: docs/structure-review.md (no broad refactor performed).
 
-- [plan.md](plan.md) holds unfinished redesign acceptance and follow-ups. Keep
-  those tasks open until verified; this memory review did not complete them.
-- Preserve redesign's duplicate-choice import dialogs when merging; main
-  deliberately removed them. Keep Resize and Emoji/Lottie export contracts.
-- Use the narrowest test tier. Full discovery and the slow tier are retired.
-- Browser checks use copied output and disabled providers. Restart only a
-  task-owned server; the previous task endpoint was `http://127.0.0.1:8796/`,
-  whose current availability has not been checked in this session.
+Next newly requested phase: 2×2 default for new generation plans and a new video
+template binding independent state/action sequences to spatial cells. Existing
+batches, explicit grids and hand-written prompts must retain their contracts.
+No paid generation, Telegram/collection send, deployment or main merge authorized.

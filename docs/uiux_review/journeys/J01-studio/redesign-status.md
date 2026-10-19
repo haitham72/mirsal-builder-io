@@ -9,3 +9,9 @@
 **Remaining:** Generic watchers/segments/preview-session extraction remains separate.
 
 [Current status](../../current-status.md) · [Execution log](../../implementation-log.md) · [Images](../../redesign-shots/README.md). Historical issue/proposed-fix documents retain the original findings; they are not a claim that all catalog refactors shipped.
+
+### Engineering acceptance — 2026-10-19
+
+Eight slider cells and four frame-editor cells passed, including native redraw/release, Reset and real 409 retries.
+
+[2026-10-19 acceptance evidence](../../acceptance-2026-10-19.md).

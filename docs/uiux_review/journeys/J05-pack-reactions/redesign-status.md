@@ -9,3 +9,9 @@
 **Remaining:** Optional new Lottie physics fields and generic shared adapters remain separate.
 
 [Current status](../../current-status.md) · [Execution log](../../implementation-log.md) · [Images](../../redesign-shots/README.md). Historical issue/proposed-fix documents retain the original findings; they are not a claim that all catalog refactors shipped.
+
+### Engineering acceptance — 2026-10-19
+
+Create and Library Packs content matched the nonempty server set list in every width/theme state. Populated multi-owner saved-set/pack dialogs remain in the explicit exhaustive-state follow-up.
+
+[2026-10-19 acceptance evidence](../../acceptance-2026-10-19.md).

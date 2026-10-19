@@ -115,4 +115,7 @@ An answer goes into `docs/deployment_plan.md` and deletes the question here.
 
 Also parked, not a question: rate limiting, deployment and OAuth are paused (2026-10-02); the engine's per-minute 429 (`console/server.py` `_wait`) stays as it is; the gateway, SQL, Docker and Render files stay untouched until Haitham asks.
 
-2026-10-15 redesign sync: per-tile Size/X/Y sliders are imported alongside the frame editor. Browser acceptance includes drag, one cut after release and Reset, in both themes and phone. The latest import-policy choice remains the redesign choice router; the forced-fresh-cut policy is not adopted.
+2026-10-19 redesign sync: the technical slider and reaction-tab matrices passed
+on copied/synthetic data in both themes at desktop and 390px. Evidence is in
+`uiux_review/acceptance-2026-10-19.md`; owner visual review remains W1. The
+redesign duplicate-choice import router and grid-mismatch consent remain.

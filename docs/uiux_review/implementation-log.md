@@ -123,3 +123,9 @@ plan.md now removes the original nine completed/accepted requirements while keep
 Implemented in `1980c857` on `redesign-ui-ux`. Lottie redraws and player mounting are scoped to the active Create or Library screen; file changes invalidate stale preview requests. From a photo asks Sticker / Emojis, and From a video opens video-sheet import; sheet paths lead directly to Studio. All sheet import dialogs offer Auto detect / 2×2 / 3×3; a manually different destination grid starts a separate batch. Duplicate/recovery choices remain.
 
 Evidence: node suite 389 passing; focused automatic/manual image-grid, preserved-original-batch, standalone-video and existing in-batch image/video checks pass. Browser on temporary storage confirmed saved-file highlighting, advancing SVG playback on both screens and Library → Create return. Automatic 2×2 image and manual 2×2 video imports finished READY. The Python console wrapper retains one stale assertion expecting removed `data-act=rxedit`; it is not green. No provider calls or external sends. The user server was restarted at http://127.0.0.1:8796/. Wider theme/phone/slider acceptance remains open in `plan.md`.
+
+## Engineering close-out — 2026-10-19
+
+All five memory findings fixed with fake failing→passing reproductions. Agent area: 322 / 4 failures / 9 errors (equal to base); Node 389/389; Python console 18/18. All eight slider cells and the full reaction-tab matrix passed. Extended delayed/off-route refresh, 400-message synthetic histories and bounded hover/editor inventory passed. New duplicate-tab and dark-hover contrast findings were fixed.
+
+[Detailed evidence, revisions and screenshots](acceptance-2026-10-19.md). Shared-code extractions, populated multi-owner dialogs, route-wide keyboard/menu combinations and owner verdicts remain explicit. Source photo retained; GUIDE.md and reaction docs reconciled. No merge, paid call, export/send or deployment.

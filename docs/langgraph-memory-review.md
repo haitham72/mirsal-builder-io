@@ -84,3 +84,17 @@ session-lock scope used by `drive_creator`. `_last_focus` requests at most 40
 checkpoints and returns an empty list if history retrieval fails. These checks
 were supplemented by the fixes above. A complete dual-write audit remains
 open; existing taste votes still use the JSON profile.
+
+## Final engineering verification — 2026-10-19
+
+Seven targeted checkpoint/profile tests passed across their narrow runs; the
+fake Telegram turn/cleanup passed after reproducing WinError 32. The final
+`mirsal test area agent` run: **322 tests, 4 failures, 9 errors**, matching the
+isolated base (previous checkout: 5/10). The model-preference assertion now
+isolates both saved preference and dotenv sources and passes by itself.
+
+Remaining baseline failures/errors concern concurrent session refusal, historical
+pack wording, model validation/catalog fallback mocks and source-location UI
+assertions. They are not silently treated as green. No provider was called.
+Node JS: **389/389**; Python console wrapper: **18/18**. The stale `rxedit`
+expectation was replaced with current preset/tab wiring.

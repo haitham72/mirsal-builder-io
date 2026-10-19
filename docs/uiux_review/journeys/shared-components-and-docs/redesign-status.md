@@ -9,3 +9,9 @@
 **Remaining:** Watcher/range/segment/download/preview/cache extractions and remaining inventory/docs catalog are explicitly pending.
 
 [Current status](../../current-status.md) · [Execution log](../../implementation-log.md) · [Images](../../redesign-shots/README.md). Historical issue/proposed-fix documents retain the original findings; they are not a claim that all catalog refactors shipped.
+
+### Engineering acceptance — 2026-10-19
+
+GUIDE.md and library-reactions.md were reconciled from main. The remaining watcher/presenter extractions and structure audit are explicit follow-ups; no broad refactor was claimed.
+
+[2026-10-19 acceptance evidence](../../acceptance-2026-10-19.md).

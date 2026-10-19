@@ -13,3 +13,9 @@
 ### Latest Library and Create acceptance — 2026-10-15
 
 `1980c857` fixes Library Lottie highlighting and visible-player mounting. Browser checks followed multiple saved-file selections and confirmed playback after Library → Create return. Create now offers Sticker / Emojis from a photo and video-sheet import; image/video sheets open Studio with Auto / 2×2 / 3×3 controls. Temporary imports finished READY. Wider editor/theme/phone states remain pending.
+
+### Engineering acceptance — 2026-10-19
+
+All three reaction tabs passed on both Create and Library, with shared state, real server contents and keyboard activation in all four width/theme states.
+
+[2026-10-19 acceptance evidence](../../acceptance-2026-10-19.md).

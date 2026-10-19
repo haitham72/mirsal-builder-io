@@ -12,3 +12,7 @@ Real Chrome captures from redesign-ui-ux, isolated server8796 and copied data. N
 | Emoji editor with Advanced (phone, dark) | [Emoji editor](emoji-editor-phone-dark.jpg) |
 
 The hierarchy improvement is the folded New request/Edge, grouped batch identity/tools/Motion and one stage primary; compare these structures across themes, rather than judging palette changes as the redesign. Some captures show loading previews; screenshots are visual evidence, not a claim of a completed render or a real provider turn.
+
+## 2026-10-19 acceptance captures
+
+[Per-cell screenshot index and assertions](../acceptance-2026-10-19.md). Eight slider states, 24 reaction surface/tab states, and four states each for the frame editor, Emoji editor, Lottie editor and saved synthetic Chat. Captured from a task-owned localhost server and copied/synthetic data; no generated mockups.
