@@ -316,7 +316,7 @@ def prompt_cmd(out, args) -> int:
         ok = 0
         for req in LAB_INPUTS:
             try:
-                plan = _t.preview(req, "3x3", args.style, ai=False)
+                plan = _t.preview(req, "2x2", args.style, ai=False)
                 from .generation import prompter as _pr
                 _pr.validate_plan(dict(plan))
                 n, key = len(plan["stickers"]), plan["slots"]["key_colour"]
@@ -645,7 +645,7 @@ def main(argv=None) -> int:
     se.add_argument("--generation"); se.add_argument("--since"); se.add_argument("--json", action="store_true", dest="as_json")
     ta = sub.add_parser("task", help="what happened to a provider task id"); ta.add_argument("ext", nargs="?"); ta.add_argument("--key")
     pr = sub.add_parser("prompt", help='print locks, concepts and template-built prompts (S1 lab: "prompt lab")')
-    pr.add_argument("request", nargs="?"); pr.add_argument("--grid", default="3x3"); pr.add_argument("--style", default="flat_vector")
+    pr.add_argument("request", nargs="?"); pr.add_argument("--grid", default="2x2"); pr.add_argument("--style", default="flat_vector")
     pr.add_argument("--ai", action="store_true"); pr.add_argument("--review-ai", action="store_true")
     pr.add_argument("--mode", default="sheet", choices=["sheet", "single"])
     js = sub.add_parser("jobs", help="pending generation jobs for the operator"); js.add_argument("--status")

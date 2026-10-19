@@ -213,7 +213,7 @@ class ConsoleTools:
             return None
 
     # ---- writes (these can spend) -----------------------------------------------------------------------------------------------------
-    def create(self, prompt: str, grid: str = "3x3", style_id: str = "flat_vector", ai: bool = True, parent: str | None = None,
+    def create(self, prompt: str, grid: str = "2x2", style_id: str = "flat_vector", ai: bool = True, parent: str | None = None,
                regen_of: str | None = None, refs: list | None = None, base_plan: dict | None = None, ref_clause: str | None = None,
                outline: int | None = None, erode: int | None = None, force_live: bool = False) -> dict:
         """A new batch: the Studio's Generate. Live -> a sheet job (Higgsfield); a request that names a prepared
@@ -811,7 +811,7 @@ class FakeTools:
     def prepared_match(self, prompt, grid=None):
         return None
 
-    def create(self, prompt, grid="3x3", style_id="flat_vector", ai=True, parent=None, regen_of=None, refs=None, base_plan=None, ref_clause=None, outline=None, erode=None, force_live=False):
+    def create(self, prompt, grid="2x2", style_id="flat_vector", ai=True, parent=None, regen_of=None, refs=None, base_plan=None, ref_clause=None, outline=None, erode=None, force_live=False):
         if getattr(self, "fail_next_create", False):
             self.fail_next_create = False
             raise ToolError("the provider refused it; try again in a minute", 503)

@@ -2,10 +2,10 @@
    and the cards that follow a running sheet / Kling job. Everything here calls a real endpoint (/api/higgsfield, /api/models, /api/usage, /api/live/*);
    the engine and the review gates are unchanged: a finished sheet runs through the same stills run, a video only starts from an approved video sheet. */
 'use strict';
-const LIVE={hf:null,m:null,style:'flat_vector',img:{id:'',options:{}},vid:{id:'',options:{}},jobs:[],est:{},loop:false,fill:null,q:[],typ:{},dis:[]};
-try{const s=JSON.parse(localStorage.getItem('mirsal.live')||'null');if(s){LIVE.style=s.style||LIVE.style;LIVE.img=s.img||LIVE.img;LIVE.vid=s.vid||LIVE.vid;LIVE.jobs=Array.isArray(s.jobs)?s.jobs:[];LIVE.loop=!!s.loop;LIVE.grid=s.grid==='2x2'?'2x2':'3x3';LIVE.fill=typeof s.fill==='number'?s.fill:null;LIVE.dis=Array.isArray(s.dis)?s.dis:[]}}catch(e){}
-/* the Studio's grid (the composer's Grid chip): 3x3 (default) or 2x2; every sheet request and plan of the Studio reads it */
-const cpGrid=()=>(typeof LIVE!=='undefined'&&LIVE.grid==='2x2')?'2x2':'3x3';
+const LIVE={hf:null,m:null,style:'flat_vector',grid:'2x2',img:{id:'',options:{}},vid:{id:'',options:{}},jobs:[],est:{},loop:false,fill:null,q:[],typ:{},dis:[]};
+try{const s=JSON.parse(localStorage.getItem('mirsal.live')||'null');if(s){LIVE.style=s.style||LIVE.style;LIVE.img=s.img||LIVE.img;LIVE.vid=s.vid||LIVE.vid;LIVE.jobs=Array.isArray(s.jobs)?s.jobs:[];LIVE.loop=!!s.loop;LIVE.grid=s.grid==='3x3'?'3x3':'2x2';LIVE.fill=typeof s.fill==='number'?s.fill:null;LIVE.dis=Array.isArray(s.dis)?s.dis:[]}}catch(e){}
+/* New sheets default to 2x2; saved explicit 3x3 choices remain available. */
+const cpGrid=()=>(typeof LIVE!=='undefined'&&LIVE.grid==='3x3')?'3x3':'2x2';
 const lsave=()=>gstore('mirsal.live',JSON.stringify({style:LIVE.style,img:LIVE.img,vid:LIVE.vid,jobs:LIVE.jobs,loop:LIVE.loop,grid:LIVE.grid,fill:LIVE.fill,dis:LIVE.dis.slice(-60)}));
 const fcr=n=>n==null?'?':(+n).toLocaleString(undefined,{maximumFractionDigits:2});
 const lkind=k=>k==='image'||k==='video'?k:(k==='sheet'||k==='single'?'image':'video');

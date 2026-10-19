@@ -119,7 +119,7 @@ def scene_missing(scene: str | None, ai: dict) -> bool:
     return not any(w in text for w in words)
 
 
-def expand(task: str, grid: tuple = (3, 3), *, use_ai: bool = False, complete=None, review_ai: bool = False) -> dict:
+def expand(task: str, grid: tuple = (2, 2), *, use_ai: bool = False, complete=None, review_ai: bool = False) -> dict:
     """The plan for a typed request, in `prompter.expand`'s exact shape, plus `expanded_by` ('ai' | 'deterministic'), `expand_model`, `expand_error`.
     `complete(system, user) -> (text, meta)` is injectable for tests. `review_ai` runs the slot reviewer after the lint."""
     from . import spelling

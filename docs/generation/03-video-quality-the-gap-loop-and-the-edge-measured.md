@@ -26,8 +26,11 @@
   ones), and a batch with a Kling video counts as having a video everywhere in the UI.
 - **Warnings in plain words.** A kept-with-a-check sticker says what Python noticed and what to do (for example "looks almost the same as S1: the same pose drawn twice? Kept: drop one with the
   x"), not a check name.
-- **One short video prompt for every plan** (Haitham, 2026-10-09: "short, direct and minimal", a long one missed the point on a 3x3): `prompter.VIDEO_TEMPLATE`
-  = `video_short_v1`, whatever the plan's version (the `video_v1`-`v4` files stay as they were, unused): the sheet and its length, Haitham's line
-  (`prompter.EXPRESSIVE`: "Create a very expressive animation of each emoji|character, each having its own personality with a wide range of emotions."),
-  one numbered motion line per kept cell, then "each one moves only inside its own cell, empty cells stay empty, static camera, keep the background and the
-  designs" (and "Faces only: no bodies, no hands." in face mode). About 10-15 lines.
+- **Independent local sequences for new plans (2026-10-19).** New slots persist
+  `video_independent_v1`: fixed spatial cell, stated emotion, Action 1 then Action 2
+  inside that cell, concurrent independent paces across cells. New sheets default
+  to 2×2. The expressive line, fixed camera/background/design, empty slots and
+  face-only restrictions stay. Loop closure is requested only when Loop is on.
+  Older plans without video-template metadata retain `video_short_v1`; old
+  template files and custom text are unchanged. This supersedes the 2026-10-09
+  short-numbered-lines default. See [contract and limits](19-independent-cell-video-and-2x2.md).

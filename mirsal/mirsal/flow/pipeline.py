@@ -417,7 +417,7 @@ def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: s
             raise PipelineError(f"Bad prompts file {pick.plan.name}: {e}", 422)
     else:
         measured = detect_grid(load_rgb(pick.sheet))
-        plan = prompter.expand(prompt, measured if measured in prompter.GRIDS else tuple(grid or (3, 3)))
+        plan = prompter.expand(prompt, measured if measured in prompter.GRIDS else tuple(grid or (2, 2)))
     out.mkdir(parents=True, exist_ok=True)
     created = round(time.time(), 3)
     gid, d = _allocate(out, plan["task_slug"], created)

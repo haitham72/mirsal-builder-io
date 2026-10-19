@@ -430,8 +430,9 @@ class PromptV2Tests(unittest.TestCase):
         p = prompter.expand("teddy bear", (3, 3))
         self.assertEqual(len({c["emoji"] for c in p["slots"]["cells"]}), 9)
         self.assertEqual(len({c["label"] for c in p["slots"]["cells"]}), 9)
-        lines = [l for l in p["video_prompt"].splitlines() if l[:2] in {f"{i}." for i in range(1, 10)}]
+        lines = [l for l in p["video_prompt"].splitlines() if '): State:' in l]
         self.assertEqual(len(lines), 9)
+        self.assertTrue(all('Action 1:' in line and 'Action 2:' in line for line in lines))
         self.assertEqual(prompter.expand("teddy bear", (3, 3))["slots"], p["slots"])          # deterministic
         self.assertNotEqual([c["label"] for c in prompter.expand("a fox", (3, 3))["slots"]["cells"]], [c["label"] for c in p["slots"]["cells"]])
 
@@ -457,6 +458,14 @@ class PromptV2Tests(unittest.TestCase):
 
 
 class LiveConsoleTests(Base):
+    def test_unspecified_http_plan_grid_defaults_to_2x2(self):
+        status, plan = self.req('POST', '/api/plan', {'prompt': 'generic emojis', 'ai': False})
+        self.assertEqual(status, 200, plan)
+        self.assertEqual(plan['grid'], [2, 2])
+        self.assertEqual(len(plan['stickers']), 4)
+        status, explicit = self.req('POST', '/api/plan', {'prompt': 'generic emojis', 'grid': '3x3', 'ai': False})
+        self.assertEqual((status, len(explicit['stickers'])), (200, 9))
+
     """The whole chain through the HTTP API with the fake CLI: sheet job -> unchanged stills run -> G2 -> video sheet -> G3 -> Kling job -> sliced."""
 
     def setUp(self):
@@ -693,7 +702,10 @@ class LiveConsoleTests(Base):
         self.assertEqual(create[create.index("--mode") + 1], "pro")                          # always pro: 1440 px, never std
         prompt = create[create.index("--prompt") + 1]
         self.assertIn("Create a very expressive animation of each character, each having its own personality with a wide range of emotions.", prompt)   # Haitham's line, in every video prompt
-        self.assertLess(len(prompt), 1200, "short, direct and minimal")
+        self.assertIn('animate concurrently', prompt)
+        self.assertEqual(prompt.count('Action 1:'), 4)
+        self.assertEqual(prompt.count('Action 2:'), 4)
+        self.assertLess(len(prompt), 2500, 'two short local actions per cell, not a long sheet-wide storyboard')
         self.assertEqual(self.req("POST", "/api/live/cost", {"kind": "video", "model": "kling3_0", "options": {"mode": "std"}})[0], 400)   # std is not offered any more
 
     def _stills_ready(self, prompt="blob"):

@@ -26,7 +26,9 @@ GUIDE.md and library-reactions.md reconciled from main, preserving duplicate-cho
 imports and grid-mismatch consent. Keep the source photo rashed 02.jpg. Folder,
 refactor and naming audit: docs/structure-review.md (no broad refactor performed).
 
-Next newly requested phase: 2×2 default for new generation plans and a new video
-template binding independent state/action sequences to spatial cells. Existing
-batches, explicit grids and hand-written prompts must retain their contracts.
+Follow-up implemented: 2×2 default for new generation plans and new
+`video_independent_v1` binding state/two local actions to spatial cells, with
+concurrent independent paces. Explicit grids, old plans/templates and custom
+text are preserved. Agent remains 322 / 4 failures / 9 errors; JS now 390/390.
+See docs/generation/19-independent-cell-video-and-2x2.md. No paid quality proof.
 No paid generation, Telegram/collection send, deployment or main merge authorized.

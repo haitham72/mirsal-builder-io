@@ -2,6 +2,11 @@
 
 <sub>Part of [generation.md](../generation.md).</sub>
 
+New generation plans default to 2×2 (four cells). Image template versions stay
+v3/v4; new slots separately persist `video_template={id:video_independent,version:1}`.
+Older slots without that field rebuild with the unchanged `video_short_v1`.
+See [the independent-cell contract](19-independent-cell-video-and-2x2.md).
+
 - **Template-locked.** A saved template per grid (`sheet_3x3`, `sheet_2x2`, `single_1x1`, `video`) is filled from a small slot JSON; nobody free-writes a prompt. New plans use **v3**
   (`TEMPLATE_VERSION`; v2 is kept as it was, so batches made with it rebuild to the prompt that was sent; v3 asks for "a wide range of emotions AND different states of action" so no two characters share a pose); a saved plan keeps its own version, and `render_plan(..., 1)` still rebuilds the v1 text exactly.
 - **v2 wording is measured, not guessed.** v1 said "sticker" (image models answer with a white die-cut border) and "equal cells / row-major" (Nano Banana 2 painted a

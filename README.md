@@ -2,6 +2,10 @@
 
 [Visual guide](GUIDE.md) · [Redesign acceptance](docs/uiux_review/acceptance-2026-10-19.md) · [Structure review](docs/structure-review.md)
 
+New generation plans default to **2×2 / four stickers**. Video prompts bind two
+local actions to each spatial cell and run the cells concurrently; explicit
+grids and old plans remain supported. [Prompt contract](docs/generation/19-independent-cell-video-and-2x2.md).
+
 ## Overview and glossary
 
 Mirsal creates **Telegram stickers** from text, images or prepared sheets: request → plan → sheet → still stickers → video sheet → animations → pack → Telegram. One deterministic Python engine serves the **AI chat**, **Studio** and **JSON API**; the screens are a sandbox over that API. Higgsfield generates media through its CLI, local models assist with chat and vision, and `out/` is the source of truth with optional Postgres mirrors and Redis caching. Humans approve review gates and paid calls; tests use fake providers. Read `CLAUDE.md` for rules, `docs/backlog.md` and `docs/waiting-for-haitham.md` for open work, and `docs/` for each area's contract and design.

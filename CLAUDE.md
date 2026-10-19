@@ -38,7 +38,7 @@ One engine, two interfaces (the AI chat; the Studio), never one monolithic promp
 2. **Areas, not phases;** each area has one doc; build only what is asked. Sheets: Nano Banana 2; animation: Kling v3.0 from the normalised video sheet; Higgsfield through its CLI.
 3. **The engine (`mirsal/engine/`) is deterministic and testable;** it never imports `psycopg`, `redis`, `langgraph` or a model client (a test enforces it).
 4. **Inputs:** text, image, both, a previous generation or stickers, an event/topic, a natural-language transformation.
-5. **Default output:** 3×3 master (9 stickers), 2K → 512 px, transparent, 3 s @ 30 fps; all configurable.
+5. **Default output:** 2×2 master (4 stickers), 2K → 512 px, transparent, 3 s @ 30 fps; explicit 3×3 and existing/imported grids remain supported (Haitham, 2026-10-19).
 6. **No dead stubs:** a UI control always has a backend that reads it.
 7. **Trackers are trackers, not logs:** an implemented entry is written into its area doc and deleted from `backlog.md` / `waiting-for-haitham.md` in the same step.
 8. **Lean and cross-platform:** venv `mirsal/.venv` (Windows) / `mirsal/venv` (macOS); stdlib first for engine and CLI; `pathlib`; ffmpeg from PATH or imageio-ffmpeg; no CDN at runtime; `python -m mirsal doctor` is the one health check, extended by every area.

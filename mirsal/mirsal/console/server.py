@@ -425,7 +425,7 @@ class Console:
             if body.get("from_generation"):
                 raise pl.PipelineError("Send either plan (the previewed one) or from_generation (a batch's own plan), not both", 400)
             style_id = body.get("style_id", "flat_vector")
-            previewed = tasks.plan_from_preview(body["plan"], body.get("prompt", ""), body.get("grid", "3x3"), style_id if isinstance(style_id, str) else "", bool(body.get("loop")))
+            previewed = tasks.plan_from_preview(body["plan"], body.get("prompt", ""), body.get("grid", "2x2"), style_id if isinstance(style_id, str) else "", bool(body.get("loop")))
         if what == "sheet":
             from ..generation.emoji_batches import validate_target
             validate_target((previewed or base_plan or {}).get("slots", {}).get("emoji_batch"), self.lib, who["id"])
@@ -442,7 +442,7 @@ class Console:
                     raise pl.PipelineError(f"{model_catalog.find('image', model)['label']} does not take reference images: pick another model or remove them.", 400)
                 base = base_plan or (self.plan_of(who, body["from_generation"]) if body.get("from_generation") else previewed)      # the plan the person approved on a card (in-process only, never from HTTP), or the Prompt tab: this batch's own plan, same cells and tags
                 validate_target((base or {}).get("slots", {}).get("emoji_batch"), self.lib, who["id"])
-                t = tasks.reserve(self.out, self.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
+                t = tasks.reserve(self.out, self.inp, body.get("prompt", ""), body.get("grid", "2x2"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
                                   base_plan=base, custom={"sheet_prompt": custom} if custom else None)
                 try:
                     clause = prompter.clean_custom(body.get("ref_clause"), "reference clause") if refs else None     # what the attached picture is for (a tweak keeps the design, a new action keeps the shape)
@@ -1955,10 +1955,10 @@ def make_handler(c: Console):
                     return self._json(200, emoji_batches.plan(body.get("prompt") or pack.get("name") or "Generic emojis", glyphs,
                         emoji_batches.sticker_emojis(pack.get("stickers")), body.get("decisions"), body.get("replacements"), pid,
                         body.get("style_id", "flat_vector"), bool(body.get("loop"))))
-                return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
+                return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "2x2"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
                                                      body.get("actions") or "creative"))
             if path == "/api/tasks":     # reserve: the next folder names + out/tasks/<NNN>.json (this is the G1 approval)
-                return self._json(200, tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
+                return self._json(200, tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "2x2"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
                                                      actions_mode=body.get("actions") or "creative"))
             if path.startswith("/api/chat/sessions"):
                 from ..agent.memory import SessionError as _SE

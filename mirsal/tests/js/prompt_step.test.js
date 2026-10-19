@@ -253,7 +253,7 @@ test('only the Generate sheet click spends, and it forwards the edited text as s
   assert.equal(body.prompt, 'spiderman in dubai');
   assert.equal(body.ai, false, 'the draft never asks the paid enhancer');
   assert.equal(body.style_id, 'flat_vector');
-  assert.equal(body.grid, '3x3');
+  assert.equal(body.grid, '2x2');
   assert.equal(sheetPosts(h).length, 1, 'exactly one paid request');
   assert.equal(h.api.GD, null, 'the draft is consumed once the sheet is queued');
   assert.ok(h.log.removed.includes('mirsal.prompt-draft'));

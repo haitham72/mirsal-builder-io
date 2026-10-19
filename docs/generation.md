@@ -1,6 +1,6 @@
 # Live generation: how it is built
 
-A typed request becomes a sheet of 9 stickers made by Higgsfield, and an approved video sheet becomes a Kling animation. Both go through the **unchanged** engine and review
+A typed request defaults to a 2×2 sheet of 4 stickers made by Higgsfield, and an approved video sheet becomes a Kling animation. Explicit 3×3 remains available. Both go through the **unchanged** engine and review
 gates; the file store is the primary state (Postgres mirrors it, see [`store-and-search.md`](store-and-search.md)). What the Higgsfield CLI offers, with measurements: [`higgsfield.md`](higgsfield.md).
 
 ```
@@ -10,6 +10,9 @@ request ─(prompt template v3 + style + stroke [+ AI enhancer] [+ references])�
 ```
 
 ## Sections
+
+New-plan defaults and the independently animated cell prompt are documented in
+[2×2 and independent video sequences](generation/19-independent-cell-video-and-2x2.md).
 
 This is an index: each section is its own file under [`generation/`](generation/); read only the one a task needs.
 

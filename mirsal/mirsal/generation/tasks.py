@@ -80,7 +80,7 @@ def nearest_valid(name: str, kind: str, number: int) -> str:
 ACTIONS_MODES = ("creative", "predefined")
 
 
-def preview(prompt: str, grid: str | list | tuple = "3x3", style_id: str = "flat_vector", ai: bool = False, loop: bool = False,
+def preview(prompt: str, grid: str | list | tuple = "2x2", style_id: str = "flat_vector", ai: bool = False, loop: bool = False,
             actions_mode: str = "creative") -> dict:
     """The plan for a typed task, for the Inbox to show before anything is reserved: template, slot JSON, final prompts.
     `actions_mode` (Haitham, 2026-10-11): "creative" = the AI's (or the mood bank's) own nine stickers; "predefined" = the first nine of the complete bank
@@ -132,7 +132,7 @@ def _text(value, what: str, limit: int, *, allow_empty: bool = False) -> str:
     return value
 
 
-def plan_from_preview(raw, prompt: str, grid: str | list | tuple = "3x3", style_id: str = "flat_vector", loop: bool = False) -> dict:
+def plan_from_preview(raw, prompt: str, grid: str | list | tuple = "2x2", style_id: str = "flat_vector", loop: bool = False) -> dict:
     """The plan the person previewed (`preview`'s answer, sent back by the browser) as a plan this server can trust. The browser is untrusted: only the CELLS (label, tags, emoji, motion),
     the subject sentence and the key colour are taken from it, each checked for type, size and characters, then linted by the enhancer's own rules (`expander.lint_slots`); everything else
     (task, template, grid, style, loop, the prompts) is rebuilt here from the request and the saved template (`prompter.render_plan`), so a forged plan cannot carry its own instructions.
@@ -224,7 +224,7 @@ def plan_again(base: dict, loop: bool | None = None) -> dict:
     return plan
 
 
-def reserve(out: Path, inp: Path, prompt: str, grid="3x3", style_id: str = "flat_vector", ai: bool = False, loop: bool = False,
+def reserve(out: Path, inp: Path, prompt: str, grid="2x2", style_id: str = "flat_vector", ai: bool = False, loop: bool = False,
             base_plan: dict | None = None, custom: dict | None = None, actions_mode: str = "creative") -> dict:
     """Save the task: this IS the G1 approval of the plan (recorded on the task and copied onto every generation run from it).
     `base_plan` starts from a batch's own saved plan (same cells and tags) instead of expanding the request again; `custom` is a prompt the user wrote by hand
@@ -370,7 +370,7 @@ def next_batch(out: Path, gens, style_id: str = "flat_vector", loop: bool = Fals
         if not free:
             return {"complete": True, "message": f"All {len(actions.PRESETS)} preset grids of this pack are made ({9 * len(actions.PRESETS)} stickers). Start a new pack, or regenerate a batch you want better."}
         text = f"{request} {free[0]}"
-        plan = preview(text, "3x3", style_id, False, loop)
+        plan = preview(text, (rows, cols), style_id, False, loop)
         return {**plan, "prompt": text, "next": {"kind": "preset", "preset": free[0], "left": len(free) - 1},
                 "existing": existing, "batches_max": max(1, min(len(free), room))}
     if expander.expand(spelling.fix_text(request), (rows, cols)).get("expanded_by") == "transformation":
@@ -467,7 +467,7 @@ def more_batches(request: str, plan: dict, k: int, style_id: str = "flat_vector"
         out = []
         for p in [x for x in actions.PRESETS if x != slots["preset"] and x not in set(used_presets)][:k]:      # a session's own grids are never made twice
             text = f"{base} {p}"
-            out.append({**preview(text, "3x3", style_id, False, loop), "prompt": text})
+            out.append({**preview(text, grid, style_id, False, loop), "prompt": text})
         return out
     used = set(used_tokens) | actions.tokens_from_stickers(plan.get("stickers"))
     out = []

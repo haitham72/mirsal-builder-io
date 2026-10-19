@@ -39,7 +39,7 @@ function chatStageInit({ A, store, loadSessions, loadAgent, loadModels, engRedra
   };
   ACT.agsetgrid = async (el) => saveSet({ grid: el.dataset.v });
   ACT.aggridtoggle = async (el) =>
-    saveSet({ grid: ((A.sess && A.sess.settings && A.sess.settings.grid) || '3x3') === '2x2' ? '3x3' : '2x2' });
+    saveSet({ grid: ((A.sess && A.sess.settings && A.sess.settings.grid) || '2x2') === '2x2' ? '3x3' : '2x2' });
   const styleNow = () =>
     (A.sess && A.sess.settings && A.sess.settings.style_id) || A.pre || (A.agent && A.agent.default_style) || 'flat_vector';
   function aiModelDetails(llm, selected, pref = 'auto') {
@@ -59,7 +59,7 @@ function chatStageInit({ A, store, loadSessions, loadAgent, loadModels, engRedra
     return list.length ? { list, groups, cur, def: fallback || '' } : null;
   }
   function selectorDetails() {
-    const st = (A.sess && A.sess.settings) || { grid: '3x3', ask_before_spending: true },
+    const st = (A.sess && A.sess.settings) || { grid: '2x2', ask_before_spending: true },
       mine = st.models || {},
       cat = A.cat || {},
       llm = A.llm || {};
@@ -165,7 +165,7 @@ function chatStageInit({ A, store, loadSessions, loadAgent, loadModels, engRedra
     const bar = $('ag-bar'),
       box = $('ag-styles');
     if (!bar || !box) return;
-    const st = (A.sess && A.sess.settings) || { grid: '3x3', ask_before_spending: true },
+    const st = (A.sess && A.sess.settings) || { grid: '2x2', ask_before_spending: true },
       list = (A.agent && A.agent.styles) || [],
       cur = styleNow();
     const now = list.find((s) => s.id === cur);

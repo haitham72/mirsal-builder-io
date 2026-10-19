@@ -37,3 +37,12 @@ passed. Two new findings were fixed: duplicate Packs tab bars and unreadable dar
 selected-tab hover. Agent area is back to base: 322 tests / 4 failures / 9 errors.
 All five memory findings are fixed; broader baseline failures remain explicit.
 GUIDE.md and library-reactions.md are reconciled with main; branches stay separate.
+
+## Follow-up request — 2×2 and independent video prompts
+
+New plans now default to 2×2 across planning, API, CLI, Chat, Studio and claims.
+Existing/imported geometry and explicit choices remain. New slots select
+`video_independent_v1`; legacy slots rebuild the unchanged short template and
+custom prompt text wins. Fake prompt-to-video-job integration passed; no paid
+quality proof. Final agent area remains 322 / 4 failures / 9 errors; JS now
+390/390 including the new default regression.

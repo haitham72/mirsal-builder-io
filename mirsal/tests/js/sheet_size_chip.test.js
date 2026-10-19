@@ -44,12 +44,12 @@ function fixture({ grid = '3x3', session = true, accept = true, styles = [] } = 
     settingsPaints: () => settingsPaints };
 }
 
-test('the sheet-size chip is one native button, defaults to 3×3, and explains both choices', () => {
+test('the sheet-size chip is one native button, defaults to 2×2, and explains both choices', () => {
   const f = fixture({ session: false });
   f.drawBar();
   const html = f.elements['ag-bar'].innerHTML;
   assert.match(html, /<button type="button" class="ag-chip ag-grid" data-act="aggridtoggle"/);
-  assert.match(html, />3×3 sheet<\/button>/);
+  assert.match(html, />2×2 sheet<\/button>/);
   assert.match(html, /nine \(3×3\) or four \(2×2\)\. Click to change\./);
   assert.equal((html.match(/data-act="aggridtoggle"/g) || []).length, 1);
   assert.doesNotMatch(html, /<select|data-aggrid|ag-sel/);
@@ -86,10 +86,10 @@ test('before the first message a size press creates one session, saves the size,
   await f.ACT.aggridtoggle({ dataset: {} });
   assert.deepEqual(f.calls, [
     ['/api/chat/sessions', {}],
-    ['/api/chat/sessions/S008/settings', { grid: '2x2' }],
+    ['/api/chat/sessions/S008/settings', { grid: '3x3' }],
   ]);
   assert.equal(f.A.sid, 'S008');
-  assert.equal(f.A.sess.settings.grid, '2x2');
+  assert.equal(f.A.sess.settings.grid, '3x3');
   assert.deepEqual(f.A.sess.messages, []);
   assert.deepEqual(f.urls, ['#/agent/S008']);
   assert.deepEqual(f.saved, [['mirsal.ai.sid', 'S008']]);

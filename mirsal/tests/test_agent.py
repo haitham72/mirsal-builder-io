@@ -57,7 +57,7 @@ class NewAndConfirm(Base):
     def test_a_request_becomes_a_plan_with_a_price_and_nothing_is_spent(self):
         m = self.say("make me falcon stickers")
         self.assertEqual(m["cards"][0]["type"], "plan")
-        self.assertEqual((m["cards"][0]["estimate"], len(m["cards"][0]["names"])), (2.0, 9))
+        self.assertEqual((m["cards"][0]["estimate"], len(m["cards"][0]["names"])), (2.0, 4))
         self.assertEqual([c.get("action") for c in m["chips"] if c.get("action") in ("confirm", "cancel")], ["confirm"],
                          "the first answer of a chat carries the one-time AI vision switch beside Create it, and no Not yet (UI/UX spec P9)")
         self.assertFalse([c for c in self.tools.calls if c[0] == "create"])            # no credits until the user says so

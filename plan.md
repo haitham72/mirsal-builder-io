@@ -7,6 +7,5 @@
 
 7. **Structural follow-up.** `docs/structure-review.md` prioritizes API routers/schemas, graph lifecycle/nodes and shared UI state/presenters before cosmetic folder/name changes. This is an audit, not an authorized broad rewrite in the acceptance phase.
 
-8. **New request: generation defaults/prompts.** Make 2×2 the default for new plans across entrypoints; preserve explicit grids and existing/imported batches. Version the video prompt with spatially bound state + local action sequences running concurrently; fake-only validation, no paid proof.
 
 Keep the duplicate-choice router per Haitham's instruction: main deliberately removed it, so a future merge must preserve the redesign dialogs. Preserve Resize semantics, engine authority, reversible per-picture decisions and distinct Emoji/Lottie export contracts. Work on `redesign-ui-ux`; active checkout is `G:/Haitham/VsCode/Mirsal-Builder`. Restart only the task-owned server on http://127.0.0.1:8796/. Use copied output and disabled providers for browser checks; no runtime/media commits, main merge or deployment.

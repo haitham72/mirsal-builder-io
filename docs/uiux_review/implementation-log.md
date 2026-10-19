@@ -129,3 +129,13 @@ Evidence: node suite 389 passing; focused automatic/manual image-grid, preserved
 All five memory findings fixed with fake failing→passing reproductions. Agent area: 322 / 4 failures / 9 errors (equal to base); Node 389/389; Python console 18/18. All eight slider cells and the full reaction-tab matrix passed. Extended delayed/off-route refresh, 400-message synthetic histories and bounded hover/editor inventory passed. New duplicate-tab and dark-hover contrast findings were fixed.
 
 [Detailed evidence, revisions and screenshots](acceptance-2026-10-19.md). Shared-code extractions, populated multi-owner dialogs, route-wide keyboard/menu combinations and owner verdicts remain explicit. Source photo retained; GUIDE.md and reaction docs reconciled. No merge, paid call, export/send or deployment.
+
+## Follow-up generation request — 2026-10-19
+
+Haitham changed new-plan defaults to 2×2 and asked for per-emoji state/action
+sequences without whole-sheet action copying. New versioned video template binds
+two local actions to fixed spatial positions and requests concurrent independent
+paces. Old template files, explicit/custom prompts and existing/imported geometry
+are preserved. Default and spatial-sequence regressions failed before and passed
+after; the real HTTP preview and fake video CLI integration pass. Agent area
+322 / 4 failures / 9 errors; Node JS 390/390. No paid model proof was attempted.

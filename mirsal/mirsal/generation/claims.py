@@ -164,7 +164,7 @@ def _grid(grid) -> tuple:
     return g
 
 
-def claim_next(out: Path, subject: str, grid=(3, 3), owner: str | None = None, title: str | None = None, plan: bool = True) -> dict:
+def claim_next(out: Path, subject: str, grid=(2, 2), owner: str | None = None, title: str | None = None, plan: bool = True) -> dict:
     """Open the subject's pack session when it does not exist yet and claim its next unclaimed preset, in one lock hold.
     {session, claim, created: bool (the session is new), complete: bool}. When all four presets are claimed, `claim` is None and `complete` True:
     the caller says so in words with the next choices (a custom pick from the bank, or a new pack); nothing is repeated silently."""
