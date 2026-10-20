@@ -1244,3 +1244,27 @@ details.lv-edge{display:block;padding:var(--space-1) var(--space-2);margin:0}
  #dlg .dbox .row{flex-wrap:wrap}#dlg .dbox .row>.btn{flex:1;justify-content:center}
  .tr-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
 }
+
+/* The Studio's left creation panel (docs/design/15): on the Studio route the second column is the creation panel (352px, 320px under 1180px) holding the one
+   New request composer; the workspace keeps the rest. Earlier batches open in the Batches drawer (#bdrawer) from the workspace's top bar. */
+body.studio-split{--col2-w:352px}
+@media (max-width:1180px){body.studio-split{--col2-w:320px}}
+.cp-col{overflow:auto;padding:12px;display:block}
+#col2 .cp{margin:0;padding:12px;box-shadow:none;background:transparent;border-radius:0;overflow:visible}
+#col2 .cp-head{flex-wrap:wrap}#col2 .cp-head .cp-gap{flex:1}
+#col2 .cp-bar>.cp-chip{flex:1 1 100%;min-width:0}#col2 .cp-bar>.cp-go{width:100%;justify-content:center}#col2 .cp-bar .cp-gap{display:none}
+#col2 .cp-options{flex:1 0 100%}#col2 .cp-options>summary{flex-wrap:wrap}#col2 .cp-option-grid .cp-chip{flex:1 1 calc(50% - var(--space-1));min-width:0}
+#col2 .cp-engine>summary{align-items:flex-start;flex-direction:column}
+#col2 .cp-styles{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr))}#col2 .cp-style{width:auto}
+#col2 .cp-summary{align-items:flex-start;flex-direction:column;gap:var(--space-half)}
+#col2 .cp-menu{right:auto;left:0;width:min(330px,80vw)}
+.gtop{display:flex;justify-content:flex-end;gap:var(--space-1);flex-wrap:wrap}.gtop .btn svg{width:16px;height:16px}.gtop-create{display:none;margin-right:auto}
+@media (max-width:900px){.gtop-create{display:inline-flex}}
+.bdrawer{position:fixed;z-index:62;top:0;right:0;bottom:0;width:min(420px,100vw);display:flex;flex-direction:column;background:var(--sf);border-left:1px solid var(--bd);box-shadow:-20px 0 50px #0f172a24}
+.bdrawer[hidden],#bdscrim[hidden]{display:none}
+#bdscrim{position:fixed;inset:0;z-index:61;background:rgba(8,40,52,.22)}
+.bd-head{display:flex;align-items:center;gap:var(--space-1);padding:var(--space-2) var(--space-2) var(--space-1);border-bottom:1px solid var(--bd)}.bd-head h2{margin:0;flex:1;font-size:var(--type-headline)}
+.bd-body{flex:1;min-height:0;display:flex;flex-direction:column}.bd-body .c2l{flex:1;overflow:auto}.bd-body .c2h h1{display:none}
+@media (max-width:760px){.bdrawer{bottom:62px}}
+@media (prefers-reduced-motion:no-preference){.bdrawer:not([hidden]){animation:mz-in .22s var(--ease) both}}
+

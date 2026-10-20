@@ -11,7 +11,7 @@ already fixed. Use [plan.md](../../plan.md) as the execution queue and the
 [user review guide](../../user%20app%20review%20guide.md) for Haitham's later review.
 
 - **Confirmed defects:** none open; UX-01 and UX-09 (phone editors/Save, watch-folder rows) are fixed too. IDs and reproduction: [current audit](app-audit-2026-10-19.md).
-- **Design decisions:** review the proposed Studio left creation panel; earlier-work recovery, phone Chat density, F-31 wording, cloud pricing and visual verdicts.
+- **Design decisions:** review the built Studio left creation panel and Batches drawer (UX-07's recovery entry); phone Chat density, F-31 wording, cloud pricing and visual verdicts.
 - **Engineering:** API routers/schemas, graph/lifecycle boundaries, watcher/presenter/cache/style extractions T-024/025/031/034/035; runtime/parked React decisions W29/W33.
 - **Unverified states:** route-wide keyboard/menu/destructive combinations, loaded Prepare video, LAN roles, all Settings/Help states and every opened/hover state. Paid quality and sends remain owner-only.
 - **Test debt:** inherited agent baseline 322 / 4 failures / 9 errors. No tests rerun for this docs-only audit.

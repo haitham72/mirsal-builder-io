@@ -17,7 +17,7 @@ test('New request stays visible for new and reopened batches without a disclosur
       $:id=>id==='prompt'?prompt:box,
       composerDraw(){},
     });
-    vm.runInContext(statement(source,'function composerMount'),ctx);
+    vm.runInContext(statement(source,'let CPKEEP')+';'+statement(source,'const cpHost')+';'+statement(source,'function composerMount'),ctx);
     vm.runInContext('composerMount()',ctx);
     assert.equal(mounted.tagName,'SECTION','composer must remain available, including after opening a batch');
     assert.equal(mounted['aria-label'],'New request');

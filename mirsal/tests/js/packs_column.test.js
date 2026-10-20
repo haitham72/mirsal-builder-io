@@ -13,6 +13,7 @@ function column(packs) {
     nodes.c2q = {focus() {}, setSelectionRange() {}};
   }};
   nodes.col2 = col;
+  nodes.c2tog = {setAttribute() {}};
   const ctx = vm.createContext({
     LIB: {packs}, route_: 'library', PACK_ID: null, C2Q: '', PKFOLD: new Map(),
     COL2: ['library', 'pack'], $: id => nodes[id],

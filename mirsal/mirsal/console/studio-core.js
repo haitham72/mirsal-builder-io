@@ -263,26 +263,33 @@ const nAdded = (g, pid) =>
 
 /* ---------- the screen */
 RENDER.generate = async () => {
+  /* the composer already lives in the creation panel (composer.js studioCol): the workspace is drawn without the old prompt row, so #prompt exists once */
+  const panel = !!(document.getElementById('cpwrap') || (typeof CPKEEP !== 'undefined' && CPKEEP));
   $('s-generate').innerHTML = `<div class=gen2>
-   <div class=sh>${ic('gen')} Studio</div>
+   <div class=gtop><button class="btn gtop-create" data-act=c2tog aria-controls=col2 title="New request and its settings">${ic('panel')} Creation settings</button>
+    <button class=btn data-act=bdopen aria-controls=bdrawer aria-expanded=false title="Your earlier batches and projects: open one to carry on">${ic('hist')} Batches</button></div>
+   ${panel ? '' : `<div class=sh>${ic('gen')} Studio</div>
    <div class=gform>${ic('search')}<input id=prompt type=text placeholder="Describe the stickers, for example: teddy bear for school" autocomplete=off><button id=go class="btn pri gbig" data-act=gprompt>Generate prompt</button></div>
-   <div class=gopts><span class=mut>White outline</span><div class=tabs id=opills></div><span class=mut id=ohint></span></div>
+   <div class=gopts><span class=mut>White outline</span><div class=tabs id=opills></div><span class=mut id=ohint></span></div>`}
    <div id=msg class=gmsg></div><div id=ghealth></div><div id=gres></div></div>`;
-  $('prompt').value = gdOn() ? GD.prompt : SES.prompt || '';
-  $('prompt').onkeydown = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      ACT.ggo();
-    }
-  };
+  if (!panel) {
+    $('prompt').value = gdOn() ? GD.prompt : SES.prompt || '';
+    $('prompt').onkeydown = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        ACT.ggo();
+      }
+    };
+  }
   document.documentElement.style.setProperty('--tile', GS.tile + 'px');
-  drawOutline();
+  if (!panel) drawOutline();
   glast = '';
   await loadInputs();
   tick(true);
 };
 
 function drawOutline() {
+  if (!$('opills')) return;
   const on = GS.outline > 0;
   $('opills').innerHTML = [
     [12, 'On'],

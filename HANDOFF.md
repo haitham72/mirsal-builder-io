@@ -1,108 +1,76 @@
-﻿# HANDOFF - session save point, 2026-10-20
+﻿# HANDOFF - session save point, 2026-10-20 (afternoon)
 
-Checkout `G:/Haitham/VsCode/Mirsal-Builder`, branch `redesign-ui-ux`.
-Last pushed commit **9baa54e9** (dark-rework close-out docs + Postgres profile
-sync docs), pushed to `origin/redesign-ui-ux`. Previous save point's close-out
-is done: `current-status.md` and the J01/J07/J10 journey headers now say they
-describe the pre-dark-rework audit and link `dark-rework-2026-10-19.md`; the
-untracked `output/playwright/` scratch was moved out of the repo (not deleted,
-not committed). Main stays `0167761b`.
+Checkout `G:/Haitham/VsCode/Mirsal-Builder`, branch `redesign-ui-ux` (main stays
+`0167761b`, never merge without Haitham asking). Haitham said "do not stop until
+all planned are implemented", then asked to stop here and hand over to another
+LLM. Everything below is committed and pushed unless it says otherwise.
 
-This session separately confirmed the chat's Postgres profile sync
-(`docs/agent-and-chat/24-durable-turns-and-profiles-2026-10-16.md`,
-`out/profile/<user>.json` -> `user_profiles` via `store/sync.sync_profile`):
-`mirsal-db` had exited and was restarted (`docker start mirsal-db`); a name
-saved before that restart never reached Postgres (sync is best-effort, skipped
-silently when unreachable) and a name saved after the restart did
-(`user_profiles` row for `user_id='local'`). No code changed for this; only
-the two docs above were updated to say so.
+## Done this session (commits on origin/redesign-ui-ux)
 
-plan.md is next steps only; nothing here needs more docs work before Haitham's
-review.
+- `0e1571d7` UX-06 Test-workspace badge, UX-08 reaction ownership heading, UX-11 owner names.
+- `b677af07` UX-03 keyboard tiles, UX-04 editor control names, UX-05 frame card focus/Escape.
+- `83b2e9ea` UX-01 phone editors and Save sticker, UX-09 watch-folder rows.
+- **Save-point commit (this one)**: Studio left creation panel + Batches drawer
+  (plan item 1, also UX-07's recovery entry). See "Studio left panel" below.
 
-## Latest user decisions
+What each fix does, where, and its test: `docs/design/16-app-audit-fixes-2026-10-20.md`.
+All confirmed audit defects (UX-01..UX-09, UX-11) are now fixed.
 
-- Dark mode should learn from https://higgsfield.ai/ai/video but KEEP Mirsal's
-  original cyan-blue accent. The intermediate soft-blue draft was replaced.
-- **New request always open**, including reopened batches. Do not fold it to
-  reduce density. Options/Prompt engine may retain internal disclosures.
-- Missing sticker/video options were found by Haitham: **Stickers / Sheet / Both**.
-  No removed-controls regression was invented/fixed; keep those choices.
-- **Plan** Studio creation settings on the left, artwork/workspace right like
-  Higgsfield. Proposal is written in `docs/design/15-studio-creation-sidebar-plan.md`.
-  Sidebar implementation has NOT started; plan review is pending.
+## Studio left panel (implemented, needs Haitham's visual review)
 
-## Implemented in the working tree
+Plan: `docs/design/15-studio-creation-sidebar-plan.md` (its "Implemented" section).
+- On `#/studio` the second column is the creation panel (352px, 320px <1180px):
+  the ONE New request composer (`#cpwrap`) is moved there (`composer.js`
+  `studioCol`, `cpHost`, `cpStash`/`CPKEEP` keeps the node, so the draft
+  survives leaving and returning). `body.studio-split`. No second form, one `#prompt`.
+- `studio-core.js` RENDER.generate draws a top bar: **Creation settings** (only
+  <=900px, opens the existing col2 drawer) and **Batches**; it skips the legacy
+  prompt row when the composer exists.
+- Earlier batches and the open project's map (projmap.js) moved into the
+  **Batches drawer** `#bdrawer` (`live.js` `bdEl`/`ACT.bdopen`/`bdClose`,
+  `histHost()`); non-modal, focus to first control, Escape/Close returns focus,
+  opening a batch (`hopen`/`pmopen`) closes it; the breadcrumb project link opens it.
+- `app.js`: clicks inside the composer no longer close the narrow col2 drawer
+  (except Generate); `#c2tog` is labelled "Creation settings" on the Studio.
+- Verified on a copied workspace (port 8795, providers off): regions at
+  1440/1024/760/390, draft kept across Library and back, drawer Escape/focus.
+  Screenshots are only in the scratchpad (not committed).
+- **Known gaps to pick up**:
+  1. In Options (narrow panel) the Creative/Predefined segment (`.gseg.cp-act`)
+     renders as an empty pill with `innerText` "" — investigate (maybe pre-existing).
+  2. Plan asks for the Generate action to stay reachable at the panel bottom while
+     settings scroll; not done (fits at 900px height today).
+  3. No dedicated regression test yet for studioCol/bdrawer (existing tests were
+     updated: `composer_visibility`, `packs_column`). Add one before more changes.
+  4. Light/dark screenshots not reviewed exhaustively; final visual verdict is Haitham's.
 
-1. `mirsal/mirsal/console/theme.css`: neutral charcoal depth and original cyan
-   actions, separate Chat canvas/user messages/composer/menus, quiet neutral
-   greeting, dark aurora/dots/pointer glow disabled, shared primary hover fixed.
-   Light palette and media/diagnostic colors are preserved.
-2. `console/composer.js`: New request is a named SECTION, not collapsible details.
-   `console/studio.css`: removes outer closed-state styling, retains nested options.
-3. New tests `mirsal/tests/js/theme_palette.test.js` (3) and
-   `mirsal/tests/js/composer_visibility.test.js` (1).
-4. Documentation/evidence: dark-mode.md; design foundations/per-screen docs;
-   current status/backlog; J01/J07/J10 status/checklists; audit UX-02 follow-up;
-   implementation log; `docs/uiux_review/dark-rework-2026-10-19.md` and `.json`;
-   **10 cited screenshots** in `docs/uiux_review/dark-rework-shots/`.
-5. Layout proposal and its design.md index entry are documentation only.
+## Remaining plan (see plan.md)
 
-## Verified - do not rerun for docs
-
-- Four narrow Node regressions pass after real failing assertions. Final cyan
-  palette 3/3 passed after the accent revision; composer 1/1 pass remains valid.
-  Command: `node --test mirsal/tests/js/theme_palette.test.js mirsal/tests/js/composer_visibility.test.js`.
-- Playwright: **36 core states** (9 states x desktop/phone x light/dark), plus
-  **24 actual view-switch cases** (Stills/Animation x Stickers/Sheet/Both x four
-  width/theme states). Nine individual items and nine frame/Adjust controls in
-  Stickers/Both; none in Sheet by design; Size/X/Y reachable.
-- No app page errors, failed responses or mutation POSTs. Primary hover:
-  **13.24:1 dark / 5.17:1 light** on both widths. Dark ambient animation: none.
-  Sampled light colors unchanged; tiny shadow interpolation is not a palette change.
-- Eighteen light states were retained after their pass because later edits were
-  dark-scoped; affected dark states were rechecked. Final screenshots explicitly
-  isolate open/closed menus. Harness errors about nested summaries or toggling an
-  already-open Adjust panel were corrected; they were not product regressions.
-- Source hashes in the dated JSON match the current three production files.
-  Changed Markdown links resolved; git diff --check passed at the last check.
-- Broader inherited results only: agent 322 / 4 failures / 9 errors; old Node
-  390/390, wrapper 18/18. Full suites were NOT rerun or claimed freshly green.
-
-## Remaining close-out details
-
-All done this session: docs clarified and linked (see above), scratch archived
-outside the repo, explicit paths committed as `9baa54e9` and pushed. Nothing
-left to close out before Haitham's review.
-
-- User's initial phone-editor/Save question was answered: the populated image/
-  animation editors and Save form clip at phone width; this is still UX-01, NOT
-  fixed by the dark theme or the future sidebar plan.
-- Do not implement the proposed sidebar merely because its plan is written.
+UX-10 phone Chat density; F-31 wording and W18 enhancer price gate (owner
+calls, never implemented); unverified states sweep; shared-code/router
+refactors (AR-01..04, T-024/025/031/034/035); optional Lottie items; agent
+baseline 4 failures / 9 errors.
 
 ## Running tools / paths
 
-- The prior session's task server (**http://127.0.0.1:8798/**) is no longer
-  running; its Playwright sessions are gone too. Nothing to stop/repoint.
-- **User real-data app http://127.0.0.1:8770/** is the only server now up; it
-  is live and was restarted by Haitham this session. Never stop/repoint/automate it.
-- `mirsal-db` (Postgres, port 5434) was found stopped and was started with
-  `docker start mirsal-db`; it is up. If it exits again, Postgres writes
-  (profiles/tasks/tickets) silently stop until `serve` is also restarted
-  (`store/db.available()` caches the first failure per process) — see
-  `docs/dev-notes.md` and `docs/agent-and-chat/24-durable-turns-and-profiles-2026-10-16.md`.
-- Reference measured ~318px creation panel, near-neutral page/form/control
-  backgrounds. The proposal uses a 352px preferred / 320-384px bounded Mirsal
-  panel, rehomes batch history to avoid an extra permanent column and preserves
-  every per-item tool, free/priced step and import/review/export contract.
+- A task test server may still be running on **http://127.0.0.1:8795/** with
+  `MIRSAL_OUT` = scratch copy (providers off). Safe to kill. Never touch the
+  real-data server **:8770**.
+- Playwright MCP writes `.playwright-mcp/` in the repo root; it is git-ignored.
+- Hash-only `goto` does not reload the page: call `page.reload()` after edits.
+- `mirsal-db` Postgres on 5434; if it exits, writes stop until `serve` restarts.
 
 ## Unowned edits - leave untouched and unstaged
 
 - Deletions: `Recovered particles L002.lottie (2).json`, `smiling_face.json`.
-- Runtime writes from the live real-data server (never stage these):
-  `mirsal/out/G154-generic_test-20261015T054257/preview/anim-S1.png`,
+- Runtime writes: `mirsal/out/G154-generic_test-20261015T054257/preview/anim-S1.png`,
   `mirsal/out/higgsfield_models.json`, `mirsal/out/model_calls.jsonl`,
-  `mirsal/out/sessions/S020.json` (new, from this session's "my name is" checks).
-- Never stage runtime data, secrets, artwork or unrelated changes. The new UI
-  screenshots are documentation evidence. Verify branch before every commit.
-  No merge, deployment, paid call, Telegram or collection send is authorized.
+  `mirsal/out/sessions/S020.json`.
+- Explicit-path commits only, check `git branch --show-current` first. No merge,
+  deployment, paid call, Telegram or collection send.
+
+## Tests last run
+
+`node --test mirsal/tests/js/*.test.js` 416/416 pass; `python -m unittest
+tests.test_ui_inventory` OK (run from `mirsal/` with `.venv`). Full Python
+discovery is retired; not run.

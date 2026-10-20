@@ -24,10 +24,24 @@ const strokeName=px=>(STROKES.find(s=>s[0]===px)||[px,px+' px'])[1];
 const glyph=px=>`<svg class=cp-gl viewBox="0 0 40 40" aria-hidden=true><rect width=40 height=40 rx=11 fill="#cbd5e1"/><circle cx="20" cy="20" r="${(11.5-px*0.12).toFixed(1)}" fill="#3B82F6" stroke="#fff" stroke-width="${(px*0.3).toFixed(1)}"/></svg>`;
 const liveReady=()=>!!(LIVE.hf&&LIVE.hf.available&&!LIVE.hf.error&&LIVE.m);
 
+/* The Studio's left creation panel (docs/design/15): on the Studio route the second column is the creation panel and the ONE composer lives there (#c2create).
+   Leaving the Studio keeps the composer node itself (CPKEEP), so its draft, references and open disclosures come back as they were; nothing is mounted twice. */
+let CPKEEP=null;
+const cpHost=()=>document.getElementById('c2create')||document.querySelector('.gen2');
+function cpStash(){const w=document.getElementById('cpwrap');if(w&&w.closest('#col2')){CPKEEP=w;w.remove()}}
+function studioCol(){const c2=document.getElementById('col2');if(!c2)return;
+  if(c2.dataset.k!=='studio'||!document.getElementById('c2create')){cpStash();c2.dataset.k='studio';
+    c2.innerHTML='<div class="c2l cp-col" id=c2create role=region aria-label="Creation settings"></div>'}
+  const host=document.getElementById('c2create'),w=document.getElementById('cpwrap')||CPKEEP;
+  if(w&&w.parentElement!==host){host.insertBefore(w,host.firstChild);CPKEEP=null;composerDraw()}
+  else if(!w)composerMount();
+  if(typeof histCol==='function')histCol()}
 function composerMount(){const g=document.querySelector('.gen2');if(!g||!LIVE.m||document.getElementById('cpwrap'))return;
   const prev=$('prompt')?$('prompt').value:'';
   g.querySelectorAll(':scope > .sh, :scope > .gform, :scope > .gopts, #lvpanel').forEach(n=>n.remove());
-  const w=document.createElement('section');w.id='cpwrap';w.className='cp';w.setAttribute('aria-label','New request');g.insertBefore(w,g.firstChild);
+  const host=cpHost();
+  if(CPKEEP){host.insertBefore(CPKEEP,host.firstChild);CPKEEP=null;composerDraw();return}
+  const w=document.createElement('section');w.id='cpwrap';w.className='cp';w.setAttribute('aria-label','New request');host.insertBefore(w,host.firstChild);
   w.innerHTML=`<div class=cp-summary>New request <small>Describe and plan another sticker set</small></div><div class=cp-halo></div>
    <header class=cp-head><img class=cp-orb src=/assets/brand/mirsal-logo.png alt=""><h1>Studio</h1><span class=cp-gap></span><div class=cp-top id=cptop></div></header>
    <div class=cp-box id=cpbox>

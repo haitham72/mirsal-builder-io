@@ -1,6 +1,6 @@
 # Studio — remaining checklist
 
-- [ ] Review the left creation-panel proposal. New request must stay open. (UX-05 is built: [audit fixes](../../../design/16-app-audit-fixes-2026-10-20.md).)
+- [ ] Left creation panel is built ([plan](../../../design/15-studio-creation-sidebar-plan.md)): fix the empty Creative/Predefined pill, pin Generate at the panel bottom, add its regression test, screenshot pass; then Haitham's review. New request must stay open. (UX-05 is built: [audit fixes](../../../design/16-app-audit-fixes-2026-10-20.md).)
 - [ ] Watcher/edge synchronization and shared preview/cache ownership (separate from slider tasks T-024/025).
 - [ ] Remaining route-wide states and owner visual verdict; preserve fresh Create and existing slider/frame semantics.
 

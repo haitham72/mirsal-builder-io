@@ -361,7 +361,25 @@ ACT.gpurgeall=async()=>{const r=await api('/api/trash');if(!r.ok)return toast(r.
 ACT.gpurgeallgo=el=>{const i=document.getElementById('rem-typed'),typed=i?i.value.trim().toLowerCase():'';if(typed!==el.dataset.phrase)return toast(`Type exactly “${el.dataset.phrase}” to go on.`,1);
   closeDlg();remPurge('/api/trash/purge_all',{confirm:typed,kind:'batch'})};
 ACT.grestore=async el=>{const r=await post(`/api/generations/${el.dataset.n}/restore`,{});if(!r.ok){toast(r.j.error,1);return}toast(`${r.j.id} is back`);await remLoad();histLoad(false)};
-function histCol(){const c2=document.getElementById('col2');if(!c2)return;
+/* Batches (docs/design/15, UX-07): in the Studio the earlier batches open in a labelled drawer from the workspace, the left column being the creation panel.
+   It is non-modal over the workspace: focus moves in, Escape or Close returns to the Batches button; opening a batch closes it. Create elsewhere keeps the column. */
+const BD={open:false,back:null};
+function bdEl(){let d=document.getElementById('bdrawer');if(d)return d;
+  d=document.createElement('aside');d.id='bdrawer';d.className='bdrawer';d.hidden=true;d.tabIndex=-1;
+  d.setAttribute('role','dialog');d.setAttribute('aria-modal','false');d.setAttribute('aria-labelledby','bdtitle');
+  d.innerHTML=`<div class=bd-head><h2 id=bdtitle>Batches</h2><button class=iconbtn data-act=bdclose aria-label="Close batches" title="Close">${ic('x')}</button></div><div class=bd-body id=bdbody></div>`;
+  const sc=document.createElement('div');sc.id='bdscrim';sc.dataset.act='bdclose';sc.hidden=true;
+  document.body.append(sc,d);return d}
+function bdSync(){document.querySelectorAll('[data-act=bdopen]').forEach(b=>b.setAttribute('aria-expanded',String(BD.open)))}
+ACT.bdopen=el=>{const d=bdEl();if(BD.open)return bdClose(true);BD.open=true;BD.back=el||document.activeElement;d.hidden=false;document.getElementById('bdscrim').hidden=false;
+  histCol();bdSync();const first=d.querySelector('#bdbody button');(first||d).focus({preventScroll:true})};
+function bdClose(restore){const d=document.getElementById('bdrawer');if(!d||!BD.open)return;BD.open=false;d.hidden=true;document.getElementById('bdscrim').hidden=true;bdSync();
+  if(restore){let b=BD.back;if(!b||!b.isConnected)b=document.querySelector('[data-act=bdopen]');if(b)b.focus({preventScroll:true})}BD.back=null}
+ACT.bdclose=()=>bdClose(true);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&BD.open&&!document.getElementById('dlg').classList.contains('on')){e.stopPropagation();bdClose(true)}});
+/* where the batch list (and projmap.js's project map) draws: the Batches drawer in the Studio, the second column on Create */
+const histHost=()=>route_==='generate'?(bdEl(),document.getElementById('bdbody')):document.getElementById('col2');
+function histCol(){const c2=histHost();if(!c2)return;
   if(!c2.querySelector('#c2hist')||c2.dataset.k!=='batches'){c2.dataset.k='batches';c2.innerHTML=histColHTML();const l=document.getElementById('c2hist');
     l.addEventListener('scroll',()=>{if(HB.more&&!HB.loading&&l.scrollTop+l.clientHeight>l.scrollHeight-320)histLoad(true)})}
   else{const l=document.getElementById('c2hist'),top=l.scrollTop;c2.querySelector('.c2n').textContent=HB.loaded?`${HB.total} in total`:'';l.innerHTML=HB.items.map(histEntry).join('')||l.innerHTML;l.scrollTop=top}
@@ -371,7 +389,7 @@ function histCol(){const c2=document.getElementById('col2');if(!c2)return;
 /* the column is redrawn here; under the Studio's view the batch's Particles section is drawn by particles.js (spSecDraw) */
 function drawHist(){if(['generate','create'].includes(route_))histCol();if(typeof spSecDraw==='function')spSecDraw()}
 /* the credits pill's drop-down lists the recent batches and this is what opens one in the Studio, as does a row of the Earlier-batches column */
-ACT.hopen=el=>{const it=histAll().find(x=>x.id===+el.dataset.id);if(!it)return;
+ACT.hopen=el=>{const it=histAll().find(x=>x.id===+el.dataset.id);if(!it)return;bdClose(false);
   if(it.kind==='particles'&&typeof spOpenBatch==='function')setTimeout(()=>spOpenBatch(it.generation_id||it.id));     /* a particle batch opens on its set (particles.js) */
   gdHide();
   SES={prompt:it.prompt||'',gens:[it.id],off:[],pack:''};saveSes();GS.tab=it.animated?'anim':'stickers';glast='';MD=null;egClear();EG.pick=null;

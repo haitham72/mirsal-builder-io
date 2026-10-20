@@ -1,6 +1,6 @@
 # Studio: left creation panel — proposed plan
 
-Requested by Haitham, 2026-10-19. **Layout proposal only; not implemented.**
+Requested by Haitham, 2026-10-19. **Built 2026-10-20 (steps 1-4 below; see "Implemented"); awaiting Haitham's visual review.**
 Creation settings belong on the left; artwork and the active batch belong in the
 main workspace. **New request stays open.** Retain Mirsal's cyan-blue accent.
 
@@ -128,6 +128,14 @@ Exact breakpoints follow measured bounds, not a device-name guess.
   data, disabled providers, narrow fake failing→passing regressions.
 - Preserve route/action inventory, engine authority, import duplicate/router
   consent, Resize and separate Emoji/Lottie export contracts.
+
+## Implemented (2026-10-20)
+
+- On `#/studio` the second column is the creation panel (`body.studio-split`, `--col2-w` 352px, 320px under 1180px). The one New request composer (`#cpwrap`) is moved into `#c2create` (`composer.js` `studioCol`, `cpHost`); leaving the Studio keeps the node (`cpStash` / `CPKEEP`), so draft text, references and open disclosures return unchanged. `RENDER.generate` skips the legacy prompt row when the composer exists, so `#prompt` is unique.
+- The workspace starts with a top bar: **Batches** (always) and **Creation settings** (900px and narrower, opening the existing second-column drawer, whose `#c2tog` is labelled the same on the Studio). Using a setting inside the composer no longer closes that drawer; Generate does.
+- Earlier batches and the open project's map (`projmap.js`) draw into the **Batches** drawer `#bdrawer` (`live.js` `histHost`, `ACT.bdopen`, `bdClose`): non-modal, focus moves to its first control, Escape or Close returns focus to the Batches button, opening a batch (`hopen`, `pmopen`) closes it, and the breadcrumb's project link opens it on the project list. Create (`#/create`) keeps the list in its column.
+- Measured on a copied workspace: panel 352/320px at 1440/1024 with the workspace beside it; drawers at 760/390; no horizontal scroll.
+- Not yet done: Generate pinned at the panel bottom while settings scroll; the Creative/Predefined segment renders as an empty pill in the narrow panel's Options; a dedicated regression test; a full light/dark screenshot pass.
 
 No new framework, engine redesign, paid run, send, deployment or branch merge
 belongs to this layout phase. Final visual approval remains Haitham's.

@@ -100,7 +100,8 @@ document.addEventListener('click', (e) => {
   const f = ACT[el.dataset.act];
   if (f) {
     e.preventDefault();
-    if (el.closest('#col2')) document.body.classList.remove('c2open');
+    // the creation panel stays open while its settings are used; its Generate, like any list row, closes the narrow-screen drawer
+    if (el.closest('#col2') && (!el.closest('#cpwrap') || ['ggo', 'gprompt'].includes(el.dataset.act))) document.body.classList.remove('c2open');
     f(el, e);
   }
 });
@@ -440,10 +441,18 @@ let C2Q = '';
 const COL2 = ['agent', 'generate', 'library', 'pack', 'chat', 'create', 'users', 'help'];
 
 function drawCol2() {
-  const on = COL2.includes(route_);
+  const on = COL2.includes(route_), studio = route_ === 'generate';
   document.body.classList.toggle('col2', on);
+  document.body.classList.toggle('studio-split', studio);
+  $('c2tog').title = studio ? 'Creation settings' : 'Lists';
+  $('c2tog').setAttribute('aria-label', studio ? 'Creation settings' : 'Lists');
+  if (!studio) {
+    if (typeof cpStash === 'function') cpStash(); /* keep the composer (and its draft) for the way back */
+    if (typeof bdClose === 'function') bdClose(false);
+  }
   if (!on) return;
-  if (route_ === 'generate' || route_ === 'create') return typeof histCol === 'function' ? histCol() : 0;
+  if (studio) return typeof studioCol === 'function' ? studioCol() : typeof histCol === 'function' ? histCol() : 0;
+  if (route_ === 'create') return typeof histCol === 'function' ? histCol() : 0;
   if (route_ === 'chat') return chList();
   if (route_ === 'users') return typeof usCol === 'function' ? usCol() : 0;
   if (route_ === 'help') return typeof supCol === 'function' ? supCol() : 0;

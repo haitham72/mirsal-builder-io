@@ -39,16 +39,17 @@ function pmHTML(){const d=PM.data,cur=pmCur(),first=d&&d.batches[0]&&d.batches[0
    <button class=pm-next data-act=gnext title="The next batch of this request, as a prompt you read before anything is spent">+ Next batch</button></div>`}
 /* the column: the map when a batch is open in the Studio, else (or after the switcher) every project */
 const _pmHistCol=histCol;
-histCol=function(){const c2=document.getElementById('col2');if(!c2)return;
+histCol=function(){const c2=histHost();if(!c2)return;
   if(PM.list&&pmCur()[0]!==PM.listFor)PM.list=false;          /* picking a project in the list (ACT.hopen / hopenpack) closes the list again */
   if(!pmOpen()||PM.list){if(c2.dataset.k==='map')c2.dataset.k='';_pmHistCol();
     if(pmOpen()&&PM.list&&!c2.querySelector('.pm-back')){const h=c2.querySelector('.c2h');if(h)h.insertAdjacentHTML('afterbegin',`<button class=pm-back data-act=pmlist title="Back to the open project">${ic('back')}</button>`)}
     return}
   const m=document.getElementById('pmmap'),top=m?m.scrollTop:0;c2.dataset.k='map';c2.innerHTML=pmHTML();const n=document.getElementById('pmmap');if(n)n.scrollTop=top;
   if(PM.id!==pmCur()[0]||!PM.data)pmLoad(true);else pmLoad(false)};
-ACT.pmlist=()=>{PM.list=!PM.list;PM.listFor=pmCur()[0];const c2=document.getElementById('col2');if(c2)c2.dataset.k='';histCol()};
+ACT.pmlist=el=>{PM.list=!PM.list;PM.listFor=pmCur()[0];const c2=histHost();if(c2)c2.dataset.k='';histCol();
+  if(route_==='generate'&&!BD.open)ACT.bdopen(el)};   /* the breadcrumb's project opens the Batches drawer on the list */
 /* a sheet of another batch of the project: present it (the same reset as a click in the project list, live.js ACT.hopen) */
-ACT.pmopen=el=>{const id=+el.dataset.g;if(!id||pmCur().includes(id))return;gdHide();
+ACT.pmopen=el=>{const id=+el.dataset.g;if(!id||pmCur().includes(id))return;gdHide();if(typeof bdClose==='function')bdClose(false);
   SES={prompt:(PM.data&&PM.data.project.request)||SES.prompt||'',gens:[id],off:[],pack:SES.pack||''};saveSes();GS.tab='stickers';glast='';MD=null;
   for(const p of PVS.values())p.v.remove();PVS.clear();PVON.clear();ANIM.clear();
   if(typeof tick==='function')tick(true);histCol();if(typeof spSecSync==='function')spSecSync();if(typeof cpDrawTop==='function')cpDrawTop()};
