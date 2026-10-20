@@ -5,6 +5,22 @@ Checkout `G:/Haitham/VsCode/Mirsal-Builder`, branch `redesign-ui-ux` (main stays
 all planned are implemented", then asked to stop here and hand over to another
 LLM. Everything below is committed and pushed unless it says otherwise.
 
+## Latest continuation
+
+- `e544a906` committed and pushed: Studio scrolling settings/action footer,
+  composer preservation and Batches regression tests (4 pass).
+- UX-10 phone Chat completed: Style and options disclosure, wrapping title,
+  visible model status. Chat stage tests: 8 pass. Synthetic 30-message browser
+  check at 390×720 in light/dark preserved draft and scroll; desktop controls
+  remained visible. Fixture-specific agent lookup returned 404; fallback status
+  remained visible. No live-job polling verification.
+- Task-owned server :8796 (exec session 3670) uses isolated
+  `output/playwright/studio-out`, providers disabled and DB writes off.
+  Local screenshots/check scripts are untracked in `output/playwright/` and
+  `.playwright-cli/`; browser session `studio-finish`.
+- Next: loaded-state/keyboard/roles sweep and scoped structural work in plan.md.
+  Owner decisions and baseline agent failures remain open.
+
 ## Done this session (commits on origin/redesign-ui-ux)
 
 - `0e1571d7` UX-06 Test-workspace badge, UX-08 reaction ownership heading, UX-11 owner names.
@@ -50,7 +66,7 @@ Plan: `docs/design/15-studio-creation-sidebar-plan.md` (its "Implemented" sectio
 
 ## Remaining plan (see plan.md)
 
-UX-10 phone Chat density; F-31 wording and W18 enhancer price gate (owner
+F-31 wording and W18 enhancer price gate (owner
 calls, never implemented); unverified states sweep; shared-code/router
 refactors (AR-01..04, T-024/025/031/034/035); optional Lottie items; agent
 baseline 4 failures / 9 errors.

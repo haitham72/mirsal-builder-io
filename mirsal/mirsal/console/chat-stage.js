@@ -1,6 +1,11 @@
 /* Chat chat-stage.js: shares the core's state through explicit callbacks. */
 function chatStageInit({ A, store, loadSessions, loadAgent, loadModels, engRedraw, engSync, loadSession, ensureSession, agList }) {
   let ENGSRC = null;
+  ACT.agconfig = el => {
+    const open = el.getAttribute('aria-expanded') !== 'true';
+    el.setAttribute('aria-expanded', String(open));
+    $('ag-config').classList.toggle('open', open);
+  };
   ACT.agdel = (el) => {
     const id = el.dataset.id;
     confirmDlg(

@@ -328,3 +328,16 @@ button.ai-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #s-agent button,#s-agent summary{min-height:var(--control-min);min-width:var(--control-min)}
 #s-agent .ai-seg{flex-wrap:wrap;gap:var(--space-half)}
 @media(max-width:760px){#s-agent .ai-top,#s-agent .ai-scroll{padding-inline:var(--space-2)}#s-agent .ai-dock-in{padding:var(--space-1)}#s-agent .ai-card{max-width:100%;min-width:0}}
+.ag-config-toggle{display:none}
+@media(max-width:760px){
+ #s-agent .ai-top{flex-wrap:wrap}
+ #s-agent .ai-top .ttl{flex:1 0 100%;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+ #s-agent .ai-top .ttl:empty{display:none}
+ #s-agent .ai-top .sp{display:none}
+ #s-agent .ag-engine{flex:1;min-width:0}
+ #s-agent .ai-pill{max-width:100%}
+ #s-agent .ai-pill span{white-space:normal;overflow-wrap:anywhere}
+ #s-agent .ag-config-toggle{display:inline-flex;margin-top:var(--space-1)}
+ #s-agent .ag-config:not(.open) .ag-config-body{display:none}
+ #s-agent .ag-config-body{max-height:30vh;overflow:auto}
+}

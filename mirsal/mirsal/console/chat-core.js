@@ -181,8 +181,9 @@ if (typeof document !== 'undefined' && typeof ACT !== 'undefined') {
      <textarea id=ai-in rows=1 placeholder="Make or change stickers" aria-label="Message"></textarea>
      <span class=ag-stage id=ag-stage></span>
      <button class=ai-send id=ai-send type=submit aria-label="Send" disabled>${ic('send')}</button></form>
-    <div class=ag-bar id=ag-bar></div>
-    <div class=ag-styles id=ag-styles role=radiogroup aria-label="Style"></div>
+    <div class=ag-config id=ag-config><button type=button class="ag-chip ag-config-toggle" data-act=agconfig aria-expanded=false aria-controls=ag-config-body>Style and options</button>
+     <div class=ag-config-body id=ag-config-body><div class=ag-bar id=ag-bar></div>
+      <div class=ag-styles id=ag-styles role=radiogroup aria-label="Style"></div></div></div>
     <div class=ai-sugg id=ai-sugg></div>
    </div></div></div></div>`;
         bgInit(root);
