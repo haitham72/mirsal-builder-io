@@ -39,7 +39,15 @@ One row per person contains `user_id`, `name`, `tone`, and JSON columns for
 `likes`, `dislikes`, `preferences`, and `edit_counts`. `Profile.set_facts` writes
 name, likes, dislikes and extras to the table and JSON profile; tone and edit
 counts also write both. First open imports the existing JSON facts. Existing
-taste votes remain JSON-only, and Postgres fact synchronization remains in place.
+taste votes remain JSON-only.
+
+Postgres copy: after the JSON write, `store/sync.sync_profile` upserts the whole
+`facts` dict into `user_profiles` (migration `011_user_profiles.sql`, keyed by
+`user_id`, `facts` JSONB). It is best effort: when Postgres is unreachable it is
+skipped silently and the file stays the record. Chat reads still come from the
+JSON file and `profiles.sqlite`; nothing reads `user_profiles` back. `db.available()`
+caches the first failure per process, so a chat server started before Postgres
+was up keeps skipping the copy until it restarts.
 
 - Explicit tone requests route to `n_profile` by rules. `detect_tone` requires
   a be/keep/stay/respond/reply/answer request with a whole style phrase and rejects

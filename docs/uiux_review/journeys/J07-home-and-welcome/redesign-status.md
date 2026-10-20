@@ -1,6 +1,8 @@
 # Home and welcome — remaining work
 
-Updated 2026-10-19 against source `64d8b8a4`. No product fix in the audit.
+Updated 2026-10-19 against source `64d8b8a4` (docs-only audit, no product fix).
+A later phase, [dark rework](../../dark-rework-2026-10-19.md), revised the
+neutral/cyan theme referenced below.
 
 - UX-06 workspace identity; owner visual review of the revised neutral/cyan theme.
 - Owner verdict on films/art/wording and welcome playback; no new media generation authorized.

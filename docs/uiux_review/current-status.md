@@ -1,6 +1,10 @@
 # Redesign — remaining work
 
-Source audited: `64d8b8a4`, `redesign-ui-ux`, 2026-10-19. No product fixes were made in this audit.
+Source audited: `64d8b8a4`, `redesign-ui-ux`, 2026-10-19 — a docs-only audit, no product fixes.
+A later, separate phase on the same branch did land a product fix: the
+[neutral/cyan dark theme and always-open New request](dark-rework-2026-10-19.md)
+(fixes UX-02 primary-hover contrast; folds in always-open New request). The
+defect list below is this audit's, minus what that later phase already fixed.
 Use [plan.md](../../plan.md) as the execution queue and the [user review guide](../../user%20app%20review%20guide.md) for Haitham's later review.
 
 - **Confirmed defects:** phone populated editor/animation/Save layout; keyboard sticker actions; editor accessible names; frame preview focus/Escape; incorrect saved-set ownership heading. Watch-folder phone layout depends on W34 retention. IDs and reproduction: [current audit](app-audit-2026-10-19.md).
