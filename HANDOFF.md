@@ -5,13 +5,24 @@ without Haitham asking. The five refactors and folder redesign are complete.
 
 ## Latest request - super reaction (2026-10-20)
 
-Hold the reaction, release, the whole screen plays: engine/super_reaction.py (screen-shaped
-canvas by aspect bucket, bottom emitters, auto/solid/gradient glow, centre pop), sources = the
-files in mirsal/lottie by name. Sandbox: Create > + New > Super reaction (#/super) and the Super
-Emojis tab (Reaction effects, Library > Reactions); desktop window + iPhone after
-ref/ref-only.jpg, both resizable. Details and open items:
-docs/reaction/19-19-super-reaction.md. 15 Python + 18 node checks pass; browser checked on an
-isolated :8797. Restart the local app to see it. Visual verdict is Haitham's.
+Hold the reaction, release, and the screen plays: engine/super_reaction.py (screen-shaped canvas
+by aspect bucket, bottom emitters, auto/solid/gradient glow, a centre pop that floats up and
+wiggles with Sway). Sources = the files in mirsal/lottie, by name. Sandbox: Create > + New >
+Super reaction (#/super) and the Super Emojis tab (Reaction effects, Library > Reactions):
+desktop window (plays in its chat area only) + iPhone (whole phone), both resizable, desktop as
+tall as the phone. Sliders Size, Amount, Rise, Float, Sway, Spread, Glow; moving one shows ONE
+still frame at Animation frame (0-100%) instead of playing.
+Library (flow/super_reactions.py, out/particles/super/library.json): every file has a seeded
+random look until saved; Shuffle, Save, Save as (another version of the same file), Remove
+(saved version only), presets (save / load / remove). Export: JSON per screen and
+superReactions.zip (each saved version, else the random look, x 8 buckets + manifest.json).
+Details and open items: docs/reaction/19-19-super-reaction.md. 22 Python checks pass; browser
+checked on an isolated :8797. Restart the local app to see it. Visual verdict is Haitham's.
+
+Mirsal-redesign (other repo, branch app-ai-removal, committed LOCALLY only: its pre-push hook
+allows master only): hold any emoji in the emoji panel = super-like with that exact emoji
+(src/chats/superReaction.ts, canvas, no Lottie; desktop = chat area, phone = whole phone), and
+the look skill now reads public/ from the repo root (the "not a picture in the app" error).
 
 ## Earlier request - natural video sequences
 
