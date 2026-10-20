@@ -2375,7 +2375,7 @@ def serve(out: Path, inp: Path, port: int = 8770, pace: float = 0.0, cfg=None, b
     if stdlib:
         srv = ThreadingHTTPServer(("127.0.0.1", port), make_handler(c))
     else:
-        from .app import Server
+        from ..api.app import Server
         srv = Server(c, "0.0.0.0" if lan else "127.0.0.1", port, tls=tls)
     if lan:
         from ..services import admin_bot

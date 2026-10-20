@@ -18,7 +18,7 @@ Two interfaces sit on one engine (`CLAUDE.md` "Structure"): the **AI chat** (nat
 ```
  browser sandbox   console/*.js, index.html, studio.css, agent.css        (one page, one global scope, ACT + RENDER)
         │  JSON over HTTP (+ SSE)                                          docs/api.md, docs/http_route_inventory.md
- HTTP server       console/app.py (FastAPI on uvicorn) ─ adapter ─ console/server.py (the original handler, Console)
+ HTTP server       api/app.py (FastAPI on uvicorn) ─ adapter ─ console/server.py (the original handler, Console)
         │
  agent             agent/  (LangGraph turn, memory, resolver, creator)   docs/agent-and-chat.md
  services          services/ (Telegram send + chat bot, local/cloud LLM, embeddings, AddCollection export)
@@ -78,9 +78,9 @@ batches column, the variations strip, the Animation tab); `docs/redesign_plan.md
 
 ## 5. The HTTP server
 
-`python -m mirsal serve` (`cli.py`) starts `console/app.py`: FastAPI on uvicorn. Routes that existed before FastAPI go through an **adapter** over
+`python -m mirsal serve` (`cli.py`) starts `api/app.py`: FastAPI on uvicorn. Routes that existed before FastAPI go through an **adapter** over
 the original handler in `console/server.py` (byte-identical answers); routes added since are native FastAPI with pydantic models
-(`console/app_models.py`); `console/openapi.py` serves the contract. `serve --lan` adds HTTPS and office accounts (`runtime/users.py`);
+(`api/schemas/`, grouped by domain); `api/openapi.py` serves the contract. Native routers live in `api/routers/`, common guards in `api/dependencies.py`, and the last-registered legacy bridge in `api/legacy_adapter.py`. The old console Python entry points remain compatibility imports. See [API layout](api-parts/22-native-router-layout.md). `serve --lan` adds HTTPS and office accounts (`runtime/users.py`);
 `serve --stdlib` keeps the old server for one release. The page (JS, CSS, HTML) is read from disk on every request, the Python only at start
 (`Console.stale()` warns when the two differ). Every route: `docs/http_route_inventory.md`; the contract: `docs/api.md`.
 

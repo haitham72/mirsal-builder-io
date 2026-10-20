@@ -4,6 +4,8 @@
 
 [User app review checklist](user%20app%20review%20guide.md) · [Remaining work](plan.md)
 
+[Code structure](docs/architecture.md) · [Native API layout](docs/api-parts/22-native-router-layout.md)
+
 New generation plans default to **2×2 / four stickers**. Video prompts bind two
 local actions to each spatial cell and run the cells concurrently; explicit
 grids and old plans remain supported. [Prompt contract](docs/generation/19-independent-cell-video-and-2x2.md).

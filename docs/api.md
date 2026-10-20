@@ -6,6 +6,8 @@ engine function and a stable JSON shape first, a screen second, so the existing 
 
 ## Sections
 
+Native transport structure: [routers, dependencies and schemas](api-parts/22-native-router-layout.md).
+
 This is an index: each section is its own file under [`api-parts/`](api-parts/); read only the one a task needs.
 
 | section | what it covers |
