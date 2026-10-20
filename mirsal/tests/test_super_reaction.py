@@ -46,6 +46,23 @@ class SuperEngine(unittest.TestCase):
             self.assertGreater(q90, 0.75, aspect)         # and starts in the bottom quarter
             self.assertGreater(np.percentile(xs[inside], 90) - np.percentile(xs[inside], 10), 0.5, aspect)   # across the width
 
+    def test_the_pop_floats_up_wiggling_until_the_end(self):
+        def pop(settings=None, source=None):
+            d = sr.export_super(P.preset("burst"), 0.46, settings=settings, source=source)
+            return d, next(L for L in d["layers"] if L["nm"] == "pop")
+        d, L = pop()
+        self.assertEqual(L["op"], d["op"])                                    # it stays to the end, no longer gone after 1.25 s
+        ys = [k["s"][1] for k in L["ks"]["p"]["k"]]
+        xs = [k["s"][0] for k in L["ks"]["p"]["k"]]
+        self.assertLess(ys[-1], ys[0] - 0.1 * d["h"])                        # it climbs
+        self.assertGreater(max(xs) - min(xs), 0.02 * d["w"])                 # it wiggles left and right
+        self.assertEqual(L["ks"]["o"]["k"][-1]["s"], [0])                    # and fades out at the end
+        wide = pop({"sway": 1.5})[1]
+        self.assertGreater(max(k["s"][0] for k in wide["ks"]["p"]["k"]) - min(k["s"][0] for k in wide["ks"]["p"]["k"]), max(xs) - min(xs))   # Sway
+        _, Ls = pop(source=SOURCE)
+        self.assertEqual((Ls["ty"], Ls["refId"]), (0, "L0"))
+        self.assertIn("tm", Ls)                                               # a short source loops while it floats
+
     def test_size_scales_the_particles(self):
         base = sr.scene_params(P.preset("burst"), 1.0)[0][0].particle_size
         self.assertAlmostEqual(sr.scene_params(P.preset("burst"), 1.0, {"size": 2})[0][0].particle_size, base * 2)

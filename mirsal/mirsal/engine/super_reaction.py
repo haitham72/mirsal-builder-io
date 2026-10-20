@@ -130,22 +130,45 @@ def glow_layer(W: int, H: int, F: int, fps: float, c1, c2, strength: float, ind:
             "shapes": [shape]}
 
 
-def pop_layer(W: int, H: int, F: int, fps: float, ind: int, src: dict | None = None) -> dict:
-    """The big emoji in the centre: in with an overshoot, a beat, out (the Instagram release). `src` = a source Lottie's info (w, h, fr, ip):
-    the pop is that animation playing from its start (precomp L0), else the emoji slot picture."""
+def pop_layer(W: int, H: int, F: int, fps: float, ind: int, src: dict | None = None, settings: dict | None = None) -> dict:
+    """The big one in the centre (the Instagram release): in with an overshoot and a beat, then it FLOATS (Haitham 2026-10-20: "float slowly,
+    wiggling left and right, taking some of its characteristics from the same settings"): it climbs slowly (Rise, Float), wiggles left and right
+    and tilts with it (Sway), is sized by Size, and fades out over the clip's last 0.6 s. `src` = a source Lottie's info (w, h, fr, ip, op): the pop
+    is that animation, LOOPED while it floats (precomp L0 with a time remap), else the emoji slot picture."""
+    s = {**SUPER_START, **(settings or {})}
     w, h = (src["w"], src["h"]) if src else (SLOT_PX, SLOT_PX)
-    k = 100.0 * 0.45 * min(W, H) / max(w, h)
-    f = [3, 3 + round(0.22 * fps), 3 + round(0.38 * fps), 3 + round(0.9 * fps), 3 + round(1.25 * fps)]
+    u = min(W, H)
+    k = 100.0 * 0.45 * u * min(max(float(s["size"]), 0.25), 3.0) ** 0.5 / max(w, h)     # Size, gentler on the big one
+    f0, f1, f2 = 3, 3 + round(0.22 * fps), 3 + round(0.38 * fps)                         # in, overshoot, settled
+    fade = max(f2 + 1, F - 1 - round(0.6 * fps))
+    sway = max(0.0, float(s["sway"]))
+    climb = H * min(0.55, 0.12 + 0.35 * max(0.0, float(s["rise"])) + 0.25 * max(0.0, float(s["float"])))   # px over the float
+    amp, hz = u * (0.02 + 0.05 * min(sway, 1.5)), 0.45 + 0.25 * min(sway, 1.5)                             # the wiggle: width and pace
+    T = max(1e-6, (F - 1 - f2) / fps)
 
-    def sk(t, v, last=False):
-        return {"t": t, "s": [v, v, 100]} if last else {"t": t, "s": [v, v, 100], "i": {"x": [0.4], "y": [1]}, "o": {"x": [0.6], "y": [0]}}
-    layer = {"ddd": 0, "ind": ind, "ty": 2, "nm": "pop", "refId": SLOT_ID, "sr": 1, "ao": 0, "bm": 0, "ip": f[0], "op": min(F, f[-1] + 1), "st": 0,
-             "ks": {"o": {"a": 1, "k": [_ease(f[0], 100), _ease(f[3], 100), _ease(f[4], 0, True)]},
-                    "r": _static(0), "p": _static([W / 2, H / 2, 0]), "a": _static([w / 2, h / 2, 0]),
-                    "s": {"a": 1, "k": [sk(f[0], 0), sk(f[1], k * 1.18), sk(f[2], k), sk(f[3], k * 1.06), sk(f[4], k * 1.3, True)]}}}
+    def sk(t, v):
+        return {"t": t, "s": [v, v, 100], "i": {"x": [0.4], "y": [1]}, "o": {"x": [0.6], "y": [0]}}
+
+    def hold(frames, vals):
+        return {"a": 1, "k": [{"t": t, "s": v, "h": 1} for t, v in zip(frames, vals)]}
+    fr = list(range(f0, F))
+    pos, rot = [], []
+    for t in fr:
+        q = max(0.0, (t - f2) / fps)                                     # seconds of floating
+        e = q / T
+        rise = climb * (0.7 * e + 0.3 * e * e)                           # slow, a little faster as it goes (Float)
+        wig = math.sin(2 * math.pi * hz * q) * min(1.0, q / 0.4)         # eases into the wiggle
+        pos.append([round(W / 2 + amp * wig, 2), round(H / 2 - rise, 2), 0])
+        rot.append([round(6.0 * (0.3 + min(sway, 1.5)) * wig * -1, 2)])  # it leans into the swing
+    layer = {"ddd": 0, "ind": ind, "ty": 2, "nm": "pop", "refId": SLOT_ID, "sr": 1, "ao": 0, "bm": 0, "ip": f0, "op": F, "st": 0,
+             "ks": {"o": {"a": 1, "k": [_ease(f0, 100), _ease(fade, 100), _ease(F - 1, 0, True)]},
+                    "r": hold(fr, rot), "p": hold(fr, pos), "a": _static([w / 2, h / 2, 0]),
+                    "s": {"a": 1, "k": [sk(f0, 0), sk(f1, k * 1.18), sk(f2, k), {"t": F - 1, "s": [k * 0.92, k * 0.92, 100]}]}}}
     if src:
         sr = fps / src["fr"]
-        layer.update({"ty": 0, "refId": "L0", "w": w, "h": h, "sr": round(sr, 6), "st": round(f[0] - src["ip"] * sr, 4)})
+        n_src = max(1.0, float(src.get("op", 0) - src["ip"]))
+        layer.update({"ty": 0, "refId": "L0", "w": w, "h": h, "sr": round(sr, 6), "st": round(f0 - src["ip"] * sr, 4),
+                      "tm": hold(fr, [[round((src["ip"] + math.floor(((t - f0) / sr) % n_src)) / fps, 5)] for t in fr])})   # loops while it floats
     return layer
 
 
@@ -196,10 +219,11 @@ def export_super(p: ParticleParams, aspect: float, *, settings: dict | None = No
             tr.pos = tr.pos + np.array([dx, dy])
             layers += _layers(q, tr, UNIT_PX, UNIT_PX, lambda i: (SLOT_ID, SLOT_PX, (SLOT_PX, SLOT_PX)))
     if source is not None:
-        src = {"w": int(source.get("w") or 512), "h": int(source.get("h") or 512), "fr": float(source.get("fr") or 30.0), "ip": float(source.get("ip") or 0.0)}
+        src = {"w": int(source.get("w") or 512), "h": int(source.get("h") or 512), "fr": float(source.get("fr") or 30.0), "ip": float(source.get("ip") or 0.0),
+               "op": float(source.get("op") or 0.0)}
     F, fps = int(round(params[0].fps * SUPER_SECONDS)), float(params[0].fps)
     if int(s["pop"]):
-        layers.insert(0, pop_layer(W, H, F, fps, 0, src))
+        layers.insert(0, pop_layer(W, H, F, fps, 0, src, s))
     c1 = c2 = None
     if glow == "auto":
         rgba = emoji_rgba if emoji_rgba is not None else (lottie_rgba(source) if source is not None else None)
