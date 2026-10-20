@@ -29,6 +29,7 @@ const rxTab=()=>RXS.tab;
 const rxStyleBar=()=>{const s=rxTab();
  return `<div class=tabs role=tablist aria-label="Reaction style"><button class="tab ${s==='emoji'?'on':''}" data-act=rxstyle data-s=emoji role=tab aria-selected=${s==='emoji'}>Emoji style</button>`+
   `<button class="tab ${s==='lottie'?'on':''}" data-act=rxstyle data-s=lottie role=tab aria-selected=${s==='lottie'}>Lottie style</button>`+
+  `<button class="tab ${s==='super'?'on':''}" data-act=rxstyle data-s=super role=tab aria-selected=${s==='super'}>Super Emojis</button>`+
   `<button class="tab ${s==='packs'?'on':''}" data-act=rxstyle data-s=packs role=tab aria-selected=${s==='packs'}>Packs</button></div>`};
 const lsFile=f=>(LS.files||[]).find(x=>x.file===f);
 const lsName=f=>String(f||'').replace(/\.json$/i,'');
@@ -118,7 +119,7 @@ function lsOpen(file){const f=lsFile(file);if(!f)return;
  LS.sel=file;LS.ed={settings:{...(LS.start||{}),...(f.settings||{})},morph_targets:[...(f.morph_targets||[])]};LS.doc=null;LS.err='';rxDraw();lsPreview()}
 
 /* ---------- actions ---------- */
-ACT.rxstyle=el=>{const s=el.dataset.s;RXS.tab=s==='lottie'||s==='packs'?s:'emoji';try{localStorage.setItem('rx.tab',RXS.tab)}catch(e){}
+ACT.rxstyle=el=>{const s=el.dataset.s;RXS.tab=s==='lottie'||s==='packs'||s==='super'?s:'emoji';try{localStorage.setItem('rx.tab',RXS.tab)}catch(e){}
  if(typeof route_!=='undefined'&&route_==='library'){if(typeof spLibRefresh==='function')spLibRefresh();}
  else if(typeof RENDER!=='undefined'&&RENDER.reactions)RENDER.reactions();};
 ACT.lspick=el=>lsOpen(el.dataset.f);

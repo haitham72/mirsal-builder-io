@@ -10,3 +10,16 @@ class LottieReactionBody(BaseModel):
     model_config = ConfigDict(extra="forbid")
     settings: dict[str, Any] | None = None
     morph_targets: list[str] | None = None
+
+
+class SuperReactionBody(BaseModel):
+    """POST /api/particles/super: one dropped Lottie (`file`, a name from GET /api/particles/super) played over a screen of `aspect` = width / height.
+    glow: auto | solid (color) | gradient (colors = [bottom, top]) | none. settings: count, rise, float, sway, spread, glow_strength, pop
+    (flow/lottie_reactions.py super_compose; engine/super_reaction.py checks them)."""
+    model_config = ConfigDict(extra="forbid")
+    file: str
+    aspect: float
+    glow: str = "auto"
+    color: str | None = None
+    colors: list[str] | None = None
+    settings: dict[str, Any] | None = None

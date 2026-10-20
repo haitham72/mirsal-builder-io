@@ -754,3 +754,39 @@ def assign_handpicked(out: Path, tokens, origin, morph=None, *, lottie_dir=None)
             assigned += 1
         _lib_write(out, d)
     return {"assigned": assigned, "cleared": cleared}
+
+
+# ---------- super reaction (Reactions 2.0, Haitham 2026-10-20): hold an emoji, release, and its preset plays over the WHOLE screen ----------
+def held_preset(out: Path, token: str) -> dict:
+    """The preset an emoji holds (the same rule as the wall): its assigned one, else its motion's first variation, else the first preset."""
+    from ..engine import emoji_motion as em
+    d = _lib_read(out)
+    by_id = {p["id"]: p for p in d["presets"]}
+    if d["assign"].get(token) in by_id:
+        return by_id[d["assign"][token]]
+    own = em.motion_for_token(token)["preset"]
+    ps = library(out)["presets"]
+    return next((p for p in ps if p["motion"] == own), ps[0])
+
+
+def super_lottie(out: Path, token, aspect, *, glow: str = "auto", color=None, colors=None, settings=None, preset_id=None) -> dict:
+    """{token, emoji, preset, bucket, color, lottie}: the emoji's held preset (or `preset_id`) as a full-screen, emoji-free Lottie for the screen
+    bucket nearest `aspect` (width / height), lit with the emoji's own colour (glow 'auto'), a `color`, a two-colour `colors` gradient, or 'none'.
+    Free and deterministic; nothing is stored. 400 for a bad option, 404 for an unknown preset, 409 for an emoji outside the bank."""
+    from ..engine import super_reaction as sr
+    t, glyph = emoji_token(token)
+    rec = lib_preset(out, preset_id) if preset_id else held_preset(out, t)
+    p = emoji_burst(t, **_kwargs({**rec["settings"], "preset": rec["motion"]}))[3]
+    rgba = None
+    if glow == "auto":
+        try:
+            rgba = _glyph(glyph)
+        except SetError:                                                         # no colour emoji font: the engine's warm default
+            rgba = None
+    try:
+        doc = sr.export_super(p, float(aspect), settings=settings, glow=str(glow), color=color, colors=colors, emoji_rgba=rgba)
+    except (TypeError, ValueError) as ex:
+        raise SetError(str(ex))
+    meta = doc.pop("mirsal")
+    return {"token": t, "emoji": glyph, "preset": rec["id"], "bucket": meta["bucket"], "aspect": meta["aspect"], "glow": meta["glow"],
+            "color": meta["color"], "lottie": doc}

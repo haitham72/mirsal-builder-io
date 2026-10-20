@@ -420,6 +420,7 @@ function libBody() {
   if(LIBTAB==='particles'&&typeof rxTab==='function'&&rxTab()==='lottie'){
     lsThumbs();lsMount();
   }
+  if(LIBTAB==='particles'&&typeof rxTab==='function'&&rxTab()==='super'&&typeof supMount==='function')supMount();
 }
 
 ACT.openpack = (el) => {

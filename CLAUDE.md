@@ -14,11 +14,11 @@
 | AI chat, agent, memory, Redis, vision judge, events, Telegram chat, support agent, manual emoji batches | `docs/agent-and-chat.md` (index) |
 | HTTP contract, accounts, office LAN, Users, Trending, credits, Export to collection | `docs/api.md` (index), every route: `docs/http_route_inventory.md`; the CMS: `docs/Api/AddCollection-API .md` |
 | look of the screens (shell, rail, palette, tiles, Home, rejected-picture overrides §9) — **read before any CSS or markup change** | `docs/design.md` (index), themes `docs/dark-mode.md`, welcome `docs/onboarding.md` |
-| reactions (formerly particles; labels say reaction, routes/storage/code keep `particles`), Reaction effects = the animation preset library (`{motion}_{NN}.json`, emoji-free Lottie, no base64; every emoji holds a preset), Lottie | `docs/reaction.md` (index), `docs/effects.md`, the emoji bank `docs/emoji-bank.md` |
+| reactions (formerly particles; labels say reaction, routes/storage/code keep `particles`), Super reaction (whole screen, `docs/reaction/19-19-super-reaction.md`), Reaction effects = the animation preset library (`{motion}_{NN}.json`, emoji-free Lottie, no base64; every emoji holds a preset), Lottie | `docs/reaction.md` (index), `docs/effects.md`, the emoji bank `docs/emoji-bank.md` |
 | ZIP exports, emoji bank resolution | `docs/export to team/mirsal-export-architecture.md` |
 | redesign (no action may disappear without a `renamed`/`retired` entry in `mirsal/tests/data/ui_baseline.json`) | `docs/redesign_plan.md`, `docs/ui_inventory.md` |
 | the whole app on one page | `docs/architecture.md` |
-| proposals waiting for a go | `docs/burst_plan.md`, `docs/chat-interaction-proposal.md`, `docs/size-position-lottie-proposal.md` (Size/Position redesign, one-frame preview, Lottie style à la Particular), `docs/super-reaction-proposal.md` (hold-to-super-react, full-screen viewport-relative scenes) |
+| proposals waiting for a go | `docs/burst_plan.md`, `docs/chat-interaction-proposal.md`, `docs/size-position-lottie-proposal.md` (Size/Position redesign, one-frame preview, Lottie style à la Particular) |
 | current app audit and owner review | `docs/uiux_review/app-audit-2026-10-19.md`, `user app review guide.md`; active remaining queue `plan.md`, journey status/checklists contain remaining work only |
 | numbers, historical audits | `docs/measurements.md`, `docs/review-prompt.md` (whole repo), `docs/uiux-review-prompt.md` (historical UI/UX audit workflow), `docs/review.md`; reference inputs `docs/inputs/` |
 

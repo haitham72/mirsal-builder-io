@@ -218,6 +218,7 @@ const SCREENS = [
     'agent',
     'effects',
     'reactions',
+    'super',
     'generate',
     'history',
     'library',
@@ -247,6 +248,7 @@ const RAIL = [
     create: 'agent',
     effects: 'agent',
     reactions: 'agent',
+    super: 'agent',
     editor: 'agent',
     export: 'agent',
     prepare: 'agent',
@@ -258,7 +260,7 @@ const RAIL = [
     history: 'me',
   };
 
-const CREATE_TABS = ['agent', 'generate', 'create', 'effects', 'reactions'];
+const CREATE_TABS = ['agent', 'generate', 'create', 'effects', 'reactions', 'super'];
 
 let route_ = 'home',
   PACK_ID = null,
@@ -312,8 +314,8 @@ function drawCtabs() {
   }
   const tab = (k, i, l) => `<button role=tab aria-selected=${route_ === k} data-act=nav data-to=${k}>${ic(i)}${l}</button>`;
   el.innerHTML = `<div class=ct-tabs role=tablist aria-label=Create>${tab('agent', 'chat', 'Chat')}${tab('generate', 'gen', 'Studio')}</div>
-  <details class=ct-new><summary class="btn sm">${ic('plus')} New</summary><div class=ct-menu role=menu><button role=menuitem data-act=newphoto class="${route_ === 'create' ? 'on' : ''}">${ic('photo')} From a photo</button><button role=menuitem data-act=newvideo>${ic('film')} From a video</button><button role=menuitem data-act=nav data-to=reactions class="${route_ === 'reactions' ? 'on' : ''}">${ic('fx')} Reaction effects</button></div></details>
-  ${route_ === 'create' || route_ === 'effects' || route_ === 'reactions' ? `<span class=ct-here>${route_ === 'create' ? 'From a photo' : route_ === 'effects' ? 'Particle effects' : 'Reaction effects'}</span>` : ''}`;
+  <details class=ct-new><summary class="btn sm">${ic('plus')} New</summary><div class=ct-menu role=menu><button role=menuitem data-act=newphoto class="${route_ === 'create' ? 'on' : ''}">${ic('photo')} From a photo</button><button role=menuitem data-act=newvideo>${ic('film')} From a video</button><button role=menuitem data-act=nav data-to=reactions class="${route_ === 'reactions' ? 'on' : ''}">${ic('fx')} Reaction effects</button><button role=menuitem data-act=nav data-to=super class="${route_ === 'super' ? 'on' : ''}">${ic('fx')} Super reaction</button></div></details>
+  ${route_ === 'create' || route_ === 'effects' || route_ === 'reactions' || route_ === 'super' ? `<span class=ct-here>${route_ === 'create' ? 'From a photo' : route_ === 'effects' ? 'Particle effects' : route_ === 'super' ? 'Super reaction' : 'Reaction effects'}</span>` : ''}`;
 }
 
 /* narrow screens: the second column is a drawer (studio.css, 'the shell on narrow screens') */

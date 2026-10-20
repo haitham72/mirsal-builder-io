@@ -5,7 +5,7 @@ from fastapi import APIRouter, Request
 from ..dependencies import _native_headers
 from ...flow import lottie_reactions as lr
 from starlette.responses import Response as _Raw
-from ..schemas.reactions import LottieReactionBody
+from ..schemas.reactions import LottieReactionBody, SuperReactionBody
 
 def build_router(ctx):
     router = APIRouter()
@@ -69,4 +69,25 @@ def build_router(ctx):
             return _j(request, 200, await asyncio.to_thread(lr.save, c.out, file, body.settings, body.morph_targets))
         except lr.SetError as e:
             return _lr_err(request, e)
+    @router.get("/api/particles/super", include_in_schema=False)
+    async def super_reactions(request: Request):
+        user, resp = await _member(request, "/api/particles/super")
+        if resp:
+            return resp
+        return _j(request, 200, await asyncio.to_thread(lr.super_listing))
+
+    @router.post("/api/particles/super", include_in_schema=False)
+    async def super_reaction(request: Request):
+        user, resp = await _member(request, "/api/particles/super/compose")
+        if resp:
+            return resp
+        body, err = await _body(request, SuperReactionBody)
+        if err:
+            return _j(request, 400, {"error": err})
+        try:
+            return _j(request, 200, await asyncio.to_thread(lr.super_compose, c.out, body.file, body.aspect, glow=body.glow,
+                                                             color=body.color, colors=body.colors, settings=body.settings))
+        except lr.SetError as e:
+            return _lr_err(request, e)
+
     return router

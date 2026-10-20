@@ -29,8 +29,8 @@ const RXPAGE=120;                                /* wall tiles drawn at a time (
    preview; multi / sel / anchor: Select; apply: what Assign gives ('random' or a preset id); shown: wall tiles drawn. */
 const RXQ={q:'',f:''};
 const RXS={bank:null,rows:null,start:null,lib:null,sample:'happy',ek:null,hover:'',pv:{},par:{},ppv:{},hT:0,t:0,multi:false,sel:new Set(),anchor:'',apply:'random',hpo:'',hpm:'',hp:null,shown:RXPAGE,mopen:new Set(),psel:new Set(),panchor:'',ppar:{},dbg:(()=>{try{return localStorage.getItem('rx.debug')==='1'}catch(e){return false}})()};
-/* the sub-tab of #/reactions, shared with Library Reactions (Haitham, 2026-10-15): Emoji style | Lottie style | Packs. Kept in the browser. */
-RXS.tab=(()=>{try{const t=localStorage.getItem('rx.tab');return t==='lottie'||t==='packs'?t:'emoji'}catch(e){return 'emoji'}})();
+/* the sub-tab of #/reactions, shared with Library Reactions (Haitham, 2026-10-15): Emoji style | Lottie style | Super Emojis (2026-10-20, super.js) | Packs. Kept in the browser. */
+RXS.tab=(()=>{try{const t=localStorage.getItem('rx.tab');return t==='lottie'||t==='packs'||t==='super'?t:'emoji'}catch(e){return 'emoji'}})();
 const rxStart=()=>RXS.start||RXSTART;
 
 /* ---------- values ---------- */
@@ -157,7 +157,8 @@ function rxPick(){
   `<div class=rx-grid data-rxwall>${list.slice(0,RXS.shown).map(rxTile).join('')||'<span class=mut>No match.</span>'}</div>${rxMoreHtml(list.length)}${rxMany()}</section>`}
 function rxHtml(){
  if(rxTab()==='packs')return `<div class="page rx">${typeof spLibHtml==='function'?spLibHtml():rxStyleBar()}</div>`;   /* Packs includes the shared tab bar. */
- if(rxTab()==='lottie')return `<div class="page rx">${rxStyleBar()}${lsHtml()}</div>`;      /* Lottie style: lottiestyle.js */
+ if(rxTab()==='lottie')return `<div class="page rx">${rxStyleBar()}${lsHtml()}</div>`;
+ if(rxTab()==='super')return `<div class="page rx">${rxStyleBar()}${supTabHtml()}</div>`;      /* Super Emojis: super.js */      /* Lottie style: lottiestyle.js */
  if(!RXS.bank)return `<div class="page rx">${rxStyleBar()}<div class=fx-job><span class=spin></span> <span class=mut>Reading the emoji bank…</span></div></div>`;
  return `<div class="page rx">${rxStyleBar()}${rxLibHtml()}${rxEditor()}${rxPick()}${rxHpHtml()}</div>`}
 
@@ -172,6 +173,7 @@ function rxDraw(){
  const w2=el.querySelector&&el.querySelector('[data-rxwall]');if(w2)w2.scrollTop=top;
  if(q){const i=el.querySelector('[data-rxq]');if(i){i.focus();try{i.setSelectionRange(i.value.length,i.value.length)}catch(e){}}}
  if(rxTab()==='lottie'){lsThumbs();return lsMount()}
+ if(rxTab()==='super')return supMount();
  rxCardPreviews()}
 const rxSwap=(sel,html)=>{const el=document.querySelector&&document.querySelector(sel);if(el)el.outerHTML=html;else rxDraw()};
 function rxGridRedraw(){const w=document.querySelector&&document.querySelector('[data-rxwall]');if(!w)return;const list=rxList();

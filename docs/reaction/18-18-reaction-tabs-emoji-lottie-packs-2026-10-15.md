@@ -1,14 +1,14 @@
-# 18. Reaction tabs: Emoji Style | Lottie Style | Packs (2026-10-15)
+# 18. Reaction tabs: Emoji Style | Lottie Style | Super Emojis | Packs (2026-10-15; Super Emojis 2026-10-20)
 
 <sub>Part of [reaction.md](../reaction.md).</sub>
 
-`#/reactions` and Library › Reactions show the same three tabs, **Emoji Style | Lottie Style | Packs**, from the one tab state — so work made in Reaction effects is visible in the Library, and the Library's sets are one tab away from the authoring screen.
+`#/reactions` and Library › Reactions show the same four tabs, **Emoji Style | Lottie Style | Super Emojis | Packs** (Super Emojis: the super reaction sandbox, [19](19-19-super-reaction.md)), from the one tab state — so work made in Reaction effects is visible in the Library, and the Library's sets are one tab away from the authoring screen.
 
 ## How it is implemented
 
 One tab state, three views, no new route or engine function. Emoji Style and Lottie Style render exactly as before, on both screens.
 
-- Tab state: `RXS.tab` (`mirsal/mirsal/console/reactions.js`, `'emoji' | 'lottie' | 'packs'`, kept in the browser as `rx.tab`; an unknown value falls back to Emoji style). The switch (`rxStyleBar`, `mirsal/mirsal/console/lottiestyle.js`) offers all three through the one `ACT.rxstyle` action (`{s}` + redraw of the current route: `RENDER.reactions()` on `#/reactions`, `spLibRefresh()` → `RENDER.library()` in the Library).
+- Tab state: `RXS.tab` (`mirsal/mirsal/console/reactions.js`, `'emoji' | 'lottie' | 'super' | 'packs'`, kept in the browser as `rx.tab`; an unknown value falls back to Emoji style). The switch (`rxStyleBar`, `mirsal/mirsal/console/lottiestyle.js`) offers all three through the one `ACT.rxstyle` action (`{s}` + redraw of the current route: `RENDER.reactions()` on `#/reactions`, `spLibRefresh()` → `RENDER.library()` in the Library).
 - `#/reactions`: `rxHtml` renders the tab's view; `rxDraw` triggers `spLibSync()` on Packs and returns (style loaders only run for their own tab).
 - Library › Reactions: `spLibHtml()` (`mirsal/mirsal/console/particles.js`) renders the same bar (`spRxTabs`) plus the tab's view — its own sets/bank/made content on Packs, the `#/reactions` renderers (`rxLibHtml`, `rxEditor`, `rxPick`, `rxHpHtml`, `lsHtml`) on the style tabs. `spRxTabSync` loads what the shown tab needs (bank / Lottie files, once each) and refreshes; without `reactions.js` every `typeof` guard falls back to the dumped list, so older callers never break.
 - Refresh: `spLibRefresh` also redraws `#/reactions` when it is the current route, so bank builds, approvals and previews arriving late repaint both screens.

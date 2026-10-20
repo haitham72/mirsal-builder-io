@@ -178,3 +178,32 @@ def export_zip(out: Path) -> bytes:
             man.append({"file": f["file"], "json": arc, "morph_targets": rec.get("morph_targets") or [], "settings": {**START, **(rec.get("settings") or {})}})
         z.writestr("manifest.json", json.dumps({"reactions": man, "seconds": REACTION_SECONDS, "size": SIZE}, ensure_ascii=False, indent=1))
     return buf.getvalue()
+
+
+# ---------- super reaction (Reactions 2.0, Haitham 2026-10-20): a dropped file played over the WHOLE screen. For now the sources are the files in
+# mirsal/lottie, listed fresh on every request by name (drop a file = a new super reaction). engine/super_reaction.py; docs/reaction/19-*.md.
+def super_listing() -> dict:
+    """GET /api/particles/super: {files: [{file, name, w, h, fps, frames}], buckets {name: width/height}, glow_modes, keys, start}."""
+    from ..engine import super_reaction as sr
+    return {"files": [{k: f[k] for k in ("file", "name", "w", "h", "fps", "frames")} for f in handpicked_files()],
+            "buckets": {k: round(v, 4) for k, v in sr.BUCKETS.items()}, "glow_modes": list(sr.GLOW_MODES),
+            "keys": list(sr.SUPER_KEYS), "start": sr.SUPER_START}
+
+
+def super_compose(out: Path, file: str, aspect, *, glow: str = "auto", color=None, colors=None, settings=None) -> dict:
+    """POST /api/particles/super: {file, name, bucket, aspect, glow, color, lottie}. The file's saved Lottie-style look (sizes, spin, zoom; the neutral
+    defaults unsaved) rises from the bottom of a canvas shaped like the screen (`aspect` = width / height), lit by `glow`. Free; nothing is stored.
+    404 for a file not in the drop zone, 400 for a bad option."""
+    from ..engine import super_reaction as sr
+    if file not in {f["file"] for f in handpicked_files()}:
+        raise SetError(f"no Lottie file {file}", 404)
+    if isinstance(aspect, bool) or not isinstance(aspect, (int, float)):
+        raise SetError("aspect must be a number (the screen's width / height)")
+    rec = _read(out)["files"].get(file) or {}
+    try:
+        doc = sr.export_super(params(rec.get("settings") or {}), float(aspect), settings=settings, glow=str(glow), color=color, colors=colors,
+                              source=_doc(file), name=Path(file).stem)
+    except (TypeError, ValueError) as ex:
+        raise SetError(str(ex))
+    meta = doc.pop("mirsal")
+    return {"file": file, "name": Path(file).stem, "bucket": meta["bucket"], "aspect": meta["aspect"], "glow": meta["glow"], "color": meta["color"], "lottie": doc}

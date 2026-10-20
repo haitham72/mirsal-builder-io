@@ -3,7 +3,17 @@
 Checkout G:/Haitham/VsCode/Mirsal-Builder, branch redesign-ui-ux. Never merge
 without Haitham asking. The five refactors and folder redesign are complete.
 
-## Latest request - natural video sequences
+## Latest request - super reaction (2026-10-20)
+
+Hold the reaction, release, the whole screen plays: engine/super_reaction.py (screen-shaped
+canvas by aspect bucket, bottom emitters, auto/solid/gradient glow, centre pop), sources = the
+files in mirsal/lottie by name. Sandbox: Create > + New > Super reaction (#/super) and the Super
+Emojis tab (Reaction effects, Library > Reactions); desktop window + iPhone after
+ref/ref-only.jpg, both resizable. Details and open items:
+docs/reaction/19-19-super-reaction.md. 15 Python + 18 node checks pass; browser checked on an
+isolated :8797. Restart the local app to see it. Visual verdict is Haitham's.
+
+## Earlier request - natural video sequences
 
 Implemented video_independent v2 for new plans: each occupied cell gets a smooth
 two-action narrative with an optional third payoff. A 3x3 grid correctly labels

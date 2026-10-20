@@ -167,7 +167,8 @@ def _embed(doc: dict, k: int) -> tuple[list, dict]:
     return assets, info
 
 
-def export_lottie_burst(p: ParticleParams, origin: dict, targets: list | None = None, *, size: int = 512, name: str = "lottie reaction") -> dict:
+def export_lottie_burst(p: ParticleParams, origin: dict, targets: list | None = None, *, size: int = 512, name: str = "lottie reaction",
+                        shift: tuple = (0.0, 0.0)) -> dict:
     """A Lottie-style burst: `origin` (a Lottie document) flying as every particle, each its own instance (its own playhead from its birth), never a
     raster. `targets` (Lottie documents) are the morph targets: with `morph_at` > 0 each particle picks one (seeded) and crossfades into it
     MORPH_XFADE s long at its morph time, the target playing from that moment. Children (`children` > 0) burst at the morph and fly a picked target
@@ -182,6 +183,8 @@ def export_lottie_burst(p: ParticleParams, origin: dict, targets: list | None = 
     p = p.clamped()
     W = H = int(size)
     tr = trajectories(p, 1)
+    if tuple(shift) != (0.0, 0.0):                                   # a super reaction's bottom emitters (engine/super_reaction.py); (0, 0) = the old bytes
+        tr.pos = tr.pos + np.array(shift, dtype=np.float64)
     N = len(tr.spawn)
     if N > MAX_PARTICLES:
         raise ValueError(f"{N} particles is more than {MAX_PARTICLES}: lower Amount or Children")

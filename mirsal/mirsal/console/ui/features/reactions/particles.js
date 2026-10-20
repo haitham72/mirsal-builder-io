@@ -207,6 +207,7 @@ function spSetDetail(s){const d=SPL.detail[s.id],full=d&&d.id===s.id?d:s,cells=f
 function spLibHtml(){const sets=SPL.sets;
  spMadeSync();spRxTabSync();
  const tabs=spRxTabs(),tab=spRxTab();
+ if(tab==='super')return tabs+supTabHtml();
  if(tab!=='packs')return tabs+(tab==='lottie'
   ?(typeof lsHtml==='function'?lsHtml():'')
   :(typeof RXS!=='undefined'&&RXS.bank?`${rxLibHtml()}${rxEditor()}${rxPick()}${rxHpHtml()}`:`<div class=fx-job><span class=spin></span> <span class=mut>Reading the emoji bank…</span></div>`));
@@ -223,7 +224,7 @@ function spLibHtml(){const sets=SPL.sets;
    "Made in Reaction effects" lists the created Lotties (GET /api/particles/emoji-lottie), newest first. */
 function spRxTab(){return (typeof rxTab==='function')?rxTab():'packs';}
 function spRxTabs(){return (typeof rxStyleBar==='function')?rxStyleBar():'';}
-async function spRxTabSync(){const t=spRxTab();if(t==='packs')return;
+async function spRxTabSync(){const t=spRxTab();if(t==='packs'||t==='super')return;
  if(t==='lottie'){if(typeof lsLoad==='function'&&typeof LS!=='undefined'&&!LS.files){await lsLoad();spLibRefresh();}return;}
  if(typeof rxBankEnsure==='function'&&typeof RXS!=='undefined'&&(!RXS.bank||!RXS.lib)){await rxBankEnsure();spLibRefresh();}}
 async function spMadeSync(force){if(SPL.madeBusy||(SPL.made&&!force))return;SPL.madeBusy=true;

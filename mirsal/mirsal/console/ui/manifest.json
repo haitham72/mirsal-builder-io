@@ -24,6 +24,7 @@
   "particles.js": "features/reactions/particles.js",
   "reactions.js": "features/reactions/reactions.js",
   "lottiestyle.js": "features/reactions/lottiestyle.js",
+  "super.js": "features/reactions/super.js",
   "library.js": "features/library/library.js",
   "packs.js": "features/library/packs.js",
   "trash.js": "features/library/trash.js",
