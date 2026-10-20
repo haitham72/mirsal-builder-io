@@ -3,9 +3,11 @@
 <sub>Part of [generation.md](../generation.md).</sub>
 
 New generation plans default to 2×2 (four cells). Image template versions stay
-v3/v4; new slots separately persist `video_template={id:video_independent,version:1}`.
+v3/v4; new slots separately persist `video_template={id:video_independent,version:2}`.
 Older slots without that field rebuild with the unchanged `video_short_v1`.
 See [the independent-cell contract](19-independent-cell-video-and-2x2.md).
+Version 2 uses [natural cell sequences and optional detached gestures](20-natural-cell-video-sequences.md);
+saved independent v1 prompts retain their numbered action wording.
 
 - **Template-locked.** A saved template per grid (`sheet_3x3`, `sheet_2x2`, `single_1x1`, `video`) is filled from a small slot JSON; nobody free-writes a prompt. New plans use **v3**
   (`TEMPLATE_VERSION`; v2 is kept as it was, so batches made with it rebuild to the prompt that was sent; v3 asks for "a wide range of emotions AND different states of action" so no two characters share a pose); a saved plan keeps its own version, and `render_plan(..., 1)` still rebuilds the v1 text exactly.
@@ -17,7 +19,7 @@ See [the independent-cell contract](19-independent-cell-video-and-2x2.md).
   in `console/assets/styles/<id>.(png|jpg|webp|svg)`; without one a generated placeholder is served.
 - **Emotions** (`generation/emotions.py`): a bank of ~35 expressive entries (label = expression + body language, emoji, motion) in nine mood groups; `pick(n, seed)` chooses one per group,
   deterministically per request, so a sheet never repeats a mood. The built-in school and birthday sets carry motions too.
-- **Face-only emoji mode (2026-10-08).** A request naming emoji (`generic emojis`, `an emoji pack`, …) renders template **v4** with the face bank (`emotions.FACE_GROUPS`, same moods/keys/emoji, labels and motions mention only the face and head): a real emoji is a face, never a body. `expand` auto-detects it (`EMOJI_WORDS`), stores `slots.face`, and old plans rebuild to their own version as before. A limb-word list (`emotions.LIMB_WORDS`) guards it in `tests/test_face_mode.py`: the only limb words a v4 prompt may carry are its own "Faces only: never …" negations.
+- **Face-only emoji mode (2026-10-08).** A request naming emoji (`generic emojis`, `an emoji pack`, …) renders template **v4** with the face bank (`emotions.FACE_GROUPS`, same moods/keys/emoji, labels and motions mention only the face and head): the image remains a face/head without a torso. New video v2 may add a detached gesture hand (no arm), as described in the natural-sequence contract. `expand` auto-detects it (`EMOJI_WORDS`), stores `slots.face`, and old plans rebuild to their own version as before. A limb-word list (`emotions.LIMB_WORDS`) guards it in `tests/test_face_mode.py`: the only limb words a v4 prompt may carry are its own "Faces only: never …" negations.
 - **Preset grids (2026-10-08).** The canonical bank drives the nine directly (`generation/actions.py`: `PRESETS` core/social/reactions/daily-v1, `FACE_SENTENCES` face-only label + motion per token, `preset_cells`). `expand(..., preset=)` names one explicitly (preset words are stripped from the subject; a preset implies face mode); a faceless-emoji 3×3 with no grid named takes `core-v1`, so the first sheet of an emoji pack is happy → thanks in bank order with bank emoji. Cell keys are `{subject}_{token}`, tags carry token + aliases. The claim queue itself (`generate more` takes the next unclaimed grid into the same pack) is still open (`docs/export to team/mirsal-export-architecture.md` §10).
 - **Motion per character.** Every cell has a `motion` sentence; the video prompt lists them as numbered lines, so the model animates each character differently.
   `Console.video_prompt_for` rebuilds the video prompt for the slots actually approved (empty slots get no motion).

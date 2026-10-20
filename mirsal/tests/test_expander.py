@@ -145,10 +145,25 @@ class MotionTests(unittest.TestCase):
         plan = expander.expand("owl", (3, 3), use_ai=True, complete=Fake(answer))
         self.assertEqual(plan["expanded_by"], "ai")
         self.assertEqual(plan["slots"]["cells"][3]["motion"], "the owl does move number 4 with a bounce")
-        self.assertIn("4. the owl does move number 4 with a bounce", plan["video_prompt"])
+        line = next(line for line in plan['video_prompt'].splitlines() if line.startswith('Mid-left (cell 4):'))
+        self.assertIn('The owl does move number 4 with a bounce', line)
         bad = json.loads(answer)
         bad["cells"][0]["motion"] = "adds a caption and a logo"
         self.assertTrue(expander._lint(bad["cells"], 9, "owl", "owl"))                         # banned words are caught in motions too
+
+    def test_a_long_three_beat_motion_keeps_the_final_payoff(self):
+        answer = json.loads(good('an expressive cartoon owl'))
+        motion = ('smiles warmly while its enormous eyes sparkle with delight and its feathers softly ripple in place '
+                  'then giggles in a cute way while its cheeks puff and its eyebrows lift with surprise '
+                  'finally covers its beak with a small hand and gives one last mischievous wink')
+        self.assertGreater(len(motion), 220)
+        answer['cells'][2]['motion'] = motion
+        plan = expander.expand('owl', (3, 3), use_ai=True, complete=Fake(json.dumps(answer)))
+        self.assertEqual(plan['expanded_by'], 'ai')
+        self.assertEqual(plan['slots']['cells'][2]['motion'], motion)
+        line = next(line for line in plan['video_prompt'].splitlines() if line.startswith('Top-right (cell 3):'))
+        self.assertIn('and finally covers its beak', line)
+        self.assertIn('one last mischievous wink', line)
 
 
 

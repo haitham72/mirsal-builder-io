@@ -28,19 +28,52 @@ class GenerationDefaults(unittest.TestCase):
             self.assertEqual(store.create()['settings']['grid'], '2x2')
         self.assertEqual(len(prompter.expand('generic emojis', (3, 3))['stickers']), 9)
 
-    def test_spatial_state_and_two_local_actions_run_concurrently(self):
+    def test_spatial_narratives_run_concurrently(self):
         plan = prompter.expand('generic emojis', (2, 2))
         text = plan['video_prompt']
         for position in ('Top-left', 'Top-right', 'Bottom-left', 'Bottom-right'):
             line = next((line for line in text.splitlines() if line.startswith(position)), '')
-            self.assertIn('State:', line)
-            self.assertIn('Action 1:', line)
-            self.assertIn('Action 2:', line)
+            self.assertIn('(cell ', line)
+            self.assertIn(', then ', line)
+            self.assertNotIn('Action 1:', line)
         self.assertIn('concurrently', text)
-        self.assertIn('local to that cell', text)
+        self.assertIn('one connected sequence for that cell alone', text)
         self.assertIn('Never apply one cell', text)
-        self.assertEqual(plan['slots']['video_template'], {'id': 'video_independent', 'version': 1})
-        self.assertNotIn('no hands', text.replace('Faces only: no bodies, no hands.', ''))
+        self.assertEqual(plan['slots']['video_template'], {'id': 'video_independent', 'version': 2})
+        self.assertNotIn('Faces only: no bodies, no hands.', text, 'the detached gesture must not conflict with a blanket hand ban')
+
+    def test_three_by_three_positions_third_gesture_and_loop_are_preserved(self):
+        plan = prompter.expand('generic emojis', (3, 3))
+        slots = plan['slots']
+        slots['loop'] = True
+        slots['cells'] = [
+            {'pos': 3, 'label': 'sad and drooping face with a single tear',
+             'motion': 'cries softly then starts sobbing in a cute way, finally wipes away the tear with a small detached hand'},
+            {'pos': 4, 'label': 'playful wink', 'motion': 'smiles while its eyes sparkle then winks'},
+        ]
+        text = prompter.render_plan(slots, plan['template_id'], plan['template_version'])['video_prompt']
+        lines = [line for line in text.splitlines() if ' (cell ' in line]
+        self.assertTrue(lines[0].startswith('Top-right (cell 3): The sad and drooping face'))
+        self.assertIn('cries softly, then starts sobbing in a cute way, and finally wipes away the tear', lines[0])
+        self.assertIn('emerges from behind the face', lines[0])
+        self.assertIn('withdraws behind it', lines[0])
+        self.assertIn('no visible arm connecting it to a body', lines[0])
+        self.assertTrue(lines[1].startswith('Mid-left (cell 4):'))
+        self.assertIn('smiles while its eyes sparkle, then winks', lines[1])
+        self.assertNotIn('detached hand', lines[1], 'the other cell must not inherit the gesture')
+        self.assertTrue(all('returns smoothly to its exact first-frame' in line for line in lines))
+        self.assertNotIn('(cell 2)', text, 'unoccupied cells have no sequence')
+        slots['loop'] = False
+        no_loop = prompter.render_plan(slots, plan['template_id'], plan['template_version'])['video_prompt']
+        self.assertNotIn('returns smoothly to its exact first-frame', no_loop)
+
+    def test_saved_independent_v1_keeps_numbered_two_action_text(self):
+        plan = prompter.expand('generic emojis')
+        plan['slots']['video_template']['version'] = 1
+        plan['slots']['cells'] = [{'pos': 2, 'label': 'happy', 'motion': 'smiles then winks then laughs'}]
+        text = prompter.render_plan(plan['slots'], plan['template_id'], plan['template_version'])['video_prompt']
+        self.assertIn('Top-right (cell 2): State: happy. Action 1: smiles. Then Action 2: winks.', text)
+        self.assertNotIn('laughs', text)
 
     def test_saved_legacy_slots_rebuild_the_unchanged_short_template(self):
         plan = prompter.expand('generic emojis', (2, 2))

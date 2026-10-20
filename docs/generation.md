@@ -13,6 +13,8 @@ request ─(prompt template v3 + style + stroke [+ AI enhancer] [+ references])�
 
 New-plan defaults and the independently animated cell prompt are documented in
 [2×2 and independent video sequences](generation/19-independent-cell-video-and-2x2.md).
+New plans use [natural two/three-beat cell directions](generation/20-natural-cell-video-sequences.md),
+including optional detached gesture hands and a first-frame return when Loop is enabled.
 
 This is an index: each section is its own file under [`generation/`](generation/); read only the one a task needs.
 

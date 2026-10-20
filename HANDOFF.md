@@ -1,8 +1,21 @@
 # HANDOFF - 2026-10-20 structural refactor
 
 Checkout G:/Haitham/VsCode/Mirsal-Builder, branch redesign-ui-ux. Never merge
-without Haitham asking. Latest request: implement all five reviewed refactor
-candidates and redesign the folders. That scope is complete.
+without Haitham asking. The five refactors and folder redesign are complete.
+
+## Latest request - natural video sequences
+
+Implemented video_independent v2 for new plans: each occupied cell gets a smooth
+two-action narrative with an optional third payoff. A 3x3 grid correctly labels
+top-right cell 3 and mid-left cell 4; the default remains 2x2. Explicit face
+gestures may use a detached hand emerging/withdrawing behind the face, with no
+connecting arm/body. Images remain face-only. Exact first-frame return is added
+only with Loop enabled. Saved v1/short templates and custom prompt precedence
+remain unchanged. The enhancer now requests the same sequence and retains up to
+600 motion characters. Details: docs/generation/20-natural-cell-video-sequences.md.
+29 focused checks passed, including actual prompt delivery to a fake video CLI
+for 2x2 and 3x3. No paid calls or real-data server restart. Restart the local app
+before checking the new prompt in its UI.
 
 ## Completed
 

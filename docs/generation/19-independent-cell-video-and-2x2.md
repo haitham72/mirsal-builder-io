@@ -1,5 +1,10 @@
 # 2×2 defaults and independent cell video sequences — 2026-10-19
 
+This section records independent-video **v1**. New plans now use
+[v2 natural sequences](20-natural-cell-video-sequences.md), preserving a third
+beat and permitting explicitly described detached gesture hands. The v1
+template and saved-plan rebuild remain unchanged.
+
 Haitham found 3×3 video laggy/low quality and reported that per-emoji action
 sequences can become whole-sheet scenes: every emoji performs cell 1's action,
 then every emoji performs cell 2's. New plans therefore default to **2×2** across

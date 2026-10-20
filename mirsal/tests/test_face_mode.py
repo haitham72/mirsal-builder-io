@@ -26,11 +26,13 @@ class FaceModeTests(unittest.TestCase):
             self.assertIn("Faces only", p["sheet_prompt"])
             self.assertIn("face and head alone", p["stickers"][0]["prompt"])
 
-    def test_no_limb_word_anywhere_in_face_prompts(self):
+    def test_images_stay_face_only_while_video_may_use_a_detached_gesture(self):
         p = prompter.expand("generic emojis", (3, 3))
         self.assertIn("Faces only: never a body", p["sheet_prompt"])          # the template's own negation steers the model…
         self.assertIn("Faces only: no bodies", p["video_prompt"])
-        texts = [p["sheet_prompt"], p["video_prompt"]] + [s["prompt"] for s in p["stickers"]]
+        self.assertIn('detached hand', p['video_prompt'])
+        self.assertIn('no visible arm connecting it to a body', p['video_prompt'])
+        texts = [p["sheet_prompt"]] + [s["prompt"] for s in p["stickers"]]
         texts += [c["label"] for c in p["slots"]["cells"]]
         texts = [t.replace("Faces only: never a body, arms, hands, legs, feet, ears, tails or props.", "")
                   .replace("Faces only: no bodies, no hands, no ears, no tails, no props.", "")

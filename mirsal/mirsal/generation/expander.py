@@ -15,9 +15,10 @@ BANNED = {"text", "caption", "logo", "watermark", "flag", "transparent", "shadow
 
 SYSTEM = """You plan sticker packs. You are given a short request (any language) and a grid size. Reply with ONE JSON object and nothing else:
 {"subject_description": "<one line: the single character/subject, its look, identical in every cell>",
- "cells": [ {"label": "<the expression plus body language, 6-14 words, English>", "motion": "<one sentence: how this character moves when animated in place, English>", "key": "<snake_case action, 1-4 words, no subject>", "tags": ["<0-3 extra snake_case search words>"], "emoji": ["<1-2 emoji that fit the pose>"]} ]}
+ "cells": [ {"label": "<the starting expression and pose, 6-14 words, English>", "motion": "<two distinct expressive actions joined by 'then', optionally a third introduced by 'finally', as one natural English sentence>", "key": "<snake_case action, 1-4 words, no subject>", "tags": ["<0-3 extra snake_case search words>"], "emoji": ["<1-2 emoji that fit the pose>"]} ]}
 Rules: exactly N cells, all completely different; cover a WIDE range of emotions and reactions (for example joy, love, laughter, pride, doubt, sadness, anger, shock, fear, embarrassment, boredom, mischief, sleepiness), each exaggerated and readable at small size, and in a different state of action (standing, walking, running, jumping, sitting, lying down, leaning, reaching, spinning), so no two share a pose or a silhouette; every label animatable (a character that can move in place);
 no text, captions, logos, flags or real people in any label; keep the user's subject and constraints, never add another character; a place, vehicle or prop the request names ("in a Lamborghini", "with a book", "on the beach") is part of subject_description and shows in the cells, never dropped; labels in English even when the request is Arabic or Arabizi.
+Motion: give each cell its own little emotional progression with two meaningful actions and an optional third payoff, connected smoothly rather than a numbered list. Keep the sequence readable in a short clip, with anticipation and follow-through; a generic blink alone is not enough. Keep simultaneous details joined by 'while'. Describe only that cell, never choreography for the whole grid. For face-only emojis keep the image label face/head-only; video gestures may use a small detached hand that emerges from behind the face and withdraws afterwards, with no visible arm or connection to a body. Do not add a torso or attached limbs. Do not force a return to the starting frame in motion text: the user's Loop choice controls that separately.
 """ + llm.DATA_RULE
 
 
@@ -140,6 +141,8 @@ def expand(task: str, grid: tuple = (2, 2), *, use_ai: bool = False, complete=No
     n = rows * cols
     subject_slug = prompter.slug(" ".join(w for w in base["subject"].split() if w not in prompter.COLORS | prompter.STOP)) or "sticker"
     user = f"{llm.fence('REQUEST', task, 600)}\nGrid: {rows}x{cols}, N = {n} cells."
+    if base['slots'].get('face'):
+        user += "\nFace-only emoji mode: image labels describe only faces/heads; any video hand gesture must use a detached hand without an arm."
     problems, meta, ai = [], {}, None
     for attempt in range(2):                                  # one answer, one repair round, then the built-in sets
         try:
@@ -178,7 +181,7 @@ def expand(task: str, grid: tuple = (2, 2), *, use_ai: bool = False, complete=No
         emoji = "".join([e.strip() for e in c["emoji"] if isinstance(e, str) and e.strip()][:2])
         cell = {"pos": i, "label": str(c["label"]).strip(), "tags": prompter.clean_tags(key, extra), "emoji": emoji}
         if str(c.get("motion") or "").strip():
-            cell["motion"] = str(c["motion"]).strip()[:220]
+            cell["motion"] = str(c["motion"]).strip()[:600]
         cells.append(cell)
     slots = dict(base["slots"])
     slots.update(subject_description=str(ai["subject_description"]).strip(), cells=cells,

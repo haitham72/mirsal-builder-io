@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from . import actions, emotions, spelling, styles
+from . import actions, emotions, spelling, styles, video_sequences
 
 TEMPLATES = Path(__file__).resolve().parent.parent / "prompts" / "templates"
 MARGIN = ("full body, centred, generous empty margin on every side (at least 20% of the cell), "
@@ -113,16 +113,20 @@ def render_plan(slots: dict, template_id: str, version: int = TEMPLATE_VERSION) 
     sheet = load_template(template_id, version).format(**common).strip()
     face = bool(slots.get("face"))
     video_template = slots.get("video_template") or {"id": "video_short", "version": 1}
+    narrative = video_template["id"] == "video_independent" and int(video_template["version"]) >= 2
+    sequences = (video_sequences.narratives(cells, rows, cols, face, bool(slots.get("loop"))) if narrative
+                 else local_sequences(cells, rows, cols, face))
+    faces = video_sequences.face_policy(cells) if narrative and face else " Faces only: no bodies, no hands." if face else ""
     video = load_template(video_template["id"], video_template["version"]).format(seconds=3, units="emojis" if face else "characters", unit="emoji" if face else "character",
-                                                  expressive=expressive(face), faces=" Faces only: no bodies, no hands." if face else "",
+                                                  expressive=expressive(face), faces=faces,
                                                   **{**common, "motions": "\n".join(f"{c['pos']}. {c.get('motion') or c['label']}" for c in cells),
-                                                     "local_sequences": local_sequences(cells, rows, cols, face)}).strip()
+                                                     "local_sequences": sequences}).strip()
     video = re.sub(r"\n{2,}", "\n", video)
     return {"sheet_prompt": sheet, "video_prompt": video, "prompts": {c["pos"]: cell_prompt(slots, c) for c in cells}}
 
 
 CUSTOM_PROMPTS = ("sheet_prompt", "video_prompt")
-VIDEO_TEMPLATE = ("video_independent", 1)  # saved per new plan; legacy slots keep video_short v1
+VIDEO_TEMPLATE = ("video_independent", 2)  # saved per new plan; earlier video templates keep their exact wording
 EXPRESSIVE = "Create a very expressive animation of each {unit}, each having its own personality with a wide range of emotions."     # Haitham's line, in every video prompt
 
 
@@ -223,6 +227,7 @@ def expand(task: str, grid: tuple = (2, 2), face: bool | None = None, preset: st
     else:
         entries = ACTIONS[kind][: rows * cols]
     for i, (suffix, phrase, emoji, motion) in enumerate(entries, 1):
+        motion = video_sequences.default_motion(motion, bool(face))
         key = f"{subject_slug}_{suffix}"                  # searchable action name; also the file name tail
         if preset or tokens:
             seed = [suffix, *actions.generation_bank()[suffix]["aliases"]] + ctx_tags

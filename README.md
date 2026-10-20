@@ -6,9 +6,10 @@
 
 [Code structure](docs/architecture.md) · [Native API layout](docs/api-parts/22-native-router-layout.md)
 
-New generation plans default to **2×2 / four stickers**. Video prompts bind two
-local actions to each spatial cell and run the cells concurrently; explicit
-grids and old plans remain supported. [Prompt contract](docs/generation/19-independent-cell-video-and-2x2.md).
+New generation plans default to **2×2 / four stickers**. Video prompts give each
+cell a natural sequence of two actions and an optional third, running cells
+concurrently; explicit grids and old plans remain supported.
+[Prompt contract](docs/generation/20-natural-cell-video-sequences.md).
 
 ## Overview and glossary
 

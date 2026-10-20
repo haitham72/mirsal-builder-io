@@ -430,9 +430,9 @@ class PromptV2Tests(unittest.TestCase):
         p = prompter.expand("teddy bear", (3, 3))
         self.assertEqual(len({c["emoji"] for c in p["slots"]["cells"]}), 9)
         self.assertEqual(len({c["label"] for c in p["slots"]["cells"]}), 9)
-        lines = [l for l in p["video_prompt"].splitlines() if '): State:' in l]
+        lines = [l for l in p["video_prompt"].splitlines() if ' (cell ' in l]
         self.assertEqual(len(lines), 9)
-        self.assertTrue(all('Action 1:' in line and 'Action 2:' in line for line in lines))
+        self.assertTrue(all(', then ' in line and 'Action 1:' not in line for line in lines))
         self.assertEqual(prompter.expand("teddy bear", (3, 3))["slots"], p["slots"])          # deterministic
         self.assertNotEqual([c["label"] for c in prompter.expand("a fox", (3, 3))["slots"]["cells"]], [c["label"] for c in p["slots"]["cells"]])
 
@@ -703,8 +703,10 @@ class LiveConsoleTests(Base):
         prompt = create[create.index("--prompt") + 1]
         self.assertIn("Create a very expressive animation of each character, each having its own personality with a wide range of emotions.", prompt)   # Haitham's line, in every video prompt
         self.assertIn('animate concurrently', prompt)
-        self.assertEqual(prompt.count('Action 1:'), 4)
-        self.assertEqual(prompt.count('Action 2:'), 4)
+        lines = [line for line in prompt.splitlines() if ' (cell ' in line]
+        self.assertEqual(len(lines), 4)
+        self.assertTrue(all(', then ' in line for line in lines))
+        self.assertNotIn('Action 1:', prompt)
         self.assertLess(len(prompt), 2500, 'two short local actions per cell, not a long sheet-wide storyboard')
         self.assertEqual(self.req("POST", "/api/live/cost", {"kind": "video", "model": "kling3_0", "options": {"mode": "std"}})[0], 400)   # std is not offered any more
 
@@ -915,7 +917,9 @@ class LiveConsoleTests(Base):
         self.assertEqual(create[create.index("--mode") + 1], "pro")
         self.assertNotIn("--end-image", create)                                                                     # Loop is off by default: no forced return to the first pose
         self.assertNotIn("loop", create[create.index("--prompt") + 1].lower())                                      # and no loop wording that makes the stickers bounce
-        self.assertIn("1. ", [l for l in create[create.index("--prompt") + 1].splitlines() if l[:3] == "1. "][0])  # per-character motion lines
+        video_prompt = create[create.index("--prompt") + 1]
+        self.assertIn('Top-left (cell 1):', video_prompt)
+        self.assertIn('Top-right (cell 3):', video_prompt)
         final = self.until(lambda: (lambda x: x if next(v for v in x["video_sheets"] if v["id"] == "A1")["status"] in ("SLICED", "VIDEO_BLOCKED") and not x["busy"] else None)(
             self.req("GET", f"/api/generations/{gid}")[1]), "slicing")
         self.assertEqual(next(v for v in final["video_sheets"] if v["id"] == "A1")["status"], "SLICED")
