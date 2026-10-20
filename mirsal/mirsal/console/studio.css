@@ -1249,8 +1249,13 @@ details.lv-edge{display:block;padding:var(--space-1) var(--space-2);margin:0}
    New request composer; the workspace keeps the rest. Earlier batches open in the Batches drawer (#bdrawer) from the workspace's top bar. */
 body.studio-split{--col2-w:352px}
 @media (max-width:1180px){body.studio-split{--col2-w:320px}}
-.cp-col{overflow:auto;padding:12px;display:block}
-#col2 .cp{margin:0;padding:12px;box-shadow:none;background:transparent;border-radius:0;overflow:visible}
+.cp-submit{display:flex;align-items:center;flex-wrap:wrap;gap:var(--space-1)}
+.cp-footer{padding-top:var(--space-2)}
+.cp-col{overflow:hidden;padding:12px;display:flex;min-height:0}
+#col2 .cp{margin:0;padding:0;box-shadow:none;background:transparent;border-radius:0;overflow:hidden;display:flex;flex-direction:column;width:100%;min-height:0}
+#col2 .cp-scroll{flex:1;min-height:0;overflow:auto;padding:12px}
+#col2 .cp-footer{flex:none;padding:var(--space-2) 12px;border-top:1px solid var(--bd);background:var(--sf)}
+#col2 .cp-submit>.cp-go{width:100%;justify-content:center}
 #col2 .cp-head{flex-wrap:wrap}#col2 .cp-head .cp-gap{flex:1}
 #col2 .cp-bar>.cp-chip{flex:1 1 100%;min-width:0}#col2 .cp-bar>.cp-go{width:100%;justify-content:center}#col2 .cp-bar .cp-gap{display:none}
 #col2 .cp-options{flex:1 0 100%}#col2 .cp-options>summary{flex-wrap:wrap}#col2 .cp-option-grid .cp-chip{flex:1 1 calc(50% - var(--space-1));min-width:0}

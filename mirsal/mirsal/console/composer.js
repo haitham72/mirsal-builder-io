@@ -42,7 +42,7 @@ function composerMount(){const g=document.querySelector('.gen2');if(!g||!LIVE.m|
   const host=cpHost();
   if(CPKEEP){host.insertBefore(CPKEEP,host.firstChild);CPKEEP=null;composerDraw();return}
   const w=document.createElement('section');w.id='cpwrap';w.className='cp';w.setAttribute('aria-label','New request');host.insertBefore(w,host.firstChild);
-  w.innerHTML=`<div class=cp-summary>New request <small>Describe and plan another sticker set</small></div><div class=cp-halo></div>
+  w.innerHTML=`<div class=cp-scroll><div class=cp-summary>New request <small>Describe and plan another sticker set</small></div><div class=cp-halo></div>
    <header class=cp-head><img class=cp-orb src=/assets/brand/mirsal-logo.png alt=""><h1>Studio</h1><span class=cp-gap></span><div class=cp-top id=cptop></div></header>
    <div class=cp-box id=cpbox>
     <div class=cp-refs id=cprefs></div>
@@ -51,7 +51,7 @@ function composerMount(){const g=document.querySelector('.gen2');if(!g||!LIVE.m|
     <div class=cp-engwrap id=cpeng hidden></div>
     <div class=cp-drop>Drop images to use them as references</div>
    </div>
-   <div class=cp-styles id=cpstyles></div>`;
+   <div class=cp-styles id=cpstyles></div></div><div class=cp-footer id=cpfooter></div>`;
   const p=$('prompt');p.value=gdOn()?GD.prompt:SES.prompt||prev||'';
   p.oninput=()=>grow();
   p.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();ACT.ggo()}};
@@ -113,8 +113,10 @@ function cpDrawBar(){const el=$('cpbar');if(!el)return;const {model,sel}=lsel('i
    <button class="cp-chip cp-ai ${aiOn()?'on':''}" data-act=cpai aria-pressed=${aiOn()} ${GAI&&GAI.configured?'':'disabled'} title="${esc(aiChipTitle())}"><span class=cp-sw><i></i></span><span><b>AI enhancer</b><em>${aiOn()?'On':'Off'}</em></span></button>
    <span class="gseg cp-act" role=group aria-label="Where the stickers come from"><button type=button data-act=cpactions data-v=creative aria-pressed=${CP.actions!=='predefined'} title="The AI (or the built-in mood list) invents nine stickers for your idea">Creative</button><button type=button data-act=cpactions data-v=predefined aria-pressed=${CP.actions==='predefined'} title="Nine of the 36 predefined actions (happy, laugh, cry …), drawn as your character; the next batches continue through the 36">Predefined</button></span>
    </div></details><span class=cp-gap></span>
-   ${GD&&!gdOn()?'<button class="btn sm" data-act=gdtab data-t=plan title="Return to the prompt you were editing">Prompt draft</button>':''}
-   <button id=go class=cp-go data-act=gprompt title="${aiOn()&&GAI.provider!=='local'?'Shows the prompt you can edit before any sheet is paid for; the AI enhancer makes one small OpenAI call to write it. No batch is created and no Higgsfield credits are spent.':'Free. Shows the prompt you can edit before any sheet is paid for; no batch is created.'} Pressing Enter in the box still starts a paid sheet at once.">Generate prompt <span class=cp-bp>${aiOn()&&GAI.provider!=='local'?'1 AI call':'free'}</span></button>${typeof impButtons==='function'?impButtons():''}`;
+   <div class=cp-submit>${GD&&!gdOn()?'<button class="btn sm" data-act=gdtab data-t=plan title="Return to the prompt you were editing">Prompt draft</button>':''}
+   <button id=go class=cp-go data-act=gprompt title="${aiOn()&&GAI.provider!=='local'?'Shows the prompt you can edit before any sheet is paid for; the AI enhancer makes one small OpenAI call to write it. No batch is created and no Higgsfield credits are spent.':'Free. Shows the prompt you can edit before any sheet is paid for; no batch is created.'} Pressing Enter in the box still starts a paid sheet at once.">Generate prompt <span class=cp-bp>${aiOn()&&GAI.provider!=='local'?'1 AI call':'free'}</span></button>${typeof impButtons==='function'?impButtons():''}</div>`;
+  const footer=$('cpfooter'),submit=el.querySelector?.('.cp-submit');
+  if(footer&&submit)footer.replaceChildren(submit);
   cpDrawEngine()}
 /* the AI enhancer's engine: the AI screen's own control (Auto / Local / Cloud, the local model drop-down, the one line saying which model answers or why it cannot; agent.js, AIENG.rows) shown under the bar while the enhancer is On,
    and also while it cannot run, so the person can pick an engine that can. One implementation, the same endpoints (an owner picks; a member sees the server's refusal as a toast). */

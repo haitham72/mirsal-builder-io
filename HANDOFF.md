@@ -38,11 +38,15 @@ Plan: `docs/design/15-studio-creation-sidebar-plan.md` (its "Implemented" sectio
 - **Known gaps to pick up**:
   1. In Options (narrow panel) the Creative/Predefined segment (`.gseg.cp-act`)
      renders as an empty pill with `innerText` "" — investigate (maybe pre-existing).
-  2. Plan asks for the Generate action to stay reachable at the panel bottom while
-     settings scroll; not done (fits at 900px height today).
-  3. No dedicated regression test yet for studioCol/bdrawer (existing tests were
-     updated: `composer_visibility`, `packs_column`). Add one before more changes.
-  4. Light/dark screenshots not reviewed exhaustively; final visual verdict is Haitham's.
+  2. Follow-up completed: Generate prompt and existing draft/import actions now sit
+     in a footer below independently scrolling settings.
+  3. Added `studio_panel.test.js`: composer node/draft preservation, drawer visibility,
+     focus restoration and history host routing. Together with composer_visibility: 4 pass.
+  4. Empty-workspace light/dark checks passed at 1440/1024/760/390, 720px high,
+     on isolated :8796 with providers off. Creative/Predefined worked in all eight
+     layouts with Options open; the empty pill was not reproduced. Screenshots in
+     `output/playwright/studio-*.png` (local only). Loaded artwork and busy/error
+     acceptance remain; final visual verdict is Haitham's.
 
 ## Remaining plan (see plan.md)
 
