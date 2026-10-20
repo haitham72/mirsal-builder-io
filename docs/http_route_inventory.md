@@ -47,9 +47,15 @@ Auth labels refer to the shared guard above; “owner / own batch/job/chat” in
 | `GET /api/particles/lottie-reactions` | — | 200 {files, start, keys, seconds, size} (Lottie style, native) | member | no |
 | `POST /api/particles/lottie-reactions/{file}` | `LottieReactionBody` {settings?, morph_targets?} | 200 {file, settings, morph_targets} | member | no |
 | `POST /api/particles/lottie-reactions/{file}/preview` | `LottieReactionBody` | 200 a Lottie document | member | no |
-| `GET /api/particles/super` | — | 200 {files (the dropped Lottie files in mirsal/lottie, by name), buckets, glow_modes, keys, start} (super reaction, native) | member | no |
+| `GET /api/particles/super` | — | 200 {files (the dropped Lottie files in mirsal/lottie, by name), buckets, glow_modes, keys, start, library {files, presets, orphans}} (super reaction, native) | member | no |
 | `POST /api/particles/super` | `SuperReactionBody` {file, aspect, glow?, color?, colors?, settings?} | 200 {file, name, bucket, aspect, glow, color, lottie} | member | no |
-| `POST /api/particles/super/export.zip` | `SuperExportBody` {files?, glow?, color?, colors?, settings?} | 200 superReactions.zip (every file × every bucket + manifest.json) | member | no |
+| `POST /api/particles/super/export.zip` | `SuperExportBody` {files?} | 200 superReactions.zip (each saved version, else the random look, × every bucket + manifest.json) | member | no |
+| `POST /api/particles/super/random` | `SuperRandomBody` {file, seed} | 200 {settings, glow, seed} (Shuffle) | member | no |
+| `POST /api/particles/super/versions` | `SuperVersionBody` {file, name?, look} | 200 the new version {id, file, name, look, created, updated} (Save as) | member | no |
+| `POST /api/particles/super/versions/{id}` | `SuperVersionBody` {name?, look?} | 200 the version (Save) | member | no |
+| `POST /api/particles/super/versions/{id}/delete` | — | 200 {removed, file} (the Lottie file stays) | member | no |
+| `POST /api/particles/super/presets` | `SuperPresetBody` {name?, look} | 200 the preset {id, name, look, created} | member | no |
+| `POST /api/particles/super/presets/{id}/delete` | — | 200 {removed} | member | no |
 | `GET /api/particles/lottie-reactions/{file}/export.json` | — | 200 a Lottie document (saved settings) | member | no |
 | `GET /api/particles/lottie-reactions.zip` | — | 200 application/zip | member | no |
 | `POST /api/particles` | ordered alternatives: from_stickers, from_generation, from_video, from_slices, from_effect, or new empty set; see durable-particle contract below | 201 object (open; operation detail) | owner | no |

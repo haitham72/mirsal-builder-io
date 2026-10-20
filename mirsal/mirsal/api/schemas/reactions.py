@@ -25,11 +25,31 @@ class SuperReactionBody(BaseModel):
     settings: dict[str, Any] | None = None
 
 
+
 class SuperExportBody(BaseModel):
-    """POST /api/particles/super/export.zip: the sandbox's settings applied to every dropped file (or `files`) for every screen bucket."""
+    """POST /api/particles/super/export.zip: every file's saved versions (an unsaved file: its random look), for every screen bucket."""
     model_config = ConfigDict(extra="forbid")
     files: list[str] | None = None
-    glow: str = "auto"
-    color: str | None = None
-    colors: list[str] | None = None
-    settings: dict[str, Any] | None = None
+
+
+class SuperRandomBody(BaseModel):
+    """POST /api/particles/super/random: Shuffle, the random look of `file` for `seed`."""
+    model_config = ConfigDict(extra="forbid")
+    file: str
+    seed: int
+
+
+class SuperVersionBody(BaseModel):
+    """POST /api/particles/super/versions (Save as; `file` required) and .../versions/{id} (Save). look = {settings, glow, color?, colors?, seed?},
+    checked by flow/super_reactions.py clean_look."""
+    model_config = ConfigDict(extra="forbid")
+    file: str | None = None
+    name: str | None = None
+    look: dict[str, Any] | None = None
+
+
+class SuperPresetBody(BaseModel):
+    """POST /api/particles/super/presets: Save as preset."""
+    model_config = ConfigDict(extra="forbid")
+    name: str | None = None
+    look: dict[str, Any]

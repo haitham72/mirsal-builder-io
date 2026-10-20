@@ -2,8 +2,11 @@
    reaction in either one's emoji box and small copies stream up, release and the whole screen plays: the dropped Lottie rising from the bottom, the
    screen lit with its colour, the big pop in the middle. The animation is made for THAT screen's shape (POST /api/particles/super with its
    width / height: the engine picks the nearest bucket, the player crops the rest with xMidYMid slice), so resizing a frame changes what it gets.
-   Sources: the files in mirsal/lottie, listed by name on every visit (GET /api/particles/super). Engine: engine/super_reaction.py. */
-const SUP = {files: [], file: '', glow: 'auto', color: '#ff5a1f', c2: '#ffd23f', set: {}, start: {}, cache: {}, docs: {}, err: '', frame: 80};
+   Sources: the files in mirsal/lottie, listed by name on every visit (GET /api/particles/super). Engine: engine/super_reaction.py.
+   The library (flow/super_reactions.py): every file opens with its seeded random look until it is saved; Save / Save as (another version of the
+   same file) / Remove (the saved version only), Shuffle (the next random look), presets to load on any file. Export uses what is saved. */
+const SUP = {files: [], file: '', glow: 'auto', color: '#ff5a1f', c2: '#ffd23f', set: {}, start: {}, cache: {}, docs: {}, err: '', frame: 80,
+  lib: {files: [], presets: []}, vid: '', seed: null, name: '', q: '', only: false, armed: '', busy: false};
 const SUP_SETS = [['size', 'Size', 0.25, 3, 0.05], ['count', 'Amount', 4, 160, 1], ['rise', 'Rise', 0.2, 1.4, 0.05], ['float', 'Float', 0, 0.8, 0.05], ['sway', 'Sway', 0, 1.5, 0.05],
   ['spread', 'Spread', 10, 120, 1], ['glow_strength', 'Glow', 0, 1, 0.05]];
 let supLib = null;
@@ -20,6 +23,32 @@ function supBody(aspect) {
   if (SUP.glow === 'gradient') b.colors = [SUP.color, SUP.c2];
   return b;
 }
+/* the editor's look as the library stores it: {settings, glow, color?, colors?, seed?} */
+function supLook() {
+  const l = {settings: {...SUP.set}, glow: SUP.glow};
+  if (SUP.glow === 'solid') l.color = SUP.color;
+  if (SUP.glow === 'gradient') l.colors = [SUP.color, SUP.c2];
+  if (SUP.seed != null) l.seed = SUP.seed;
+  return l;
+}
+function supApply(look) {
+  SUP.set = {...((look && look.settings) || {})}; SUP.glow = (look && look.glow) || 'auto'; SUP.seed = look && look.seed != null ? look.seed : SUP.seed;
+  if (look && look.color) SUP.color = look.color;
+  if (look && look.colors) [SUP.color, SUP.c2] = look.colors;
+}
+const supRow = f => (SUP.lib.files || []).find(r => r.file === f);
+const supVer = id => (SUP.lib.files || []).flatMap(r => r.versions).find(v => v.id === id);
+const supSaved = () => { const v = SUP.vid && supVer(SUP.vid); return v ? v.look : (supRow(SUP.file) || {}).random };
+const supDirty = () => { const a = supSaved(); if (!a) return false; const n = l => JSON.stringify({s: l.settings, g: l.glow, c: l.glow === 'solid' ? l.color : null, cs: l.glow === 'gradient' ? l.colors : null}); return n(a) !== n(supLook()) };
+/* open a file (its first saved version, else its random look) or one version */
+function supOpen(file, vid) {
+  const row = supRow(file); if (!row) return;
+  const v = vid ? row.versions.find(x => x.id === vid) : row.versions[0];
+  SUP.file = file; SUP.vid = v ? v.id : ''; SUP.name = v ? v.name : row.name; SUP.seed = null; SUP.armed = '';
+  supApply(v ? v.look : row.random);
+  supStillClear(); supDraw(); supStill();
+}
+
 /* the nearest bucket name for a shape, from the listing (the server decides; this only labels the frame) */
 function supBucket(aspect) {
   let best = '', d = 1e9;
@@ -90,22 +119,45 @@ function supDraw() {
   document.querySelectorAll('.sup-root').forEach(supDrawIn);
 }
 function supDrawIn(el) {
-  const opts = SUP.files.map(f => `<option value="${esc(f.file)}"${f.file === SUP.file ? ' selected' : ''}>${esc(f.name)}</option>`).join('');
   const glow = ['auto', 'solid', 'gradient', 'none'].map(g => `<button class="btn sm${SUP.glow === g ? ' pri' : ''}" data-supglow=${g}>${g[0].toUpperCase() + g.slice(1)}</button>`).join('');
   const sliders = SUP_SETS.map(([k, label, lo, hi, st]) => {
     const v = SUP.set[k] ?? SUP.start[k] ?? lo;
     return `<label class=sup-sl><span>${label} <em>${v}</em></span><input type=range min=${lo} max=${hi} step=${st} value="${v}" data-supset=${k}></label>`;
   }).join('') + `<label class="sup-sl sup-frame"><span>Animation frame <em>${SUP.frame}%</em></span><input type=range min=0 max=100 step=1 value="${SUP.frame}" data-supframe></label>`;
+  const q = SUP.q.trim().toLowerCase();
+  const cards = (SUP.lib.files || []).filter(r => (!SUP.only || r.versions.length) && (!q || r.name.toLowerCase().includes(q) || r.versions.some(v => v.name.toLowerCase().includes(q))))
+    .map(r => {
+      const items = r.versions.length ? r.versions.map(v => ({vid: v.id, name: v.name, saved: true})) : [{vid: '', name: r.name, saved: false}];
+      return `<div class=sup-card><div class=sup-thumb data-supthumb="${esc(r.file)}"></div><div class=sup-cmain><small class=sup-mut>${esc(r.name)}</small>${items.map(it =>
+        `<button class="sup-item${r.file === SUP.file && it.vid === SUP.vid ? ' on' : ''}" data-supopen="${esc(r.file)}" data-supv="${esc(it.vid)}">${esc(it.name)}<span class="sup-chip${it.saved ? ' saved' : ''}">${it.saved ? 'saved' : 'random'}</span></button>`).join('')}</div></div>`;
+    }).join('') || `<p class=sup-mut>${(SUP.lib.files || []).length ? 'No match.' : 'No files in mirsal/lottie.'}</p>`;
+  const nSaved = (SUP.lib.files || []).filter(r => r.versions.length).length, nAll = (SUP.lib.files || []).length;
+  const presets = (SUP.lib.presets || []).map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join('');
+  const dirty = supDirty();
+  const lib = `<details class=sup-lib open><summary><b>Library</b> <span class=sup-mut>${nAll} files · ${nSaved} saved</span></summary>
+    <div class=sup-libbar><input type=search id=sup-q placeholder="Search…" value="${esc(SUP.q)}" aria-label="Search the super reactions"><label class=sup-only><input type=checkbox id=sup-only${SUP.only ? ' checked' : ''}> Saved only</label></div>
+    <div class=sup-cards>${cards}</div></details>
+   <div class=sup-edit>
+    <label class=sup-src>Name <input type=text id=sup-name value="${esc(SUP.name)}" maxlength=60></label>
+    <span class="sup-chip${SUP.vid ? ' saved' : ''}">${SUP.vid ? 'saved ' + esc(SUP.vid) : 'random look'}</span>${dirty ? '<span class=sup-mut>· unsaved changes</span>' : ''}
+    <button class="btn sm pri" data-supsave ${SUP.file && !SUP.busy ? '' : 'disabled'}>Save</button>
+    <button class="btn sm" data-supsaveas ${SUP.file && !SUP.busy ? '' : 'disabled'} title="Another version of this file">Save as</button>
+    <button class="btn sm" data-supremove ${SUP.vid && !SUP.busy ? '' : 'disabled'} title="Remove this saved version (the Lottie file stays)">${SUP.armed === SUP.vid && SUP.vid ? 'Remove? Click again' : 'Remove'}</button>
+    <button class="btn sm" data-supshuffle ${SUP.file ? '' : 'disabled'} title="Another random look">Shuffle</button>
+    <span class=sup-pre><select id=sup-preset aria-label="Load a preset"><option value="">Load preset…</option>${presets}</select>
+     <input type=text id=sup-pname placeholder="Preset name" maxlength=60><button class="btn sm" data-suppsave title="Save these sliders as a preset">Save as preset</button>
+     ${presets ? `<button class="btn sm" data-suppdel title="Remove the preset chosen in Load preset">Remove preset</button>` : ''}</span>
+   </div>`;
   el.innerHTML = `<div class=sup-wrap>
-   <div class=sup-head>${el.dataset.suptab ? '' : '<h1>Super reaction</h1>'}<span class=sup-mut>Hold the reaction in a screen, then release. Drag a screen's corner to resize it. Moving a slider shows one frame (Animation frame) instead of playing.</span></div>
+   <div class=sup-head>${el.dataset.suptab ? '' : '<h1>Super reaction</h1>'}<span class=sup-mut>Pick a file or a saved version. Hold the reaction in a screen, then release. Drag a screen's corner to resize it. Moving a slider shows one frame (Animation frame) instead of playing.</span></div>
+   ${lib}
    <div class=sup-tools>
-    <label class=sup-src>Lottie <select id=sup-file>${opts || '<option value="">No files in mirsal/lottie</option>'}</select></label>
     <span class=sup-glow>Light ${glow}
      ${SUP.glow === 'solid' || SUP.glow === 'gradient' ? `<input type=color id=sup-c1 value="${SUP.color}" title="${SUP.glow === 'gradient' ? 'Bottom' : 'Colour'}">` : ''}
      ${SUP.glow === 'gradient' ? `<input type=color id=sup-c2 value="${SUP.c2}" title=Top>` : ''}
      <span class=sup-auto id=sup-auto></span></span>
     <button class="btn sm" data-supreset>Reset</button>
-    <span class=sup-exp><button class="btn sm" data-supdl=desktop title="The super reaction the desktop screen plays, for its shape">${ic('download')} JSON · desktop</button><button class="btn sm" data-supdl=phone title="The super reaction the phone plays, for its shape">${ic('download')} JSON · phone</button><button class="btn sm" data-supzip title="Every file in mirsal/lottie, for every screen shape, with these settings, plus manifest.json">${ic('download')} Export all (.zip)</button></span>
+    <span class=sup-exp><button class="btn sm" data-supdl=desktop title="The super reaction the desktop screen plays, for its shape">${ic('download')} JSON · desktop</button><button class="btn sm" data-supdl=phone title="The super reaction the phone plays, for its shape">${ic('download')} JSON · phone</button><button class="btn sm" data-supzip title="Every saved version (an unsaved file: its random look), for every screen shape, plus manifest.json">${ic('download')} Export all (.zip)</button></span>
    </div>
    <div class=sup-sliders>${sliders}</div>
    ${SUP.err ? `<p class=sup-err>${esc(SUP.err)}</p>` : ''}
@@ -113,6 +165,21 @@ function supDrawIn(el) {
   </div>`;
   supIcons();
   el.querySelectorAll('.sup-dev').forEach(supWatch);
+  supThumbs(el);
+}
+/* a card's picture: one still frame of its source, drawn only when the card scrolls into view (50 animations at once would crawl) */
+function supThumbs(el) {
+  const boxes = [...el.querySelectorAll('[data-supthumb]')];
+  const draw = async box => {
+    const [L, doc] = await Promise.all([supLottie(), supDoc(box.dataset.supthumb)]);
+    if (!doc || !box.isConnected) return;
+    const a = L.loadAnimation({container: box, renderer: 'svg', loop: false, autoplay: false, animationData: supClone(doc)});
+    const mid = () => a.goToAndStop(Math.floor((a.totalFrames || 1) / 2), true);
+    a.addEventListener('DOMLoaded', mid); if (a.isLoaded) mid();
+  };
+  if (!window.IntersectionObserver) return boxes.forEach(draw);
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { io.unobserve(e.target); draw(e.target) } }));
+  boxes.forEach(b => io.observe(b));
 }
 
 /* the emoji box's button shows the source itself, looping */
@@ -234,7 +301,7 @@ async function supDownload(kind, root) {
   } catch (e) { toast(e.message || 'Could not make the JSON', 1) }
 }
 async function supZip(btn) {
-  const b = supBody(1); delete b.file; delete b.aspect;
+  const b = {};
   btn.disabled = true;
   try {
     const r = await fetch('/api/particles/super/export.zip', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(b)});
@@ -242,14 +309,53 @@ async function supZip(btn) {
     supSave(await r.blob(), 'superReactions.zip');
   } finally { btn.disabled = false }
 }
+async function supCall(url, body, ok) {
+  SUP.busy = true; supDraw();
+  try {
+    const r = await post(url, body);
+    if (!r.ok) return toast(r.j.error || 'Could not save', 1);
+    await supLoad(); if (ok) ok(r.j);
+  } finally { SUP.busy = false; supDraw(); supStill() }
+}
 document.addEventListener('click', e => {
+  const on = sel => e.target.closest && e.target.closest('.sup-root ' + sel);
+  const op = on('[data-supopen]');
+  if (op) return supOpen(op.dataset.supopen, op.dataset.supv);
+  if (on('[data-supsave]')) {
+    const name = SUP.name;
+    return SUP.vid ? supCall('/api/particles/super/versions/' + SUP.vid, {name, look: supLook()}, () => toast('Saved'))
+      : supCall('/api/particles/super/versions', {file: SUP.file, name, look: supLook()}, j => { SUP.vid = j.id; toast('Saved ' + j.id) });
+  }
+  if (on('[data-supsaveas]')) {
+    const row = supRow(SUP.file) || {versions: []}, base = SUP.name || row.name || supName();
+    const name = row.versions.some(v => v.name === base) ? `${base} ${row.versions.length + 1}` : base;
+    return supCall('/api/particles/super/versions', {file: SUP.file, name, look: supLook()}, j => { SUP.vid = j.id; SUP.name = j.name; toast('Saved as ' + j.name) });
+  }
+  if (on('[data-supremove]')) {
+    if (SUP.armed !== SUP.vid) { SUP.armed = SUP.vid; return supDraw() }
+    const vid = SUP.vid; SUP.armed = '';
+    return supCall(`/api/particles/super/versions/${vid}/delete`, {}, () => { toast('Removed ' + vid + ' (the Lottie file stays)'); supOpen(SUP.file) });
+  }
+  if (on('[data-supshuffle]')) {
+    const seed = (SUP.seed != null ? SUP.seed : 0) + 1;
+    return post('/api/particles/super/random', {file: SUP.file, seed}).then(r => { if (!r.ok) return toast(r.j.error || 'Could not shuffle', 1); supApply(r.j); SUP.seed = r.j.seed; supDraw(); supStill() });
+  }
+  if (on('[data-suppsave]')) {
+    const name = (document.getElementById('sup-pname') || {}).value || '';
+    return supCall('/api/particles/super/presets', {name, look: supLook()}, j => toast('Preset ' + j.name + ' saved'));
+  }
+  if (on('[data-suppdel]')) {
+    const pid = (document.getElementById('sup-preset') || {}).value;
+    if (!pid) return toast('Choose the preset in Load preset first', 1);
+    return supCall(`/api/particles/super/presets/${pid}/delete`, {}, () => toast('Preset removed'));
+  }
   const dl = e.target.closest && e.target.closest('.sup-root [data-supdl]');
   if (dl) return supDownload(dl.dataset.supdl, dl.closest('.sup-root'));
   const zp = e.target.closest && e.target.closest('.sup-root [data-supzip]');
   if (zp) return supZip(zp);
   const g = e.target.closest && e.target.closest('.sup-root [data-supglow]');
   if (g) { SUP.glow = g.dataset.supglow; supDraw(); return supStill() }
-  if (e.target.closest && e.target.closest('.sup-root [data-supreset]')) { SUP.set = {}; SUP.glow = 'auto'; SUP.frame = 80; supStillClear(); return supDraw() }
+  if (e.target.closest && e.target.closest('.sup-root [data-supreset]')) { SUP.frame = 80; SUP.armed = ''; supApply(supSaved()); supStillClear(); supDraw(); return supStill() }   /* back to the saved look (or the random one) */
 });
 document.addEventListener('input', e => {
   const t = e.target;
@@ -259,10 +365,18 @@ document.addEventListener('input', e => {
     SUP.frame = +t.value; const em = t.parentElement.querySelector('em'); if (em) em.textContent = t.value + '%';
     return document.querySelector('.sup-root .sup-still') ? supStill(true) : supStill();
   }
+  if (t.id === 'sup-name') { SUP.name = t.value; return }
+  if (t.id === 'sup-q') { SUP.q = t.value; const p = t.selectionStart; supDraw(); const i = document.getElementById('sup-q'); if (i) { i.focus(); i.setSelectionRange(p, p) } return }
   if (t.id === 'sup-c1') { SUP.color = t.value; supStill() }
   if (t.id === 'sup-c2') { SUP.c2 = t.value; supStill() }
 });
-document.addEventListener('change', e => { if (e.target.id === 'sup-file') { SUP.file = e.target.value; supStillClear(); supDraw(); supStill() } });
+document.addEventListener('change', e => {
+  if (e.target.id === 'sup-only') { SUP.only = e.target.checked; return supDraw() }
+  if (e.target.id === 'sup-preset' && e.target.value) {          /* Load preset: its sliders (and its Light, as saved) on this file; Save keeps them */
+    const p = (SUP.lib.presets || []).find(x => x.id === e.target.value);
+    if (p) { const seed = SUP.seed; supApply(p.look); SUP.seed = seed; toast('Loaded ' + p.name + ': Save to keep it'); supDraw(); supStill() }
+  }
+});
 
 /* the folder is read on every visit: a file dropped in mirsal/lottie appears by its name */
 async function supLoad() {
@@ -270,7 +384,12 @@ async function supLoad() {
   if (!r.ok) { SUP.err = r.j.error || 'Could not list the Lottie files'; return }
   SUP.err = '';
   SUP.files = r.j.files || []; SUP.buckets = r.j.buckets || {}; SUP.start = r.j.start || {};
-  if (!SUP.files.some(f => f.file === SUP.file)) SUP.file = (SUP.files[0] || {}).file || '';
+  SUP.lib = r.j.library || {files: [], presets: []};
+  if (!SUP.files.some(f => f.file === SUP.file)) {                 /* first visit (or the file left the folder): the first file, its look */
+    const first = (SUP.lib.files || [])[0];
+    SUP.file = first ? first.file : ''; SUP.vid = ''; SUP.name = first ? first.name : '';
+    if (first) { const v = first.versions[0]; SUP.vid = v ? v.id : ''; SUP.name = v ? v.name : first.name; supApply(v ? v.look : first.random) }
+  } else if (SUP.vid && !supVer(SUP.vid)) SUP.vid = '';
 }
 /* a tab host (Reaction effects, Library > Reactions): drawn now from what is known, refreshed once the folder is read */
 let supLoading = null;

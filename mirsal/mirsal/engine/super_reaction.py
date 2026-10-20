@@ -216,3 +216,27 @@ def export_super(p: ParticleParams, aspect: float, *, settings: dict | None = No
         layer["ind"] = i
     return {"v": "5.7.4", "fr": fps, "ip": 0, "op": F, "w": W, "h": H, "nm": f"{name} ({bname})", "ddd": 0, "assets": assets, "layers": layers,
             "mirsal": {"bucket": bname, "aspect": round(a, 4), "glow": glow, "color": None if c1 is None else "#%02x%02x%02x" % c1}}
+
+
+# A file nobody has saved yet still has a look of its own (Haitham 2026-10-20: "every lottie gets a random generation"): seeded by its name,
+# so it is the same on every visit; Shuffle asks for the next seed. (lo, hi, step) per setting, inside the sandbox's slider ranges.
+RANDOM_RANGES = {"size": (0.7, 1.6, 0.05), "count": (24, 60, 1), "rise": (0.5, 0.95, 0.05), "float": (0.1, 0.4, 0.05),
+                 "sway": (0.1, 0.9, 0.05), "spread": (20, 70, 1), "glow_strength": (0.35, 0.75, 0.05)}
+
+
+def seed_of(name: str) -> int:
+    """The seed a file's random look starts from: its name, stable across machines and runs."""
+    import zlib
+    return zlib.crc32(str(name).encode("utf-8")) & 0x7FFFFFFF
+
+
+def random_settings(seed: int) -> dict:
+    """A random super reaction look: every RANDOM_RANGES setting, rounded to its slider step, plus the pop. Same seed -> same settings."""
+    import random
+    rnd = random.Random(int(seed))
+    out = {}
+    for k, (lo, hi, step) in RANDOM_RANGES.items():
+        v = round(round(rnd.uniform(lo, hi) / step) * step, 4)
+        out[k] = int(v) if float(step).is_integer() else v
+    out["pop"] = 1
+    return out

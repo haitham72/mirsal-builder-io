@@ -129,19 +129,54 @@ class SuperFlow(unittest.TestCase):
         self.assertIn("phone", j["buckets"])
         self.assertEqual(j["glow_modes"], list(sr.GLOW_MODES))
 
-    def test_export_zip_every_bucket_and_manifest(self):
+    def test_random_look_is_seeded_by_the_file(self):
+        from mirsal.flow import super_reactions as sl
+        a, b = sl.random_look("Red dot.json"), sl.random_look("Red dot.json")
+        self.assertEqual(a, b)
+        self.assertEqual(a["seed"], sr.seed_of("Red dot.json"))
+        self.assertNotEqual(sl.shuffle("Red dot.json", a["seed"] + 1)["settings"], a["settings"])
+        for k, (lo, hi, _) in sr.RANDOM_RANGES.items():
+            self.assertTrue(lo <= a["settings"][k] <= hi, k)
+
+    def test_save_save_as_remove_and_presets(self):
+        from mirsal.flow import super_reactions as sl
+        look = {"settings": {"size": 1.5, "count": 30}, "glow": "solid", "color": "#00FF00"}
+        v1 = sl.save_version(self.out, "Red dot.json", look)
+        v2 = sl.save_version(self.out, "Red dot.json", {**look, "glow": "auto"}, name="Red dot big")
+        self.assertEqual((v1["id"], v1["name"], v1["look"]["color"]), ("V001", "Red dot", "#00ff00"))
+        self.assertEqual([v["id"] for v in sl.library(self.out)["files"][0]["versions"]], ["V001", "V002"])
+        self.assertEqual(sl.update_version(self.out, "V002", {"settings": {"size": 2}, "glow": "none"})["look"]["glow"], "none")
+        sl.remove_version(self.out, "V001")
+        self.assertEqual(sl.save_version(self.out, "Red dot.json", look)["id"], "V003")      # a number is never reused
+        self.assertTrue((self.out.parent / "lottie" / "Red dot.json").is_file())             # Remove never touches the file
+        p = sl.save_preset(self.out, {"settings": {"size": 0.5}, "glow": "auto", "seed": 4}, name="Tiny")
+        self.assertNotIn("seed", p["look"])
+        self.assertEqual([x["name"] for x in sl.library(self.out)["presets"]], ["Tiny"])
+        sl.remove_preset(self.out, p["id"])
+        for bad in ({"settings": {"nope": 1}}, {"glow": "rainbow"}, {"glow": "solid", "color": "red"}, {"x": 1}, {"settings": {"size": "big"}}):
+            with self.assertRaises(sl.SetError):
+                sl.save_version(self.out, "Red dot.json", bad)
+        for call in (lambda: sl.save_version(self.out, "missing.json", look), lambda: sl.update_version(self.out, "V999", look),
+                     lambda: sl.remove_version(self.out, "V999"), lambda: sl.remove_preset(self.out, "P999")):
+            with self.assertRaises(sl.SetError) as e:
+                call()
+            self.assertEqual(e.exception.code, 404)
+
+    def test_export_is_what_is_saved_else_random(self):
         import io
         import zipfile
-        from mirsal.flow import lottie_reactions as lr
-        z = zipfile.ZipFile(io.BytesIO(lr.super_export_zip(self.out, glow="solid", color="#00ff00", settings={"size": 1.5})))
+        from mirsal.flow import super_reactions as sl
+        m = json.loads(zipfile.ZipFile(io.BytesIO(sl.export_zip(self.out))).read("manifest.json"))
+        self.assertEqual([(r["name"], r["saved"]) for r in m["superReactions"]], [("Red dot", False)])
+        sl.save_version(self.out, "Red dot.json", {"settings": {"size": 1.5}, "glow": "solid", "color": "#00ff00"}, name="Green")
+        z = zipfile.ZipFile(io.BytesIO(sl.export_zip(self.out)))
         m = json.loads(z.read("manifest.json"))
-        self.assertEqual([r["name"] for r in m["superReactions"]], ["Red dot"])
+        self.assertEqual([(r["id"], r["name"], r["saved"], r["color"]) for r in m["superReactions"]], [("V001", "Green", True, "#00ff00")])
         self.assertEqual(set(m["superReactions"][0]["buckets"]), set(sr.BUCKETS))
-        self.assertEqual(m["settings"]["size"], 1.5)
-        doc = json.loads(z.read("superReactions/Red dot/phone.json"))
+        doc = json.loads(z.read("superReactions/Green/phone.json"))
         self.assertEqual((doc["w"], doc["h"]), sr.canvas(sr.BUCKETS["phone"]))
-        with self.assertRaises(lr.SetError) as e:
-            lr.super_export_zip(self.out, files=["missing.json"])
+        with self.assertRaises(sl.SetError) as e:
+            sl.export_zip(self.out, ["missing.json"])
         self.assertEqual(e.exception.code, 404)
 
     def test_compose_and_errors(self):

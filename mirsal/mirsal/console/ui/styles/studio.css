@@ -1336,3 +1336,19 @@ body.studio-split{--col2-w:352px}
 .sup-root .sup-frame em{color:var(--pri-d)}
 .sup-root .sup-chat[data-supstage]{position:relative;overflow:hidden}   /* the desktop's super reaction plays in the chat area only */
 .sup-root .sup-exp{display:inline-flex;flex-wrap:wrap;gap:6px}
+/* super reaction library (super.js): the folder's files, their saved versions, the editor bar */
+.sup-root .sup-lib{margin-bottom:10px;border:1px solid var(--bd);border-radius:var(--r-m);padding:8px 12px;background:var(--sf)}
+.sup-root .sup-lib summary{cursor:pointer;display:flex;gap:8px;align-items:baseline}
+.sup-root .sup-libbar{display:flex;gap:12px;align-items:center;margin:8px 0}.sup-root .sup-libbar input[type=search]{max-width:260px}
+.sup-root .sup-only{display:inline-flex;gap:6px;align-items:center;font-size:var(--fs-s)}
+.sup-root .sup-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;max-height:240px;overflow:auto}
+.sup-root .sup-card{display:flex;gap:8px;align-items:flex-start;padding:6px;border:1px solid var(--bd);border-radius:var(--r-s);background:var(--bg)}
+.sup-root .sup-thumb{width:44px;height:44px;flex:none;border-radius:var(--r-s);background:var(--fill);overflow:hidden}
+.sup-root .sup-cmain{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.sup-root .sup-item{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;text-align:left;padding:3px 6px;border-radius:var(--r-s);font-size:var(--fs-s);color:var(--tx);background:none;border:1px solid transparent;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.sup-root .sup-item:hover{background:var(--fill)}.sup-root .sup-item.on{border-color:var(--pri);background:var(--pri-l)}
+.sup-root .sup-chip{flex:none;padding:1px 7px;border-radius:var(--r-pill);font-size:var(--fs-xs);color:var(--mut);border:1px solid var(--bd)}
+.sup-root .sup-chip.saved{color:var(--pri-d);border-color:var(--pri-bd,var(--pri))}
+.sup-root .sup-edit{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-bottom:8px}
+.sup-root .sup-edit input[type=text]{width:180px;padding:6px 10px}
+.sup-root .sup-pre{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center}.sup-root .sup-pre select{width:auto;min-width:150px;padding:6px 10px}
