@@ -8,6 +8,9 @@ mirsal/.venv/
 __pycache__/
 *.pyc
 wheels/
+output/
+.playwright-cli/
+.playwright-mcp/
 
 # AI cutout models: isnet-general-use is 178MB (over GitHub's 100MB file limit); u2netp (4.6MB) stays in git as the fallback
 mirsal/mirsal/models/*.onnx

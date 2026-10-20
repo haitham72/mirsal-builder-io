@@ -1,0 +1,879 @@
+{
+ "id": "S020",
+ "user": "local",
+ "title": "good morning",
+ "created": 1792471548.024,
+ "updated": 1792474196.781,
+ "settings": {
+  "grid": "2x2",
+  "style_id": "glossy_3d",
+  "ask_before_spending": true,
+  "ai": true,
+  "actions": "predefined",
+  "allow_vlm": null,
+  "stage": "export",
+  "creator": {
+   "on": false,
+   "scope": "images",
+   "bypass": false
+  }
+ },
+ "focus": {
+  "generation": null,
+  "stickers": []
+ },
+ "subjects": [],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1792471552.303,
+   "user": "good morning",
+   "assistant": "Hi! What will you create today?",
+   "intents": [
+    "SMALLTALK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 2,
+   "ts": 1792471559.265,
+   "user": "my name is haitham",
+   "assistant": "Nice to meet you, Haitham! I'll remember your name (Haitham). What will you create today?",
+   "intents": [
+    "PROFILE"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 3,
+   "ts": 1792474040.993,
+   "user": "my name is spelled \"Mr. Haitham\"",
+   "assistant": "Nice to meet you, Mr. Haitham! I'll remember your name (Mr. Haitham). What will you create today?",
+   "intents": [
+    "PROFILE"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 4,
+   "ts": 1792474163.161,
+   "user": "my nams is batates",
+   "assistant": "Creator plan for **my nams is batates**: 4 stickers, then the stickers animated, then to Telegram, stopping at each approval for one click from you. Shall I run it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "intents": [
+    "NEW"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 5,
+   "ts": 1792474171.151,
+   "user": "no, my name is batates",
+   "assistant": "Nice to meet you, Batates! I'll remember your name (Batates). Your plan for my nams is batates is still waiting: say \"create it\" when you're ready.",
+   "intents": [
+    "PROFILE"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 6,
+   "ts": 1792474196.78,
+   "user": "what is my name?",
+   "assistant": "You're Batates.",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "good morning",
+   "cards": [],
+   "steps": [],
+   "ts": 1792471552.234
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "Hi! What will you create today?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1792471552.261
+    },
+    {
+     "kind": "step",
+     "label": "understood: a hello",
+     "detail": null,
+     "status": "done",
+     "ts": 1792471552.264
+    },
+    {
+     "kind": "task",
+     "label": "saying hello",
+     "detail": null,
+     "status": "running",
+     "ts": 1792471552.268
+    },
+    {
+     "kind": "final",
+     "label": "ready",
+     "detail": null,
+     "status": "done",
+     "ts": 1792471552.3
+    }
+   ],
+   "ts": 1792471552.234,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    },
+    {
+     "label": "Eid mubarak greetings",
+     "text": "Eid mubarak greetings"
+    }
+   ]
+  },
+  {
+   "id": "m3",
+   "role": "user",
+   "text": "my name is haitham",
+   "cards": [],
+   "steps": [],
+   "ts": 1792471559.22
+  },
+  {
+   "id": "m4",
+   "role": "assistant",
+   "text": "Nice to meet you, Haitham! I'll remember your name (Haitham). What will you create today?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1792471559.227
+    },
+    {
+     "kind": "step",
+     "label": "understood: something about you",
+     "detail": null,
+     "status": "done",
+     "ts": 1792471559.237
+    },
+    {
+     "kind": "task",
+     "label": "remembering what you told me",
+     "detail": null,
+     "status": "running",
+     "ts": 1792471559.244
+    },
+    {
+     "kind": "final",
+     "label": "saved: your name (Haitham)",
+     "detail": null,
+     "status": "done",
+     "ts": 1792471559.262
+    }
+   ],
+   "ts": 1792471559.22,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    },
+    {
+     "label": "Eid mubarak greetings",
+     "text": "Eid mubarak greetings"
+    }
+   ]
+  },
+  {
+   "id": "m5",
+   "role": "user",
+   "text": "my name is spelled \"Mr. Haitham\"",
+   "cards": [],
+   "steps": [],
+   "ts": 1792474035.833
+  },
+  {
+   "id": "m6",
+   "role": "assistant",
+   "text": "Nice to meet you, Mr. Haitham! I'll remember your name (Mr. Haitham). What will you create today?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1792474038.772
+    },
+    {
+     "kind": "step",
+     "label": "understood: something about you",
+     "detail": null,
+     "status": "done",
+     "ts": 1792474038.776
+    },
+    {
+     "kind": "task",
+     "label": "remembering what you told me",
+     "detail": null,
+     "status": "running",
+     "ts": 1792474040.975
+    },
+    {
+     "kind": "final",
+     "label": "saved: your name (Mr. Haitham)",
+     "detail": null,
+     "status": "done",
+     "ts": 1792474040.988
+    }
+   ],
+   "ts": 1792474035.833,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    },
+    {
+     "label": "Eid mubarak greetings",
+     "text": "Eid mubarak greetings"
+    }
+   ]
+  },
+  {
+   "id": "m7",
+   "role": "user",
+   "text": "my nams is batates",
+   "cards": [],
+   "steps": [],
+   "ts": 1792474161.499
+  },
+  {
+   "id": "m8",
+   "role": "assistant",
+   "text": "Creator plan for **my nams is batates**: 4 stickers, then the stickers animated, then to Telegram, stopping at each approval for one click from you. Shall I run it?\n\nOne more thing, once: may I look at your stickers with a vision model (the local one when LM Studio is running, otherwise the cloud one)? I would check each picture, describe it, and suggest a better name when the current one does not fit. Nothing is sent until you say yes.",
+   "cards": [
+    {
+     "type": "plan",
+     "subject": "my nams is batates",
+     "grid": "2x2",
+     "style": "glossy 3d",
+     "count": 4,
+     "names": [
+      "nams is batates happy",
+      "nams is batates laugh",
+      "nams is batates cry",
+      "nams is batates sad"
+     ],
+     "estimate": 6.5,
+     "balance": 0.87,
+     "prompt": "my nams is batates",
+     "prepared": false,
+     "free": false,
+     "stage": "export",
+     "batch": {
+      "no": 1,
+      "max": 4,
+      "label": "Batch 01 · actions 1-4",
+      "text": "Batch 01 of 04 · actions 1-4"
+     },
+     "creator": {
+      "scope": "video",
+      "bypass": false,
+      "sheet": 2.0,
+      "video": 4.5,
+      "end": "export"
+     }
+    }
+   ],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "generating my nams is batates",
+     "detail": null,
+     "status": "running",
+     "ts": 1792474161.657
+    },
+    {
+     "kind": "step",
+     "label": "understood: a new set",
+     "detail": null,
+     "status": "done",
+     "ts": 1792474161.679
+    },
+    {
+     "kind": "step",
+     "label": "writing 4 sticker ideas with openai:gpt-6-luna (cloud)",
+     "detail": null,
+     "status": "done",
+     "ts": 1792474161.707
+    },
+    {
+     "kind": "step",
+     "label": "expand prompt",
+     "detail": {
+      "title": "4 stickers",
+      "lines": [
+       "nams is batates happy",
+       "nams is batates laugh",
+       "nams is batates cry",
+       "nams is batates sad"
+      ]
+     },
+     "status": "done",
+     "ts": 1792474161.733
+    },
+    {
+     "kind": "step",
+     "label": "creator: Draw the sheet > Cut and check > Look at the pictures > Approve the stickers > Animate > Approve the animations > Make the pack > Send to Telegram",
+     "detail": null,
+     "status": "done",
+     "ts": 1792474163.108
+    },
+    {
+     "kind": "final",
+     "label": "plan ready · about 6.5 credits",
+     "detail": null,
+     "status": "done",
+     "ts": 1792474163.145
+    }
+   ],
+   "ts": 1792474161.499,
+   "status": "done",
+   "chips": [
+    {
+     "label": "Create and send to Telegram",
+     "action": "confirm"
+    },
+    {
+     "label": "Allow AI vision",
+     "on": "AI vision on",
+     "off": "AI vision off",
+     "setting": {
+      "allow_vlm": true
+     },
+     "side": "right",
+     "glow": true
+    }
+   ]
+  },
+  {
+   "id": "m9",
+   "role": "user",
+   "text": "no, my name is batates",
+   "cards": [],
+   "steps": [],
+   "ts": 1792474171.016
+  },
+  {
+   "id": "m10",
+   "role": "assistant",
+   "text": "Nice to meet you, Batates! I'll remember your name (Batates). Your plan for my nams is batates is still waiting: say \"create it\" when you're ready.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1792474171.041
+    },
+    {
+     "kind": "step",
+     "label": "understood: something about you",
+     "detail": null,
+     "status": "done",
+     "ts": 1792474171.068
+    },
+    {
+     "kind": "task",
+     "label": "remembering what you told me",
+     "detail": null,
+     "status": "running",
+     "ts": 1792474171.096
+    },
+    {
+     "kind": "final",
+     "label": "saved: your name (Batates)",
+     "detail": null,
+     "status": "done",
+     "ts": 1792474171.134
+    }
+   ],
+   "ts": 1792474171.016,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m11",
+   "role": "user",
+   "text": "what is my name?",
+   "cards": [],
+   "steps": [],
+   "ts": 1792474196.657
+  },
+  {
+   "id": "m12",
+   "role": "assistant",
+   "text": "You're Batates.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1792474196.709
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1792474196.735
+    },
+    {
+     "kind": "final",
+     "label": "answered from what you told me",
+     "detail": null,
+     "status": "done",
+     "ts": 1792474196.763
+    }
+   ],
+   "ts": 1792474196.657,
+   "status": "done",
+   "chips": []
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": {
+  "type": "creator",
+  "prompt": "my nams is batates",
+  "subject": "my nams is batates",
+  "grid": "2x2",
+  "style_id": "glossy_3d",
+  "ai": true,
+  "estimate": 2.0,
+  "video_estimate": 4.5,
+  "scope": "video",
+  "bypass": false,
+  "end": "export",
+  "plan": {
+   "task": "my nams is batates",
+   "task_slug": "nams_is_batates",
+   "subject": "my nams is batates",
+   "scene": "",
+   "described": "my nams is batates",
+   "context": "",
+   "kind": "default",
+   "grid": [
+    2,
+    2
+   ],
+   "template_id": "sheet_2x2",
+   "template_version": 3,
+   "slots": {
+    "subject_description": "my nams is batates",
+    "style_id": "glossy_3d",
+    "mode": "sheet_2x2",
+    "cells": [
+     {
+      "pos": 1,
+      "label": "beaming with happiness, bouncing on the spot with a huge smile",
+      "tags": [
+       "nams_is_batates_happy",
+       "happy",
+       "smile",
+       "joy"
+      ],
+      "emoji": "😀",
+      "motion": "bounces happily, the smile widens, a little hop"
+     },
+     {
+      "pos": 2,
+      "label": "laughing so hard tears of joy fly out, holding the belly",
+      "tags": [
+       "nams_is_batates_laugh",
+       "laugh",
+       "laughing",
+       "lol",
+       "rofl"
+      ],
+      "emoji": "🤣",
+      "motion": "doubles over laughing, shoulders shake, wipes a tear"
+     },
+     {
+      "pos": 3,
+      "label": "bawling with big streaming tears, rubbing the eyes",
+      "tags": [
+       "nams_is_batates_cry",
+       "cry",
+       "crying",
+       "sobbing",
+       "tears"
+      ],
+      "emoji": "😭",
+      "motion": "tears stream in two arcs, the body shakes with sobs"
+     },
+     {
+      "pos": 4,
+      "label": "sad and slumped, head hanging low, a single tear",
+      "tags": [
+       "nams_is_batates_sad",
+       "sad",
+       "unhappy",
+       "disappointed"
+      ],
+      "emoji": "😔",
+      "motion": "sighs, the shoulders drop, a tear slides down"
+     }
+    ],
+    "action_guidance": "default",
+    "key_colour": "green",
+    "face": false,
+    "preset": null,
+    "video_template": {
+     "id": "video_independent",
+     "version": 1
+    },
+    "loop": false
+   },
+   "guidelines": {
+    "sheet": "2x2 sticker sheet, 4 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+    "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+    "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+    "consistency": "same character design, proportions and colors in all 4 cells",
+    "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+   },
+   "stickers": [
+    {
+     "index": 1,
+     "id": "prompt01",
+     "key": "nams_is_batates_happy",
+     "tags": [
+      "nams_is_batates_happy",
+      "happy",
+      "smile",
+      "joy"
+     ],
+     "emoji": "😀"
+    },
+    {
+     "index": 2,
+     "id": "prompt02",
+     "key": "nams_is_batates_laugh",
+     "tags": [
+      "nams_is_batates_laugh",
+      "laugh",
+      "laughing",
+      "lol",
+      "rofl"
+     ],
+     "emoji": "🤣"
+    },
+    {
+     "index": 3,
+     "id": "prompt03",
+     "key": "nams_is_batates_cry",
+     "tags": [
+      "nams_is_batates_cry",
+      "cry",
+      "crying",
+      "sobbing",
+      "tears"
+     ],
+     "emoji": "😭"
+    },
+    {
+     "index": 4,
+     "id": "prompt04",
+     "key": "nams_is_batates_sad",
+     "tags": [
+      "nams_is_batates_sad",
+      "sad",
+      "unhappy",
+      "disappointed"
+     ],
+     "emoji": "😔"
+    }
+   ],
+   "expanded_by": "deterministic",
+   "actions_mode": "predefined",
+   "batches_max": 4
+  },
+  "batch": {
+   "no": 1,
+   "label": "Batch 01 · actions 1-4",
+   "pack": {
+    "request": "my nams is batates",
+    "subject": "my nams is batates",
+    "grid": "2x2",
+    "style_id": "glossy_3d",
+    "ai": true,
+    "plan": {
+     "task": "my nams is batates",
+     "task_slug": "nams_is_batates",
+     "subject": "my nams is batates",
+     "scene": "",
+     "described": "my nams is batates",
+     "context": "",
+     "kind": "default",
+     "grid": [
+      2,
+      2
+     ],
+     "template_id": "sheet_2x2",
+     "template_version": 3,
+     "slots": {
+      "subject_description": "my nams is batates",
+      "style_id": "glossy_3d",
+      "mode": "sheet_2x2",
+      "cells": [
+       {
+        "pos": 1,
+        "label": "beaming with happiness, bouncing on the spot with a huge smile",
+        "tags": [
+         "nams_is_batates_happy",
+         "happy",
+         "smile",
+         "joy"
+        ],
+        "emoji": "😀",
+        "motion": "bounces happily, the smile widens, a little hop"
+       },
+       {
+        "pos": 2,
+        "label": "laughing so hard tears of joy fly out, holding the belly",
+        "tags": [
+         "nams_is_batates_laugh",
+         "laugh",
+         "laughing",
+         "lol",
+         "rofl"
+        ],
+        "emoji": "🤣",
+        "motion": "doubles over laughing, shoulders shake, wipes a tear"
+       },
+       {
+        "pos": 3,
+        "label": "bawling with big streaming tears, rubbing the eyes",
+        "tags": [
+         "nams_is_batates_cry",
+         "cry",
+         "crying",
+         "sobbing",
+         "tears"
+        ],
+        "emoji": "😭",
+        "motion": "tears stream in two arcs, the body shakes with sobs"
+       },
+       {
+        "pos": 4,
+        "label": "sad and slumped, head hanging low, a single tear",
+        "tags": [
+         "nams_is_batates_sad",
+         "sad",
+         "unhappy",
+         "disappointed"
+        ],
+        "emoji": "😔",
+        "motion": "sighs, the shoulders drop, a tear slides down"
+       }
+      ],
+      "action_guidance": "default",
+      "key_colour": "green",
+      "face": false,
+      "preset": null,
+      "video_template": {
+       "id": "video_independent",
+       "version": 1
+      },
+      "loop": false
+     },
+     "guidelines": {
+      "sheet": "2x2 sticker sheet, 4 separate characters, equal cells, wide gaps between characters, no character touches its cell edge",
+      "style": "flat vector sticker illustration, bold clean shapes, vibrant colors, friendly proportions",
+      "background": "flat pure green (#00FF00) background, no shadows, no floor, no gradients",
+      "consistency": "same character design, proportions and colors in all 4 cells",
+      "motion": "each character moves in place, no interaction between cells, static camera, seamless loop"
+     },
+     "stickers": [
+      {
+       "index": 1,
+       "id": "prompt01",
+       "key": "nams_is_batates_happy",
+       "tags": [
+        "nams_is_batates_happy",
+        "happy",
+        "smile",
+        "joy"
+       ],
+       "emoji": "😀"
+      },
+      {
+       "index": 2,
+       "id": "prompt02",
+       "key": "nams_is_batates_laugh",
+       "tags": [
+        "nams_is_batates_laugh",
+        "laugh",
+        "laughing",
+        "lol",
+        "rofl"
+       ],
+       "emoji": "🤣"
+      },
+      {
+       "index": 3,
+       "id": "prompt03",
+       "key": "nams_is_batates_cry",
+       "tags": [
+        "nams_is_batates_cry",
+        "cry",
+        "crying",
+        "sobbing",
+        "tears"
+       ],
+       "emoji": "😭"
+      },
+      {
+       "index": 4,
+       "id": "prompt04",
+       "key": "nams_is_batates_sad",
+       "tags": [
+        "nams_is_batates_sad",
+        "sad",
+        "unhappy",
+        "disappointed"
+       ],
+       "emoji": "😔"
+      }
+     ],
+     "expanded_by": "deterministic",
+     "actions_mode": "predefined",
+     "batches_max": 4
+    },
+    "max": 4,
+    "transformation": false
+   }
+  }
+ },
+ "vision_asked": true
+}
