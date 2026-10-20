@@ -2,7 +2,7 @@
 
 Updated 2026-10-19 against source `64d8b8a4`. No product fix in the audit.
 
-- UX-01 phone Save sticker layout; remaining dialog/keyboard combinations.
+- Remaining dialog/keyboard combinations. UX-01 Save sticker on a phone is built ([audit fixes](../../../design/16-app-audit-fixes-2026-10-20.md)).
 - Download lifecycle and unresolved bank-picker/short-code export work in backlog.
 - Collection/Telegram sends and paid quality proof remain owner-only.
 

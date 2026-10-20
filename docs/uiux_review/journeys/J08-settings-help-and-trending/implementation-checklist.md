@@ -1,6 +1,5 @@
 # Settings, Help and Trending — remaining checklist
 
-- [ ] UX-09 watch-folder phone layout if W34 retains the screen.
 - [ ] LAN roles, populated Trending, all Settings/Help substates and FAQ publishing remain unverified/owner-dependent.
 - [ ] Settings spending requires a real API route before UI controls; no guessed settings.
 

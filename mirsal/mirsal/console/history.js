@@ -5,14 +5,14 @@ const HS={rows:[],trash:[],images:'',videos:''};
 const bytes=n=>n>=1048576?(n/1048576).toFixed(1)+' MB':n>=1024?Math.round(n/1024)+' KB':n+' B';
 const hAgo=ts=>{const m=Math.round((Date.now()/1000-ts)/60);return m<1?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':new Date(ts*1000).toLocaleDateString()};
 async function hLoad(){const r=await api('/api/watch');if(r.ok){Object.assign(HS,r.j);hDraw()}else toast(r.j.error||'Could not read the folders',1)}
-RENDER.history=async()=>{$('s-history').innerHTML='<div class=hwrap><div class=sh>'+ic('hist')+' History</div><div class=mut>Loading the folders…</div></div>';await hLoad()};
+RENDER.history=async()=>{$('s-history').innerHTML='<div class=hwrap><div class=sh>'+ic('hist')+' Watch folders</div><div class=mut>Loading the folders…</div></div>';await hLoad()};
 function hSide(label,s,kind){
   if(!s)return`<div class=hside none>${label}: <span class=mut>${kind==='vid'?'no video yet':'missing'}</span></div>`;
   return`<div class=hside>${label}: <b>${esc(s.name)}</b> <span class=mut>${s.n_files} ${s.n_files===1?'file':'files'} · ${bytes(s.bytes)}</span></div>`}
 function hDraw(){const el=$('s-history');if(!el||route_!=='history')return;
   const gens=r=>r.generations.length?`<div class=hgens>${r.generations.slice(-6).map(g=>`<button class=chip2 data-act=hsopen data-g=${+g.slice(1)}>${g}</button>`).join('')}${r.generations.length>6?`<span class=mut>+${r.generations.length-6} more</span>`:''}</div>`:'';
-  el.innerHTML=`<div class=hwrap><div class=sh>${ic('hist')} History</div>
-   <div class=mut>What is in your watch folders now. <code>${esc(HS.images)}</code> and <code>${esc(HS.videos)}</code></div>
+  el.innerHTML=`<div class=hwrap><div class=sh>${ic('hist')} Watch folders <span class=mut style="font-weight:500">History</span></div>
+   <div class=mut>The sheet and video folders the Studio watches (not your conversations or earlier batches): what is in them now. <code>${esc(HS.images)}</code> and <code>${esc(HS.videos)}</code></div>
    <div class=plist style="margin-top:14px">${HS.rows.map(r=>`<div class=hrow>
       <div class=hthumb>${r.thumb?`<img src="${r.thumb}" loading=lazy alt="">`:ic('photo')}</div>
       <div class=hmain><b>${esc(r.subject.replace(/_/g,' '))}</b> <span class=mut>${r.number}</span>

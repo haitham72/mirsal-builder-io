@@ -97,13 +97,16 @@ const TOOLS=[['select','sticker','Sticker'],['text','text','Text'],['emoji','emo
 RENDER.editor=()=>{const el=$('s-editor');
  if(!E.active){el.innerHTML=`<div class=pnl style="margin:40px auto;text-align:center;padding:40px;width:420px;align-self:flex-start"><h2>No sticker open</h2><p class=mut>Start from a photo, a text sticker or a generated sticker.</p><button class="btn pri" data-act=nav data-to=create>${ic('create')} Create</button> <button class=btn data-act=nav data-to=generate>${ic('gen')} Generate</button></div>`;return}
  el.innerHTML=`<div class="ed-l pnl" id=edl></div><div class=ed-c><div class="ed-bar pnl" id=edbar></div><div class="ed-view pnl vbg-${E.bgv}" id=edv><div class=wrap id=edw><canvas id=edc width=${CV} height=${CV}></canvas><canvas id=ovl width=${CV} height=${CV} style="position:absolute;left:0;top:0;pointer-events:none"></canvas></div></div><div class="ed-hist pnl" id=edh></div></div><div class="ed-r pnl" id=edr></div>`;
- ui();zoomTo(E.zoom);redraw()};
+ ui();zoomTo(edFit(E.zoom));ui();redraw()};
+/* UX-01: on a narrow screen the canvas opens at the largest zoom step that fits its view, so the whole sticker is visible; a person's own pick is kept when it fits */
+const ZOOMS=[.5,.75,1,1.5,2];
+function edFit(z){const v=$('edv');if(!v||!v.clientWidth)return z;const room=v.clientWidth-24;if(CV*z<=room)return z;const fit=ZOOMS.filter(x=>CV*x<=room);return fit.length?fit[fit.length-1]:ZOOMS[0]}
 function zoomTo(z){E.zoom=z;['edc','ovl'].forEach(i=>{const c=$(i);if(c){c.style.width=CV*z+'px';c.style.height=CV*z+'px'}});const w=$('edw');if(w){w.style.width=CV*z+'px';w.style.height=CV*z+'px'}redraw()}
 function layThumb(l){if(l.type==='subject')return`<img src="${l.cv.toDataURL('image/png')}">`;if(l.type==='emoji')return l.ch;return`<b style="font-size:15px;color:var(--mut)">T</b>`}
 function ui(){if(!E.active||!$('edl'))return;const L=cur_();
  $('edbar').innerHTML=`<div class=ttl>${ic('sticker')} Sticker Editor <span class=mut style="font-weight:400">· ${esc(E.name)}</span></div>
   <button class=iconbtn data-act=edundo ${E.undo.length>1?'':'disabled'} title="Undo (Ctrl+Z)">${ic('undo')}</button><button class=iconbtn data-act=edredo ${E.redo.length?'':'disabled'} title="Redo (Ctrl+Y)">${ic('redo')}</button>
-  <select id=edzoom aria-label="Zoom">${[.5,.75,1,1.5,2].map(z=>`<option value=${z} ${z===E.zoom?'selected':''}>${z*100}%</option>`).join('')}</select>
+  <select id=edzoom aria-label="Zoom">${ZOOMS.map(z=>`<option value=${z} ${z===E.zoom?'selected':''}>${z*100}%</option>`).join('')}</select>
   <select id=edpv title="Preview background" aria-label="Preview background">${['checker','light','dark','chat'].map(b=>`<option value=${b} ${b===E.bgv?'selected':''}>${b}</option>`).join('')}</select>
   <button class="btn pri" data-act=edsave style="padding:8px 26px" title="${E.back?'Save the changes to this sticker and go back to '+(E.back.to==='agent'?'the AI':'the Studio'):'Save to a pack'}">${E.back?'Save to sticker':'Save'}</button><button class=iconbtn data-act=edback title="${E.back?'Back to '+(E.back.to==='agent'?'the AI':'the Studio')+' without saving':'Close'}">${ic('x')}</button>`;
  $('edzoom').onchange=e=>zoomTo(+e.target.value);$('edpv').onchange=e=>{E.bgv=e.target.value;$('edv').className='ed-view pnl vbg-'+E.bgv};
@@ -113,7 +116,8 @@ function ui(){if(!E.active||!$('edl'))return;const L=cur_();
    <span class=ops><button data-act=layvis data-id=${l.id} title=Visible>${ic(l.vis?'eye':'eyeoff')}</button><button data-act=laylock data-id=${l.id} title=Lock>${ic(l.lock?'lock':'unlock')}</button><button data-act=layup data-id=${l.id} title="Bring forward">${ic('up')}</button><button data-act=laydown data-id=${l.id} title="Send back">${ic('down')}</button><button data-act=laydel data-id=${l.id} title=Delete>${ic('trash')}</button></span></div>`).join('')||'<div class=mut style="padding:8px">No layers</div>'}`;
  const hs=E.undo.concat(E.redo.slice().reverse()),now=E.undo.length-1;
  $('edh').innerHTML=`<div class=hh><b>History</b><span>/ Layers</span><span style="margin-left:auto">${now} edit${now===1?'':'s'} · click a thumbnail to jump back or forward</span></div><div class=film>${hs.map((h,i)=>`<div class="fr ${i===now?'on':''}" data-act=histgo data-i=${i} style="background-image:url(${h.thumb})" title="${i===0?'Start':'Edit '+i}"></div>`).join('')}</div>`;
- const f=$('edh').querySelector('.fr.on');if(f)f.scrollIntoView({inline:'nearest',block:'nearest'});
+ /* bring the current thumbnail into the strip's own view only: scrollIntoView would also scroll the stacked phone screen down past the canvas (UX-01) */
+ const f=$('edh').querySelector('.fr.on'),fm=f&&f.parentElement;if(fm){const l=f.offsetLeft-fm.offsetLeft,r=l+f.offsetWidth;if(l<fm.scrollLeft)fm.scrollLeft=l;else if(r>fm.scrollLeft+fm.clientWidth)fm.scrollLeft=r-fm.clientWidth}
  $('edr').innerHTML=`<div class=ph>Properties</div>`+inspector(L)}
 ACT.histgo=el=>{const i=+el.dataset.i;if(i<E.undo.length){while(E.undo.length>i+1)E.redo.push(E.undo.pop())}else{while(E.undo.length<=i)E.undo.push(E.redo.pop())}restore(E.undo[E.undo.length-1]);ui();redraw()};
 /* every control carries its own name and unit (UX-04): the visible label above the pair is not associated with either input */
@@ -207,7 +211,7 @@ RENDER.export=async()=>{await loadLib();const el=$('s-export');
  if(!E.dataUrl){el.innerHTML=`<div class=card style="margin:40px auto;width:420px;text-align:center;padding:30px"><h2>Nothing to export</h2><button class="btn pri" data-act=nav data-to=create>Create</button></div>`;return}
  const packs=LIB.packs,pid=E.pack&&packById(E.pack)?E.pack:packs.length?packs[packs.length-1].id:'__new',sv=E.saved;
  el.innerHTML=`<div class=page><div class=row style="margin-top:0"><button class="btn sm" data-act=exback>${ic('back')} Back to editor</button></div><h1>Save sticker</h1>
-  <div style="display:grid;grid-template-columns:1fr 340px;gap:20px;margin-top:12px"><div class="pvbox bg-checker"><img src="${E.dataUrl}"></div>
+  <div class=xgrid><div class="pvbox bg-checker"><img src="${E.dataUrl}"></div>
   <div class=card><div class=fld><label for=xn>Name</label><input type=text id=xn value="${esc(E.name)}"></div><div class=fld><label for=xe>Emoji tag (Telegram requires at least one)</label><input type=text id=xe value="${esc(E.emoji)}"></div>
    <div class=fld><label for=xp>Pack</label><select id=xp>${packs.map(p=>`<option value=${p.id} ${p.id===pid?'selected':''}>${esc(p.name)} (${p.stickers.length})</option>`).join('')}<option value=__new ${pid==='__new'?'selected':''}>+ New pack…</option></select></div>
    <div class=fld id=xnew style="display:${pid==='__new'?'block':'none'}"><label for=xnn>New pack name</label><input type=text id=xnn value="My Pack"></div>

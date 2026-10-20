@@ -176,6 +176,14 @@ input.tgl::before{content:"";position:absolute;left:3px;top:3px;width:18px;heigh
 .pill{display:inline-block;padding:3px 12px;border-radius:var(--r-pill);font-size:var(--fs-s);font-weight:600;background:var(--fill);color:var(--mut);margin-bottom:10px;text-transform:capitalize}.pill[data-s=READY],.pill[data-s=READY_WITH_MASK]{background:var(--ok-l);color:var(--ok)}.pill[data-s=ERROR]{background:#FEF2F2;color:var(--bad)}
 .errbox{background:#FEF2F2;border:1px solid #FECACA;color:#7f1d1d;border-radius:var(--r-m);padding:10px 12px;margin-top:10px;font-size:var(--fs-m)}
 @media (max-width:1180px){#s-prepare.on{flex-wrap:wrap;overflow:auto}#s-prepare .an-l{width:100%}#s-prepare .an-r{width:100%;max-height:none}}
+/* UX-01: below 1000px the image and animation editors stack, the canvas first (the primary workspace), Layers/Animation and Properties under it as full-width
+   panels; nothing is hidden, so every tool, layer, trim handle and setting stays reachable. Save sticker stacks its preview over its form. */
+@media (max-width:1000px){#s-editor.on,#s-animate.on{flex-direction:column;overflow:auto}
+ #s-editor .ed-c,#s-animate .an-c{order:-1;flex:none}#s-editor .ed-l,#s-editor .ed-r,#s-animate .an-l,#s-animate .an-r{width:auto;flex:none;overflow:visible}
+ #s-animate .an-l{max-height:420px}#s-animate .an-l .frl{overflow:auto}
+ .ed-bar{height:auto;flex-wrap:wrap;padding:8px 10px}.ed-bar .ttl{flex:1 1 100%;min-width:0}.ed-bar .ttl .mut{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .ed-view{flex:none;padding:12px}.an-pv{flex:none}.an-pv .stage{height:auto;width:min(100%,420px)}}
+.xgrid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;margin-top:12px}@media (max-width:760px){.xgrid{grid-template-columns:minmax(0,1fr)}.xgrid .pvbox{min-height:0}}
 .ph svg{width:18px;height:18px;vertical-align:-3px;margin-right:4px}.ptools .tool svg{width:22px;height:22px}
 
 /* ---- Generate: type a request -> stickers -> Animate -> Add (generate.js) ---- */
@@ -214,6 +222,8 @@ input.tgl::before{content:"";position:absolute;left:3px;top:3px;width:18px;heigh
 .hthumb{width:84px;height:84px;border-radius:var(--r-m);overflow:hidden;background:var(--fill);flex:none;display:flex;align-items:center;justify-content:center;color:var(--mut2)}.hthumb img{width:100%;height:100%;object-fit:cover}.hthumb svg{width:28px;height:28px}
 .hmain{flex:1;min-width:0;font-size:var(--fs-m)}.hmain b{font-size:var(--fs-l)}.hside{margin-top:3px;word-break:break-all}.hgens{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}.hgens .chip2{padding:2px 10px;font-size:var(--fs-s)}
 .hact{display:flex;gap:8px;flex:none}.hrow[trash]{opacity:.85}
+/* UX-09: on a phone a watch-folder row stacks: thumbnail and text share the first line, Generate/Remove get their own; long folder paths wrap */
+.hwrap code{word-break:break-all}@media (max-width:760px){.hrow{flex-wrap:wrap}.hthumb{width:64px;height:64px}.hmain{flex:1 1 calc(100% - 80px)}.hact{flex:1 1 100%;justify-content:flex-end;flex-wrap:wrap}.hside{word-break:normal;overflow-wrap:anywhere}}
 
 .link{border:0;background:none;color:var(--pri-d);font-weight:600;font-size:var(--fs-m);padding:4px 6px;border-radius:var(--r-s)}.link:hover{background:var(--pri-l)}.link:disabled{opacity:.4}
 .gpack b{color:var(--tx)}

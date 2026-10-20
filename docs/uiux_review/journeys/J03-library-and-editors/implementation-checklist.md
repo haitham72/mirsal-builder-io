@@ -1,6 +1,5 @@
 # Library and editors — remaining checklist
 
-- [ ] UX-01 populated phone image/animation/Save layout.
 - [ ] Shared grid/preview/download lifecycle; loaded Prepare and remaining viewer/menu states.
 
 Before implementation: reproduce against current source, preserve all contracts,

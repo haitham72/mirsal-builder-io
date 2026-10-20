@@ -1,6 +1,5 @@
 # Phone layout — remaining checklist
 
-- [ ] UX-01 populated image/animation/Save; UX-09 watch-folder rows if retained.
 - [ ] UX-10 Chat density; remaining menu/keyboard/loaded Prepare states.
 
 Before implementation: reproduce against current source, preserve all contracts,
