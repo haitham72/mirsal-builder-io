@@ -23,8 +23,8 @@ BUCKETS = {                # width / height of the screens a super reaction is m
 }
 GLOW_MODES = ("auto", "solid", "gradient", "none")
 SUPER_SECONDS = 3.0        # the simulator's (and Telegram's) cap
-SUPER_KEYS = ("count", "rise", "float", "sway", "spread", "glow_strength", "pop")
-SUPER_START = {"count": 36, "rise": 0.7, "float": 0.2, "sway": 0.4, "spread": 40.0, "glow_strength": 0.55, "pop": 1}
+SUPER_KEYS = ("count", "size", "rise", "float", "sway", "spread", "glow_strength", "pop")
+SUPER_START = {"count": 36, "size": 1.0, "rise": 0.7, "float": 0.2, "sway": 0.4, "spread": 40.0, "glow_strength": 0.55, "pop": 1}
 _LOOK = ("size_min", "size_max", "particle_size", "spin", "size_in_dur", "size_out_dur", "flip", "flip_var", "speed_var", "size_curve")
 
 
@@ -87,6 +87,7 @@ def scene_params(p: ParticleParams, aspect: float, settings: dict | None = None)
     tiles = max(1, math.ceil(w_u - 1e-6))
     base = p.clamped()
     look = {k: getattr(base, k) for k in _LOOK}
+    look["particle_size"] = base.particle_size * float(s["size"])          # Size: x the look's own (the engine clamps 0.25..3)
     total = int(min(max(round(float(s["count"])), 4), 80 * tiles))
     params, shifts = [], []
     for k in range(tiles):

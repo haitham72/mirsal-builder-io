@@ -3,8 +3,8 @@
    screen lit with its colour, the big pop in the middle. The animation is made for THAT screen's shape (POST /api/particles/super with its
    width / height: the engine picks the nearest bucket, the player crops the rest with xMidYMid slice), so resizing a frame changes what it gets.
    Sources: the files in mirsal/lottie, listed by name on every visit (GET /api/particles/super). Engine: engine/super_reaction.py. */
-const SUP = {files: [], file: '', glow: 'auto', color: '#ff5a1f', c2: '#ffd23f', set: {}, start: {}, cache: {}, docs: {}, err: ''};
-const SUP_SETS = [['count', 'Amount', 4, 160, 1], ['rise', 'Rise', 0.2, 1.4, 0.05], ['float', 'Float', 0, 0.8, 0.05], ['sway', 'Sway', 0, 1.5, 0.05],
+const SUP = {files: [], file: '', glow: 'auto', color: '#ff5a1f', c2: '#ffd23f', set: {}, start: {}, cache: {}, docs: {}, err: '', frame: 80};
+const SUP_SETS = [['size', 'Size', 0.25, 3, 0.05], ['count', 'Amount', 4, 160, 1], ['rise', 'Rise', 0.2, 1.4, 0.05], ['float', 'Float', 0, 0.8, 0.05], ['sway', 'Sway', 0, 1.5, 0.05],
   ['spread', 'Spread', 10, 120, 1], ['glow_strength', 'Glow', 0, 1, 0.05]];
 let supLib = null;
 const supLottie = () => supLib || (supLib = typeof lsLib !== 'undefined' && lsLib ? lsLib : new Promise((ok, no) => {
@@ -91,9 +91,9 @@ function supDrawIn(el) {
   const sliders = SUP_SETS.map(([k, label, lo, hi, st]) => {
     const v = SUP.set[k] ?? SUP.start[k] ?? lo;
     return `<label class=sup-sl><span>${label} <em>${v}</em></span><input type=range min=${lo} max=${hi} step=${st} value="${v}" data-supset=${k}></label>`;
-  }).join('');
+  }).join('') + `<label class="sup-sl sup-frame"><span>Animation frame <em>${SUP.frame}%</em></span><input type=range min=0 max=100 step=1 value="${SUP.frame}" data-supframe></label>`;
   el.innerHTML = `<div class=sup-wrap>
-   <div class=sup-head>${el.dataset.suptab ? '' : '<h1>Super reaction</h1>'}<span class=sup-mut>Hold the reaction in a screen, then release. Drag a screen's corner to resize it.</span></div>
+   <div class=sup-head>${el.dataset.suptab ? '' : '<h1>Super reaction</h1>'}<span class=sup-mut>Hold the reaction in a screen, then release. Drag a screen's corner to resize it. Moving a slider shows one frame (Animation frame) instead of playing.</span></div>
    <div class=sup-tools>
     <label class=sup-src>Lottie <select id=sup-file>${opts || '<option value="">No files in mirsal/lottie</option>'}</select></label>
     <span class=sup-glow>Light ${glow}
@@ -126,6 +126,39 @@ function supWatch(dev) {
   show();
   if (window.ResizeObserver) new ResizeObserver(show).observe(scr);
 }
+
+/* one frame instead of the whole animation (like the emoji pack's first-frame preview): moving a slider shows, in every screen, the
+   super reaction made for that screen's shape, stopped at Animation frame. A new frame of the same animation is instant (goToAndStop);
+   other settings ask the server again (cached by settings and shape), a little after the slider stops moving. Hold / release clears it. */
+const SUPSTILL = {timer: 0, seq: 0};
+function supStillClear() { clearTimeout(SUPSTILL.timer); SUPSTILL.seq++; document.querySelectorAll('.sup-root .sup-still').forEach(b => { if (b._anim) b._anim.destroy(); b.remove() }) }
+function supStillFrame(box) { const a = box._anim; if (a) a.goToAndStop(Math.round((a.totalFrames - 1) * SUP.frame / 100), true) }
+function supStill(now) {
+  clearTimeout(SUPSTILL.timer);
+  if (now) { document.querySelectorAll('.sup-root .sup-still').forEach(supStillFrame); return }     // the frame slider: same animation, another frame
+  SUPSTILL.timer = setTimeout(async () => {
+    const seq = ++SUPSTILL.seq;
+    if (!SUP.file) return;
+    const L = await supLottie();
+    await Promise.all([...document.querySelectorAll('.sup-root .sup-dev')].map(async dev => {
+      const scr = dev.querySelector('.sup-screen'), fx = scr.querySelector('.sup-fx');
+      let r;
+      try { r = await supFetch(scr.clientWidth / Math.max(1, scr.clientHeight)) } catch (e) { return toast(e.message, 1) }
+      if (seq !== SUPSTILL.seq) return;                                              // a newer move won
+      let box = fx.querySelector('.sup-still');
+      if (box && box._doc === r.lottie) return supStillFrame(box);
+      if (box) { box._anim && box._anim.destroy(); box.remove() }
+      box = document.createElement('div'); box.className = 'sup-full sup-still'; fx.appendChild(box);
+      box._doc = r.lottie;
+      box._anim = L.loadAnimation({container: box, renderer: 'svg', loop: false, autoplay: false, animationData: supClone(r.lottie),
+        rendererSettings: {preserveAspectRatio: 'xMidYMid slice'}});
+      box._anim.addEventListener('DOMLoaded', () => supStillFrame(box));
+      if (box._anim.isLoaded) supStillFrame(box);
+      supAuto(r);
+    }));
+  }, 140);
+}
+const supAuto = r => { const auto = $('sup-auto'); if (auto && r.color) auto.innerHTML = `<i style="background:${r.color}"></i>${SUP.glow === 'auto' ? 'auto ' : ''}${r.color}` };
 
 /* hold: small copies of the source rise from the button, faster the longer it is held */
 function supStream(btn) {
@@ -161,8 +194,7 @@ async function supPlay(dev) {
     const a = L.loadAnimation({container: box, renderer: 'svg', loop: false, autoplay: true, animationData: supClone(r.lottie),
       rendererSettings: {preserveAspectRatio: 'xMidYMid slice'}});
     a.addEventListener('complete', () => { a.destroy(); box.remove() });
-    const auto = $('sup-auto');
-    if (auto && r.color) auto.innerHTML = `<i style="background:${r.color}"></i>${SUP.glow === 'auto' ? 'auto ' : ''}${r.color}`;
+    supAuto(r);
   } catch (e) { toast(e.message || 'Could not play', 1) }
 }
 
@@ -171,6 +203,7 @@ document.addEventListener('pointerdown', e => {
   const btn = e.target.closest && e.target.closest('.sup-root .sup-react');
   if (!btn || !SUP.file) return;
   e.preventDefault();
+  supStillClear();
   const dev = btn.closest('.sup-dev'), scr = dev.querySelector('.sup-screen');
   supFetch(scr.clientWidth / Math.max(1, scr.clientHeight)).catch(() => 0);      // ready by the release
   btn.classList.add('held');
@@ -187,16 +220,21 @@ document.addEventListener('pointerdown', e => {
 document.addEventListener('contextmenu', e => { if (e.target.closest && e.target.closest('.sup-root .sup-react')) e.preventDefault() });
 document.addEventListener('click', e => {
   const g = e.target.closest && e.target.closest('.sup-root [data-supglow]');
-  if (g) { SUP.glow = g.dataset.supglow; return supDraw() }
-  if (e.target.closest && e.target.closest('.sup-root [data-supreset]')) { SUP.set = {}; SUP.glow = 'auto'; return supDraw() }
+  if (g) { SUP.glow = g.dataset.supglow; supDraw(); return supStill() }
+  if (e.target.closest && e.target.closest('.sup-root [data-supreset]')) { SUP.set = {}; SUP.glow = 'auto'; SUP.frame = 80; supStillClear(); return supDraw() }
 });
 document.addEventListener('input', e => {
   const t = e.target;
-  if (t.dataset && t.dataset.supset) { SUP.set[t.dataset.supset] = +t.value; const em = t.parentElement.querySelector('em'); if (em) em.textContent = t.value }
-  if (t.id === 'sup-c1') SUP.color = t.value;
-  if (t.id === 'sup-c2') SUP.c2 = t.value;
+  if (!t.closest || !t.closest('.sup-root')) return;
+  if (t.dataset && t.dataset.supset) { SUP.set[t.dataset.supset] = +t.value; const em = t.parentElement.querySelector('em'); if (em) em.textContent = t.value; return supStill() }
+  if (t.dataset && t.dataset.supframe !== undefined) {
+    SUP.frame = +t.value; const em = t.parentElement.querySelector('em'); if (em) em.textContent = t.value + '%';
+    return document.querySelector('.sup-root .sup-still') ? supStill(true) : supStill();
+  }
+  if (t.id === 'sup-c1') { SUP.color = t.value; supStill() }
+  if (t.id === 'sup-c2') { SUP.c2 = t.value; supStill() }
 });
-document.addEventListener('change', e => { if (e.target.id === 'sup-file') { SUP.file = e.target.value; supDraw() } });
+document.addEventListener('change', e => { if (e.target.id === 'sup-file') { SUP.file = e.target.value; supStillClear(); supDraw(); supStill() } });
 
 /* the folder is read on every visit: a file dropped in mirsal/lottie appears by its name */
 async function supLoad() {

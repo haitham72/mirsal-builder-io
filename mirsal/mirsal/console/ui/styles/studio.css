@@ -1333,3 +1333,4 @@ body.studio-split{--col2-w:352px}
 .sup-root .sup-phone .sup-size{right:30px;color:var(--mut2)}
 @media (max-width:760px){.sup-root .sup-desktop{width:100%}.sup-root .sup-menu{display:none}}
 .sup-root .sup-desktop .sup-size{bottom:auto;top:9px;right:120px}
+.sup-root .sup-frame em{color:var(--pri-d)}

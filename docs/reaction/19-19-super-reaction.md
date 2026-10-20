@@ -14,7 +14,7 @@
   - **Spread** ÷ height, because the fan opens with the launch speed;
   - a wide screen gets one emitter per unit of width (an emitter is at most one unit wide; ultrawide has 3).
   
-  `SUPER_START` (count 36, rise 0.7, float 0.2, sway 0.4, spread 40, glow 0.55, pop on) was tuned by numbers. In every bucket, ≥83% of particle time is on screen; the 10th percentile of height reaches the top quarter and the 90th starts in the bottom quarter.
+  **Size** multiplies the look's own particle size (0.25–3 after the engine clamp). `SUPER_START` (count 36, size 1, rise 0.7, float 0.2, sway 0.4, spread 40, glow 0.55, pop on) was tuned by numbers. In every bucket, ≥83% of particle time is on screen; the 10th percentile of height reaches the top quarter and the 90th starts in the bottom quarter.
 - **Glow.** One shape layer behind the particles: a full-screen linear gradient from the bottom edge up. It fades in over 0.35 s, holds at 70% until 1.6 s, and fades out by the end. Modes: `auto` (the dominant colour: `dominant_color` of the emoji glyph, or `lottie_rgba` of a Lottie's static fills and strokes), `solid` (`color`), `gradient` (`colors` = [bottom, top]; the top keeps 35%), `none`. lottie-web and lottie-ios both play it.
 - **Pop.** The big one in the centre (0.45 × the short side): it scales in with an overshoot, holds a beat, and fades out by 1.25 s.
 - **Sources.** Either the emoji slot (`emoji.png`, no base64, like every preset) or a Lottie document: `source=` embeds it once as precomp `L0` through `engine.lottie.export_lottie_burst(..., shift=(dx, dy))`. `shift` (0, 0) is the old burst byte for byte.
@@ -41,7 +41,8 @@ It lives at Create › + New › **Super reaction** (`#/super`), and as the **Su
   - **Hold** (≥ 250 ms): copies of the file rise from it, faster the longer the hold. The full-screen file is requested at once, so it is ready by the release.
   - **Release** on the button: the screen plays, made for that frame's current shape. The layer covers the rail and menus with `pointer-events: none`.
   - Dragging off the button cancels; a short tap plays nothing.
-- **Controls** (each sent to the server, rule 6): Lottie (the folder by name), Light (Auto, which shows the picked colour after a play; Solid; Gradient; None) with colour pickers, and Amount, Rise, Float, Sway, Spread and Glow.
+- **Controls** (each sent to the server, rule 6): Lottie (the folder by name), Light (Auto, which shows the picked colour after a play; Solid; Gradient; None) with colour pickers, and Size, Amount, Rise, Float, Sway, Spread and Glow.
+- **One frame while tuning** (Haitham 2026-10-20, like the emoji pack's first-frame preview). Moving any slider, colour or Light mode shows ONE still frame in every screen instead of playing. It is the super reaction made for that screen's shape, stopped (`goToAndStop`) at **Animation frame** (0–100%, default 80%). The frame slider only moves the playhead of the animation already loaded (about 10 ms); other settings ask the server again 140 ms after the slider stops (about 20–200 ms a compose, cached by settings and shape). Holding the reaction clears the still; Reset clears it and returns the frame to 80%. Animation frame is a viewer control (the playhead), so the server never needs it.
 
 Tests: `tests/test_super_reaction.py` covers buckets, whole-screen coverage, wide emitters, emoji-free determinism, glow modes and errors, the dominant colour, the Lottie source and its colour, `shift` (0,0) byte-identity, and the folder listing and compose errors. Browser check (isolated :8797, providers off):
 - the desktop and phone frames play;

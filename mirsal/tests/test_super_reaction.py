@@ -46,6 +46,11 @@ class SuperEngine(unittest.TestCase):
             self.assertGreater(q90, 0.75, aspect)         # and starts in the bottom quarter
             self.assertGreater(np.percentile(xs[inside], 90) - np.percentile(xs[inside], 10), 0.5, aspect)   # across the width
 
+    def test_size_scales_the_particles(self):
+        base = sr.scene_params(P.preset("burst"), 1.0)[0][0].particle_size
+        self.assertAlmostEqual(sr.scene_params(P.preset("burst"), 1.0, {"size": 2})[0][0].particle_size, base * 2)
+        self.assertEqual(sr.scene_params(P.preset("burst"), 1.0, {"size": 99})[0][0].particle_size, 3.0)      # the engine's clamp
+
     def test_wide_screens_get_one_emitter_per_unit(self):
         self.assertEqual(len(sr.scene_params(P.preset("burst"), 21 / 9)[0]), 3)
         self.assertEqual(len(sr.scene_params(P.preset("burst"), 9 / 19.5)[0]), 1)
