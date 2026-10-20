@@ -23,3 +23,13 @@ class SuperReactionBody(BaseModel):
     color: str | None = None
     colors: list[str] | None = None
     settings: dict[str, Any] | None = None
+
+
+class SuperExportBody(BaseModel):
+    """POST /api/particles/super/export.zip: the sandbox's settings applied to every dropped file (or `files`) for every screen bucket."""
+    model_config = ConfigDict(extra="forbid")
+    files: list[str] | None = None
+    glow: str = "auto"
+    color: str | None = None
+    colors: list[str] | None = None
+    settings: dict[str, Any] | None = None

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Request
 from ..dependencies import _native_headers
 from ...flow import lottie_reactions as lr
 from starlette.responses import Response as _Raw
-from ..schemas.reactions import LottieReactionBody, SuperReactionBody
+from ..schemas.reactions import LottieReactionBody, SuperExportBody, SuperReactionBody
 
 def build_router(ctx):
     router = APIRouter()
@@ -89,5 +89,20 @@ def build_router(ctx):
                                                              color=body.color, colors=body.colors, settings=body.settings))
         except lr.SetError as e:
             return _lr_err(request, e)
+
+    @router.post("/api/particles/super/export.zip", include_in_schema=False)
+    async def super_export(request: Request):
+        user, resp = await _member(request, "/api/particles/super/export.zip")
+        if resp:
+            return resp
+        body, err = await _body(request, SuperExportBody)
+        if err:
+            return _j(request, 400, {"error": err})
+        try:
+            data = await asyncio.to_thread(lr.super_export_zip, c.out, files=body.files, glow=body.glow, color=body.color,
+                                           colors=body.colors, settings=body.settings)
+        except lr.SetError as e:
+            return _lr_err(request, e)
+        return _Raw(data, media_type="application/zip", headers={**_native_headers(request), "Content-Disposition": 'attachment; filename="superReactions.zip"'})
 
     return router

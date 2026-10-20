@@ -45,7 +45,7 @@ async function supDoc(file) {
 const SUP_CHATS = [['Mirsal', 'New in version 10.1.89', '7:22 AM'], ['Haitham (You)', 'Envato: 21 October', '7:22 AM'], ['Arif Hh', 'https://higgsfield.ai/me…', '7:19 AM'],
   ['Rashid Khalfan Hh', 'Video', '25/09'], ['Sameer Hh', 'python py file', '24/09'], ['Nasir Hh', 'Video', '28/08']];
 function supConvo(phone) {
-  return `<div class="chat${phone ? ' mobile' : ''} sup-chat">
+  return `<div class="chat${phone ? ' mobile' : ''} sup-chat"${phone ? '' : ' data-supstage'}>
     <div class=chh>${phone ? `<span class=sup-back>${ic('back')}</span>` : ''}<div class="cv chav">A</div><div style="flex:1"><b>Arif Hh</b><small>online</small></div>
      <span class=sup-ico>${ic('search')}</span></div>
     <div class=chm>
@@ -54,12 +54,17 @@ function supConvo(phone) {
     </div>
     <div class=chc><span class=sup-ico>${ic('sticker')}</span><span class=sup-input>Type a message</span>
      <span class=sup-ico>${ic('emoji')}</span><button class=sup-react aria-label="Hold for a super reaction" title="Hold, then release"><span class=sup-icon></span></button></div>
+    ${phone ? '' : '<div class=sup-fx aria-hidden=true></div>'}
    </div>`;
 }
+/* where a screen's super reaction plays: the chat area on desktop (the rail and the Chats list stay above it, like the app's other panels and
+   modals), the whole phone screen on the phone. Its width / height picks the bucket. */
+const supStageOf = dev => dev.querySelector('[data-supstage]');
+const supAspect = st => st.clientWidth / Math.max(1, st.clientHeight);
 function supFrame(kind) {
   const phone = kind === 'phone';
   if (phone) return `<div class="sup-dev sup-phone" data-sup=phone>
-   <div class=sup-screen>
+   <div class=sup-screen data-supstage>
     <div class=sup-status><b>1:47</b><span class=sup-notch></span><span class=sup-sig><i></i><i></i><i></i><i></i></span></div>
     ${supConvo(true)}
     <div class=sup-fx aria-hidden=true></div>
@@ -75,7 +80,6 @@ function supFrame(kind) {
      ${SUP_CHATS.map(([n, m, t], i) => `<div class="sup-row${i === 2 ? ' on' : ''}"><span class="cv chav">${esc(n[0])}</span><span class=sup-rt><b>${esc(n)}</b><small>${esc(m)}</small></span><small class=sup-t>${esc(t)}</small></div>`).join('')}
     </aside>
     ${supConvo(false)}
-    <div class=sup-fx aria-hidden=true></div>
    </div>
    <div class=sup-size></div>
   </div>`;
@@ -101,6 +105,7 @@ function supDrawIn(el) {
      ${SUP.glow === 'gradient' ? `<input type=color id=sup-c2 value="${SUP.c2}" title=Top>` : ''}
      <span class=sup-auto id=sup-auto></span></span>
     <button class="btn sm" data-supreset>Reset</button>
+    <span class=sup-exp><button class="btn sm" data-supdl=desktop title="The super reaction the desktop screen plays, for its shape">${ic('download')} JSON · desktop</button><button class="btn sm" data-supdl=phone title="The super reaction the phone plays, for its shape">${ic('download')} JSON · phone</button><button class="btn sm" data-supzip title="Every file in mirsal/lottie, for every screen shape, with these settings, plus manifest.json">${ic('download')} Export all (.zip)</button></span>
    </div>
    <div class=sup-sliders>${sliders}</div>
    ${SUP.err ? `<p class=sup-err>${esc(SUP.err)}</p>` : ''}
@@ -121,7 +126,7 @@ async function supIcons() {
 }
 /* the frame's size readout: px and the bucket it will get */
 function supWatch(dev) {
-  const scr = dev.querySelector('.sup-screen'), out = dev.querySelector('.sup-size');
+  const scr = supStageOf(dev), out = dev.querySelector('.sup-size');
   const show = () => { const w = scr.clientWidth, h = scr.clientHeight; if (w && h) out.textContent = `${w} × ${h} · ${supBucket(w / h)}` };
   show();
   if (window.ResizeObserver) new ResizeObserver(show).observe(scr);
@@ -141,9 +146,9 @@ function supStill(now) {
     if (!SUP.file) return;
     const L = await supLottie();
     await Promise.all([...document.querySelectorAll('.sup-root .sup-dev')].map(async dev => {
-      const scr = dev.querySelector('.sup-screen'), fx = scr.querySelector('.sup-fx');
+      const scr = supStageOf(dev), fx = scr.querySelector('.sup-fx');
       let r;
-      try { r = await supFetch(scr.clientWidth / Math.max(1, scr.clientHeight)) } catch (e) { return toast(e.message, 1) }
+      try { r = await supFetch(supAspect(scr)) } catch (e) { return toast(e.message, 1) }
       if (seq !== SUPSTILL.seq) return;                                              // a newer move won
       let box = fx.querySelector('.sup-still');
       if (box && box._doc === r.lottie) return supStillFrame(box);
@@ -162,7 +167,7 @@ const supAuto = r => { const auto = $('sup-auto'); if (auto && r.color) auto.inn
 
 /* hold: small copies of the source rise from the button, faster the longer it is held */
 function supStream(btn) {
-  const fx = btn.closest('.sup-screen').querySelector('.sup-fx'), t0 = performance.now();
+  const fx = btn.closest('[data-supstage]').querySelector('.sup-fx'), t0 = performance.now();
   let alive = true, timer = 0;
   const spawn = async () => {
     if (!alive) return;
@@ -184,8 +189,8 @@ function supStream(btn) {
 
 /* release: the whole screen plays, made for this screen's shape */
 async function supPlay(dev) {
-  const scr = dev.querySelector('.sup-screen'), fx = scr.querySelector('.sup-fx');
-  const aspect = scr.clientWidth / Math.max(1, scr.clientHeight);
+  const scr = supStageOf(dev), fx = scr.querySelector('.sup-fx');
+  const aspect = supAspect(scr);
   try {
     const [L, r] = await Promise.all([supLottie(), supFetch(aspect)]);
     const box = document.createElement('div');
@@ -204,8 +209,8 @@ document.addEventListener('pointerdown', e => {
   if (!btn || !SUP.file) return;
   e.preventDefault();
   supStillClear();
-  const dev = btn.closest('.sup-dev'), scr = dev.querySelector('.sup-screen');
-  supFetch(scr.clientWidth / Math.max(1, scr.clientHeight)).catch(() => 0);      // ready by the release
+  const dev = btn.closest('.sup-dev');
+  supFetch(supAspect(supStageOf(dev))).catch(() => 0);      // ready by the release
   btn.classList.add('held');
   const stop = supStream(btn), t0 = performance.now();
   btn.setPointerCapture && btn.setPointerCapture(e.pointerId);
@@ -218,7 +223,30 @@ document.addEventListener('pointerdown', e => {
   btn.addEventListener('pointerup', end); btn.addEventListener('pointercancel', end);
 });
 document.addEventListener('contextmenu', e => { if (e.target.closest && e.target.closest('.sup-root .sup-react')) e.preventDefault() });
+const supSave = (blob, name) => { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000) };
+const supName = () => String(SUP.file || '').replace(/\.json$/i, '');
+async function supDownload(kind, root) {
+  const dev = root.querySelector(`.sup-dev[data-sup=${kind}]`);
+  if (!dev || !SUP.file) return;
+  try {
+    const r = await supFetch(supAspect(supStageOf(dev)));
+    supSave(new Blob([JSON.stringify(r.lottie)], {type: 'application/json'}), `${supName()}-superReaction-${r.bucket}.json`);
+  } catch (e) { toast(e.message || 'Could not make the JSON', 1) }
+}
+async function supZip(btn) {
+  const b = supBody(1); delete b.file; delete b.aspect;
+  btn.disabled = true;
+  try {
+    const r = await fetch('/api/particles/super/export.zip', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(b)});
+    if (!r.ok) { let j = {}; try { j = await r.json() } catch (x) {} return toast(j.error || 'Could not export', 1) }
+    supSave(await r.blob(), 'superReactions.zip');
+  } finally { btn.disabled = false }
+}
 document.addEventListener('click', e => {
+  const dl = e.target.closest && e.target.closest('.sup-root [data-supdl]');
+  if (dl) return supDownload(dl.dataset.supdl, dl.closest('.sup-root'));
+  const zp = e.target.closest && e.target.closest('.sup-root [data-supzip]');
+  if (zp) return supZip(zp);
   const g = e.target.closest && e.target.closest('.sup-root [data-supglow]');
   if (g) { SUP.glow = g.dataset.supglow; supDraw(); return supStill() }
   if (e.target.closest && e.target.closest('.sup-root [data-supreset]')) { SUP.set = {}; SUP.glow = 'auto'; SUP.frame = 80; supStillClear(); return supDraw() }

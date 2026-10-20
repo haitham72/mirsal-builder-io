@@ -129,6 +129,21 @@ class SuperFlow(unittest.TestCase):
         self.assertIn("phone", j["buckets"])
         self.assertEqual(j["glow_modes"], list(sr.GLOW_MODES))
 
+    def test_export_zip_every_bucket_and_manifest(self):
+        import io
+        import zipfile
+        from mirsal.flow import lottie_reactions as lr
+        z = zipfile.ZipFile(io.BytesIO(lr.super_export_zip(self.out, glow="solid", color="#00ff00", settings={"size": 1.5})))
+        m = json.loads(z.read("manifest.json"))
+        self.assertEqual([r["name"] for r in m["superReactions"]], ["Red dot"])
+        self.assertEqual(set(m["superReactions"][0]["buckets"]), set(sr.BUCKETS))
+        self.assertEqual(m["settings"]["size"], 1.5)
+        doc = json.loads(z.read("superReactions/Red dot/phone.json"))
+        self.assertEqual((doc["w"], doc["h"]), sr.canvas(sr.BUCKETS["phone"]))
+        with self.assertRaises(lr.SetError) as e:
+            lr.super_export_zip(self.out, files=["missing.json"])
+        self.assertEqual(e.exception.code, 404)
+
     def test_compose_and_errors(self):
         from mirsal.flow import lottie_reactions as lr
         r = lr.super_compose(self.out, "Red dot.json", 390 / 844, glow="solid", color="#00ff00")

@@ -207,3 +207,32 @@ def super_compose(out: Path, file: str, aspect, *, glow: str = "auto", color=Non
         raise SetError(str(ex))
     meta = doc.pop("mirsal")
     return {"file": file, "name": Path(file).stem, "bucket": meta["bucket"], "aspect": meta["aspect"], "glow": meta["glow"], "color": meta["color"], "lottie": doc}
+
+
+def super_export_zip(out: Path, *, files=None, glow: str = "auto", color=None, colors=None, settings=None) -> bytes:
+    """POST /api/particles/super/export.zip (superReactions.zip): every dropped file (or `files`) as a super reaction for EVERY screen bucket,
+    `superReactions/<name>/<bucket>.json`, made with the sandbox's settings, plus manifest.json {superReactions: [{file, name, color, buckets:
+    {bucket: path}}], buckets {bucket: width/height}, glow, color, colors, settings, seconds, unit_px}. The app picks the bucket nearest its
+    chat area's width / height and plays it with xMidYMid slice. 404 for a named file not in the drop zone, 400 for a bad option."""
+    from ..engine import super_reaction as sr
+    names = [f["file"] for f in handpicked_files()]
+    todo = names if files is None else list(dict.fromkeys(str(f) for f in files))
+    missing = [f for f in todo if f not in names]
+    if missing:
+        raise SetError(f"no Lottie file {missing[0]}", 404)
+    if not todo:
+        raise SetError("no Lottie files in mirsal/lottie", 409)
+    buf, rows = io.BytesIO(), []
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        for f in todo:
+            row = {"file": f, "name": Path(f).stem, "color": None, "buckets": {}}
+            for b, aspect in sr.BUCKETS.items():
+                r = super_compose(out, f, aspect, glow=glow, color=color, colors=colors, settings=settings)
+                arc = f"superReactions/{Path(f).stem}/{b}.json"
+                z.writestr(arc, json.dumps(r["lottie"], separators=(",", ":")))
+                row["buckets"][b], row["color"] = arc, r["color"]
+            rows.append(row)
+        z.writestr("manifest.json", json.dumps({"superReactions": rows, "buckets": {k: round(v, 4) for k, v in sr.BUCKETS.items()},
+                                                "glow": glow, "color": color, "colors": colors, "settings": {**sr.SUPER_START, **(settings or {})},
+                                                "seconds": sr.SUPER_SECONDS, "unit_px": sr.UNIT_PX}, ensure_ascii=False, indent=1))
+    return buf.getvalue()

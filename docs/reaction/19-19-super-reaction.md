@@ -26,15 +26,16 @@
   - `super_compose(out, file, aspect, glow, color, colors, settings)` uses the file's saved Lottie-style look (neutral defaults if unsaved) and returns `{file, name, bucket, aspect, glow, color, lottie}`.
   - Errors: 404 for a file not in the drop zone, 400 for a bad option.
 - `flow/emoji_reactions.py`: `held_preset(out, token)` (the wall's rule, on the server) and `super_lottie(out, token, aspect, ...)`, the same for a bank emoji with its held preset. It has no route yet.
-- Routes (native, `api/routers/reactions.py`, member): `GET /api/particles/super` and `POST /api/particles/super` with `SuperReactionBody` `{file, aspect, glow?, color?, colors?, settings?}`.
+- Routes (native, `api/routers/reactions.py`, member): `GET /api/particles/super`, `POST /api/particles/super` with `SuperReactionBody` `{file, aspect, glow?, color?, colors?, settings?}`, and `POST /api/particles/super/export.zip` with `SuperExportBody` `{files?, glow?, color?, colors?, settings?}`.
+- **Export, like Lottie style** (`super_export_zip`): `superReactions.zip` holds every dropped file (or `files`) for EVERY bucket, as `superReactions/<name>/<bucket>.json`, made with the sandbox's settings, plus `manifest.json` `{superReactions: [{file, name, color, buckets: {bucket: path}}], buckets, glow, color, colors, settings, seconds, unit_px}`. An app picks the bucket nearest its chat area's width / height and plays it with `xMidYMid slice`. In the sandbox, **JSON · desktop** and **JSON · phone** download what that screen plays (`<name>-superReaction-<bucket>.json`), and **Export all (.zip)** downloads the zip.
 
 ## The sandbox (`console/ui/features/reactions/super.js`)
 
 It lives at Create › + New › **Super reaction** (`#/super`), and as the **Super Emojis** tab of the shared reaction tabs (Reaction effects and Library › Reactions, [18](18-18-reaction-tabs-emoji-lottie-packs-2026-10-15.md)). Every host is a `.sup-root`; the folder is listed on each visit.
 
 - **Two resizable screens** follow the Mirsal app (`ref/ref-only.jpg`) and reuse the Chat screen's pieces (`.chat`, `.chh`, `.chm` bubbles, the `.chc` "Type a message" bar):
-  - a desktop window: title bar, icon rail, the Chats list, the conversation;
-  - an iPhone: status bar, notch, chat, bar.
+  - a desktop window: title bar, icon rail, the Chats list, the conversation. **The super reaction plays in the chat area only** (the conversation pane, `[data-supstage]`): the rail and the Chats list stay above it, like the app's panels and modals, and the bucket comes from the chat area's own width / height;
+  - an iPhone: status bar, notch, chat, bar; it plays over the whole phone screen.
   
   Drag a corner to resize. Each frame shows its px size and bucket.
 - **The gesture.** The reaction sits in the bar.
@@ -52,6 +53,5 @@ Tests: `tests/test_super_reaction.py` covers buckets, whole-screen coverage, wid
 
 **Open.**
 - Emoji-bank super reactions (`super_lottie`) need a route and a picker in the sandbox.
-- Export (zip + manifest per bucket) is not built.
 - The real chat apps (desktop HTML, iOS lottie-ios) are not wired.
 - A visual verdict is Haitham's.

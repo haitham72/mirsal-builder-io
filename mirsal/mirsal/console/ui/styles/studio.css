@@ -1334,3 +1334,5 @@ body.studio-split{--col2-w:352px}
 @media (max-width:760px){.sup-root .sup-desktop{width:100%}.sup-root .sup-menu{display:none}}
 .sup-root .sup-desktop .sup-size{bottom:auto;top:9px;right:120px}
 .sup-root .sup-frame em{color:var(--pri-d)}
+.sup-root .sup-chat[data-supstage]{position:relative;overflow:hidden}   /* the desktop's super reaction plays in the chat area only */
+.sup-root .sup-exp{display:inline-flex;flex-wrap:wrap;gap:6px}
