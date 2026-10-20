@@ -1293,7 +1293,7 @@ body.studio-split{--col2-w:352px}
 .sup-root .sup-err{color:var(--bad);font-size:var(--fs-s)}
 .sup-root .sup-stage{display:flex;flex-wrap:wrap;align-items:flex-start;gap:24px}
 .sup-root .sup-dev{position:relative;display:flex;flex-direction:column;resize:both;overflow:hidden;max-width:100%;background:var(--sf);border:1px solid var(--bd);box-shadow:var(--sh,0 10px 30px rgba(0,0,0,.25))}
-.sup-root .sup-desktop{width:760px;height:480px;min-width:320px;min-height:240px;border-radius:var(--r-s)}
+.sup-root .sup-desktop{width:760px;height:620px;min-width:320px;min-height:240px;border-radius:var(--r-s)}
 .sup-root .sup-phone{width:300px;height:620px;min-width:220px;min-height:380px;border-radius:40px;padding:9px;background:#0b0d0f;border:2px solid var(--bd)}
 .sup-root .sup-bar{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 10px;background:var(--fill);font-size:var(--fs-s)}
 .sup-root .sup-bar .sp{flex:1}.sup-root .sup-bar i{font-style:normal;width:30px;text-align:center;color:var(--mut)}
