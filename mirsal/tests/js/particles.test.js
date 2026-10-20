@@ -70,31 +70,23 @@ test('three creation cards (sticker sprites, AI images, Kling) and scoped slices
   assert.doesNotMatch(h,/Nothing is drawn or spent yet/);
 });
 
-test('the Studio’s header gets a Reactions step after Animation, and only once an animation exists', () => {
-  const done = t => `<button class="gst done " data-act=gtab data-t=${t}><span class=gsm><svg></svg></span><span class=gsl><b>${t}</b></span></button>`;
-  const steps = '<div class=gsteps>' + done('request') + done('plan') + done('stickers')
-    + '<button class="gst todo " data-act=gtab data-t=anim><span class=gsm>4</span><span class=gsl><b>Animation</b></span></button>'
-    + '<button class="gst todo " data-act=gadd ><span class=gsm>5</span><span class=gsl><b>Pack</b></span></button></div>';
+test('Studio registers Reactions between Motion and Pack only after animation exists', () => {
+  const steps = [['Motion','todo','','anim'],['Pack','todo','','pack'],['Telegram','todo','','telegram']];
   const anim = [{generation_id:'G012',stickers:[{anim_status:'READY'}]}];
-  assert.equal(run(withPacks(`spSteps(${JSON.stringify(steps)},[])`)), steps, 'no animation yet: no Reactions step anywhere');
-  assert.equal(run(withPacks(`spSteps(${JSON.stringify(steps)},[{generation_id:'G012'}])`)), steps, 'a batch without stickers is not animated either');
-  const h = run(withPacks(`spSteps(${JSON.stringify(steps)},${JSON.stringify(anim)})`));
-  assert.ok(h.indexOf('data-t=particles') > h.indexOf('data-t=anim') && h.indexOf('data-t=particles') < h.indexOf('data-act=gadd'), 'between Animation and Pack');
-  assert.match(h, /<button class="gst todo " data-act=gtab data-t=particles><span class=gsm>5<\/span><span class=gsl><b>Reactions<\/b><small>None yet<\/small>/);
-  assert.match(h, /data-act=gadd ><span class=gsm>6<\/span>/, 'Pack is the sixth step now');
-  assert.match(h, /data-t=anim><span class=gsm>4<\/span>/, 'what is before it is untouched');
-  assert.equal(run("spSteps('no steps at all',[])"), 'no steps at all');
-  const cur = run(withPacks(`(GS.tab='particles',spSteps(${JSON.stringify(steps)},${JSON.stringify(anim)}))`));
-  assert.match(cur, /class="gst todo cur" data-act=gtab data-t=particles/);
-  run("GS.tab='stickers'");
+  const extend=gs=>JSON.parse(run(withPacks(`JSON.stringify(gExtraSteps(${JSON.stringify(steps)},{gs:${JSON.stringify(gs)}}))`)));
+  assert.deepEqual(extend([]),steps);
+  assert.deepEqual(extend([{generation_id:'G012'}]),steps);
+  const extended=extend(anim);
+  assert.deepEqual(extended.map(s=>s[3]),['anim','particles','pack','telegram']);
+  assert.deepEqual(extended[1],['Reactions','todo','None yet','particles']);
+  assert.equal(run('GSTUDIO.size'),1,'one registered section, without replacing Studio renderers');
 });
 
 test('the step counts what was made for the batch’s stickers', () => {
   const made = run(withPacks("(PKPT.c={p1:{a1:{created:2,saved:1},a3:{created:9,saved:9}}},spMade([{generation_id:'G012'}]))"));
   assert.equal(made, 3, 'only the stickers that came from this batch count');
-  const h = run(withPacks("(PKPT.c={p1:{a1:{created:2,saved:1}}},spSteps('<button class=\"gst todo \" data-act=gadd ><span class=gsm>5</span></button>',[{generation_id:'G012',stickers:[{anim_status:'READY'}]}]))"));
-  assert.match(h, /data-t=particles><span class=gsm><svg data-i=check><\/svg><\/span><span class=gsl><b>Reactions<\/b><small>3 made<\/small>/);
-  assert.match(h, /class="gst done "/);
+  const step = run(withPacks("(PKPT.c={p1:{a1:{created:2,saved:1}}},JSON.stringify(GSTUDIO.get('particles').step({gs:[{generation_id:'G012',stickers:[{anim_status:'READY'}]}]})))"));
+  assert.deepEqual(JSON.parse(step),['Reactions','done','3 made']);
   run("PKPT.c={}");
 });
 

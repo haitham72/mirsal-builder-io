@@ -103,6 +103,11 @@ the original handler in `console/server.py` (byte-identical answers); routes add
 
 Feature files retain the existing function, action and route names:
 
+Studio extensions register a section in `GSTUDIO` with an eligibility predicate,
+body presenter, step data and insertion anchor. `studio-core.js` owns rendering
+and numbering; Reactions no longer replaces `gbodyHtml`/`stepsHtml` or parses
+rendered button HTML. Focused Reactions/Studio extension checks: 62 pass.
+
 | Files | Responsibility |
 |---|---|
 | `app.js`, `library.js`, `settings.js` | shared shell/router; Library; system settings and Appearance |

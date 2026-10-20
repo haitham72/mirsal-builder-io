@@ -3,7 +3,7 @@
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
-const { GROUPS } = require('./console_source');
+const { GROUPS, readConsoleFile, statement } = require('./console_source');
 
 const CONSOLE = path.join(__dirname, '..', '..', 'mirsal', 'console');
 const BASE = `
@@ -23,13 +23,15 @@ const packById=id=>LIB.packs.find(p=>p.id===id);
 const loadLib=async()=>LIB;
 const VLM={then:null},vlmState=()=>'0',vlmSet=()=>{};
 `;
-const STUDIO = `
+const studioSource=readConsoleFile(path.join(CONSOLE,'studio-core.js'));
+const studioExtensions=['const GSTUDIO','function gExtraBody','function gExtraSteps'].map(marker=>statement(studioSource,marker)).join('\n');
+const STUDIO = studioExtensions + `
 const GS={tab:'stickers',outline:12};
 const GM=new Map();
 let SES={prompt:'',gens:[],off:[],pack:''},glast='';
 const sessionGens=()=>SES.gens.map(id=>GM.get(id)).filter(Boolean);
 const tick=()=>{};
-function gbodyHtml(gs,c){return 'ORIGINAL BODY'}
+function gbodyHtml(gs,c){return gExtraBody(GS.tab,gs,c)??'ORIGINAL BODY'}
 function stepsHtml(c){return 'ORIGINAL STEPS'}
 const PKPT={d:{},c:{}};
 function ptBody(j,s){return '<ptbody data-for='+(s?s.id:'')+'>'+(j?'data':'null')+'</ptbody>'}

@@ -637,8 +637,23 @@ function gview() {
 }
 
 /* what the page shows under the header: each step is a real view. */
+const GSTUDIO = new Map();
+function gExtraBody(tab, gs, c) {
+  const section = GSTUDIO.get(tab);
+  return section && section.active(gs) ? section.body(gs, c) : null;
+}
+function gExtraSteps(steps, c) {
+  for (const [tab, section] of GSTUDIO) {
+    if (!c.gs.length || !section.active(c.gs)) continue;
+    const at = steps.findIndex(step => step[3] === section.before);
+    if (at >= 0) steps.splice(at, 0, [...section.step(c), tab]);
+  }
+  return steps;
+}
 function gbodyHtml(gs, c) {
   const t = GS.tab;
+  const extra = gExtraBody(t, gs, c);
+  if (extra !== null) return extra;
   if (t === 'request') return requestView(gs);
   if (t === 'plan') return planView(gs[0]);
   if (t === 'anim' && !gs.some(animPhase) && !c.busyAnim && !gs.some((g) => PVON.has(g.number)))
@@ -760,6 +775,7 @@ function stepsHtml(c) {
   S[0][0] = 'Idea';
   S[3][0] = 'Motion';
   S.push(['Telegram', tg ? 'done' : 'todo', tg ? 'Sent' : allAdded ? 'Send from the pack' : 'After the pack', 'telegram']);
+  gExtraSteps(S, c);
   const mark = (st, i) => (st === 'done' ? ic('check') : st === 'run' ? '<span class=spin></span>' : st === 'warn' ? '!' : i + 1);
   return `<div class=gsteps role=tablist aria-label="Where this batch is">${S.map(([l, st, sub, tab], i) => `<button class="gst ${st} ${tab === cur ? 'cur' : ''}" ${tab === 'pack' ? `data-act=gadd ${ready && n ? '' : 'disabled'}` : tab === 'telegram' ? `data-act=gopenpack ${allAdded ? '' : 'disabled'}` : `data-act=gtab data-t=${tab}`}><span class=gsm>${mark(st, i)}</span><span class=gsl><b>${l}</b><small title="${sub.replace(/<[^>]+>/g, '')}">${sub}</small></span></button>`).join('')}</div>`;
 }

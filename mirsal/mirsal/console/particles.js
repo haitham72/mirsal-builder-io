@@ -122,18 +122,15 @@ function spView(gs){if(SP.eid&&Date.now()-SP.t>3000){SP.t=Date.now();fxLoad(SP).
  return `<section class="gplan sp fx" id=sp-root data-fxx=sp>${cont}${spBody(gs)}</section>`}
 const spEffectsRender=RENDER.effects;
 RENDER.effects=arg=>{if(arg)return spEffectsRender(arg);$('s-effects').innerHTML=spView([]);spAfterDraw()};
-/* the tab is part of the Studio's header and body: generate.js owns both, so they are wrapped here (the way live.js wraps drawRail) instead of being edited */
-const spWasBody=gbodyHtml;
+/* Register data and a view; Studio owns rendering and step numbering. */
 const spAnimated=gs=>(gs||[]).some(g=>g.kind==='particles'||((g.stickers||[]).some(t=>['READY','FAILED'].includes(t.anim_status))));
-gbodyHtml=function(gs,c){return (GS.tab==='particles'&&(!gs.length||spAnimated(gs)))?spView(gs):spWasBody(gs,c)};
-/* the tab's step goes right after Animation, and only once an animation exists (before that there is nothing to put particles on):
-   the steps after it are numbered again (Pack becomes 6) */
 const spMade=gs=>{let n=0;for(const l of gs.map(g=>spLinkIndex(LIB.packs,g.generation_id)))for(const x of Object.values(l)){const c=(PKPT.c[x.pack_id]||{})[x.sticker.id];if(c)n+=c.created+c.saved}return n};
-function spSteps(h,gs){const at=h.indexOf('data-act=gadd'),i=at<0?-1:h.lastIndexOf('<button class="gst',at);if(i<0||!spAnimated(gs))return h;
- const n=spMade(gs),cur=GS.tab==='particles',btn=`<button class="gst ${n?'done':'todo'} ${cur?'cur':''}" data-act=gtab data-t=particles><span class=gsm>${n?ic('check'):5}</span><span class=gsl><b>Reactions</b><small>${n?`${n} made`:'None yet'}</small></span></button>`;
- return(h.slice(0,i)+btn+h.slice(i)).split('<button class="gst').map((x,k)=>k?x.replace(/<span class=gsm>\d<\/span>/,`<span class=gsm>${k}</span>`):x).join('<button class="gst')}
-const spWasSteps=stepsHtml;
-stepsHtml=function(c){return spSteps(spWasSteps(c),c.gs)};
+GSTUDIO.set('particles', {
+ active: gs=>!gs.length||spAnimated(gs),
+ body: gs=>spView(gs),
+ before:'pack',
+ step: c=>{const n=spMade(c.gs);return ['Reactions',n?'done':'todo',n?`${n} made`:'None yet'];}
+});
 /* "Make reactions" for one sticker (the section below, the library's sticker view in the Studio) and "Create reactions for pack" */
 const spShowTab=()=>{GS.tab='particles';glast='';if(typeof tick==='function')tick(true);const r=document.getElementById('gres');if(r)r.scrollIntoView({behavior:'smooth',block:'start'})};
 function spOpenFor(pack,sid){return spEnter({pack_id:pack,sticker_id:sid||undefined})}
