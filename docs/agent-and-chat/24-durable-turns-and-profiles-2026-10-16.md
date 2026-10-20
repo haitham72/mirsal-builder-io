@@ -9,6 +9,11 @@ remain the approval interface.
 
 ## Turn checkpoints (`SqliteSaver`, `out/checkpoints.sqlite`)
 
+Code ownership is now split under `agent/lifecycle/`: `checkpoints.py` owns the
+connection pool, `runner.py` owns locks/replay, `turn.py` owns serialized state,
+and `builder.py` owns topology. `agent/graph.py` preserves the public entry points
+and old checkpoint class imports. See [code boundaries](25-agent-code-boundaries.md).
+
 Every turn checkpoints under `thread_id = <session id>` using
 `langgraph-checkpoint-sqlite`. The file is git-ignored under `mirsal/out/`, with
 one saver per output directory. `Turn.__getstate__` drops the live trace and lock;

@@ -42,6 +42,10 @@ Rules that hold across the layers:
 
 ## 3. Where the data lives
 
+Agent implementation: `agent/graph.py` owns state and public entry points;
+`agent/lifecycle/` owns turns, checkpoints, replay and graph construction;
+`agent/nodes/` groups intent handlers. See [agent code boundaries](agent-and-chat/25-agent-code-boundaries.md).
+
 | place | what | owner |
 |---|---|---|
 | `inputs/Images_gen`, `inputs/videos_gen` | prepared sheets and videos, `img-NNN-<subject>/` + `vid-NNN-<subject>/` (never renamed) | `flow/sources.py`, `flow/watch.py` |

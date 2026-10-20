@@ -18,6 +18,8 @@ through `agent/tools.py`. Nothing is re-implemented.
 
 ## Sections
 
+Implementation structure: [Agent lifecycle and intent modules](agent-and-chat/25-agent-code-boundaries.md).
+
 This is an index: each section is its own file under [`agent-and-chat/`](agent-and-chat/); read only the one a task needs.
 
 | section | what it covers |
