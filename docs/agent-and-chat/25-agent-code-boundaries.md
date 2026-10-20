@@ -6,7 +6,7 @@ classes; these classes have no constructors or separate mutable state.
 
 `agent/lifecycle/` owns:
 
-- `turn.py`: serializable Turn, graph State and visible Trace.
+- `turn.py`: serializable Turn, graph State, visible Trace and interrupted-message handling.
 - `checkpoints.py`: process-owned SQLite connections, locking and reference counts.
 - `runner.py`: per-session turn locks, execute/finally release and safe replay.
 - `builder.py`: graph topology and queue dispatch.

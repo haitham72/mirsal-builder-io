@@ -12,11 +12,11 @@ from .brain import Brain
 from .memory import SessionStore
 from .profile import EDIT_HINTS, Profile
 from .tools import ConsoleTools
-from .lifecycle.turn import Turn, State, Trace
+from .lifecycle.turn import Turn, State, Trace, _interrupt_message
 from .lifecycle import checkpoints
 from .lifecycle.runner import TurnLifecycle
 from .lifecycle.builder import build_graph, route as dispatch_route
-from .nodes.shared import STYLE_NAMES, _interrupt_message, compact_plan
+from .nodes.shared import STYLE_NAMES, compact_plan
 from .nodes.understanding import UnderstandingNodes
 from .nodes.creation import CreationNodes
 from .nodes.batches import BatchesNodes

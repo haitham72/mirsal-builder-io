@@ -6,6 +6,13 @@ from typing import Any, TypedDict
 from ..memory import SessionStore
 from ..resolver import Resolution
 
+INTERRUPTED = "That turn was interrupted before it finished (the server restarted). Check the Queue for any job already started before trying again."
+
+def _interrupt_message(msg):
+    msg.update(status="error", text=msg.get("text") or INTERRUPTED)
+    msg.setdefault("steps", []).append({"kind": "note", "label": INTERRUPTED, "status": "done"})
+
+
 class Trace:
     """The visible step queue of one turn. Saved as it grows so the page (which polls) shows the agent working."""
 

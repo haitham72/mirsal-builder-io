@@ -2,9 +2,8 @@
 from __future__ import annotations
 from ...runtime import cache as cachemod
 from ..memory import SessionError
-from .turn import Turn, Trace
+from .turn import Turn, Trace, _interrupt_message
 from . import checkpoints
-from ..nodes.shared import _interrupt_message
 SAFE_RESUME_NODES = {"resolve", "clarify", "smalltalk", "finish"}
 
 class TurnLifecycle:

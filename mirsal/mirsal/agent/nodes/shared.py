@@ -3,16 +3,12 @@ from __future__ import annotations
 from ...generation import styles
 from ..lifecycle.turn import Turn
 
-INTERRUPTED = "That turn was interrupted before it finished (the server restarted). Check the Queue for any job already started before trying again."
 CONTINUE_RX = r"^(?:continue|go on|go ahead|proceed|carry on|keep going|approve and continue|resume)\b"
 CREATION_INTENTS = {"NEW", "NEW_MULTI", "ANOTHER", "REFINE", "EDIT_STICKERS", "EDIT_ROUTE", "ANIMATE", "CONFIRM", "EFFECTS", "PARTICLES", "CREATOR", "RETRY", "BATCH_MORE", "REGENERATE"}
 SUGGESTIONS = ["a teddy bear waving", "falcon stickers", "my dog as a banana", "Eid mubarak greetings"]
 TONE_ACK = {"brief": " I'll keep it short.", "warm": " I'll keep it warm and chatty.", "formal": " I'll keep it formal."}
 STYLE_NAMES = {p["id"]: p["label"].lower() for p in styles.PRESETS}          # the names the cards and replies use: the real presets, never a list of the chat's own
 
-def _interrupt_message(msg):
-    msg.update(status="error", text=msg.get("text") or INTERRUPTED)
-    msg.setdefault("steps", []).append({"kind": "note", "label": INTERRUPTED, "status": "done"})
 
 def _credits(x) -> str:
     return "free" if not x else f"about {x:g} credit" + ("" if x == 1 else "s")
