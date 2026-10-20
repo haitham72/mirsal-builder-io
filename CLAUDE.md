@@ -18,7 +18,7 @@
 | ZIP exports, emoji bank resolution | `docs/export to team/mirsal-export-architecture.md` |
 | redesign (no action may disappear without a `renamed`/`retired` entry in `mirsal/tests/data/ui_baseline.json`) | `docs/redesign_plan.md`, `docs/ui_inventory.md` |
 | the whole app on one page | `docs/architecture.md` |
-| proposals waiting for a go | `docs/burst_plan.md`, `docs/chat-interaction-proposal.md`, `docs/size-position-lottie-proposal.md` (Size/Position redesign, one-frame preview, Lottie style à la Particular) |
+| proposals waiting for a go | `docs/burst_plan.md`, `docs/chat-interaction-proposal.md`, `docs/size-position-lottie-proposal.md` (Size/Position redesign, one-frame preview, Lottie style à la Particular), `docs/super-reaction-proposal.md` (hold-to-super-react, full-screen viewport-relative scenes) |
 | current app audit and owner review | `docs/uiux_review/app-audit-2026-10-19.md`, `user app review guide.md`; active remaining queue `plan.md`, journey status/checklists contain remaining work only |
 | numbers, historical audits | `docs/measurements.md`, `docs/review-prompt.md` (whole repo), `docs/uiux-review-prompt.md` (historical UI/UX audit workflow), `docs/review.md`; reference inputs `docs/inputs/` |
 
