@@ -832,7 +832,7 @@ function vzCard(show) {
   const g = GM.get(VZ.g), i = g && vzTarget(g);
   if (!g || !i) return vzCard(false);
   if (!c) {
-    c = TESTCARD.open({id:'vzcard',apply:'vzapply',cancel:'vzcancel',stageClass:'vzstage',
+    c = TESTCARD.open({id:'vzcard',apply:'vzapply',cancel:'vzcancel',stageClass:'vzstage',focus:true,
       stageExtra:'<svg class=vzguide viewBox="0 0 512 512" aria-hidden=true></svg>',
       controls:'<div class=vzframe><input type=range min=0 value=0 aria-label="Frame"><small class=mut></small></div><div class=vzctl></div>'});
     const rg = c.querySelector('input[type=range]');

@@ -100,7 +100,7 @@ function rxCard(p,used){
  return `<article class="rx-card rx-var${open?' on':''}${sel?' sel':''}" data-rxcard=${esc(p.id)}>`+
   `<button class=rx-x data-act=rxpdel data-id="${esc(p.id)}" aria-label="Remove ${esc(p.id)}" title="Remove ${esc(p.id)} (its emojis go back to their motion's first variation)">${ic('x')}</button>`+
   `<button class=rx-vsel data-act=rxpsel data-id="${esc(p.id)}" aria-pressed=${sel} aria-label="Select ${esc(p.id)}">${sel?ic('check'):''}</button>`+
-  `<div class=rx-stage data-act=rxpopen data-id="${esc(p.id)}" title="Open ${esc(p.id)}">${rxStageHtml(rxRow(RXS.sample).emoji,url,p.id,(RXS.ppar[p.id+'|'+RXS.sample]||{}).origin)}${url?'':'<span class=spin></span>'}</div>`+
+  `<div class=rx-stage data-act=rxpopen data-id="${esc(p.id)}" role=button tabindex=0 aria-label="Open ${esc(p.id)}" title="Open ${esc(p.id)}">${rxStageHtml(rxRow(RXS.sample).emoji,url,p.id,(RXS.ppar[p.id+'|'+RXS.sample]||{}).origin)}${url?'':'<span class=spin></span>'}</div>`+
   `<div class=rx-meta><span class=rx-mt><b>${esc(p.id)}</b><small class=mut>${rxPlural(used||0,'emoji')}</small></span><button class=link data-act=rxdl data-id="${esc(p.id)}" title="${esc(p.id)}.json" aria-label="Download ${esc(p.id)}.json">${ic('download')}</button></div></article>`}
 function rxLibHtml(){
  const ps=rxPresets();if(!RXS.lib)return `<section class=rx-made data-rxlib><div class=sh>Animation presets</div><span class=spin></span></section>`;

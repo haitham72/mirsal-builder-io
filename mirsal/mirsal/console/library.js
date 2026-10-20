@@ -55,10 +55,12 @@ const selRefresh = () => {
 };
 
 ACT.lsel = (el) => {
-  const k = selKey(el.dataset.p, el.dataset.id);
+  const k = selKey(el.dataset.p, el.dataset.id), kb = el === document.activeElement;
   if (SEL.has(k)) SEL.delete(k);
   else SEL.set(k, { pack_id: el.dataset.p, id: el.dataset.id });
   selRefresh();
+  // the grid is redrawn: a keyboard toggle keeps focus on the same sticker's box (UX-03)
+  if (kb) { const b = document.querySelector(`.selbox[data-p="${el.dataset.p}"][data-id="${el.dataset.id}"]`); if (b) b.focus(); }
 };
 
 ACT.lselall = () => {
@@ -372,7 +374,7 @@ function libByPackHtml(all) {
   });
   const cell = ([s, i]) => {
     const on = SEL.has(selKey(s.pack_id, s.id));
-    return `<div class="cell ${on ? 'sel' : ''}" data-act=lcopen data-i=${i}><span class="selbox ${on ? 'on' : ''}" data-act=lsel data-p=${s.pack_id} data-id=${s.id} title="Select"></span>${media(s)}<div class=cap>${esc(s.emoji)} ${esc(s.name)}</div></div>`;
+    return `<div class="cell ${on ? 'sel' : ''}" data-act=lcopen data-i=${i}><button type=button class="selbox ${on ? 'on' : ''}" data-act=lsel data-p=${s.pack_id} data-id=${s.id} title="Select" aria-label="Select ${esc(s.name)}" aria-pressed=${on}></button>${media(s)}<button type=button class=cap data-act=lcopen data-i=${i} title="View">${esc(s.emoji)} ${esc(s.name)}</button></div>`;
   };
   return `<div class="selgrid lib-bypack ${SEL.size ? 'selmode' : ''}">${[...by].map(([pid, xs]) => `<section class=lib-pk><div class=lib-pkh><b>${esc(xs[0][0].pack)}</b><small class=mut>${libCountLabel((typeof LIBQ==='undefined'||!LIBQ.trim())&&typeof LIB!=='undefined'?(LIB.packs||[]).find(p=>p.id===pid):null,xs.length)}</small><button class=link data-act=openpack data-id=${esc(pid)}>Open pack</button></div><div class=grid>${xs.map(cell).join('')}</div></section>`).join('')}</div>`;
 }

@@ -1,6 +1,5 @@
 # Reaction presets — remaining checklist
 
-- [ ] Inspect native keyboard opening of preset preview stages (UX-03 related pattern).
 - [ ] Shared controller/presenter/cache tasks with current Motion/Size/Advanced and separate export contracts.
 - [ ] Optional Lottie fields, F-31 wording and remaining combinations; do not recreate retired per-emoji generation workflows.
 

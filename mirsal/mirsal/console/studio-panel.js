@@ -143,10 +143,10 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft') ACT.gstep({ dataset: { d: -1 } });
 });
 
-/* the sheet's cells are SVG rects: Enter or Space on a focused one presses it like a click (a rect answers neither key by itself) */
+/* the sheet's cells are SVG rects, a preset's preview stage a div[role=button]: Enter or Space on a focused one presses it like a click (neither answers those keys by itself) */
 document.addEventListener('keydown', (e) => {
-  const t = e.target;
-  if ((e.key === 'Enter' || e.key === ' ') && t && t.dataset && t.dataset.act && String(t.tagName || '').toLowerCase() === 'rect') {
+  const t = e.target, tag = String((t && t.tagName) || '').toLowerCase();
+  if ((e.key === 'Enter' || e.key === ' ') && t && t.dataset && t.dataset.act && (tag === 'rect' || (tag === 'div' && t.getAttribute('role') === 'button'))) {
     e.preventDefault();
     const f = ACT[t.dataset.act];
     if (f) f(t, e);

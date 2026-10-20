@@ -4,7 +4,7 @@ Updated 2026-10-19 against source `64d8b8a4` (docs-only audit, no product fix).
 A later phase on this branch, [dark rework](../../dark-rework-2026-10-19.md),
 made New request a permanently open section — the item below is resolved.
 
-- UX-05 frame-card focus/Escape; review the left creation-panel proposal.
+- Review the left creation-panel proposal. UX-05 frame-card focus/Escape is built ([audit fixes](../../../design/16-app-audit-fixes-2026-10-20.md)).
 - Watcher/edge synchronization and shared preview/cache ownership (separate from slider tasks T-024/025).
 - Remaining route-wide states and owner visual verdict; preserve fresh Create and existing slider/frame semantics.
 

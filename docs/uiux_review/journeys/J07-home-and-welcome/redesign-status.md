@@ -4,7 +4,7 @@ Updated 2026-10-19 against source `64d8b8a4` (docs-only audit, no product fix).
 A later phase, [dark rework](../../dark-rework-2026-10-19.md), revised the
 neutral/cyan theme referenced below.
 
-- UX-06 workspace identity is implemented (2026-10-20): see the checklist. Still open: owner visual review of the revised neutral/cyan theme.
+- UX-06 workspace identity is built: [audit fixes](../../../design/16-app-audit-fixes-2026-10-20.md). Still open: owner visual review of the revised neutral/cyan theme.
 - Owner verdict on films/art/wording and welcome playback; no new media generation authorized.
 
 [Current audit and evidence](../../app-audit-2026-10-19.md) · [Remaining queue](../../../../plan.md)

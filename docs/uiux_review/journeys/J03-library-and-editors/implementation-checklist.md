@@ -1,7 +1,6 @@
 # Library and editors — remaining checklist
 
 - [ ] UX-01 populated phone image/animation/Save layout.
-- [ ] UX-03 native keyboard tile/selection actions; UX-04 accessible editor names.
 - [ ] Shared grid/preview/download lifecycle; loaded Prepare and remaining viewer/menu states.
 
 Before implementation: reproduce against current source, preserve all contracts,
