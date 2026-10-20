@@ -188,20 +188,52 @@ function rxEdSync(){
   const v=rxVal(k,o);if(v!=null)i.value=v;const out=i.parentNode.querySelector('output');if(out)out.textContent=rxFmt(o,v)})}
 
 /* ---------- the server ---------- */
+/* A cache owns both the request and its result. Invalidated requests may finish,
+   but cannot repopulate the cache or update a newer editor. Errors can retry. */
+function rxPreviewCache(values, params, request=post) {
+ const entries = new Map();
+ return {
+  entries,
+  async load(key, body) {
+   if(values[key])return {url:values[key],par:params[key]};
+   const prior=entries.get(key);
+   if(prior&&prior.status==='pending')return prior.promise;
+   const entry={status:'pending',promise:null};
+   entries.set(key,entry);
+   entry.promise=(async()=>{
+    try {
+     const r=await request('/api/particles/emoji-preview',body);
+     if(entries.get(key)!==entry)return null;
+     if(!r.ok){entry.status='error';entry.error=r.j.error||'The preview could not be made.';return null;}
+     entry.status='success';values[key]=r.j.url;params[key]=r.j.params;
+     return {url:r.j.url,par:r.j.params};
+    } catch(e) {
+     if(entries.get(key)===entry){entry.status='error';entry.error=e.message;}
+     return null;
+    }
+   })();
+   return entry.promise;
+  },
+  invalidate(match=()=>true) {
+   for(const key of new Set([...entries.keys(),...Object.keys(values)])){
+    if(match(key)){entries.delete(key);delete values[key];delete params[key];}
+   }
+  }
+ };
+}
+const RXPREVIEW=rxPreviewCache(RXS.pv,RXS.par);
+const RXCARDPREVIEW=rxPreviewCache(RXS.ppv,RXS.ppar);
 /* the editor's preview (the plain framing), or a hovered emoji's (fit) */
 async function rxPlay(t){
  const ed=()=>RXS.ek&&RXS.ek.token===t;
  if(!ed()){if(await rxHovPreview(t)&&RXS.hover===t)rxTileRedraw(t);return}
  const b=rxBody(RXS.ek),key=rxKey(b);
- if(!RXS.pv[key]){
-  const r=await post('/api/particles/emoji-preview',{...b,size:RXED});
-  if(!r.ok){if(ed()){RXS.ek.err=r.j.error||'The preview could not be made.';rxEdRedraw()}return}
-  RXS.pv[key]=r.j.url;RXS.par[key]=r.j.params}
+ const preview=await RXPREVIEW.load(key,{...b,size:RXED});
+ if(!preview){if(ed()&&key===rxKey(rxBody(RXS.ek))){RXS.ek.err=RXPREVIEW.entries.get(key)?.error||'The preview could not be made.';rxEdRedraw()}return}
  if(ed()&&key===rxKey(rxBody(RXS.ek))){RXS.ek.own=RXS.par[key];RXS.ek.shown=RXS.pv[key];RXS.ek.err='';rxEdSync()}}
 /* ---------- the same hover reaction anywhere else (a pack's sticker plays its emoji's preset when pointed at, the SAME effect as the wall) ---------- */
 async function rxHovPreview(t){const key=rxHovKey(t);
- if(!RXS.pv[key]){const r=await post('/api/particles/emoji-preview',{...rxFor(t),size:RXPX,fit:true});if(!r.ok)return null;RXS.pv[key]=r.j.url;RXS.par[key]=r.j.params}
- return{url:RXS.pv[key],par:RXS.par[key]}}
+ return RXPREVIEW.load(key,{...rxFor(t),size:RXPX,fit:true})}
 async function rxBankEnsure(){
  if(!RXS.bank){const b=await api('/api/particles/emoji-motions');if(b.ok){RXS.bank=b.j.motions||[];RXS.rows=null;if(b.j.start)RXS.start=b.j.start}}
  if(!RXS.lib)await rxLoadLib(true);
@@ -220,10 +252,9 @@ async function rxLoadLib(quiet){const r=await api('/api/particles/reaction-prese
 async function rxCardPreviews(){
  const t=RXS.sample;
  for(const p of rxPresets().filter(x=>RXS.mopen.has(x.motion))){
-  const k=p.id+'|'+t;if(RXS.ppv[k]!==undefined)continue;RXS.ppv[k]='';
-  const r=await post('/api/particles/emoji-preview',{...rxBodyOf(t,p.settings,p.motion),size:RXPX});
-  RXS.ppv[k]=r.ok?r.j.url:'';if(r.ok)RXS.ppar[k]=r.j.params;
-  if(r.ok&&route_==='reactions'&&RXS.sample===t){const el=document.querySelector&&document.querySelector(`[data-rxcard="${p.id}"]`);if(el)el.outerHTML=rxCard(p,rxUse()[p.id])}}}
+  const k=p.id+'|'+t;
+  const preview=await RXCARDPREVIEW.load(k,{...rxBodyOf(t,p.settings,p.motion),size:RXPX});
+  if(preview&&route_==='reactions'&&RXS.sample===t){const el=document.querySelector&&document.querySelector(`[data-rxcard="${p.id}"]`);if(el)el.outerHTML=rxCard(p,rxUse()[p.id])}}}
 RENDER.reactions=async()=>{rxDraw();
  if(rxTab()==='packs')return;
  if(rxTab()==='lottie'){if(!LS.files){await lsLoad();if(route_==='reactions')rxDraw()}return}
@@ -287,7 +318,7 @@ ACT.rxsave=async()=>{
  const k=RXS.ek;if(!k||!k.id||k.busy)return;k.busy=true;rxEdRedraw();
  const r=await post(`/api/particles/reaction-presets/${encodeURIComponent(k.id)}`,{settings:rxSettings(k)});k.busy=false;
  if(!r.ok){k.err=r.j.error||'Could not save it';return rxEdRedraw()}
- await rxLoadLib(true);Object.keys(RXS.ppv).filter(x=>x.startsWith(k.id+'|')).forEach(x=>delete RXS.ppv[x]);rxDraw();toast(`${k.id} saved`)};
+ await rxLoadLib(true);RXCARDPREVIEW.invalidate(x=>x.startsWith(k.id+'|'));rxDraw();toast(`${k.id} saved`)};
 ACT.rxcreate=async()=>{
  const k=RXS.ek;if(!k||k.busy)return;k.busy=true;rxEdRedraw();
  const r=await post('/api/particles/reaction-presets',{motion:k.motion,settings:rxSettings(k)});k.busy=false;

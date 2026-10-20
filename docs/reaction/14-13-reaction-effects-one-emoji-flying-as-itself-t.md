@@ -39,3 +39,12 @@ The envelope multiplies the pop-in and the flight growth, never replaces them. T
 **The viewer is the export (Haitham, 2026-10-14).** The editor plays the preset at `size` 512, shown 1:1 in a 512 px square (stacked above the controls below 1180 px): exactly the 512 x 512 canvas of `{motion}_{NN}.json`, no fit zoom. A **Border** checkbox (editor header and the Animation presets header, one setting kept in the browser as `rx.debug`) draws the canvas edge as a square line and a `+` on the burst origin (the preview's own `params.origin`), on the editor and on every preset card. A view-only debug aid: nothing is sent or stored on the server. The emoji-wall hover keeps its fit zoom and its bottom-right Telegram placement.
 
 **Preview cache (Haitham, 2026-10-14).** Every `previews/` folder under `out/particles/` (a set's and each emoji's) and under `out/effects/` (each run's `sim_preview`) is a cache: nothing stores its paths, and a preview asked again is made again. Each write keeps only the newest `particle_sets.PREVIEW_KEEP` (24) files of its folder (`prune_previews`); `sweep_previews(out)` prunes every folder at once (run once on 2026-10-14: 303 files, about 85 MB). `renders/` (created reactions) and `cells/` (set sprites) are never pruned. Lottie style writes no preview file (the viewer plays the JSON from memory).
+# Preview request ownership (2026-10-20)
+
+`reactions.js` uses `rxPreviewCache` for editor/hover and preset-card previews.
+Each cache deduplicates pending requests, records success/error explicitly and
+allows a failed request to retry. Invalidating a preset also detaches its pending
+request, so an older completion cannot restore stale artwork. The existing URL
+and parameter maps remain the renderer's read interface. The focused Reactions
+tests cover retry, concurrent callers and invalidation during a request (9 pass).
+
