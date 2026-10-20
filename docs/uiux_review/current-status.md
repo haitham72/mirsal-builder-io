@@ -1,14 +1,17 @@
 # Redesign — remaining work
 
 Source audited: `64d8b8a4`, `redesign-ui-ux`, 2026-10-19 — a docs-only audit, no product fixes.
-A later, separate phase on the same branch did land a product fix: the
+Two later, separate phases on the same branch did land product fixes: the
 [neutral/cyan dark theme and always-open New request](dark-rework-2026-10-19.md)
-(fixes UX-02 primary-hover contrast; folds in always-open New request). The
-defect list below is this audit's, minus what that later phase already fixed.
-Use [plan.md](../../plan.md) as the execution queue and the [user review guide](../../user%20app%20review%20guide.md) for Haitham's later review.
+(fixes UX-02 primary-hover contrast; folds in always-open New request), and a
+2026-10-20 pass fixing UX-06 (workspace identity), UX-08 (owner-aware heading)
+and UX-11 (recognizable owner names/thumbnails) — see J05's and J07's
+checklists. The defect list below is this audit's, minus what those phases
+already fixed. Use [plan.md](../../plan.md) as the execution queue and the
+[user review guide](../../user%20app%20review%20guide.md) for Haitham's later review.
 
-- **Confirmed defects:** phone populated editor/animation/Save layout; keyboard sticker actions; editor accessible names; frame preview focus/Escape; incorrect saved-set ownership heading. Watch-folder phone layout depends on W34 retention. IDs and reproduction: [current audit](app-audit-2026-10-19.md).
-- **Design decisions:** review the proposed Studio left creation panel;  workspace identity, earlier-work recovery, phone Chat density, recognizable reaction owners, F-31 wording, cloud pricing and visual verdicts.
+- **Confirmed defects:** phone populated editor/animation/Save layout; keyboard sticker actions; editor accessible names; frame preview focus/Escape. Watch-folder phone layout depends on W34 retention. IDs and reproduction: [current audit](app-audit-2026-10-19.md).
+- **Design decisions:** review the proposed Studio left creation panel; earlier-work recovery, phone Chat density, F-31 wording, cloud pricing and visual verdicts.
 - **Engineering:** API routers/schemas, graph/lifecycle boundaries, watcher/presenter/cache/style extractions T-024/025/031/034/035; runtime/parked React decisions W29/W33.
 - **Unverified states:** route-wide keyboard/menu/destructive combinations, loaded Prepare video, LAN roles, all Settings/Help states and every opened/hover state. Paid quality and sends remain owner-only.
 - **Test debt:** inherited agent baseline 322 / 4 failures / 9 errors. No tests rerun for this docs-only audit.

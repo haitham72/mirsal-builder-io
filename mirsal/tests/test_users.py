@@ -178,6 +178,10 @@ class UsersServerTests(unittest.TestCase):
         self.assertEqual(self.req("POST", f"/api/users/{made['user']['id']}/update", {"can_spend": False}, PAGE)[1]["user"]["can_spend"], False)
         self.assertEqual(self.req("POST", "/api/users/U999/disable", {}, PAGE)[0], 404)
 
+    def test_the_owner_sees_whether_this_is_the_real_out_or_a_copy(self):
+        """UX-06: the workspace identity is an API contract (`paths.default`), never a client guess from a port. A member never sees `paths` at all (asserted elsewhere)."""
+        self.assertIs(self.req("GET", "/api/generations", headers=self.O)[1]["paths"]["default"], False)  # this test's out/ is a tempfile.mkdtemp(), never the real out/
+
     def test_a_member_cannot_reach_the_owners_surface(self):
         for path in ("/api/users", "/api/library", "/api/telegram", "/api/usage", "/api/higgsfield", "/api/watch", "/api/tasks", "/api/inbox", "/api/projects",
                      "/api/models", "/api/inputs", "/api/history", "/api/jobs/J999/x"):

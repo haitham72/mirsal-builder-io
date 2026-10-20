@@ -15,7 +15,8 @@ let SES = { prompt: '', gens: [], off: [], pack: '' },
   MD = null,
   VG = null,
   GINP = [],
-  GHEALTH = null;
+  GHEALTH = null,
+  GPATHS = null;   // UX-06: {input,out,default} from /api/generations; `default` says whether this IS the real out/, never guessed from a port
 
 const GS = { outline: 0, tile: 220, tab: 'stickers' };
 
@@ -315,7 +316,10 @@ async function loadInputs() {
   if (r.ok) GINP = r.j.inputs;
   await aiRefresh();
   const h = await api('/api/generations');
-  if (h.ok) GHEALTH = h.j.health;
+  if (h.ok) {
+    GHEALTH = h.j.health;
+    if (h.j.paths) { GPATHS = h.j.paths; if (typeof drawRail === 'function') drawRail(); }
+  }
 }
 
 /* a new request starts a session with Batch 1; "Create more" adds the next batch */

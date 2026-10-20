@@ -205,6 +205,17 @@ test('the open card: elements, source, motion, every cell with what is kept, and
   run("SPL.open=''");
 });
 
+test('UX-11: Manage stickers resolves owner ids to the sticker\'s name, thumbnail and pack, never an opaque id alone', () => {
+  const h = run(withPacks(`spSetDetail(${JSON.stringify(SET())})`));
+  assert.doesNotMatch(h, /sticker a1/, 'a1 is in PACKS: no raw id fallback');
+  assert.match(h, /<img data-m=a1>/, 'the sticker\'s own thumbnail (media()), not a placeholder');
+  assert.match(h, /Sticker &lt;a1&gt;/, 'the sticker\'s real name, escaped');
+  assert.match(h, /Fruits &lt;b&gt;/, 'the pack it is attached through, escaped');
+  const unknown = run(`spSetDetail(${JSON.stringify(SET({ owner: [{ pack_id: 'gone', sticker_id: 'zzz' }] }))})`);
+  assert.match(unknown, /sticker zzz/, 'an id no longer in any pack still says something, never a blank row');
+  run("LIB.packs=[]");
+});
+
 test('the library list: loading, empty, and the sets with a way to make more', () => {
   run("SPL.sets=null;SPL.view=null;SPL.bank=null;SPL.bankSel=null;SPL.build=[]");
   assert.match(run("spLibHtml()"), /Reading the particle sets/);

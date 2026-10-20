@@ -289,8 +289,9 @@ function drawRail() {
   $('c2tog').innerHTML = ic('panel');
   const on = RAILOF[route_] || route_,
     me = meOf();
+  const notDefault = typeof GPATHS !== 'undefined' && GPATHS && GPATHS.default === false;  // UX-06: never hidden - a copied/task out/ must say so, not look like the real workspace
   $('rail').innerHTML =
-    `<button class="logo ${route_ === 'home' ? 'on' : ''}" data-act=home title="Home" aria-label="Mirsal home"><img src=/assets/brand/mirsal-logo.png alt=""></button>` +
+    `<button class="logo ${route_ === 'home' ? 'on' : ''}" data-act=home title="${notDefault ? 'Mirsal home — Test workspace: ' + esc(GPATHS.out) : 'Mirsal home'}" aria-label="Mirsal home"><img src=/assets/brand/mirsal-logo.png alt="">${notDefault ? '<span class=ws-badge title="Not the real out/: a copy or a task workspace">Test</span>' : ''}</button>` +
     RAIL.map(
       ([k, i, l]) =>
         `<button class="rbtn ${on === k ? 'on' : ''}" data-act=${k === 'agent' ? 'railcreate' : 'nav'} data-to=${k === 'agent' ? CTAB : k}${on === k ? ' aria-current=page' : ''}>${ic(i)}<span>${l}</span>${k === 'help' && typeof supUnread === 'function' && supUnread() ? `<i class=rdot aria-label="${supUnread()} unread"></i>` : ''}</button>`,

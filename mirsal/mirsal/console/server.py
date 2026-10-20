@@ -1288,7 +1288,10 @@ def make_handler(c: Console):
                     page, meta = self._page([g for g in pl.summary(c.out) if g.get("owner") == self.user["id"]])
                     return self._json(200, {"busy": c.lock.locked(), "generations": page, **meta})
                 page, meta = self._page(pl.summary(c.out))
-                return self._json(200, {"busy": c.lock.locked(), "health": c.health(), "paths": {"input": str(c.inp), "out": str(c.out)}, "stale": c.stale(), "generations": page, **meta})
+                from ..store import sync as _sync          # UX-06: the workspace identity contract (is this the real out/, decided here, never guessed from a port in the browser)
+                return self._json(200, {"busy": c.lock.locked(), "health": c.health(),
+                                         "paths": {"input": str(c.inp), "out": str(c.out), "default": _sync.is_default_out(c.out)},
+                                         "stale": c.stale(), "generations": page, **meta})
             if path == "/api/generations/removed":      # the trash of batches (owner only like the rest): Restore is reachable long after the remove
                 return self._json(200, {"batches": batches.list_removed(c.out)})
             if path == "/api/trash":                    # the whole trash (removed batches + deleted packs) with exactly what a purge would remove (owner only; flow/purge.py)

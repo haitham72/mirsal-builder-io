@@ -101,6 +101,13 @@ test('mixed sources keep their Kling provenance visible',()=>{
 });
 
 
+test('UX-08: the set heading tag agrees with its real owner list, never a hard-coded "on their own"',()=>{
+ const run=setup();
+ run(`SP.scope={set:'P001'};SP.set={...${set},owner:[{pack_id:'parent',sticker_id:'a'},{pack_id:'parent',sticker_id:'b'}]}`);
+ assert.match(run('spBody([])'),/<b>Particles<\/b><span class=mut>made for 2 stickers<\/span>/);
+ run(`SP.set={...${set},owner:[]}`);
+ assert.match(run('spBody([])'),/<b>Particles<\/b><span class=mut>on their own<\/span>/);
+});
 test('Open and save mode writes a new row and leaves the source row unchanged',async()=>{
  const run=setup();run(owner+`;SPBS.P001=${set};spBurstState(SPBS.P001,'parent');SP.saveAsNew='P001';POSTREPLIES.push({ok:true,j:{...SPBS.P001,id:'P002'}})`);
  await run("ACT.psbsave({dataset:{id:'P001'}})");
