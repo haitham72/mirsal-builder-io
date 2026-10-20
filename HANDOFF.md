@@ -1,10 +1,24 @@
-﻿# HANDOFF - session save point, 2026-10-19
+﻿# HANDOFF - session save point, 2026-10-20
 
 Checkout `G:/Haitham/VsCode/Mirsal-Builder`, branch `redesign-ui-ux`.
-Last pushed commit **6170c0ec** (audit and remaining-only documentation).
-Main stays `0167761b`. **This session's source/docs changes are uncommitted.**
-User requested this save point at 5% context; no further implementation is needed
-before finishing the documentation/commit close-out. plan.md is next steps only.
+Last pushed commit **9baa54e9** (dark-rework close-out docs + Postgres profile
+sync docs), pushed to `origin/redesign-ui-ux`. Previous save point's close-out
+is done: `current-status.md` and the J01/J07/J10 journey headers now say they
+describe the pre-dark-rework audit and link `dark-rework-2026-10-19.md`; the
+untracked `output/playwright/` scratch was moved out of the repo (not deleted,
+not committed). Main stays `0167761b`.
+
+This session separately confirmed the chat's Postgres profile sync
+(`docs/agent-and-chat/24-durable-turns-and-profiles-2026-10-16.md`,
+`out/profile/<user>.json` -> `user_profiles` via `store/sync.sync_profile`):
+`mirsal-db` had exited and was restarted (`docker start mirsal-db`); a name
+saved before that restart never reached Postgres (sync is best-effort, skipped
+silently when unreachable) and a name saved after the restart did
+(`user_profiles` row for `user_id='local'`). No code changed for this; only
+the two docs above were updated to say so.
+
+plan.md is next steps only; nothing here needs more docs work before Haitham's
+review.
 
 ## Latest user decisions
 
@@ -57,34 +71,26 @@ before finishing the documentation/commit close-out. plan.md is next steps only.
 
 ## Remaining close-out details
 
-- `docs/uiux_review/current-status.md` still starts with the earlier audit's
-  source/no-product-fixes and docs-only-test wording. Clarify it describes that
-  historical audit, link the new bounded phase and keep only current remaining work.
-  Affected journey status headers likewise still cite the old audit revision.
+All done this session: docs clarified and linked (see above), scratch archived
+outside the repo, explicit paths committed as `9baa54e9` and pushed. Nothing
+left to close out before Haitham's review.
+
 - User's initial phone-editor/Save question was answered: the populated image/
   animation editors and Save form clip at phone width; this is still UX-01, NOT
   fixed by the dark theme or the future sidebar plan.
-- Review the final diff, archive scratch scripts/logs outside repo, commit explicit
-  owned paths (one bounded theme/composer phase and optionally a separate plan/docs
-  phase), push, then update this save point with actual commit hashes/server state.
 - Do not implement the proposed sidebar merely because its plan is written.
 
 ## Running tools / paths
 
-- Task server **http://127.0.0.1:8798/**, exec session **85913**, started from
-  `mirsal/.venv` with all providers/real CLI/DB writes/tracing off. Uses verified
-  sanitized `%TEMP%/mirsal-design-audit-r2e83i1u/outcopy` (three copied artwork
-  batches G146/G150/G154 and synthetic packs/chat/reaction fixtures).
-- **User real-data app http://127.0.0.1:8770/**: never stop/repoint or automate it.
-  Earlier copied-data :8797 stays untouched. Only stop/restart task :8798.
-- Playwright sessions **dark-rework** (localhost) and **higgsfield-reference**
-  (public reference) are still open. No login, generation or purchase on Higgsfield;
-  only non-essential cookies rejected and promotion dismissed for measurement.
-- Temp `%TEMP%/mirsal-dark-rework-d_mt__3k/`: browser config, snapshots and shots.
-- Repo `output/playwright/` is untracked scratch: scripts, logs and parsed results
-  (`dark-acceptance-final.json`, `studio-views.json`, `dark-clean-captures.log`).
-  `dark_docs.py` has ALREADY RUN; do not rerun its append operations blindly.
-  The earlier audit scratch is separate; do not delete the copied output while serving it.
+- The prior session's task server (**http://127.0.0.1:8798/**) is no longer
+  running; its Playwright sessions are gone too. Nothing to stop/repoint.
+- **User real-data app http://127.0.0.1:8770/** is the only server now up; it
+  is live and was restarted by Haitham this session. Never stop/repoint/automate it.
+- `mirsal-db` (Postgres, port 5434) was found stopped and was started with
+  `docker start mirsal-db`; it is up. If it exits again, Postgres writes
+  (profiles/tasks/tickets) silently stop until `serve` is also restarted
+  (`store/db.available()` caches the first failure per process) — see
+  `docs/dev-notes.md` and `docs/agent-and-chat/24-durable-turns-and-profiles-2026-10-16.md`.
 - Reference measured ~318px creation panel, near-neutral page/form/control
   backgrounds. The proposal uses a 352px preferred / 320-384px bounded Mirsal
   panel, rehomes batch history to avoid an extra permanent column and preserves
@@ -93,8 +99,10 @@ before finishing the documentation/commit close-out. plan.md is next steps only.
 ## Unowned edits - leave untouched and unstaged
 
 - Deletions: `Recovered particles L002.lottie (2).json`, `smiling_face.json`.
-- Runtime update observed while the user checked the real app:
-  `mirsal/out/G154-generic_test-20261015T054257/preview/anim-S1.png`.
+- Runtime writes from the live real-data server (never stage these):
+  `mirsal/out/G154-generic_test-20261015T054257/preview/anim-S1.png`,
+  `mirsal/out/higgsfield_models.json`, `mirsal/out/model_calls.jsonl`,
+  `mirsal/out/sessions/S020.json` (new, from this session's "my name is" checks).
 - Never stage runtime data, secrets, artwork or unrelated changes. The new UI
   screenshots are documentation evidence. Verify branch before every commit.
   No merge, deployment, paid call, Telegram or collection send is authorized.
