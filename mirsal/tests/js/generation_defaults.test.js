@@ -1,5 +1,6 @@
+const {readRawConsoleFile}=require('./console_source');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const src=fs.readFileSync(path.join(__dirname,'../../mirsal/console/live.js'),'utf8');
+const src=readRawConsoleFile(path.join(__dirname,'../../mirsal/console/live.js'),'utf8');
 const boot=s=>{const c=vm.createContext({localStorage:{getItem:()=>s&&JSON.stringify(s)},gstore(){}});vm.runInContext(src.slice(0,src.indexOf('/* ---------- models')),c);return code=>vm.runInContext(code,c)};
 test('a fresh Studio defaults to 2x2 and a saved explicit 3x3 is preserved',()=>{
  assert.equal(boot(null)('cpGrid()'),'2x2');

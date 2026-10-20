@@ -5,7 +5,7 @@ including browser defects, actual source/coupling counts, naming targets and
 acceptance gates. This earlier summary uses nonblank line counts; the expanded
 audit labels physical line counts. Neither document describes an implemented refactor.
 
-Implementation update (2026-10-20): native API routers, domain schemas and the legacy transport bridge now live under `mirsal/api/`; see [API layout](api-parts/22-native-router-layout.md). The proposals below remain historical context for unfinished boundaries.
+Implementation update (2026-10-20): native API routers, domain schemas and the legacy transport bridge now live under `mirsal/api/`; see [API layout](api-parts/22-native-router-layout.md). Agent lifecycle/intent modules and UI feature folders are also implemented; see [completed scope and remaining consumers](uiux_review/refactor-2026-10-20.md). The proposals below remain historical context for unfinished boundaries.
 
 Scope: read-only follow-up to redesign acceptance. These are proposed extractions,
 not changes included in the redesign fixes. Counts below are nonblank lines.

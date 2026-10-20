@@ -12,10 +12,14 @@ tasks in tasks.json require fresh reconciliation, not automatic implementation.
 | T-034 | Shared preview presentation | Actual preset/Lottie/frame contexts; keep engine decisions and staged Cancel behavior |
 | T-035 | Cache/presenter boundaries | Explicit ownership/invalidation; route return and pending edits survive |
 
-Separate remaining work: watcher/resource ownership and Studio edge synchronization;
+Completed scope: [five reviewed refactors and folder layout](refactor-2026-10-20.md).
+Reactions preview requests and its Studio/saved-set polling now have explicit
+owners; other consumers still need their own scoped migrations.
+
+Separate remaining work: other watcher/resource ownership and Studio edge synchronization;
 staged values, busy retries and no extra recuts must be preserved.
-Related extractions: API routers/schemas (AR-01), feature state/controllers
-(AR-02), styles/control states (AR-03), graph/flow lifecycle (AR-04), current
+Related remaining extractions: other feature state/controllers (AR-02),
+styles/control states (AR-03), flow lifecycle beyond the extracted agent (AR-04), current
 documentation reading paths (DOC-01). Inventory has been regenerated; broader
 documentation cleanup remains. Generic range/segment helpers need current
 consumer-specific scope before adding files. TESTCARD already exists.

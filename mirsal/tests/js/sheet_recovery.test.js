@@ -1,6 +1,6 @@
 const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
-const root=path.join(__dirname,'../../mirsal/console'),SR=require(path.join(root,'sheet-recovery.js'));
+const root=path.join(__dirname,'../../mirsal/console'),SR=require(require('./console_source').resolveConsoleFile(path.join(root,'sheet-recovery.js')));
 const g={number:7,generation_id:'G007',allow:{video_sheet:{can:['A1'],allowed:['A2'],undo:['A2'],why:{A1:'outline <ring>'},final:{A3:'File cannot decode'}}}};
 test('the sheet picture itself retains the picture and offers the recorded decision with escaped reason',()=>{
  const h=SR.picture(g,{id:'A1',file:'sheet.png'});

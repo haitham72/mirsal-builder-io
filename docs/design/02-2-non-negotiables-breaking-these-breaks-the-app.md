@@ -2,7 +2,7 @@
 
 <sub>Part of [design.md](../design.md).</sub>
 
-- **No CDN, no runtime fetch** (rule 8). One self-hosted family: `console/fonts/InterVariable.woff2` (`studio.css:1`), used by `body` at `studio.css:4`.
+- **No CDN, no runtime fetch** (rule 8). One self-hosted family: `console/ui/fonts/InterVariable.woff2` (`studio.css:1`), used by `body` at `studio.css:4`.
   No second webfont. Icons are inline SVG (`ic()` in `app.js`).
 - **One shared `ACT` object.** A second `ACT.name =` in a later script *silently replaces* the first — this already bit the app once (`history.js` replaced
   `hopen`, so "Earlier batches" opened batch NaN). `tests/test_js.py` fails on any clash not listed as intentional.

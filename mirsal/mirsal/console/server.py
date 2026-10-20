@@ -30,7 +30,7 @@ from .openapi import VERSION as API_VERSION
 
 UI = Path(__file__).parent
 INDEX = UI / "index.html"            # the desktop builder: one page, one stdlib server, no build step
-UI_FILES = {"ui-testcard.js": "text/javascript", "library.js": "text/javascript", "settings.js": "text/javascript", "studio-core.js": "text/javascript", "studio-tiles.js": "text/javascript", "studio-sheet.js": "text/javascript", "studio-animate.js": "text/javascript", "studio-prompt.js": "text/javascript", "studio-panel.js": "text/javascript", "chat-cards.js": "text/javascript", "chat-stage.js": "text/javascript", "chat-core.js": "text/javascript", "support.js": "text/javascript", "imports.js": "text/javascript", "studio.css": "text/css", "app.js": "text/javascript", "users.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "agent.js": "text/javascript", "agent.css": "text/css", "prepare.js": "text/javascript", "effects.js": "text/javascript", "reactions.js": "text/javascript", "lottiestyle.js": "text/javascript", "vendor/lottie-5.12.2.min.js": "text/javascript", "particles.js": "text/javascript", "welcome.js": "text/javascript", "home.js": "text/javascript", "theme.js": "text/javascript", "theme.css": "text/css", "live.js": "text/javascript", "composer.js": "text/javascript", "trash.js": "text/javascript", "tickets.js": "text/javascript", "auth.js": "text/javascript", "trending.js": "text/javascript", "sheet-recovery.js": "text/javascript", "job-recovery.js": "text/javascript", "projmap.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
+from .assets import UI_FILES, asset_path
 
 
 # What a `member` may reach. Library packs/files are checked separately for every caller. Anything not listed here is owner-only: projects, Telegram, watch folders,
@@ -1102,7 +1102,7 @@ def make_handler(c: Console):
                 return self._json(200, tasks.inbox(c.out, c.inp))
             if path.startswith("/ui/") and path[4:] in UI_FILES:
                 ct = UI_FILES[path[4:]]
-                return self._send(200, (UI / path[4:]).read_bytes(), ct if ct.startswith("font") else ct + "; charset=utf-8")
+                return self._send(200, asset_path(path[4:]).read_bytes(), ct if ct.startswith("font") else ct + "; charset=utf-8")
             if path == "/api/library":
                 snap = c.lib.snapshot(owner=self.user["id"])
                 from ..flow import groups as _groups       # the Library sits the packs of one batch group together (flow/groups.pack_groups)

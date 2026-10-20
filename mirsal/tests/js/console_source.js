@@ -4,9 +4,15 @@ const fs = require('node:fs');
 const path = require('node:path');
 const acorn = require('./vendor/acorn.cjs');
 const DIR = path.join(__dirname, '../../mirsal/console');
+const ASSETS = JSON.parse(fs.readFileSync(path.join(DIR,'ui/manifest.json'),'utf8'));
+const consoleFiles = () => Object.keys(ASSETS).filter(n=>n.endsWith('.js')&&!n.startsWith('vendor/'));
+const resolveConsoleFile = file => path.resolve(path.dirname(file))===path.resolve(DIR)&&ASSETS[path.basename(file)]
+  ? path.join(DIR,'ui',ASSETS[path.basename(file)]) : file;
+const readRawConsoleFile = (file,encoding='utf8') => fs.readFileSync(resolveConsoleFile(file),encoding);
 const GROUPS = {
   'generate.js': ['studio-core.js','studio-tiles.js','studio-sheet.js','studio-prompt.js','studio-animate.js','studio-panel.js'],
-  'app.js': ['app.js','library.js','settings.js'],
+  'app.js': ['lifecycle.js','app.js','library.js','settings.js'],
+  'reactions.js': ['reaction-preview-cache.js','reactions.js'],
   'agent.js': ['agent.js','chat-cards.js','chat-stage.js','chat-core.js'],
 };
 const parse = source => acorn.parse(source, {ecmaVersion:'latest'});
@@ -34,9 +40,9 @@ function canonical(source) {
 function readConsoleFile(file, encoding='utf8') {
   const name=path.basename(file);
   if (path.resolve(path.dirname(file)) === path.resolve(DIR) && name.endsWith('.js')) {
-    return (GROUPS[name]||[name]).map(f=>canonical(fs.readFileSync(path.join(DIR,f),'utf8'))).join('\n');
+    return (GROUPS[name]||[name]).map(f=>canonical(readRawConsoleFile(path.join(DIR,f),'utf8'))).join('\n');
   }
-  return fs.readFileSync(file,encoding);
+  return readRawConsoleFile(file,encoding);
 }
 const statementsCache = new Map();
 function statement(source, marker) {
@@ -62,9 +68,9 @@ function statement(source, marker) {
   if (!candidates.length) throw Error('Missing production statement: '+marker);
   return candidates.sort((a,b)=>a.length-b.length)[0];
 }
-module.exports={readConsoleFile,statement,canonical,GROUPS};
+module.exports={readConsoleFile,readRawConsoleFile,resolveConsoleFile,consoleFiles,statement,canonical,GROUPS};
 if (require.main===module) {
-  const names=fs.readdirSync(DIR).filter(n=>n.endsWith('.js'));
+  const names=consoleFiles();
   names.push('generate.js');
   process.stdout.write(JSON.stringify(Object.fromEntries(names.map(n=>[n,readConsoleFile(path.join(DIR,n))]))));
 }

@@ -12,6 +12,7 @@ import time
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from mirsal.console.assets import asset_path
 from unittest import mock
 
 from mirsal.services import llm
@@ -540,8 +541,8 @@ class UiWiringTests(unittest.TestCase):
 
     def setUp(self):
         ui = Path(__file__).resolve().parent.parent / "mirsal" / "console"
-        self.js = (ui / "agent.js").read_text(encoding="utf-8")
-        self.css = (ui / "agent.css").read_text(encoding="utf-8")
+        self.js = asset_path("agent.js").read_text(encoding="utf-8")
+        self.css = asset_path("agent.css").read_text(encoding="utf-8")
 
     def test_the_engine_row_has_a_dropdown_fed_by_the_server_without_a_count_limit(self):
         row = self.block(self.js, "function modelRow()")

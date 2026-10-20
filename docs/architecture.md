@@ -16,7 +16,7 @@ Two interfaces sit on one engine (`CLAUDE.md` "Structure"): the **AI chat** (nat
 ## 2. The layers
 
 ```
- browser sandbox   console/*.js, index.html, studio.css, agent.css        (one page, one global scope, ACT + RENDER)
+ browser sandbox   console/ui/{shell,shared,features,styles}, index.html        (one page, one global scope, ACT + RENDER)
         │  JSON over HTTP (+ SSE)                                          docs/api.md, docs/http_route_inventory.md
  HTTP server       api/app.py (FastAPI on uvicorn) ─ adapter ─ console/server.py (the original handler, Console)
         │
@@ -88,10 +88,10 @@ the original handler in `console/server.py` (byte-identical answers); routes add
 `serve --stdlib` keeps the old server for one release. The page (JS, CSS, HTML) is read from disk on every request, the Python only at start
 (`Console.stale()` warns when the two differ). Every route: `docs/http_route_inventory.md`; the contract: `docs/api.md`.
 
-## 6. The browser sandbox (`mirsal/mirsal/console/`)
+## 6. The browser sandbox (`mirsal/mirsal/console/ui/`)
 
 - **One page.** `index.html` holds the shell (`#rail`, `#col2`, `#stage` with one `<section id=s-<screen>>` per screen, `#toast`, `#modal`,
-  `#dlg`, `#welcome`) and loads the scripts **in order**; each script must also be in `UI_FILES` (`console/server.py`) or it is a silent 404.
+  `#dlg`, `#welcome`) and loads the scripts **in order**. `console/ui/manifest.json` maps stable `/ui/` URLs to feature/shared/style folders; `console/assets.py` owns the allowlist and resolver. See [UI folder layout and checks](uiux_review/refactor-2026-10-20.md).
 - **One global scope.** The scripts are plain files sharing globals. Two consequences (`docs/design.md` §2): a top-level `const` declared twice
   kills the second script, and **every action lives on one object, `ACT`**: `ACT.<name>=` defines it, `data-act=<name>` on any element calls it
   through one click handler (`app.js`). A later `ACT.<name>=` silently replaces an earlier one (`tests/test_js.py` lists the intentional ones).
@@ -112,7 +112,7 @@ body presenter, step data and insertion anchor. `studio-core.js` owns rendering
 and numbering; Reactions no longer replaces `gbodyHtml`/`stepsHtml` or parses
 rendered button HTML. Focused Reactions/Studio extension checks: 62 pass.
 
-The shell owns a `ROUTELIFE` registry. Feature `routeOwner` scopes cancel their
+`ui/shared/lifecycle.js` owns the shell's `ROUTELIFE` registry. Feature `routeOwner` scopes cancel their
 timer and advance a request version before navigation, then enter only matching
 routes. Reactions' Studio watcher and saved-set polling use these scopes rather
 than an always-running interval. Earlier reads cannot redraw a new route;

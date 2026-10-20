@@ -1,96 +1,68 @@
-﻿# HANDOFF - session save point, 2026-10-20 (afternoon)
+# HANDOFF - 2026-10-20 structural refactor
 
-Checkout `G:/Haitham/VsCode/Mirsal-Builder`, branch `redesign-ui-ux` (main stays
-`0167761b`, never merge without Haitham asking). Haitham said "do not stop until
-all planned are implemented", then asked to stop here and hand over to another
-LLM. Everything below is committed and pushed unless it says otherwise.
+Checkout G:/Haitham/VsCode/Mirsal-Builder, branch redesign-ui-ux. Never merge
+without Haitham asking. Latest request: implement all five reviewed refactor
+candidates and redesign the folders. That scope is complete.
 
-## Latest continuation
+## Completed
 
-- `e544a906` committed and pushed: Studio scrolling settings/action footer,
-  composer preservation and Batches regression tests (4 pass).
-- UX-10 phone Chat completed: Style and options disclosure, wrapping title,
-  visible model status. Chat stage tests: 8 pass. Synthetic 30-message browser
-  check at 390×720 in light/dark preserved draft and scroll; desktop controls
-  remained visible. Fixture-specific agent lookup returned 404; fallback status
-  remained visible. No live-job polling verification.
-- Task-owned server :8796 (exec session 3670) uses isolated
-  `output/playwright/studio-out`, providers disabled and DB writes off.
-  Local screenshots/check scripts are untracked in `output/playwright/` and
-  `.playwright-cli/`; browser session `studio-finish`.
-- Next: loaded-state/keyboard/roles sweep and scoped structural work in plan.md.
-  Owner decisions and baseline agent failures remain open.
+- e49675ed: preview cache request deduplication, retry and invalidation.
+- f90ee061: Studio section/step registration replaces renderer replacement and
+  HTML string insertion.
+- f48df177: navigation scopes own Reactions polling and invalidate old reads.
+- f7566fea: mirsal/api/ with ten routers, nine schema domains, common guards,
+  OpenAPI registry and legacy stream adapter. All 92 route decorators retained.
+- 2cc4556d, d3e71f78: agent lifecycle/topology and eight intent groups; all 112
+  methods and three class constants retained. Old checkpoint class imports work.
+- Latest UI phase: console/ui/{shell,shared,features,styles,fonts,vendor} and one
+  asset manifest/resolver. Browser URLs and script order preserved; canonical
+  source URLs work. Source readers/inventory follow the manifest. Vendor license
+  moved with the player.
 
-## Done this session (commits on origin/redesign-ui-ux)
+Detailed scope/evidence: docs/uiux_review/refactor-2026-10-20.md. API details:
+docs/api-parts/22-native-router-layout.md. Agent details:
+docs/agent-and-chat/25-agent-code-boundaries.md.
 
-- `0e1571d7` UX-06 Test-workspace badge, UX-08 reaction ownership heading, UX-11 owner names.
-- `b677af07` UX-03 keyboard tiles, UX-04 editor control names, UX-05 frame card focus/Escape.
-- `83b2e9ea` UX-01 phone editors and Save sticker, UX-09 watch-folder rows.
-- **Save-point commit (this one)**: Studio left creation panel + Batches drawer
-  (plan item 1, also UX-07's recovery entry). See "Studio left panel" below.
+## Verification and limits
 
-What each fix does, where, and its test: `docs/design/16-app-audit-fixes-2026-10-20.md`.
-All confirmed audit defects (UX-01..UX-09, UX-11) are now fixed.
+- Cache: 9 pass. Section/polling/particle editor: 63 pass.
+- API contract and role/route checks pass; exact selections in the API doc.
+- Agent checkpoints: 5 pass on final imports. Representative behaviors: 20/21;
+  remaining locking test also fails on the saved pre-refactor implementation.
+  Required focused recovery: 14 pass, zero skipped.
+- UI source migration: 417 node cases passed; two old-path failures corrected,
+  affected 11-case selection passed. Asset-serving/inventory: 6 pass. Two welcome
+  checks pass. Shared shell retains pre-existing studio.css 9px font-scale failure.
+- Playwright isolated :8797: Studio, Library, Reactions, Settings, Help and Chat
+  load without page errors or failed UI assets. Draft/single composer survive
+  navigation; no horizontal document overflow at 390px. Loaded artwork,
+  busy/error and complete visual acceptance remain separate.
 
-## Studio left panel (implemented, needs Haitham's visual review)
+## Next
 
-Plan: `docs/design/15-studio-creation-sidebar-plan.md` (its "Implemented" section).
-- On `#/studio` the second column is the creation panel (352px, 320px <1180px):
-  the ONE New request composer (`#cpwrap`) is moved there (`composer.js`
-  `studioCol`, `cpHost`, `cpStash`/`CPKEEP` keeps the node, so the draft
-  survives leaving and returning). `body.studio-split`. No second form, one `#prompt`.
-- `studio-core.js` RENDER.generate draws a top bar: **Creation settings** (only
-  <=900px, opens the existing col2 drawer) and **Batches**; it skips the legacy
-  prompt row when the composer exists.
-- Earlier batches and the open project's map (projmap.js) moved into the
-  **Batches drawer** `#bdrawer` (`live.js` `bdEl`/`ACT.bdopen`/`bdClose`,
-  `histHost()`); non-modal, focus to first control, Escape/Close returns focus,
-  opening a batch (`hopen`/`pmopen`) closes it; the breadcrumb project link opens it.
-- `app.js`: clicks inside the composer no longer close the narrow col2 drawer
-  (except Generate); `#c2tog` is labelled "Creation settings" on the Studio.
-- Verified on a copied workspace (port 8795, providers off): regions at
-  1440/1024/760/390, draft kept across Library and back, drawer Escape/focus.
-  Screenshots are only in the scratchpad (not committed).
-- **Known gaps to pick up**:
-  1. In Options (narrow panel) the Creative/Predefined segment (`.gseg.cp-act`)
-     renders as an empty pill with `innerText` "" — investigate (maybe pre-existing).
-  2. Follow-up completed: Generate prompt and existing draft/import actions now sit
-     in a footer below independently scrolling settings.
-  3. Added `studio_panel.test.js`: composer node/draft preservation, drawer visibility,
-     focus restoration and history host routing. Together with composer_visibility: 4 pass.
-  4. Empty-workspace light/dark checks passed at 1440/1024/760/390, 720px high,
-     on isolated :8796 with providers off. Creative/Predefined worked in all eight
-     layouts with Options open; the empty pill was not reproduced. Screenshots in
-     `output/playwright/studio-*.png` (local only). Loaded artwork and busy/error
-     acceptance remain; final visual verdict is Haitham's.
+Use plan.md. Loaded-state acceptance, other watcher/edge consumers, sliders,
+download/preview presenters and other caches remain separately scoped. The five
+reviewed refactors, API/agent extraction and folder redesign are complete.
+Owner wording/pricing/visual/merge decisions remain unapproved.
 
-## Remaining plan (see plan.md)
+## Tools and local artifacts
 
-F-31 wording and W18 enhancer price gate (owner
-calls, never implemented); unverified states sweep; shared-code/router
-refactors (AR-01..04, T-024/025/031/034/035); optional Lottie items; agent
-baseline 4 failures / 9 errors.
-
-## Running tools / paths
-
-- A task test server may still be running on **http://127.0.0.1:8795/** with
-  `MIRSAL_OUT` = scratch copy (providers off). Safe to kill. Never touch the
-  real-data server **:8770**.
-- Playwright MCP writes `.playwright-mcp/` in the repo root; it is git-ignored.
-- Hash-only `goto` does not reload the page: call `page.reload()` after edits.
-- `mirsal-db` Postgres on 5434; if it exits, writes stop until `serve` restarts.
+- Isolated :8797 server, exec session 49126, output/refactor-browser-out; DB
+  writes and providers off. Browser session refactor-check. Screenshots/scripts
+  under output/playwright/refactor-*.
+- Earlier :8796 (session 3670) may remain alive with older Python asset mapping.
+  Restart a task-owned server before using it after the folder move.
+- Do not automate/restart/repoint real-data :8770. Its owner must restart the app
+  to load the new Python asset resolver.
+- output/ and .playwright-cli/ remain local/untracked. Extraction scripts and
+  saved original agent source are under output/.
 
 ## Unowned edits - leave untouched and unstaged
 
-- Deletions: `Recovered particles L002.lottie (2).json`, `smiling_face.json`.
-- Runtime writes: `mirsal/out/G154-generic_test-20261015T054257/preview/anim-S1.png`,
-  `mirsal/out/higgsfield_models.json`, `mirsal/out/model_calls.jsonl`,
-  `mirsal/out/sessions/S020.json`.
-- Explicit-path commits only, check `git branch --show-current` first. No merge,
-  deployment, paid call, Telegram or collection send.
+Deletions: Recovered particles L002.lottie (2).json, smiling_face.json.
+Runtime writes: mirsal/out/G154-generic_test-20261015T054257/preview/anim-S1.png,
+mirsal/out/higgsfield_models.json, mirsal/out/model_calls.jsonl,
+mirsal/out/sessions/S020.json and subsequently observed S021.json.
 
-## Tests last run
-
-`node --test mirsal/tests/js/*.test.js` 416/416 pass; `python -m unittest
-tests.test_ui_inventory` OK (run from `mirsal/` with `.venv`). Full Python
-discovery is retired; not run.
+Explicit-path commits, branch check before each commit. No merge, deployment,
+paid calls or real Telegram/collection sends.

@@ -26,7 +26,7 @@
 
 - **Tests (budget, Haitham 2026-10-04):** one narrowest run per change (`mirsal test fast` / `focused` / `area <module>`; map in `mirsal/test_tiers.py`); zero tests for docs; a pass stays valid until its files change; the slow tier and full `unittest discover` are retired, never run. Uncertainty is not a reason to run a bigger suite.
 - **Git:** unattended coding, then commit + push, is authorized (2026-10-04); one commit per phase, explicit paths, never `git add -A`; never commit a Telegram token, `.env`, `opencode.json`, `mirsal/telegram-id.md`, credentials or keys. Branches: `main` (merged implementation), `handpicked-lottie`, and `redesign-ui-ux` (active checkout for the implemented UI/UX redesign); each stays separate until Haitham asks for a merge. Two sessions can share one checkout: check `git branch --show-current` before every commit.
-- **Server:** FastAPI on uvicorn (`console/app.py`); existing routes go through the adapter byte for byte, new routes are native with pydantic; `serve --stdlib` stays one release. Restart from `mirsal/.venv` before judging the browser.
+- **Server:** FastAPI on uvicorn (`api/app.py`, native `api/routers/`, `api/schemas/`; compatibility imports remain in `console`); existing routes go through the adapter byte for byte, new routes are native with pydantic; `serve --stdlib` stays one release. Restart from `mirsal/.venv` before judging the browser.
 - **Office LAN** (`serve --lan`, email + password, approval in Users > People and the Telegram bot) stands in for the paused deployment.
 
 ## Structure

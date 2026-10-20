@@ -3,7 +3,7 @@ const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // Run: node --test tests/js
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const U = require('../../mirsal/console/agent.js');
+const U = require(require('./console_source').resolveConsoleFile(require('node:path').join(__dirname,'../../mirsal/console/agent.js')));
 const icon = name => `<svg data-icon="${name}"></svg>`;
 const fs = require('node:fs');
 const path = require('node:path');

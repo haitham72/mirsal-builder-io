@@ -5,7 +5,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const AIU = require('../../mirsal/console/agent.js');
+const AIU = require(require('./console_source').resolveConsoleFile(require('node:path').join(__dirname,'../../mirsal/console/agent.js')));
 const src = readConsoleFile(path.join(__dirname, '../../mirsal/console/agent.js'), 'utf8');
 
 function statement(marker) {return consoleStatement(src,marker);}

@@ -1,6 +1,7 @@
+const {readRawConsoleFile}=require('./console_source');
 // Exercise the production Resize/frame controllers with fake I/O and a controlled clock.
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const source=fs.readFileSync(path.join(__dirname,'../../mirsal/console/studio-core.js'),'utf8');
+const source=readRawConsoleFile(path.join(__dirname,'../../mirsal/console/studio-core.js'),'utf8');
 const controllers=source.slice(source.indexOf('/* Motion size'),source.indexOf("/* the batch's Download .zip"));
 function setup(resize=true){
  const reads=[],writes=[],timers=new Map();let serial=0;

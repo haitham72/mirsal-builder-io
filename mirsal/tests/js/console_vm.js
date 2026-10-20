@@ -1,9 +1,8 @@
 // A helper of the node tests (it is not a test: only *.test.js run): load whole console scripts into ONE vm context, the way the browser shares one global scope, with the few globals they use
 // (app.js, generate.js, live.js, packs.js) stubbed. `run(code)` evaluates in that context, so the top-level `const`s of the scripts are reachable. Nothing here touches a DOM or a server.
 const vm = require('node:vm');
-const fs = require('node:fs');
 const path = require('node:path');
-const { GROUPS, readConsoleFile, statement } = require('./console_source');
+const { GROUPS, readConsoleFile, readRawConsoleFile, statement } = require('./console_source');
 
 const CONSOLE = path.join(__dirname, '..', '..', 'mirsal', 'console');
 const BASE = `
@@ -48,7 +47,7 @@ function loadConsole(files, { studio = false, extra = '' } = {}) {
     localStorage: { getItem: () => null, setItem() {} },
   });
   vm.runInContext(BASE + routeScopes + (studio ? STUDIO : '') + extra, ctx, { filename: 'stubs.js' });
-  for (const f of files.flatMap(f=>GROUPS[f]||[f])) vm.runInContext(fs.readFileSync(path.join(CONSOLE, f), 'utf8'), ctx, { filename: f });
+  for (const f of files.flatMap(f=>GROUPS[f]||[f])) vm.runInContext(readRawConsoleFile(path.join(CONSOLE, f), 'utf8'), ctx, { filename: f });
   return code => vm.runInContext(code, ctx);
 }
 module.exports = { loadConsole };

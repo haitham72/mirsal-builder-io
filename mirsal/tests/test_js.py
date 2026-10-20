@@ -6,17 +6,20 @@ import subprocess
 import unittest
 from pathlib import Path
 from functools import lru_cache
+from mirsal.console.assets import ASSETS, UI_FILES, asset_path
 
 
 @lru_cache(maxsize=1)
 def console_sources():
     import json
     helper = Path(__file__).parent / 'js' / 'console_source.js'
-    return json.loads(subprocess.check_output(['node', str(helper)], text=True))
+    return json.loads(subprocess.check_output(['node', str(helper)], text=True, encoding='utf-8'))
 
 
 def read_console(path):
-    return console_sources()[path.name] if path.suffix == '.js' else path.read_text(encoding='utf-8')
+    if path.suffix == '.js':
+        return console_sources()[path.name]
+    return (asset_path(path.name) if path.name in ASSETS else path).read_text(encoding='utf-8')
 
 
 class JavaScriptTests(unittest.TestCase):
@@ -53,7 +56,7 @@ class StudioActionTests(unittest.TestCase):
         self.assertTrue(order)
         defs: dict[str, list[str]] = {}
         for name in order:
-            src = (ui / name).read_text(encoding='utf-8')
+            src = (asset_path(name) if name in ASSETS else ui / name).read_text(encoding='utf-8')
             for m in re.finditer(r"\bACT\.([A-Za-z0-9_]+)\s*=(?!=)", src):
                 defs.setdefault(m.group(1), []).append(name)
         twice = {act: files for act, files in defs.items() if len(files) > 1}
@@ -66,7 +69,7 @@ class StudioActionTests(unittest.TestCase):
         ui, order = self.scripts()
         defined, used = set(), {}
         for name in order + ["index.html"]:
-            src = (ui / name).read_text(encoding='utf-8')
+            src = (asset_path(name) if name in ASSETS else ui / name).read_text(encoding='utf-8')
             defined |= set(re.findall(r"\bACT\.([A-Za-z0-9_]+)\s*=(?!=)", src))
             for m in re.finditer(r"data-act=\"?([A-Za-z0-9_]+)", src):
                 used.setdefault(m.group(1), name)
@@ -152,7 +155,7 @@ class StudioActionTests(unittest.TestCase):
         html = read_console(ui / "index.html")
         self.assertIn("particles.js", order, "index.html loads it")
         self.assertLess(order.index("effects.js"), order.index("particles.js"), "it uses effects.js's functions: loaded after it")
-        self.assertIn('"particles.js": "text/javascript"', read_console(ui / "server.py"), "the server serves it")
+        self.assertEqual(UI_FILES['particles.js'], 'text/javascript', 'the server serves it')
         sp = read_console(ui / "particles.js")
         mine = re.findall(r"^(?:const|let|function|class)\s+([A-Za-z_$][\w$]*)", sp, re.M)
         self.assertTrue(mine)
@@ -358,7 +361,7 @@ class ShellTests(unittest.TestCase):
         html = read_console(ui / "index.html")
         self.assertIn("id=s-effects", html)
         self.assertIn("/ui/effects.js", html)
-        self.assertIn('"effects.js"', (ui.parent / "console" / "server.py").read_text(encoding="utf-8"))
+        self.assertIn('effects.js', UI_FILES)
         app = read_console(ui / "app.js")
         self.assertIn("'effects'", re.search(r"const SCREENS=\[(.*?)\]", app).group(1))
         self.assertIn("effects:'agent'", app, "the rail keeps Create lit on the effects screen")
@@ -375,7 +378,7 @@ class ShellTests(unittest.TestCase):
         rx = read_console(ui / "reactions.js")
         self.assertIn("id=s-reactions", html)
         self.assertIn("/ui/reactions.js", html)
-        self.assertIn('"reactions.js"', (ui.parent / "console" / "server.py").read_text(encoding="utf-8"))
+        self.assertIn('reactions.js', UI_FILES)
         self.assertIn("'reactions'", re.search(r"const SCREENS=\[(.*?)\]", app).group(1))
         self.assertIn("reactions:'agent'", app, "the rail keeps Create lit on Reaction effects")
         self.assertIn("data-to=reactions", app, "+ New > Reaction effects opens #/reactions, not the Studio's #/effects")

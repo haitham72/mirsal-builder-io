@@ -108,7 +108,7 @@ test('the Library has a Reactions tab on the shared switch, and every new action
 
 test('the chrome says particles, not pieces, on every screen', () => {
   const bad = [];
-  for (const f of fs.readdirSync(DIR).filter(x => x.endsWith('.js'))) {
+  for (const f of require('./console_source').consoleFiles()) {
     let code = readConsoleFile(path.join(DIR, f), 'utf8');
     code = code.replace(/\/\*.*?\*\//gs, '');
     code = code.replace(/fx-pieces|\w*[Pp]iece\w*/g, '');
