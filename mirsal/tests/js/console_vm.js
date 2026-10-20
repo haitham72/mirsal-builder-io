@@ -23,6 +23,8 @@ const packById=id=>LIB.packs.find(p=>p.id===id);
 const loadLib=async()=>LIB;
 const VLM={then:null},vlmState=()=>'0',vlmSet=()=>{};
 `;
+const shellSource=readConsoleFile(path.join(CONSOLE,'app.js'));
+const routeScopes=['const ROUTELIFE','function routeOwner'].map(marker=>statement(shellSource,marker)).join('\n');
 const studioSource=readConsoleFile(path.join(CONSOLE,'studio-core.js'));
 const studioExtensions=['const GSTUDIO','function gExtraBody','function gExtraSteps'].map(marker=>statement(studioSource,marker)).join('\n');
 const STUDIO = studioExtensions + `
@@ -45,7 +47,7 @@ function loadConsole(files, { studio = false, extra = '' } = {}) {
     document: { addEventListener() {}, getElementById: () => null, querySelector: () => null, hidden: false },
     localStorage: { getItem: () => null, setItem() {} },
   });
-  vm.runInContext(BASE + (studio ? STUDIO : '') + extra, ctx, { filename: 'stubs.js' });
+  vm.runInContext(BASE + routeScopes + (studio ? STUDIO : '') + extra, ctx, { filename: 'stubs.js' });
   for (const f of files.flatMap(f=>GROUPS[f]||[f])) vm.runInContext(fs.readFileSync(path.join(CONSOLE, f), 'utf8'), ctx, { filename: f });
   return code => vm.runInContext(code, ctx);
 }

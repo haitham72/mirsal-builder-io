@@ -159,9 +159,19 @@ function spSecData(){const out=[];for(const id of SES.gens){const g=GM.get(id);i
  family:((batch||{}).family||[]).map(c=>({index:c.index,key:c.key,png:c.png,link:c.link,n:1,det:c,generation:c.generation}))})}return out}
 function spSecDraw(){const el=$('gpart');if(!el)return;const html=spSecHtml(spSecData());if(html!==SPS.html||el!==SPS.el){SPS.html=html;SPS.el=el;el.innerHTML=html}}
 async function spSecSync(force){if(SPS.busy||!$('gpart'))return;SPS.busy=true;
- try{for(const b of spSecData()){const r=await api(`/api/generations/${b.gid}/particles`);if(r.ok)SPS.batches[b.gid]=r.j}SPS.loaded=true;spSecDraw()}
- finally{SPS.busy=false}}
-setInterval(()=>{if(route_==='generate'&&!document.hidden)spSecSync()},2500);
+ const token=SPSROUTES.capture();
+ try{for(const b of spSecData()){
+  const r=await api(`/api/generations/${b.gid}/particles`);
+  if(!SPSROUTES.current(token))return;
+  if(r.ok)SPS.batches[b.gid]=r.j;
+ }SPS.loaded=true;spSecDraw()}
+ finally{if(SPSROUTES.current(token))SPS.busy=false}}
+async function spSecWatch(){
+ const token=SPSROUTES.capture();
+ try{if(!document.hidden)await spSecSync();}
+ finally{if(SPSROUTES.current(token))SPSROUTES.schedule(spSecWatch,2500);}
+}
+const SPSROUTES=routeOwner(name=>name==='generate',()=>SPSROUTES.schedule(spSecWatch,2500),()=>{SPS.busy=false;});
 
 /* ---------- Library > Particles: every durable set as a card (docs/particles.md 5). Reads GET /api/particles; writes rename/assign/unassign/duplicate/delete/restore.
    The trash is listed (GET /api/particles/deleted): Restore is offered on the notice right after a delete AND from the "Deleted" list under the sets, long after. One set belongs to pack(s): the card says
@@ -289,17 +299,22 @@ function spLibRefresh(){if(SP.set&&!SP.eid&&SP.alive())spDraw();if(typeof route_
  if(typeof route_!=='undefined'&&route_==='pack'&&typeof drawPack==='function')drawPack();
  if(typeof route_!=='undefined'&&route_==='reactions'&&typeof RENDER!=='undefined'&&RENDER.reactions)RENDER.reactions();}
 async function spLibSync(force){if(SPL.busy||(SPL.sets&&!force))return;SPL.busy=true;
- try{const r=await api('/api/particles');if(r.ok){SPL.sets=r.j.sets||[];
+ const token=SPROUTES.capture();
+ try{const r=await api('/api/particles');if(!SPROUTES.current(token))return;if(r.ok){SPL.sets=r.j.sets||[];
    for(const s of SPL.sets){const d=SPL.detail[s.id];if(d&&d.n_cells!==s.n_cells)delete SPL.detail[s.id]}          // cells arrived since the card was opened: it is read again
-   const t=await api('/api/particles/deleted');if(t.ok)SPL.trash=t.j.sets||[];spLibRefresh();spPoll()}}finally{SPL.busy=false}}
+   const t=await api('/api/particles/deleted');if(!SPROUTES.current(token))return;if(t.ok)SPL.trash=t.j.sets||[];spLibRefresh();spPoll()}}finally{if(SPROUTES.current(token))SPL.busy=false}}
 /* a sheet being drawn for a set (Generate more) arrives on its own: while any set is drawing, the list (or the pack's sets) is read again every few seconds */
-function spPoll(){clearTimeout(SPL.poll);
+function spPoll(){
  const busy=(SPL.sets||[]).some(s=>s.drawing)||(typeof PKPT!=='undefined'&&Object.values(PKPT.sets||{}).some(l=>(l||[]).some(s=>s&&s.drawing)));
  if(!busy)return;
- SPL.poll=setTimeout(async()=>{if(typeof route_==='undefined')return;
-  if(route_==='library'&&typeof LIBTAB!=='undefined'&&LIBTAB==='particles')await spLibSync(true);
-  else if(route_==='pack'&&typeof ptCounts==='function'&&typeof PACK_ID!=='undefined'){await ptCounts(PACK_ID);if(PKPT.sets[PACK_ID]&&PKPT.sets[PACK_ID].length)spLibSync(true)}
-  spPoll()},2500)}
+ SPROUTES.schedule(async()=>{
+  const token=SPROUTES.capture();
+  try{if(!document.hidden){
+   if((route_==='library'&&typeof LIBTAB!=='undefined'&&LIBTAB==='particles')||route_==='reactions')await spLibSync(true);
+   else if(route_==='pack'&&typeof ptCounts==='function'&&typeof PACK_ID!=='undefined'){await ptCounts(PACK_ID);if(SPROUTES.current(token)&&PKPT.sets[PACK_ID]&&PKPT.sets[PACK_ID].length)await spLibSync(true);}
+  }}finally{if(SPROUTES.current(token))spPoll();}
+ },2500)}
+const SPROUTES=routeOwner(name=>['library','pack','reactions'].includes(name),()=>spPoll(),()=>{SPL.busy=false;});
 ACT.psopen=async el=>{const id=el&&el.dataset.id;if(!id){spShowTab();return}SPL.open=SPL.open===id?'':id;
  if(SPL.open&&!SPL.detail[id]){const r=await api('/api/particles/'+id);if(r.ok)SPL.detail[id]=r.j}
  spLibRefresh();if(SPL.open===id){spMoreEstimate(id);spBurstPreview(id)}};

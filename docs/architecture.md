@@ -108,6 +108,13 @@ body presenter, step data and insertion anchor. `studio-core.js` owns rendering
 and numbering; Reactions no longer replaces `gbodyHtml`/`stepsHtml` or parses
 rendered button HTML. Focused Reactions/Studio extension checks: 62 pass.
 
+The shell owns a `ROUTELIFE` registry. Feature `routeOwner` scopes cancel their
+timer and advance a request version before navigation, then enter only matching
+routes. Reactions' Studio watcher and saved-set polling use these scopes rather
+than an always-running interval. Earlier reads cannot redraw a new route;
+cached records and pending edits survive navigation. Lifecycle regression plus
+the existing Reactions/particle editor tests: 63 pass.
+
 | Files | Responsibility |
 |---|---|
 | `app.js`, `library.js`, `settings.js` | shared shell/router; Library; system settings and Appearance |
