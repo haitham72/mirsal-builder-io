@@ -260,5 +260,68 @@ class CollectionTests(unittest.TestCase):
             col.thumbnail("a.webm", b"not a video")
 
 
+class StdlibCollectionTests(unittest.TestCase):
+    """The same 4 routes on serve --stdlib (console/server.py): status, state reads, and both queues refuse like the FastAPI router."""
+
+    @classmethod
+    def setUpClass(cls):
+        from mirsal.console.server import serve
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.env = patch.dict(os.environ, {"MIRSAL_API_TOKEN": "collection-test-owner"})
+        cls.hf = patch.object(hf, "available", return_value=False)
+        cls.env.start(); cls.hf.start()
+        cls._saved = {k: os.environ.pop(k) for k in ("MIRSAL_COLLECTION_API_URL", "MIRSAL_COLLECTION_API_CREDENTIALS") if k in os.environ}
+        cls.srv, cls.c = serve(Path(cls.tmp.name) / "out", Path(cls.tmp.name) / "in", 0, cfg=EngineConfig(min_sheet_px=256), block=False, stdlib=True)
+        cls.port = cls.srv.server_address[1]
+        threading.Thread(target=cls.srv.serve_forever, daemon=True).start()
+        _, cls.member = cls.c.users.create("Member")
+        data = cv2.imencode(".png", cv2.cvtColor(synth.make_sheet(), cv2.COLOR_RGB2BGR))[1].tobytes()
+        s, j = cls.req(cls, "/api/import?name=own.png", data)
+        assert s == 202, j
+        cls.gid = j["id"]
+        cls.c.wait_jobs()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.c.wait_jobs()
+        cls.srv.shutdown(); cls.c.release_writer()
+        os.environ.update(cls._saved)
+        cls.hf.stop(); cls.env.stop(); cls.tmp.cleanup()
+
+    def req(self, path, body=b"", token="collection-test-owner", method="POST"):
+        conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=60)
+        conn.request(method, path, body if isinstance(body, bytes) else json.dumps(body).encode(), {"Authorization": "Bearer " + token, "Content-Type": "application/octet-stream"})
+        r = conn.getresponse()
+        result = r.status, json.loads(r.read())
+        conn.close()
+        return result
+
+    def test_status_reads_and_unknown_exports_are_404_not_unserved(self):
+        s, j = self.req("/api/collection", method="GET")
+        self.assertEqual((s, j["configured"], j["url"]), (200, False, col.DEFAULT_URL), j)
+        self.assertEqual(self.req("/api/v1/collection", method="GET")[0], 200)
+        s, j = self.req("/api/collection/exports/X0", method="GET")
+        self.assertEqual((s, j["error"]), (404, "not found"), j)
+
+    def test_batch_export_refusals_come_from_the_service(self):
+        s, j = self.req(f"/api/generations/{self.gid}/export-collection", {"name": "n" * 41})
+        self.assertEqual(s, 400, j)
+        self.assertIn("40", j["error"])
+        s, j = self.req(f"/api/generations/{self.gid}/export-collection", {"name": "Ok", "description": "d"})
+        self.assertEqual((s, "MIRSAL_COLLECTION_API_CREDENTIALS" in j["error"]), (503, True), j)
+        s, j = self.req("/api/generations/999/export-collection", {"name": "Ok"})
+        self.assertEqual((s, j["error"]), (404, "not found"), j)
+        s, j = self.req(f"/api/generations/{self.gid}/export-collection", {"name": "Ok"}, token=self.member)
+        self.assertEqual((s, j["error"]), (403, "Exporting to the collection API is available to the owner only"), j)
+
+    def test_pack_export_route_is_served(self):
+        s, p = self.req("/api/packs", {"name": "Stdlib"})
+        self.assertEqual(s, 200, p)
+        s, j = self.req(f"/api/packs/{p['id']}/export-collection", {"name": "x"})
+        self.assertEqual(s, 503, j)
+        s, j = self.req("/api/packs/NOPE/export-collection", {"name": "x"})
+        self.assertEqual((s, j["error"]), (404, "not found"), j)
+
+
 if __name__ == "__main__":
     unittest.main()

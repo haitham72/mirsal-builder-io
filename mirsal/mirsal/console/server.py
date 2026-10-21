@@ -16,7 +16,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 from ..flow import batches, effects as fx_flow, gates, groups, metrics, particle_sets as fx_sets, purge, sources, sticker_history, watch
 from ..generation import higgsfield, jobs, model_catalog, prompter, styles, tasks, usage
-from ..services import llm, telegram
+from ..services import collection as col, llm, telegram
 from ..vision import consent as vision_consent, transcribe
 from ..flow import pipeline as pl
 from ..media.library import Library, LibraryError, cutout, decode_image, png_bytes
@@ -856,6 +856,10 @@ def make_handler(c: Console):
                 return None if user.get("status") != "pending" and c.lib.owns_file(path[5:], user["id"]) else (404, {"error": "not found"})
             if path in ("/api/stickers/move", "/api/stickers/delete") and user.get("status") != "pending":
                 return None
+            if self.command == "GET" and path == "/api/collection":      # Export-to-collection status reads like the FastAPI router: anyone signed in (pending included)
+                return None
+            if self.command == "GET" and len(parts) == 4 and parts[:3] == ["api", "collection", "exports"]:      # one export's state is its sender's; anyone else gets the router's 404
+                return None if user.get("role") == "owner" else (404, {"error": "not found"})
             if user.get("role") == "owner":
                 return None
             if user.get("status") == "pending":          # signed up, not approved yet: the page shows Waiting for approval and nothing else
@@ -868,6 +872,8 @@ def make_handler(c: Console):
                 if (act not in MEMBER_GEN_POST) if post else (act is not None and act not in MEMBER_GEN_GET):
                     return deny
                 return None if c.visible(user, gid) else gone
+            if post and len(parts) == 4 and parts[:2] == ["api", "generations"] and parts[3] == "export-collection":
+                return 403, {"error": "Exporting to the collection API is available to the owner only"}      # owner-only, in the router's own words (`_GEN_PATH` never matches the hyphen)
             if not post and path.startswith("/out/"):                    # authorise the file the URL RESOLVES to (`..` and symlinks included), never its prefix
                 gid = _out_batch(c.out, path)
                 return deny if gid is None else (None if c.visible(user, gid) else gone)
@@ -1033,6 +1039,13 @@ def make_handler(c: Console):
                 return self._json(200, {"users": c.users.list()})
             if path == "/api/telegram":      # connected or not and which bot: never the token
                 return self._json(200, telegram.status(c.out))
+            if path == "/api/collection":    # Export to collection: where it sends and whether its credentials are set (never their value)
+                return self._json(200, col.status())
+            if len(gp) == 4 and gp[:3] == ["api", "collection", "exports"]:      # one export's outcome, its sender only (404 for anyone else, like the router)
+                st = col.export_state(c.out, gp[3])
+                if not st or self.user.get("role") != "owner" or st.get("by") != (self.user.get("id") or "human"):
+                    return self._json(404, {"error": "not found"})
+                return self._json(200, st)
             pp = path.strip("/").split("/")
             if len(pp) == 6 and pp[:2] == ["api", "packs"] and pp[3] == "stickers" and pp[5] == "particle-preview":
                 if self.user.get("role") != "owner":
@@ -1715,6 +1728,20 @@ def make_handler(c: Console):
                     raise
                 activity.say(f"sent pack {parts[2]} to Telegram" + (f" ({sent.get('name') or sent.get('url') or ''})" if isinstance(sent, dict) else ""))
                 self._json(200, sent)
+            elif len(parts) == 4 and parts[3] == "export-collection":     # Export to collection: queue the pack's Download .zip as one collection (services/collection.py)
+                body = self._body()
+                pid = parts[2]
+                def make(retime=False, light=False):
+                    try:
+                        return lib.export_zip(pid, light=light, retime=retime)[0]
+                    except LibraryError as e:
+                        raise col.CollectionError(str(e), getattr(e, "code", 409))
+                try:
+                    st = col.enqueue(c.out, f"pack {pid}", lambda: make(bool(body.get("retime")), bool(body.get("light"))),
+                                     body.get("name"), str(body.get("description") or ""), self.user.get("id") or "human")
+                except col.CollectionError as e:
+                    raise pl.PipelineError(str(e), e.code)
+                self._json(202, st)
             elif len(parts) == 4 and parts[3] == "stickers":
                 b = self._body()
                 g = b.get("from_generation") or {}
@@ -2358,6 +2385,21 @@ def make_handler(c: Console):
                         return self._json(200, {"noop": True, "message": "Already animated."})
                     c.submit(lambda: pl.run_animate(c.out, gid, c.cfg, scope, index, c.pace))
                     return self._json(202, {"id": gid, "noop": False})
+                if parts[3] == "export-collection":      # Export to collection: queue the batch's Download .zip as one collection (services/collection.py)
+                    def make(retime=False, light=False):
+                        try:
+                            return batches.export_zip(c.out, gid, light=light, retime=retime)[0]
+                        except (ValueError, FileNotFoundError, pl.PipelineError) as e:
+                            missing = isinstance(e, (FileNotFoundError, pl.PipelineError)) or "invalid literal" in str(e)
+                            raise col.CollectionError("not found" if missing else str(e), 404 if missing else 409)
+                    if not pl.gen_dir(c.out, gid).is_dir() or not c.visible(self.user, gid):     # checked now: the zip is built later, in the queue
+                        raise pl.PipelineError("not found", 404)
+                    try:
+                        st = col.enqueue(c.out, f"G{gid}", lambda: make(bool(body.get("retime")), bool(body.get("light"))),
+                                         body.get("name"), str(body.get("description") or ""), self.user.get("id") or "human")
+                    except col.CollectionError as e:
+                        raise pl.PipelineError(str(e), e.code)
+                    return self._json(202, st)
             raise pl.PipelineError(NO_ROUTE, 404)
     return H
 
