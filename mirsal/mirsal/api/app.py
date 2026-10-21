@@ -7,7 +7,7 @@ import uvicorn
 from fastapi import FastAPI
 from .dependencies import RequestContext
 from . import legacy_adapter
-from .routers import accounts, imports, reactions, generations, users, trending, tickets, collection, support, chat
+from .routers import accounts, imports, reactions, generations, users, trending, tickets, collection, support, chat, telegram
 
 def quiet_loop():
     """Event loop for `Server`: identical, except a client that vanishes mid-connection stays silent. On Windows every
@@ -28,7 +28,7 @@ def create_app(c, port: int, secure: bool = False) -> FastAPI:
     app = FastAPI(title="Mirsal Builder", docs_url=None, redoc_url=None, openapi_url=None)
     app.state.console = c
     ctx = RequestContext(c, make_handler(c), port, secure)
-    for domain in (imports, accounts, reactions, generations, users, trending, tickets, collection, support, chat):
+    for domain in (imports, accounts, reactions, generations, users, trending, tickets, collection, support, chat, telegram):
         app.include_router(domain.build_router(ctx))
     app.include_router(legacy_adapter.build_router(ctx))
     return app

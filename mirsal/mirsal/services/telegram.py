@@ -9,8 +9,10 @@ from __future__ import annotations
 import io
 import json
 import os
+import queue
 import re
 import ssl
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -328,6 +330,14 @@ def _input(lib, item: dict, kind: str, retime: bool = False, cfg: EngineConfig |
     return {"sticker": f"attach://{ref}", "format": kind, "emoji_list": item["emoji"]}, {ref: (path.name, data, _mime(path))}
 
 
+def require_connected(out: Path) -> dict:
+    """The saved bot config, or the 409 send() raises when Telegram was never connected."""
+    c = load_config(out)
+    if not (c["token"] and c["user_id"]):
+        raise TelegramError("Telegram is not connected. Add your bot token and user id first.", 409)
+    return c
+
+
 def send(out: Path, lib, pid: str, base_name: str | None = None, cfg: EngineConfig | None = None, mode: str = "once", retime: bool = False) -> dict:
     """Send a pack. `mode`: `once` (the default) answers with the earlier export when this exact content was already sent and calls Telegram NOT AT ALL; `replace` sends on purpose
     (only what is new is added to the existing set); `new_set` sends the whole pack again as a second set with a numbered name. Both escape hatches are recorded.
@@ -339,9 +349,7 @@ def send(out: Path, lib, pid: str, base_name: str | None = None, cfg: EngineConf
         if prev:
             return {"already": True, "sets": [dict(x, added=0) for x in prev["sets"]], "sent_at": prev["sent_at"], "bot": prev.get("bot"), "warnings": [], "notified": False, "notify_error": None,
                     "note": "This pack was already sent to Telegram; nothing was sent again. Use Replace or Send as a new set on purpose."}
-    c = load_config(out)
-    if not (c["token"] and c["user_id"]):
-        raise TelegramError("Telegram is not connected. Add your bot token and user id first.", 409)
+    c = require_connected(out)
     token, user = c["token"], c["user_id"]
     bot = c["bot"] or _call(token, "getMe", {})["username"]
     if mode == "new_set":
@@ -417,3 +425,82 @@ def zip_for_stickers_bot(lib, pid: str) -> tuple[bytes, str]:
                    "4. Send /publish, then /skip for the icon, then a short link name.\n\n"
                    "Limits: video 512 px, up to 3 s, 30 fps, 256 KB; static 512 px, 512 KB; at least one emoji per sticker.\n")
     return buf.getvalue(), pack["name"]
+
+
+# ---------- queued sends: the POST answers 202 at once, one worker sends in order ----------
+_TQ: queue.Queue = queue.Queue()
+_TLIVE: set = set()                 # the send ids this process will still run (queued or running)
+_TQLOCK = threading.Lock()
+_TWORKER: list = []
+FINAL_SEND = ("done", "failed")
+
+def _tsend_path(out: Path, tid: str) -> Path:
+    return Path(out) / "telegram_sends" / f"{tid}.json"
+
+def _tsave(out: Path, st: dict) -> None:
+    from ..runtime import atomic
+    p = _tsend_path(out, st["id"])
+    p.parent.mkdir(parents=True, exist_ok=True)
+    atomic.write_text(p, json.dumps(st, ensure_ascii=False, indent=1))
+
+def enqueue_send(out: Path, pid: str, make_send, by: str = "human") -> dict:
+    """Queue one send; `make_send()` runs it when its turn comes. Answers at once: {id, state: queued, position, …}."""
+    tid = f"T{int(time.time() * 1000):x}{uuid.uuid4().hex[:4]}"
+    st = {"id": tid, "pack": pid, "what": f"pack {pid}", "by": by, "state": "queued", "at": round(time.time(), 3)}
+    _tsave(out, st)
+    with _TQLOCK:
+        _TLIVE.add(tid)
+        position = len(_TLIVE)
+        _TQ.put((Path(out), tid, make_send, by))
+        if not _TWORKER or not _TWORKER[0].is_alive():
+            _TWORKER[:] = [threading.Thread(target=_twork, name="telegram-send", daemon=True)]
+            _TWORKER[0].start()
+    return {**st, "position": position}
+
+def send_state(out: Path, tid: str) -> dict | None:
+    """The send's state, None when there is no such send. One an earlier server run left unfinished reads as failed."""
+    if not re.fullmatch(r"T[0-9a-f]+", str(tid or "")):
+        return None
+    from ..runtime import atomic
+    try:
+        st = json.loads(atomic.read_text(_tsend_path(out, tid)))  # retrying: a plain read can catch the replace instant on Windows (PermissionError) and report a live send as missing
+    except (OSError, ValueError):
+        return None
+    with _TQLOCK:
+        live = tid in _TLIVE
+    if st.get("state") not in FINAL_SEND and not live:
+        st.update(state="failed", error="The server restarted before this send finished; send it again")
+    return st
+
+def _twork() -> None:
+    from ..runtime import activity
+    while True:
+        out, tid, make_send, by = _TQ.get()
+        st = send_state(out, tid) or {"id": tid, "by": by}
+        try:
+            st["state"] = "sending"; _tsave(out, st)
+            st["result"] = make_send()
+            st["state"] = "done"
+            activity.say(f"sent {st.get('what')} to Telegram")
+        except TelegramError as e:
+            st.update(state="failed", error=str(e), code=e.code)
+            activity.say(f"Telegram send of {st.get('what')} failed: {e}", error=True)
+        except Exception as e:                                     # never a silent stop: whatever broke is the send's answer
+            st.update(state="failed", error=f"The send broke: {e}")
+            activity.say(f"Telegram send of {st.get('what')} broke: {e}", error=True)
+        st["finished"] = round(time.time(), 3)
+        try:
+            _tsave(out, st)
+        finally:
+            with _TQLOCK:
+                _TLIVE.discard(tid)
+
+def wait(timeout: float = 60.0) -> bool:
+    """For tests: True once every queued send has finished."""
+    end = time.time() + timeout
+    while time.time() < end:
+        with _TQLOCK:
+            if not _TLIVE:
+                return True
+        time.sleep(0.05)
+    return False

@@ -860,6 +860,8 @@ def make_handler(c: Console):
                 return None
             if self.command == "GET" and len(parts) == 4 and parts[:3] == ["api", "collection", "exports"]:      # one export's state is its sender's; anyone else gets the router's 404
                 return None if user.get("role") == "owner" else (404, {"error": "not found"})
+            if self.command == "GET" and len(parts) == 4 and parts[:3] == ["api", "telegram", "sends"]:      # one send's state is its sender's; anyone else gets the router's 404
+                return None if user.get("role") == "owner" else (404, {"error": "not found"})
             if user.get("role") == "owner":
                 return None
             if user.get("status") == "pending":          # signed up, not approved yet: the page shows Waiting for approval and nothing else
@@ -1043,6 +1045,11 @@ def make_handler(c: Console):
                 return self._json(200, col.status())
             if len(gp) == 4 and gp[:3] == ["api", "collection", "exports"]:      # one export's outcome, its sender only (404 for anyone else, like the router)
                 st = col.export_state(c.out, gp[3])
+                if not st or self.user.get("role") != "owner" or st.get("by") != (self.user.get("id") or "human"):
+                    return self._json(404, {"error": "not found"})
+                return self._json(200, st)
+            if len(gp) == 4 and gp[:3] == ["api", "telegram", "sends"]:      # one queued send's outcome, its sender only (404 for anyone else, like the router)
+                st = telegram.send_state(c.out, gp[3])
                 if not st or self.user.get("role") != "owner" or st.get("by") != (self.user.get("id") or "human"):
                     return self._json(404, {"error": "not found"})
                 return self._json(200, st)
@@ -1718,16 +1725,17 @@ def make_handler(c: Console):
                 self._json(200, lib.merge_pack(parts[2], into, by=self.user["id"]))
             elif len(parts) == 4 and parts[3] == "restore":     # back from the trash under the same id
                 self._json(200, lib.restore_pack(parts[2]))
-            elif len(parts) == 4 and parts[3] == "telegram":     # create the pack on Telegram (or add what is new to it)
+            elif len(parts) == 4 and parts[3] == "telegram":     # create the pack on Telegram (or add what is new to it): queued, one send at a time (services/telegram.py)
                 body = self._body()
+                mode = str(body.get("mode") or "once")
+                if mode not in telegram.MODES:
+                    raise pl.PipelineError(f"mode must be one of {', '.join(telegram.MODES)}", 400)
+                telegram.require_connected(c.out)                            # refused at once, like the collection API's missing key
+                pid = parts[2]
+                st = telegram.enqueue_send(c.out, pid, lambda: telegram.send(c.out, lib, pid, (body.get("name") or None), c.cfg, mode, retime=bool(body.get("retime"))), self.user.get("id") or "human")
                 from ..runtime import activity
-                try:
-                    sent = telegram.send(c.out, lib, parts[2], (body.get("name") or None), c.cfg, str(body.get("mode") or "once"), retime=bool(body.get("retime")))
-                except Exception as e:
-                    activity.say(f"Telegram send of pack {parts[2]} failed: {e}", error=True)
-                    raise
-                activity.say(f"sent pack {parts[2]} to Telegram" + (f" ({sent.get('name') or sent.get('url') or ''})" if isinstance(sent, dict) else ""))
-                self._json(200, sent)
+                activity.say(f"queued pack {pid} for Telegram ({st['id']}, #{st['position']} in line)")
+                self._json(202, st)
             elif len(parts) == 4 and parts[3] == "export-collection":     # Export to collection: queue the pack's Download .zip as one collection (services/collection.py)
                 body = self._body()
                 pid = parts[2]

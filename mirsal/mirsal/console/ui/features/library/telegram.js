@@ -30,7 +30,13 @@ async function tgFlow(){const P=TG.plan;if(!P)return;const st=P.status||{};
   dlg(`<div class=tgdlg style="text-align:center;padding:14px 8px"><div class=spin style="margin:0 auto 12px"></div><h2 style="margin:0">Sending ${newN} sticker${newN===1?'':'s'} to Telegram…</h2><div class=mut style="margin-top:6px">${newN>20?'A big pack takes about a minute. ':''}Telegram opens when it is ready.</div></div>`);
   const r=await post(`/api/packs/${PACK_ID}/telegram`,{name:P.pack,retime:rt});
   if(!r.ok){closeDlg();toast(r.j.error,1);return}
-  TG.done=r.j;tgDone(r.j)}
+  tgWatch(r.j.id,PACK_ID,0)}
+/* a send runs on the server (services/telegram.py queue): ask its state until it is done or failed */
+async function tgWatch(id,pid,tries=0){let r={ok:false,status:0,j:{}};try{r=await api('/api/telegram/sends/'+encodeURIComponent(id))}catch(e){}
+ const here=()=>route_==='pack'&&PACK_ID===pid;
+ if(r.ok&&r.j.state==='done'){TG.done=r.j.result;if(here())return tgDone(r.j.result);const n=r.j.result.sets.reduce((a,s)=>a+(s.added||s.total),0);return toast(`Sent ${n} sticker${n===1?'':'s'} to Telegram`)}
+ if(r.ok&&r.j.state==='failed'){if(here())closeDlg();return toast(`Send to Telegram failed: ${r.j.error||'unknown error'}`,1)}
+ if(r.status===404||tries>720){if(here())closeDlg();return toast('Send status unknown: reopen Send to check',1)}setTimeout(()=>tgWatch(id,pid,tries+1),2500)}
 function tgDone(d){const first=d.sets[0];
   dlg(`<div class=tgdlg><h2>${ic('check')} Sent to Telegram</h2>
     ${d.sets.map(s=>`<div class=row style="justify-content:space-between;margin:8px 0"><span><b>${esc(tgN(s.added||s.total,s.kind))}</b> <span class=mut>${s.added?'added':'already there'}</span></span>
@@ -52,3 +58,4 @@ async function tgSettingsCard(){const r=await api('/api/telegram');if(!r.ok)retu
      <div class=row>${s.from_env?'':`<button class="btn sm dng" data-act=tgdisconnect>Disconnect</button>`}<span class=mut>Send a pack with one click: Library → a pack → Send to Telegram.</span></div>`
    :`<div class=mut>Not connected. Stickers can be sent to Telegram in one click once you connect a bot.</div><div class=row><button class="btn pri sm" data-act=tgsettings>Connect Telegram</button></div>`}</div>`}
 ACT.tgsettings=()=>dlg(`<div class=tgdlg><h2>${ic('telegram')} Connect Telegram</h2>${tgConnectForm()}</div>`);
+if(typeof module!=='undefined')module.exports={tgWatch};

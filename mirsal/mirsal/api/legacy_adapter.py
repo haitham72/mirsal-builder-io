@@ -32,15 +32,15 @@ class _Pipe:
 
 def _handle(H, method: str, target: str, raw_headers: bytes, body: bytes, client: str, port: int, pipe: _Pipe) -> None:
     """Run the existing handler on one request without a socket: the same object the stdlib server builds, minus the connection."""
-    h = H.__new__(H)
-    h.rfile, h.wfile = io.BytesIO(body), pipe
-    h.client_address = (client, 0)
-    h.server = SimpleNamespace(server_address=("127.0.0.1", port))
-    h.command, h.path, h.request_version = method, target, "HTTP/1.1"
-    h.requestline = f"{method} {target} HTTP/1.1"
-    h.close_connection = True
-    h.headers = http.client.parse_headers(io.BytesIO(raw_headers))
-    try:
+    try:                                                     # setup included: even a header line past the 64 KiB limit ends the request, never hangs it
+        h = H.__new__(H)
+        h.rfile, h.wfile = io.BytesIO(body), pipe
+        h.client_address = (client, 0)
+        h.server = SimpleNamespace(server_address=("127.0.0.1", port))
+        h.command, h.path, h.request_version = method, target, "HTTP/1.1"
+        h.requestline = f"{method} {target} HTTP/1.1"
+        h.close_connection = True
+        h.headers = http.client.parse_headers(io.BytesIO(raw_headers))
         fn = getattr(h, "do_" + method, None)
         if fn is None:
             h.send_error(501, f"Unsupported method ({method!r})")
@@ -114,7 +114,10 @@ def build_router(ctx):
             if chunk is _END:
                 break
             buf += chunk
-        status, headers, first = _split_head(buf) if b"\r\n\r\n" in buf else (500, [(b"content-type", b"application/json; charset=utf-8")], b'{"error": "internal error"}')
+        try:
+            status, headers, first = _split_head(buf) if b"\r\n\r\n" in buf else (500, [(b"content-type", b"application/json; charset=utf-8")], b'{"error": "internal error"}')
+        except ValueError:
+            status, headers, first = 500, [(b"content-type", b"application/json; charset=utf-8")], b'{"error": "internal error"}'  # garbage where the status line goes: a 500, like no head at all
         done = b"\r\n\r\n" not in buf
 
         async def stream():

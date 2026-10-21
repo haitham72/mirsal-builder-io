@@ -6,6 +6,7 @@ import os
 import shutil
 import tempfile
 import threading
+import time
 import unittest
 import zipfile
 from dataclasses import replace
@@ -293,6 +294,18 @@ class Zip(LibFixture):
         self.assertIn("/newvideo", z.read("HOW-TO.txt").decode())
 
 
+def poll_send(req, tid, timeout=30):
+    """Poll a queued Telegram send until it finishes (like the page's tgWatch)."""
+    end = time.time() + timeout
+    while time.time() < end:
+        s, st = req("GET", f"/api/telegram/sends/{tid}")
+        assert s == 200, st
+        if st["state"] in ("done", "failed"):
+            return st
+        time.sleep(0.2)
+    raise AssertionError("queued Telegram send never finished")
+
+
 class Api(LibFixture):
     """The page's endpoints, against the fake: connect, plan, send, zip. The token is never in a response."""
     def setUp(self):
@@ -323,11 +336,16 @@ class Api(LibFixture):
         self.assertEqual(self.req("POST", "/api/telegram/config", {"token": "x", "user_id": "1"})[0], 400)
         s, st = self.req("POST", "/api/telegram/config", {"token": TOKEN, "user_id": USER})
         self.assertEqual((s, st["configured"], st["bot"]), (200, True, BOT))
-        s, r = self.req("POST", f"/api/packs/{self.pid}/telegram", {})
-        self.assertEqual(s, 200, r)
-        self.assertEqual(r["sets"][0]["link"], "https://t.me/addstickers/teddy_pack_by_mirsalbot")
-        s, again = self.req("POST", f"/api/packs/{self.pid}/telegram", {})
-        self.assertEqual(again["sets"][0]["added"], 0)
+        s, q = self.req("POST", f"/api/packs/{self.pid}/telegram", {})
+        self.assertEqual(s, 202, q)
+        r = poll_send(self.req, q["id"])
+        self.assertEqual(r["state"], "done", r)
+        self.assertEqual(r["result"]["sets"][0]["link"], "https://t.me/addstickers/teddy_pack_by_mirsalbot")
+        s, q2 = self.req("POST", f"/api/packs/{self.pid}/telegram", {})
+        r2 = poll_send(self.req, q2["id"])
+        self.assertEqual(r2["result"]["sets"][0]["added"], 0)
+        self.assertEqual(self.req("POST", f"/api/packs/{self.pid}/telegram", {"mode": "nope"})[0], 400)
+        self.assertEqual(self.req("GET", "/api/telegram/sends/T0")[0], 404)
         s, z = self.req("GET", f"/api/packs/{self.pid}/telegram.zip")
         self.assertEqual((s, z[:2]), (200, b"PK"))
         s, z = self.req("GET", f"/api/packs/{self.pid}/export.zip")                                      # the plain download (no Telegram wording)
@@ -393,3 +411,62 @@ class NeverTwice(Send):
         with self.assertRaises(tg.TelegramError):
             tg.send(self.out, self.lib, self.pid, mode="twice")
         self.assertEqual(self.fake.f.sets, {})
+
+
+class QueuedSend(LibFixture):
+    """The send queue: refused at once when that is possible, one worker sends in order, the state file reports it."""
+    def test_unconnected_send_fails_on_the_queue_without_touching_the_network(self):
+        self.add_static("One", "😀")
+        st = tg.enqueue_send(self.out, self.pid, lambda: tg.send(self.out, self.lib, self.pid, None, CFG), "tester")
+        self.assertEqual(st["state"], "queued")
+        self.assertTrue(tg.wait(timeout=30))
+        done = tg.send_state(self.out, st["id"])
+        self.assertEqual(done["state"], "failed")
+        self.assertIn("not connected", done["error"])
+        self.assertEqual(self.fake.f.sets, {})
+
+    def test_full_send_against_the_fake(self):
+        self.connect()
+        self.add_static("One", "😀")
+        st = tg.enqueue_send(self.out, self.pid, lambda: tg.send(self.out, self.lib, self.pid, None, CFG), "tester")
+        self.assertTrue(tg.wait(timeout=60))
+        done = tg.send_state(self.out, st["id"])
+        self.assertEqual(done["state"], "done", done)
+        self.assertEqual(done["result"]["sets"][0]["link"], "https://t.me/addstickers/teddy_pack_by_mirsalbot")
+
+    def test_unknown_send_is_none(self):
+        self.assertIsNone(tg.send_state(self.out, "T0"))
+        self.assertIsNone(tg.send_state(self.out, "bogus"))
+
+
+class ApiStdlib(LibFixture):
+    """The same queue contract on serve --stdlib."""
+    def setUp(self):
+        super().setUp()
+        self.add_static("One", "😀")
+        self.srv, self.c = serve(self.out, self.tmp / "in", 0, block=False, stdlib=True)
+        threading.Thread(target=self.srv.serve_forever, daemon=True).start()
+        self.port = self.srv.server_address[1]
+
+    def tearDown(self):
+        self.srv.shutdown()
+        super().tearDown()
+
+    def req(self, method, path, body=None):
+        h = http.client.HTTPConnection("127.0.0.1", self.port, timeout=60)
+        h.request(method, path, json.dumps(body) if body is not None else None, {"Content-Type": "application/json"})
+        r = h.getresponse(); raw = r.read(); h.close()
+        try:
+            return r.status, json.loads(raw)
+        except ValueError:
+            return r.status, raw
+
+    def test_send_is_queued_and_polled(self):
+        self.assertEqual(self.req("POST", f"/api/packs/{self.pid}/telegram", {})[0], 409)   # unconnected: refused at once
+        s, st = self.req("POST", "/api/telegram/config", {"token": TOKEN, "user_id": USER})
+        self.assertEqual(s, 200, st)
+        s, q = self.req("POST", f"/api/packs/{self.pid}/telegram", {})
+        self.assertEqual(s, 202, q)
+        done = poll_send(self.req, q["id"])
+        self.assertEqual(done["state"], "done", done)
+        self.assertEqual(self.req("GET", "/api/telegram/sends/T0")[0], 404)

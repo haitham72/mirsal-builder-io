@@ -33,7 +33,7 @@ const TRX=(()=>{
   const allText=pa=>`This deletes ${plural(pa.count,'item')} for good. Type “${pa.phrase}” to confirm.`;
   const typedOk=(typed,pa)=>String(typed||'').trim().toLowerCase().replace(/\s+/g,' ')===pa.phrase;
   /* a purge task in one sentence */
-  const outcome=t=>{if(!t)return '';if(t.nothing_to_do)return 'Nothing to delete.';
+  const outcome=t=>{if(!t)return '';if(t.nothing_to_do)return 'Nothing to delete.';if(t.timedout)return 'Still deleting after 3 minutes: Refresh in a bit to see the rest.';
     const ok=(t.results||[]).filter(r=>r.ok).length,bad=(t.results||[]).filter(r=>!r.ok);
     return `${t.status==='done'?'Deleted':'Deleted so far'}: ${ok} of ${t.total}.`+(bad.length?' Could not delete '+bad.map(r=>r.id+' ('+r.error+')').join(', ')+'; they are still in the trash, run it again.':'')+((t.refused||[]).length?` Left alone, they need their own confirmation: ${t.refused.map(r=>r.id).join(', ')}.`:'')};
   return{escape,size,nice,detail,row,html,confirmOne,allText,typedOk,outcome};
@@ -45,7 +45,7 @@ if(typeof document!=='undefined'){
   const trxDraw=()=>{const b=trxBox();if(b)b.innerHTML=TRX.html(trxData)};
   async function trxLoad(){const r=await api('/api/trash');if(!r.ok){const b=trxBox();if(b)b.innerHTML=`<div class=mut>${TRX.escape(r.status===403?'The trash is for the owner account.':(r.j&&r.j.error)||'Could not read the trash.')}</div>`;return}trxData=r.j;trxDraw()}
   /* a purge answers 200 when it finished within the request, 202 while it runs: then poll its task until it is done */
-  async function trxWait(t){while(t&&t.status==='running'&&t.id){await new Promise(r=>setTimeout(r,1200));const r=await api('/api/trash/purges/'+t.id);if(!r.ok)break;t=r.j}return t}
+  async function trxWait(t){let n=0;while(t&&t.status==='running'&&t.id&&n<150){n++;await new Promise(r=>setTimeout(r,1200));const r=await api('/api/trash/purges/'+t.id);if(!r.ok)break;t=r.j}if(t&&t.status==='running'&&n>=150)t.timedout=true;return t}
   async function trxRun(url,body,shared){if(trxBusy)return;trxBusy=true;
     try{const r=await post(url,body);if(!r.ok){if(r.status===409&&!shared&&body.type&&/Confirm to go on/.test(r.j.error||'')){trxAskShared(body,r.j.error);return}toast(r.j.error||'The purge did not start',1);return}
       const t=await trxWait(r.j);toast(TRX.outcome(t),t&&t.status==='failed')}finally{trxBusy=false;await trxLoad()}}

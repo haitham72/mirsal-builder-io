@@ -316,8 +316,9 @@ def export_state(out: Path, xid: str) -> dict | None:
     """The export's state, None when there is no such export. One an earlier server run left unfinished reads as failed."""
     if not re.fullmatch(r"X[0-9a-f]+", str(xid or "")):
         return None
+    from ..runtime import atomic
     try:
-        st = json.loads(_state_path(out, xid).read_text(encoding="utf-8"))
+        st = json.loads(atomic.read_text(_state_path(out, xid)))  # retrying: a plain read can catch the replace instant on Windows (PermissionError) and report a live export as missing
     except (OSError, ValueError):
         return None
     with _QLOCK:

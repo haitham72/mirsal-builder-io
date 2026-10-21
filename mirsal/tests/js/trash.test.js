@@ -63,6 +63,10 @@ test('a finished purge is told in one sentence, failures and skipped items inclu
   assert.match(t, /need their own confirmation: G005/);
 });
 
+test('a purge that outlasts the 3-minute poll says so instead of going quiet', () => {
+  assert.match(TRX.outcome({ status: 'running', timedout: true, total: 9, results: [] }), /Still deleting after 3 minutes/);
+});
+
 test('the script follows the console rules: names prefixed, every data-act has a handler, one ACT object', () => {
   const src = readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'trash.js'), 'utf8');
   const top = [...src.matchAll(/^(?:const|let|function|class)\s+([A-Za-z_$][\w$]*)/gm)].map(m => m[1]);
