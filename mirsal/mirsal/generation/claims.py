@@ -1,4 +1,4 @@
-"""The pack claim ledger (`docs/export to team/mirsal-export-architecture.md` §10.7): which preset grid each pack session has taken, and which generations
+"""The pack claim ledger (`docs/api-integration.md`): which preset grid each pack session has taken, and which generations
 each claim produced. File store leads, Postgres mirrors (`store/repo.save_pack_session`, `migrations/012_pack_claims.sql`).
 
   session  out/pack_sessions/<slug>.json      `pack-<slug>`, one per pack subject ("generate sticker pack for falcon" -> pack-falcon)

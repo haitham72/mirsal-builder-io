@@ -1,4 +1,4 @@
-"""Durable turns and profiles (docs/agent-and-chat.md 24): checkpoints per turn, safe resume,
+"""Durable turns and profiles (docs/architecture.md): checkpoints per turn, safe resume,
 focus fallback from the last turn, and the SQLite profile table. Fakes only: no network, no spend."""
 import tempfile
 import unittest

@@ -385,7 +385,7 @@ def start(prompt: str, out: Path, inp: Path, variant: int | None = None, pick: s
           outline: int | None = None, erode: int | None = None, kind: str | None = None, prepared: bool | None = None, sheet_model: str | None = None) -> int:
     """Synchronous part: match source, run the prompter, allocate G00N. Returns the id fast.
     grid: the user's choice (3x3 / 2x2). A prepared sheet's own layout wins: it is measured from its gutters.
-    kind: "particles" marks the batch as a particle sheet (docs/effects.md): its layout is the plan's, it is cut into EXACT equal cells and no sticker rule can stop a cell (verify.PARTICLE_KEEP).
+    kind: "particles" marks the batch as a particle sheet (docs/architecture.md ("Reactions")): its layout is the plan's, it is cut into EXACT equal cells and no sticker rule can stop a cell (verify.PARTICLE_KEEP).
     prepared: this batch serves a prepared watch-folder set (its real source, recorded in result.json, 0 credits, no job or ledger line).
     None (the default) detects it: the sheet lives under the watch folder. A live provider sheet and a hand import do not."""
     if kind not in (None, "particles"):
@@ -660,7 +660,7 @@ def recut(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0, by: str = "
 
 def recut_as_particles(out: Path, gid: int, cfg: EngineConfig, pace: float = 0.0, by: str = "human") -> None:
     """A batch that was drawn as a particle sheet before batches knew they were particles (G100: a 2x2 sheet with a white divider cross, read as "3x3", three cells blocked `inside_cell`) is cut
-    again as one, from the sheet it stores, free: exact equal cells, no sticker rule blocks a cell (docs/effects.md). Same refusals as `recut` (a decided sticker or a video sheet would lose
+    again as one, from the sheet it stores, free: exact equal cells, no sticker rule blocks a cell (docs/architecture.md ("Reactions")). Same refusals as `recut` (a decided sticker or a video sheet would lose
     its decision); a batch that already is a particle batch is refused (nothing would change)."""
     recut_check(out, gid)
     res = read_result(out, gid)
@@ -1472,7 +1472,7 @@ def _history_item(out: Path, gid: int, edited: float) -> dict:
 
 
 def history(out: Path, offset: int = 0, limit: int = 5) -> dict:
-    """Every batch FAMILY, the most recently EDITED first (any change to any of its batches counts), a page at a time (docs/engine-and-studio.md, "Batch
+    """Every batch FAMILY, the most recently EDITED first (any change to any of its batches counts), a page at a time (docs/architecture.md, "Batch
     groups"). An item is the family's root batch (title, times, counts, the stickers as the sheet's own grid: `grid: [rows, cols]`, `cells: [{index, row, col,
     png, status, animated}]`) with `variants`: every batch of the family as the same item shape, root first. A batch alone is a family of one."""
     from . import groups

@@ -1,7 +1,7 @@
 /* The welcome modal: shown once when the app is first opened in a browser session, and again from Home's "Watch the film" (home.js; the Mirsal logo opens Home).
    Page 0 is a fast-cut ad film (Seedance 2.5, /assets/welcome/welcome.mp4), pages 1-4 are the features as sliding images (Nano Banana 2): stickers from one idea, stickers that move,
    emoji particle bursts, the AI chat. The slides are data (WL_SLIDES), the markup is built by pure functions. Nothing here talks to the server except the assets; the files are real files
-   under console/assets/welcome/ (a missing one just leaves the soft gradient behind the text, the modal still works). docs/onboarding.md has the prompts that made the media. */
+   under console/assets/welcome/ (a missing one just leaves the soft gradient behind the text, the modal still works). docs/design.md has the prompts that made the media. */
 'use strict';
 ICONS.wlplay='<path d="M8 5.5v13l11-6.5z" fill="currentColor"/>';
 ICONS.wlpause='<path d="M8 5h3v14H8zM13 5h3v14h-3z" fill="currentColor"/>';

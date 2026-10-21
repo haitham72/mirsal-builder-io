@@ -1,4 +1,4 @@
-/* The project map (redesign phase 4, docs/redesign_plan.md §2 and §4 MAP / PROJ, docs/design.md "The project map"): the Studio's left column.
+/* The project map (redesign phase 4, docs/design.md, docs/design.md): the Studio's left column.
    Project = one idea · Batch = one set of stickers · Sheet = one try at it · Video = one animation of a sheet, read in ONE call (GET /api/generations/{id}/map,
    flow/projects.py). Above it the project switcher opens every project (the Earlier-batches list of live.js, unchanged: paging, drag and drop, Removed batches).
    Every control calls the action it always called: a sheet of the open batch is `ggen`, another batch's sheet `pmopen`, a video `gapick` / `garm`, the sheet menu

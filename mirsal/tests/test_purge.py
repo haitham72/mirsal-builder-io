@@ -563,7 +563,7 @@ class DatabaseHalf(unittest.TestCase):
 
 
 class TrashRoutes(unittest.TestCase):
-    """The routes over the real server (owner-only like Remove batch): docs/api.md."""
+    """The routes over the real server (owner-only like Remove batch): docs/api-integration.md."""
 
     def setUp(self):
         self.td = tempfile.TemporaryDirectory(); self.tmp = Path(self.td.name)

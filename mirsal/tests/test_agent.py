@@ -1,4 +1,4 @@
-"""The agent end to end on a fake provider (docs/agent-and-chat.md 4A-4C exits): no network, no spend, no files but the session."""
+"""The agent end to end on a fake provider (turn exits 4A-4C; docs/architecture.md): no network, no spend, no files but the session."""
 import json
 import tempfile
 import threading
@@ -805,7 +805,7 @@ class NamesFromPictures(Base):
 
 
 class ParticleIntents(Base):
-    """Chat intents for particle sets (docs/agent-and-chat.md, particle sets in the chat): make particles for a pack, generate more, delete, restore, also use them for another pack. Reading and the free list edits happen at once;
+    """Chat intents for particle sets (docs/architecture.md, particle sets in the chat): make particles for a pack, generate more, delete, restore, also use them for another pack. Reading and the free list edits happen at once;
     anything that SPENDS (a sheet) shows its price on a plan and waits for the go-ahead. FakeTools: no provider."""
 
     def setUp(self):

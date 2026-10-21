@@ -1,4 +1,4 @@
-"""The previewed plan is reused (docs/engine-and-studio.md, "Generate prompt, before the sheet"): `POST /api/live/sheet {plan}` starts the batch from the cells, tags and emoji the person
+"""The previewed plan is reused ("Generate prompt, before the sheet"; docs/architecture.md): `POST /api/live/sheet {plan}` starts the batch from the cells, tags and emoji the person
 saw on Generate prompt instead of planning the request again with the built-in sets. The plan is untrusted browser data: validated (type, size, characters, the enhancer's own lint),
 rebuilt from the saved template, an invalid one is a 400 in words. No test reaches a model or the real CLI (the fake CLI of tests.test_live; `llm.complete` is a mock that must stay unused)."""
 import copy

@@ -1,8 +1,0 @@
-# The queue (`GET /api/jobs`, `live.js`)
-
-<sub>Part of [generation.md](../generation.md).</sub>
-
-The **Queue** is a small panel fixed at the bottom left next to the credits (collapsed: "N running · stage · elapsed of about typical", or "N failed"; open: the rows, expanding upward, state remembered). It lists every job the server knows (it survives a reload): kind, request, model and settings, credits, start time, the Higgsfield job id (with a copy button), a progress bar
-against the typical duration of that model (median of the ledger), and the real stage: waiting to start, Higgsfield is working (elapsed against typical), downloading the result, cutting the
-animations (n of 9 for a video), done, or the reason it failed in plain words (for example a content-filter refusal, `nsfw`, or a temporary HTTP 5xx). A running job also shows on the credits pill.
-Stalled jobs carry four explicit actions, cheapest first: **Refresh** (local state and generation SSE only), **Check · free** (one `generate get`, then download/attach a completed result by ticket), **Continue · same ticket** (`POST /api/jobs/<id>/continue`, `jobs.resume`, no second charge), and **Retry · SPENDS** (a separately priced and confirmed new request, never the default). A local FAILED/TIMEOUT ticket with a completed provider task is labelled **“Divergence, not a failure”** and reconciled with human history. The Queue, Studio job panels and chat all use the same controls (`console/job-recovery.js`, loaded before `live.js`; the Queue lists every active, recent and FAILED/TIMEOUT job instead of only the last day's eight, and its pill says "N need attention"). Routes and bodies: `docs/api.md`, "Job recovery"; the runbook: `docs/operator.md`.

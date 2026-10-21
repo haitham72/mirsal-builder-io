@@ -1,4 +1,4 @@
-"""Account requests on the office LAN (docs/api.md, Office accounts on the LAN): a sign-up waiting for approval, a forgotten password, a request for more
+"""Account requests on the office LAN (docs/api-integration.md): a sign-up waiting for approval, a forgotten password, a request for more
 credits. Each is one record in `out/account_requests.json` (git-ignored: emails), decided by Haitham in Users > People or with a button in the
 Telegram bot (`services/admin_bot.py`); every decision says who made it and when. Nothing is decided automatically: no credit refills on its own,
 no password is reset without Haitham."""

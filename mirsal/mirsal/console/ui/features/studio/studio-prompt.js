@@ -168,7 +168,7 @@ ACT.pgreset = (el) => {
   tick(true);
 };
 
-/* The same Prompt editor, before a sheet exists (docs/engine-and-studio.md, the Generate prompt step). "Generate prompt" is POST /api/plan: no G### is allocated, nothing enters SES or GM, no Higgsfield credit is spent.
+/* The same Prompt editor, before a sheet exists (docs/architecture.md, the Generate prompt step). "Generate prompt" is POST /api/plan: no G### is allocated, nothing enters SES or GM, no Higgsfield credit is spent.
    With the AI enhancer On the plan is written through the engine the person chose (ai:true; Local is free, Cloud is one small OpenAI call); a model that fails never blocks, the server answers the built-in plan with expand_error and the step says why.
    "Generate sheet" is the one click that spends: the Higgsfield price sits on its own line above it, the edited text goes to the live sheet route as `sheet_prompt` and the previewed plan (its cells, tags and emoji) as `plan`, which the server re-validates (rule 13). */
 const gdOn = () => !!(GD && GD.active && GD.gens === SES.gens.join());

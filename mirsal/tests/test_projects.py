@@ -1,4 +1,4 @@
-"""The project map (flow/projects.py, docs/redesign_plan.md §6): Project > Batch > Sheet > Video as ONE read, on hand-made result files (nothing is generated),
+"""The project map (flow/projects.py, docs/design.md): Project > Batch > Sheet > Video as ONE read, on hand-made result files (nothing is generated),
 and its native route GET /api/generations/{id}/map through the real server."""
 import json
 import shutil

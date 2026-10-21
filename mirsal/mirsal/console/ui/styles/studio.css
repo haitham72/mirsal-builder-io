@@ -1,7 +1,7 @@
 @font-face{font-family:"Inter";src:url(/ui/fonts/InterVariable.woff2) format("woff2");font-weight:100 900;font-display:swap}
-:root{/* ONE token set for every screen (docs/design.md 3.1). The accent for actions is Mirsal blue (--pri); the depth cues (glass, glow, wash, the cyan family) were AI's alone and are shared now. */
+:root{/* ONE token set for every screen (docs/design.md). The accent for actions is Mirsal blue (--pri); the depth cues (glass, glow, wash, the cyan family) were AI's alone and are shared now. */
 --rail-w:96px;--col2-w:392px;--gutter:30px;
-/* ONE scale each (docs/design.md 3.2): six type steps and the radii; a screen picks a step, it does not invent a size */
+/* ONE scale each (docs/design.md): six type steps and the radii; a screen picks a step, it does not invent a size */
 --fs-xs:11.5px;--fs-s:12.5px;--fs-m:14px;--fs-l:16px;--fs-xl:20px;--fs-2xl:24px;--r-s:8px;--r-m:12px;--r-l:24px;--r-pill:999px;
 --ai:#06B6D4;--ai2:#22D3EE;--aid:#0E7490;--ink:#0B3B4A;--ink2:#35606E;--ink3:#6B8A96;--wl-ink:#123546;--wl-ink2:#345969;--wash:#F2FBFE;--glass:rgba(255,255,255,.70);--aline:rgba(8,145,178,.17);--aglow:rgba(6,182,212,.30);--viol:#8B5CF6;--blu:#3B82F6;
 --glow-bg:radial-gradient(1100px 700px at 12% -8%,#E3F8FF 0%,transparent 62%),radial-gradient(900px 620px at 104% 22%,#DCEBFF 0%,transparent 62%),radial-gradient(800px 560px at 38% 112%,#EEE6FF 0%,transparent 64%),linear-gradient(180deg,#F6FCFF 0%,#EDF5FF 100%);
@@ -37,7 +37,7 @@ html[data-theme=light] #thm-toggle .thm-moon{display:block}
 #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);font-size:var(--fs-m);font-weight:500;padding:9px 18px;border-radius:var(--r-pill);background:var(--tx);color:#fff;opacity:0;pointer-events:none;transition:opacity .2s;z-index:80;max-width:80vw}#toast.on{opacity:.96}#toast.bad{background:var(--bad)}
 .screen{display:none;flex:1;min-height:0;overflow:auto;padding:22px var(--gutter)}.screen.on{display:block}#s-editor.on,#s-animate.on,#s-prepare.on{display:flex;padding:12px;gap:12px}
 h1{font-size:var(--fs-2xl);margin:0 0 4px;font-weight:700;letter-spacing:-.01em}h2{font-size:var(--fs-l);margin:0;font-weight:600}h1 svg,h2 svg{width:18px;height:18px;flex:none}
-/* the page every plain screen sits in: ONE width and ONE header (docs/design.md 4.4) */
+/* the page every plain screen sits in: ONE width and ONE header (docs/design.md) */
 .page{max-width:1000px;margin:0 auto}.ph{display:flex;align-items:baseline;gap:12px;margin:0 0 12px}.ph h1{margin:0}.mut,small{color:var(--mut)}
 .sh{display:flex;align-items:center;gap:10px;font-size:var(--fs-l);font-weight:600;margin-bottom:14px}.sh svg{width:18px;height:18px;color:var(--mut)}
 /* controls */
@@ -318,7 +318,7 @@ body.marq{user-select:none;cursor:crosshair}.grid.mdim .cell.sel{outline-color:t
 .lv-job{display:flex;align-items:center;gap:14px;margin:12px 4px 0}.lv-job.bad{border-color:var(--bad)}.lv-x{width:30px;height:30px;border-radius:50%;background:#fee2e2;color:var(--bad);display:flex;align-items:center;justify-content:center;font-weight:800;flex:none}
 .dbox:has(.lv-md),.dbox:has(.lv-usage){width:min(880px,94vw)}.lv-md,.lv-usage{width:auto}
 
-/* the Generate menu (composer): the shared glass surface and glow of AI (docs/design.md 3.1 and 5): no palette of its own */
+/* the Generate menu (composer): the shared glass surface and glow of AI (docs/design.md): no palette of its own */
 .cp{position:relative;isolation:isolate;border-radius:var(--r-l);padding:20px 24px 24px;color:var(--ink);background:var(--glass);backdrop-filter:blur(14px);box-shadow:0 30px 70px -46px var(--aglow),inset 0 0 0 1px var(--aline);overflow:hidden;margin-bottom:18px}
 .cp-halo{position:absolute;z-index:-1;left:-10%;top:-40%;width:72%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(34,211,238,.30) 0%,rgba(96,165,250,.14) 40%,transparent 66%);filter:blur(10px);animation:cphalo 16s ease-in-out infinite alternate}
 @keyframes cphalo{to{transform:translate(14%,8%) scale(1.1)}}
@@ -475,7 +475,7 @@ body.hasq .screen{padding-bottom:96px}
 .egccap{font-size:var(--fs-s);color:var(--mut);margin:8px 2px 8px}.egcbtn{display:flex;gap:8px}.egcbtn .btn{flex:1}
 .keychip{background:#dbeafe;color:#1e40af;border:1px solid #93c5fd;border-radius:var(--r-pill);font-size:var(--fs-xs);font-weight:700;padding:2px 10px}
 
-/* the shell on narrow screens: ONE layout for every screen (docs/design.md 4). <=900px the second column is a drawer opened by #c2tog; <=760px the rail is a bottom bar. */
+/* the shell on narrow screens: ONE layout for every screen (docs/design.md). <=900px the second column is a drawer opened by #c2tog; <=760px the rail is a bottom bar. */
 #c2tog,#c2scrim{display:none}
 @media (max-width:900px){
  body.col2 #app{grid-template-columns:var(--rail-w) 1fr}
@@ -522,7 +522,7 @@ a:focus-visible,button:focus-visible,[data-act]:focus-visible,select:focus-visib
 #toast{transition:opacity .2s ease,transform .22s var(--ease)}#toast:not(.on){transform:translate(-50%,8px)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important;animation-delay:0s!important;scroll-behavior:auto!important}}
 
-/* particle effects (#/effects, docs/effects.md): one page width, the shared tokens, no palette of its own; room below so the fixed Queue pill never covers the last buttons */
+/* particle effects (#/effects, docs/architecture.md ("Reactions")): one page width, the shared tokens, no palette of its own; room below so the fixed Queue pill never covers the last buttons */
 .page.fx{padding-bottom:110px}
 .fx .sh{margin-bottom:8px}.fx-past{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}.fx-past a{padding:4px 12px;border-radius:var(--r-pill);background:var(--glass);box-shadow:inset 0 0 0 1px var(--aline);color:var(--ink2);text-decoration:none;font-size:var(--fs-s)}.fx-past a:hover{box-shadow:inset 0 0 0 1px var(--ai);color:var(--aid)}
 .fx-packs{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
@@ -767,7 +767,7 @@ details.rx-grp>summary{cursor:pointer;list-style:none;gap:8px}details.rx-grp>sum
 .sp-slice-sheet{display:block;width:100%;max-width:420px;margin:12px 0}
 .sp-slice-hit{cursor:pointer;stroke:transparent;stroke-width:4}
 .sp-slice-hit:hover,.sp-slice-hit:focus-visible{stroke:var(--pri);outline:none}
-/* ---- Users (users.js, docs/design.md §5 Users): the roster in the second column, stats, hand-drawn SVG bars on the shared tokens ---- */
+/* ---- Users (users.js, docs/design.md): the roster in the second column, stats, hand-drawn SVG bars on the shared tokens ---- */
 .us-filters{display:flex;gap:6px;flex-wrap:wrap;padding:6px 20px 0}.us-filters .chip2{padding:3px 11px;font-size:var(--fs-s)}.us-filters .chip2.on{background:var(--pri-l);border-color:var(--pri-bd);color:var(--pri-d)}
 .us-roster{padding:10px 0 20px}
 .us-row{display:flex;align-items:center;gap:12px;width:calc(100% - 8px);margin:0 4px;padding:9px 12px;text-align:left;border:0;border-radius:var(--r-m);background:none;cursor:pointer;min-width:0;transition:background .15s var(--ease)}
@@ -822,7 +822,7 @@ details.rx-grp>summary{cursor:pointer;list-style:none;gap:8px}details.rx-grp>sum
 .lib-pk{padding:12px 14px;border-radius:var(--r-l);background:var(--glass);box-shadow:inset 0 0 0 1px var(--aline)}.lib-pkh{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}.lib-pkh b{font-size:var(--fs-m)}.lib-pkh .link{margin-left:auto}
 .crow.sub .pkmerge{margin-left:auto;font-size:var(--fs-xs);white-space:nowrap}   /* Library: fold a group's pack into its parent (app.js pkmerge) */
 
-/* Help & Support (support.js; docs/design.md §5 Help): one conversation on the stage, the person's issues and notifications in the column */
+/* Help & Support (support.js; docs/design.md): one conversation on the stage, the person's issues and notifications in the column */
 .rbtn{position:relative}.rdot{position:absolute;top:7px;right:18px;width:9px;height:9px;border-radius:50%;background:var(--bad);box-shadow:0 0 0 2px #fff}
 .su-tabs{margin:6px 16px 4px;flex-wrap:nowrap}.su-tabs .tab{white-space:nowrap;padding:6px 12px;font-size:var(--fs-s)}.su-t{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.su-sh{padding:14px 16px 4px;font-size:var(--fs-s);font-weight:600;color:var(--mut)}
 .su-dot{display:inline-block;min-width:18px;padding:0 5px;border-radius:var(--r-pill);background:var(--bad);color:#fff;font-size:var(--fs-xs);text-align:center}
@@ -846,11 +846,11 @@ span.su-cite{cursor:default}.su-cite.code{background:var(--fill);color:var(--mut
 .su-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.su-pchk{display:flex;align-items:center;gap:8px;font-size:var(--fs-s);color:var(--ink2)}
 .su-was{padding:10px 14px;border-radius:var(--r-m);background:var(--fill);font-size:var(--fs-s);display:flex;flex-direction:column;gap:4px}
 .su-conv label{display:flex;flex-direction:column;gap:4px;font-size:var(--fs-s);font-weight:600;color:var(--ink2)}.su-conv label input,.su-conv label textarea{font-weight:400}.su-conv label input{font:inherit;font-weight:400;font-size:var(--fs-m);padding:9px 12px;border:0;border-radius:var(--r-m);background:var(--fill);color:var(--tx)}
-/* Home (home.js, docs/design.md "Home"): Haitham's Higgsfield-style page on the shared tokens. Its display sizes (the h1, the hero line) are the one place
+/* Home (home.js, docs/design.md): Haitham's Higgsfield-style page on the shared tokens. Its display sizes (the h1, the hero line) are the one place
    above --fs-2xl: a landing page's headline, not a screen title */
 .logo.on img{filter:drop-shadow(0 0 6px var(--pri-glow))}
 #s-home.on{padding:0}
-/* Home's two display steps: the landing headlines, the only sizes above --fs-2xl (docs/design.md "Home") */
+/* Home's two display steps: the landing headlines, the only sizes above --fs-2xl (docs/design.md) */
 .hm{--hm-d1:clamp(26px,2.2vw,30px);--hm-d2:clamp(32px,3.2vw,46px)}
 .hm{max-width:1440px;margin:0 auto;padding:30px var(--gutter) 0}
 .hm h1,.hm h2,.hm h3,.hm p{margin:0}.hm button{font:inherit;cursor:pointer}.hm svg{width:16px;height:16px;flex:none}
@@ -935,7 +935,7 @@ span.su-cite{cursor:default}.su-cite.code{background:var(--fill);color:var(--mut
  .hm-journey{padding:22px}.hm-steps{grid-template-columns:1fr}.hm-foot{flex-wrap:wrap}}
 @media (prefers-reduced-motion:reduce){.hm-tool,.hm-art,.hm-go,.hm-link,.hm-open{transition:none}.hm-card:hover .hm-art,.hm-tool:hover{transform:none}}
 
-/* the rail of four and the avatar (docs/redesign_plan.md D5, docs/design.md §4): the credits chip, then the avatar at the very bottom; its menu holds Settings & health, Team, Trash, Watch folders, Sign out */
+/* the rail of four and the avatar (docs/design.md, docs/design.md): the credits chip, then the avatar at the very bottom; its menu holds Settings & health, Team, Trash, Watch folders, Sign out */
 .rme{order:1;margin:8px 0 2px;width:40px;height:40px;flex:none;border-radius:50%;border:2px solid #fff;background:linear-gradient(140deg,#dbe8ff,#c5d8fb);color:#33507e;font-weight:700;font-size:var(--fs-s);cursor:pointer;box-shadow:var(--sh);display:grid;place-items:center}
 .rme:hover,.rme.on{box-shadow:0 0 0 3px var(--pri-l2)}.rme[aria-expanded=true]{box-shadow:0 0 0 3px var(--pri-bd)}
 #rmenu{position:fixed;z-index:70;left:calc(var(--rail-w) + 8px);bottom:14px;min-width:220px;padding:6px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r-m);box-shadow:0 18px 50px #0f172a24;display:flex;flex-direction:column;gap:2px}
@@ -961,7 +961,7 @@ span.su-cite{cursor:default}.su-cite.code{background:var(--fill);color:var(--mut
  #rmenu{left:auto;right:8px;bottom:calc(70px + env(safe-area-inset-bottom))}
 }
 
-/* the Studio's journey (redesign phase 2, docs/design.md §5 Studio): one slim track of stops, Idea · Prompt · Stickers · Motion · (Particles) · Pack · Telegram.
+/* the Studio's journey (redesign phase 2, docs/design.md): one slim track of stops, Idea · Prompt · Stickers · Motion · (Particles) · Pack · Telegram.
    A stop is a dot and a name, a short status under it; done stops are filled, the open view is the white pill. Same buttons as the old step strip. */
 .gsteps{position:relative;display:flex;align-items:stretch;gap:2px;margin:0 4px 16px;padding:4px;background:var(--fill);border-radius:var(--r-pill);overflow-x:auto;scrollbar-width:none}
 .gsteps::-webkit-scrollbar{display:none}
@@ -978,7 +978,7 @@ button.gst{cursor:pointer}button.gst:hover:not(:disabled){background:#ffffff99;c
 .gst:disabled{opacity:.5;cursor:default}
 @media (max-width:900px){.gst{flex:0 0 auto}.gsl small{display:none}}
 
-/* the project map (redesign phase 4, projmap.js, docs/design.md "The project map"): the Studio's left column. Flat rows, 40px pictures, one accent for the open
+/* the project map (redesign phase 4, projmap.js, docs/design.md): the Studio's left column. Flat rows, 40px pictures, one accent for the open
    sheet; menus are <details> popovers; the branch buttons are quiet text buttons under the open sheet. */
 .pm-h{padding:14px 12px 6px}
 .pm-switch{display:flex;align-items:center;gap:10px;width:100%;padding:6px 10px 6px 6px;border:1px solid var(--bd);border-radius:var(--r-m);background:var(--sf);cursor:pointer;text-align:left;font:inherit}
@@ -1245,7 +1245,7 @@ details.lv-edge{display:block;padding:var(--space-1) var(--space-2);margin:0}
  .tr-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
 }
 
-/* The Studio's left creation panel (docs/design/15): on the Studio route the second column is the creation panel (352px, 320px under 1180px) holding the one
+/* The Studio's left creation panel (docs/design.md): on the Studio route the second column is the creation panel (352px, 320px under 1180px) holding the one
    New request composer; the workspace keeps the rest. Earlier batches open in the Batches drawer (#bdrawer) from the workspace's top bar. */
 body.studio-split{--col2-w:352px}
 @media (max-width:1180px){body.studio-split{--col2-w:320px}}

@@ -1,4 +1,4 @@
-"""Help & Support (docs/agent-and-chat.md "Support"): a person describes a problem, the support agent answers from what is documented, and a person
+"""Help & Support (docs/architecture.md ("Chat and the agent")): a person describes a problem, the support agent answers from what is documented, and a person
 takes over when that is not enough.
 
 A conversation is `out/support/C###.json` (the record; Postgres mirrors it). The loop, deterministic around one model call:

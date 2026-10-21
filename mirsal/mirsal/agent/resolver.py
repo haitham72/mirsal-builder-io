@@ -446,7 +446,7 @@ NAMES_RX = (r"\b(?:rename|re-name|better names?|new names?|nicer names?|suggest 
 
 
 def particles_intent(text: str, has_set: bool) -> str | None:
-    """Which request about PARTICLE SETS this is (docs/agent-and-chat.md, particle sets in the chat): make | more | delete | restore | assign, or None. "particle effects" (the working-session card), a singular "particle burst"
+    """Which request about PARTICLE SETS this is (docs/architecture.md, particle sets in the chat): make | more | delete | restore | assign, or None. "particle effects" (the working-session card), a singular "particle burst"
     and a sticker request are not it. A request that names no particles ("generate more", "also use them for the Princess pack") is about the set the chat has in focus, so it needs one."""
     t = text.lower()
     if re.search(r"\beffects?\b", t):

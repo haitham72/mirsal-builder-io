@@ -216,7 +216,7 @@ class GalleryApiTests(unittest.TestCase):
         self.assertEqual([x["pack_id"] for x in j["saved"]], [self.pack["id"]])
         self.assertEqual(j["created"][0]["added_to"], self.pack["id"])
         s, studio = self.req("GET", f"/api/packs/{self.pack['id']}/particles")
-        counts = studio["counts"]          # the pack's studio answer is {pack_id, sets, bursts, counts}; `counts` is the old per-sticker map (docs/api.md)
+        counts = studio["counts"]          # the pack's studio answer is {pack_id, sets, bursts, counts}; `counts` is the old per-sticker map (docs/api-integration.md)
         self.assertEqual((s, counts[self.s[2]]), (200, {"created": 1, "saved": 1, "sets": 0}))
         self.assertEqual(counts[self.s[0]]["created"], 2, "the badge counts versions: each run once, never once per slice")
         self.assertEqual(self.req("GET", "/api/packs/nope/particles")[0], 404)

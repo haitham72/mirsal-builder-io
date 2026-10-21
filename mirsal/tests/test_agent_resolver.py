@@ -1,4 +1,4 @@
-"""The deterministic resolver and intent rules (docs/agent-and-chat.md 4A exit: fully offline, these resolve exactly)."""
+"""The deterministic resolver and intent rules (turn exit 4A: fully offline, these resolve exactly)."""
 import unittest
 
 from mirsal.agent.resolver import classify, is_sticker_answer, polarity_of, resolve, settings_from

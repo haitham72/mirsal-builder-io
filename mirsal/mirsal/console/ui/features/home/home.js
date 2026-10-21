@@ -1,6 +1,6 @@
 /* Home (#/home): the first screen and the Mirsal logo's target. Haitham's Higgsfield-style page (web/mockups/home-library.html) drawn from the caller's real
    library (GET /api/library): the featured stickers, the shortcuts into the app, the packs with search and filters, how it works. Nothing here is a preview:
-   every card opens the real pack, every shortcut opens the real screen (docs/design.md "Home"). */
+   every card opens the real pack, every shortcut opens the real screen (docs/design.md). */
 'use strict';
 const HM={q:'',filter:'all'};
 /* the first start of a browser session opens Home, whatever screen the tab or bookmark was on (#/agent was the old first screen); the welcome film opens over

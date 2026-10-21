@@ -6,7 +6,7 @@ next seed). **Save** keeps a version's settings, **Save as** adds another versio
 slider bundles (and a Light colour only when it is Solid or Gradient) that any file can load. One file: out/particles/super/library.json
 `{versions: {V###: {id, file, name, look, created, updated}}, presets: {P###: {id, name, look, created}}, n: {...}}`; a look is
 `{settings, glow, color?, colors?, seed?}`. The export (`export_zip`) uses these: every version, and every unsaved file's random look.
-docs/reaction/19-19-super-reaction.md. Errors are particle_sets.SetError (the HTTP layer maps its code). Free: nothing here spends.
+docs/architecture.md. Errors are particle_sets.SetError (the HTTP layer maps its code). Free: nothing here spends.
 """
 from __future__ import annotations
 

@@ -1,5 +1,0 @@
-# History: the watch folders, with Remove (`flow/watch.py`, `console/history.js`)
-
-<sub>Part of [engine-and-studio.md](../engine-and-studio.md).</sub>
-
-History lists what is in `inputs/Images_gen` and `inputs/videos_gen` **now**: one row per folder number with the sheet folder and its video folder side by side (files, sizes, a small cached thumbnail at `GET /api/watch/thumb/<img folder>`), the generations made from it, **Generate** (that exact folder) and **Remove**. Remove (`POST /api/watch/remove {number, subject}`) never deletes outright: the image and video folder move to `out/trash/<id>/` (the media is not in git, so a mistaken click must be undoable) and appear under "Removed" with **Restore** (back under their own, final names; refused if the name exists again) and **Delete for good** (`/api/watch/restore`, `/api/watch/purge`). Folder names are validated (`img|vid-NNN-<subject>`), so nothing outside the two watch folders can be touched. Generations that used a folder keep their own copies of the sheet; only the prepared-video path reads the watch-folder video, and says so when it is gone.

@@ -133,10 +133,10 @@ listed under `renamed`/`retired` in `mirsal/tests/data/ui_baseline.json`
 | Zip manifest rows | `flow/batches.py` `export_zip` (batch), `media/library.py` `export_zip` (pack) | per-sticker fields |
 | Grey PNG | `media/grey.py` (`alpha_of` → first visible frame, `grey_png` → #BFBFBF) | silhouette logic |
 | CMS emoji/tags | `services/collection.py` (`tags_of`, `items_from_zip`, `thumbnail`) | metadata + thumbnail bytes |
-| CMS reference | `docs/Api/AddCollection-API .md` | field docs |
+| CMS reference | `docs/api-integration.md` | field docs |
 | Telegram send | `services/telegram.py` | delivery |
 | Size/codec/duration rules | `engine/verify.py` (stage `telegram`) | limits |
-| API shape | `console/app_models.py` + `console/openapi.py` + `docs/api-parts/` + label in `console/*.js` | contract end to end |
+| API shape | `api/schemas/` + `api/routers/` + `console/openapi.py` + `docs/api-integration.md` + label in `console/ui/` | contract end to end |
 
 > Debugging rule: the CMS shows **our** thumbnail PNG at
 > `user_media/Emoji_Assets/{emoji}.png` — a wrong picture there means our
@@ -151,7 +151,7 @@ listed under `renamed`/`retired` in `mirsal/tests/data/ui_baseline.json`
 |---|---|
 | Where is feature X? | `rg <DistinctiveName>` from root (`vsizeRow`, `export_zip`, `spLibHtml`…) |
 | What does this button do? | search `data-act=<name>` → `ACT.<name>` → its `post(...)` URL |
-| Is this route real? | `docs/http_route_inventory.md`, then `console/app.py` |
+| Is this route real? | `GET /api/openapi.json`, then `api/app.py` |
 | What should this screen do? | `docs/<area>.md` index → read only that section file |
 | Which actions exist? | `console/inventory.py` + `tests/data/ui_baseline.json` |
 | How is this tested? | `mirsal/tests/test_<area>.py`, `mirsal/tests/js/*.test.js` (browser-less UI) |

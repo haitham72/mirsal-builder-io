@@ -1,4 +1,4 @@
-/* Help & Support (docs/agent-and-chat.md "Support", docs/design.md §5 Help): one place to describe a problem and follow it. The second column lists the
+/* Help & Support (docs/architecture.md ("Chat and the agent"), docs/design.md): one place to describe a problem and follow it. The second column lists the
    person's issues (a state chip each) and their notifications; staff also get the Queue (escalated tickets) and FAQ review. The stage is one conversation:
    the agent's answer with the help entries it read, "Did this solve it?", Send to support, the admin's replies, Reopen. A screenshot can be attached or
    pasted (Ctrl+V) when it helps; the local vision model reads it. Everything is GET/POST /api/support, /api/notifications, /api/faq (console/app.py).

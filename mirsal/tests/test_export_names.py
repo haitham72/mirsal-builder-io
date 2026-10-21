@@ -1,4 +1,4 @@
-"""Export-as-ZIP names (`docs/export to team/mirsal-export-architecture.md`): `{emoji}-{pack_slug}-{multi_action_tag}-{sNN}-{G###}-{date}`,
+"""Export-as-ZIP names (`docs/api-integration.md`): `{emoji}-{pack_slug}-{multi_action_tag}-{sNN}-{G###}-{date}`,
 e.g. `🤣-falcon-laugh_rofl_lmao-s08-G112-20261008.webm`. Pure functions only: no provider, no Postgres, no files."""
 import unittest
 

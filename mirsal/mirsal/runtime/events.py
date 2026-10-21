@@ -5,7 +5,7 @@ stream `mirsal:u:<user>:events:G###` (capped, expiring), under the Phase 5 event
 vocabularies stay searchable. The stream entry id is the SSE event id, so `Last-Event-ID` replay is native. Redis is disposable: when it is
 down the in-memory fallback keeps the stream for this process, and the events.jsonl file remains the truth.
 
-Stage -> event (docs/agent-and-chat.md): requested -> generation_started; sheet_picked -> sheet_generated; keyed -> sticker_processing; sliced ->
+Stage -> event (docs/architecture.md): requested -> generation_started; sheet_picked -> sheet_generated; keyed -> sticker_processing; sliced ->
 sticker_ready / sticker_failed (one per sticker, see `sticker_events`); video_requested / video_returned -> animation_started; video_cell ->
 animation_ready / animation_failed; a gate decision -> review_decided; video_sheet_built -> video_sheet_ready; pack_final -> pack_complete;
 any error -> generation_failed."""

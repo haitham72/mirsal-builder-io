@@ -88,7 +88,7 @@ def render(m: dict) -> str:
 
 
 def record(out: Path, m: dict, path: Path) -> Path:
-    """Append this measurement to docs/measurements.md (created on first use)."""
+    """Append this measurement to docs/architecture.md ("Measurements") (created on first use)."""
     path.parent.mkdir(parents=True, exist_ok=True)
     head = "" if path.exists() else "# Phase 2 measurements\n\nEach block is one run of `python -m mirsal measure-cells --record`.\n"
     block = f"\n## measure-cells {time.strftime('%Y-%m-%d %H:%M')}\n\n```\n{render(m)}\n```\n"

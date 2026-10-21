@@ -200,7 +200,7 @@ class CollectionTests(unittest.TestCase):
             self.assertEqual(FakeCMS.seen[-1]["auth"], "Bearer sk-test-key-123")
 
     def test_the_developer_key_api_answers(self):
-        """docs/Api/AddCollection-API .md: 200 {Success: true, Result}; a 200 {Success: false} is a refusal; 400 explains in ErrorMessages; 401 is the key."""
+        """docs/api-integration.md: 200 {Success: true, Result}; a 200 {Success: false} is a refusal; 400 explains in ErrorMessages; 401 is the key."""
         g = f"G{self.gid:03d}"
         FakeCMS.answer = (200, b'{"Success": true, "Result": {"CollectionId": 42, "Status": "Pending"}, "ErrorMessages": []}', "application/json")
         s, j = self.export(f"/api/generations/{g}/export-collection", {"name": "Approval pack", "description": "for review"})

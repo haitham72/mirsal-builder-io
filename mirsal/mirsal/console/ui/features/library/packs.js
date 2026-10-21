@@ -35,7 +35,7 @@ function drawPack(){
     <div class=hov><button data-act=stview data-id=${s.id} title=Preview aria-label="Preview ${esc(s.name)}">${ic('eye')}</button><button data-act=stdel data-id=${s.id} title=Delete aria-label="Delete ${esc(s.name)}">${ic('trash')}</button></div>
     <button type=button class=cap data-act=stname data-id=${s.id} title="Rename / change emoji">${esc(s.emoji)} ${esc(s.name)} · ${s.kb}KB</button></div>`).join('')}</div></section>`:''}${pkPsHtml(p)}</div>`;
  ptCounts(p.id);pkWallLoad(p.id);pkReactionsLoad(p.id)}
-/* Export to collection (services/collection.py, docs/api.md "Export to the AddCollection API"): the same stickers as Download .zip, in the same order, sent to the
+/* Export to collection (services/collection.py, docs/api-integration.md): the same stickers as Download .zip, in the same order, sent to the
    external emoji CMS as one collection. Owner only, like Telegram; free but outward, so it always asks first (name, optional description, where it goes). */
 const colOwner=()=>typeof ME==='undefined'||!ME||ME.role==='owner';
 /* Retime to 3 s (Haitham, 2026-10-12): before an export, animations shorter than 3 s (a closed loop ends early) are listed and the person picks:
@@ -195,7 +195,7 @@ ACT.lcmove=()=>{const s=LCL[LCI];pickPack(async pid=>{if(pid===s.pack_id)return 
  const to=packById(pid)?.name||'pack';await loadLib();lcClose();if(route_==='pack')drawPack();else if(route_==='library')RENDER.library();drawCol2();toast(`Moved to ${to}`)},'Move to pack')};
 document.addEventListener('keydown',e=>{if(LCI===null||$('dlg').classList.contains('on'))return;if(e.key==='Escape')lcClose();if(e.key==='ArrowRight')lcStep(1);if(e.key==='ArrowLeft')lcStep(-1)});
 
-/* ---------- Particles of a sticker (docs/effects.md): what was created for it and what was saved, under the big preview and, for the stickers of the open batch, in the Studio (particles.js).
+/* ---------- Particles of a sticker (docs/architecture.md ("Reactions")): what was created for it and what was saved, under the big preview and, for the stickers of the open batch, in the Studio (particles.js).
    The data is GET /api/packs/{id}/stickers/{sid}/particles (an engine function, flow/effects.for_sticker); the pack grid's little counter is ONE request for the whole pack,
    GET /api/packs/{id}/particles. ptHtml/ptBody/ptCard are pure (tests/js); every button carries its pack and sticker (data-p, data-s), so it works wherever the gallery is drawn. */
 const PKPT={d:{},c:{},sets:{},bursts:{}};          // d: sticker id -> the route's answer; c: pack id -> {sticker id: {created, saved}}; sets/bursts: the pack's particle studio
@@ -257,7 +257,7 @@ ACT.ptadd=async el=>{const pid=el.dataset.p,sid=el.dataset.s;el.disabled=true;
  ptForget();await loadLib();toast('Added to '+ptPackName(pid)+', saved under the sticker');if(route_==='pack')drawPack();else if(route_==='library')RENDER.library();else if(route_==='generate'&&typeof spSecSync==='function')spSecSync(true);
    const cur=LCI===null?null:LCL[LCI];if(cur&&cur.id===sid)ptLoad(cur)};
 
-/* ---------- the pack's reaction studio (docs/reaction.md 5): the sets assigned to this pack and the bursts rendered for it. One set belongs to
+/* ---------- the pack's reaction studio (docs/architecture.md ("Reactions") 5): the sets assigned to this pack and the bursts rendered for it. One set belongs to
    the pack: a sticker shows one line linking here (pkStickerLine), never a gallery of its own. The set cards are shared with the Library (particles.js).
    The bursts rendered FOR this pack are listed with Add (POST /api/particles/{id}/add, the same handler as the set card's burst maker: particles.js psbadd); making one is in the set's card. */
 /* an added burst is a reaction, not a sticker: it lives in the Reactions section, never in the grid, and never gets reactions of its own (no loop) */

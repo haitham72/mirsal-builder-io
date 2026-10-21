@@ -1,4 +1,4 @@
-"""Particle effects, the lifecycle of one effect `E###` (docs/effects.md).
+"""Particle effects, the lifecycle of one effect `E###` (docs/architecture.md ("Reactions")).
 
 An effect belongs to a PACK of the library: a person picks a pack (an emoji pack) and some of its stickers, a vision model (or a built-in table) decides what bursts out of each
 (`vision/effect_plan.py`), and the result is one 3-second Telegram video sticker per source sticker, added to the pack tagged with the source emoji. Two ways to make the burst:

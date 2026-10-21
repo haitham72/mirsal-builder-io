@@ -1,4 +1,4 @@
-"""Export a pack (or one Studio batch) to the Mirsal Creator API's "Submit a Pack for Approval", an external emoji CMS (`docs/Api/AddCollection-API .md`).
+"""Export a pack (or one Studio batch) to the Mirsal Creator API's "Submit a Pack for Approval", an external emoji CMS (`docs/api-integration.md`).
 
 `POST {base}/api/v1/Upload/AddCollection`, multipart/form-data, `Authorization: Bearer <developer key>` (an `sk-...` key from the CMS's Developer Keys page):
 - `CollectionName` (the pack's name, at most 40 characters), `Description` (required, at most 160; the collection's name when none is given),
@@ -41,7 +41,7 @@ from pathlib import Path
 DEFAULT_URL = "https://emojicms.ehub.ae"
 ENDPOINT = "/api/v1/Upload/AddCollection"
 TIMEOUT = 120
-NAME_MAX = 40            # the API's limits (docs/Api/AddCollection-API .md): checked here, so a refusal is a sentence before anything is uploaded
+NAME_MAX = 40            # the API's limits (docs/api-integration.md): checked here, so a refusal is a sentence before anything is uploaded
 DESCRIPTION_MAX = 160
 MIME = {".webm": "video/webm", ".png": "image/png", ".webp": "image/webp"}
 

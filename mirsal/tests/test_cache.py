@@ -110,7 +110,7 @@ class RedisEngine(Behaviour, unittest.TestCase):
 
 
 class PlannerCache(unittest.TestCase):
-    """docs/agent-and-chat.md "Redis exit": a repeated request is a cache hit (0 model calls) and the key never merges a semantic difference."""
+    """The "Redis exit" (docs/architecture.md): a repeated request is a cache hit (0 model calls) and the key never merges a semantic difference."""
 
     def test_normalisation_only_touches_case_spaces_and_end_punctuation(self):
         from mirsal.runtime.cache import normalize_request as n
@@ -198,7 +198,7 @@ class FakeRedis:
 
 class RedisDiesMidOperation(unittest.TestCase):
     """The review's missing test: Redis killed in the middle of a rate-limit window, a held lock and a cached answer. Everything carries on in memory: cache misses and a restarted
-    window, never an exception (the short-lived state is per process from then on: docs/agent-and-chat.md, "Redis")."""
+    window, never an exception (the short-lived state is per process from then on: the "Redis" cache, docs/architecture.md)."""
 
     def cache(self, alive):
         c = Cache(force_memory=True)

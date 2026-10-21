@@ -1,8 +1,8 @@
-"""Reaction effects (Create > + New, console/reactions.js): one bank emoji -> its fixed motion, flying as the literal glyph -> a Lottie file.
+"""Reaction effects (Create > + New, console/ui reactions.js): one bank emoji -> its fixed motion, flying as the literal glyph -> a Lottie file.
 
 No set, no pack, no sticker: the sprite IS the emoji glyph (`engine.emoji_glyph.render_emoji`), flown by the simulator (`engine.particles`), exported by
 `engine.lottie`. Storage is out/particles/emoji/<token>/ (never a P### folder, so the set scans never see it): renders/L###.lottie.json + .png + .webp and
-emoji.json (lottie[], history). docs/reaction.md section 13. Errors are particle_sets.SetError (the HTTP handler maps its code). Free: nothing here spends.
+emoji.json (lottie[], history). docs/architecture.md ("Reactions"). Errors are particle_sets.SetError (the HTTP handler maps its code). Free: nothing here spends.
 """
 from __future__ import annotations
 

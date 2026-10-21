@@ -6,12 +6,12 @@ How a go-ahead works: a shown price plus "let's try" is that one experiment; "pu
 
 ## A. Eyes and money: things only a person can verify
 
-**1. Review the app in your own browser.** Use the [minimal user review guide](../user%20app%20review%20guide.md) on the real-data viewer :8770, desktop and phone, both themes. Remaining verdicts: visual hierarchy, wording, films/artwork, editing/recovery usability and paid-quality/delivery checks where separately approved. The [current audit](uiux_review/app-audit-2026-10-19.md) lists known defects; automated technical checks are evidence, not your acceptance. Active branch is `redesign-ui-ux`; no merge decision is inferred. Unblocks: owner visual acceptance.
+**1. Review the app in your own browser.** Use the [minimal user review guide](../user%20app%20review%20guide.md) on the real-data viewer :8770, desktop and phone, both themes. Remaining verdicts: visual hierarchy, wording, films/artwork, editing/recovery usability and paid-quality/delivery checks where separately approved. plan.md and `docs/backlog.md` list the known defects (past audits in git history); automated technical checks are evidence, not your acceptance. Active branch is `redesign-ui-ux`; no merge decision is inferred. Unblocks: owner visual acceptance.
 
-**2. Run the approved paid check (6.5 credits).** Your go-ahead of 2026-10-03 (price shown, one attempt each) is still unused: one Kling 2x2 clip with the v2 prompt (4.5 credits; script pattern `kling_exp.py`; measure `key_is_seamless`, never open the media) and one drawn particle sheet (2.0) through the app's own route with `ref_clause`, to confirm the exact 2x2 cut. Recommendation: say "run it" once and a session runs both, measuring only. Unblocks: knowing whether the v2 video prompt and the particle-sheet cut work for real (`docs/effects.md`, `docs/backlog.md` particles).
+**2. Run the approved paid check (6.5 credits).** Your go-ahead of 2026-10-03 (price shown, one attempt each) is still unused: one Kling 2x2 clip with the v2 prompt (4.5 credits; script pattern `kling_exp.py`; measure `key_is_seamless`, never open the media) and one drawn particle sheet (2.0) through the app's own route with `ref_clause`, to confirm the exact 2x2 cut. Recommendation: say "run it" once and a session runs both, measuring only. Unblocks: knowing whether the v2 video prompt and the particle-sheet cut work for real (`docs/architecture.md` "Reactions", `docs/backlog.md` particles).
 
 
-**4. Do you accept the remaining purge decisions?** There is no packs table in Postgres (a pack purge is files + `library.json`); `reviews` stay and referenced rows become `status='PURGED'` tombstones; "delete all" skips shared-sticker items and lists refusals; deleted particle sets are not part of permanent purge yet. The particle rework already settles owner detachment: pack purge retains sets visibly rather than leaving pack assignments dangling. Recommendation: accept the remaining policies; the SQL in `store/purge_rows.py` has only a recording-fake check, so test it against scratch Postgres before relying on it. Unblocks: calling the trash purge done (`docs/engine-and-studio.md`, "Emptying the trash").
+**4. Do you accept the remaining purge decisions?** There is no packs table in Postgres (a pack purge is files + `library.json`); `reviews` stay and referenced rows become `status='PURGED'` tombstones; "delete all" skips shared-sticker items and lists refusals; deleted particle sets are not part of permanent purge yet. The particle rework already settles owner detachment: pack purge retains sets visibly rather than leaving pack assignments dangling. Recommendation: accept the remaining policies; the SQL in `store/purge_rows.py` has only a recording-fake check, so test it against scratch Postgres before relying on it. Unblocks: calling the trash purge done (`docs/architecture.md`).
 
 **5. Press *Check · free* or *Continue · same ticket* on the four paid sheets J022-J025.** Their download failed on this PC's certificate store (`[ASN1: NOT_ENOUGH_DATA]`); the jobs are `FAILED` but hold their Higgsfield tickets, so about 8 credits are already paid for. Recommendation: after restarting the server, press the button on each in the Queue panel (no second charge); this is also the first real test of the recovery actions. Unblocks: the four sheets, and proof that `generation/recovery.py` works against the real Higgsfield.
 
@@ -21,7 +21,7 @@ How a go-ahead works: a shown price plus "let's try" is that one experiment; "pu
 
 **8. Look at the loop close.** `close_loop` was rewritten (`engine/video.py`): the head of a clip is the source untouched, the last 6 frames ease into frame 0; the animation cache version was bumped. Animating a batch again (from its stored video, no credits) makes new clips: do the first frames / the thumbnail show a ghost, and does the loop point visibly settle? Recommendation: check one batch; if you still dislike the "dissolve", make the generator close loops itself (first = last image, already requested when Loop is on). Unblocks: whether the generator or only the engine closes loops.
 
-**9. Look at the welcome modal and Home.** First load of a session (the film opens over Home), and Home's "Watch the film": the fast-cut film (`console/assets/welcome/welcome.mp4`, Seedance 2.5 take 2, 105 credits; take 1 was rejected as too slow) and the four slides were checked with numbers only; are the on-screen words spelled right? Another take is a new price (one attempt each was approved). Home is reachable from the responsive rail. It now has two distinct sticker bands with welcome and supplied onboarding films; Dark / Light is in Settings → Appearance. Fake-data browser checks pass at 1440 / 900 / 390px, including film/card geometry and theme persistence; your visual verdict on the real media and wording remains open. Recommendation: look once on desktop and once narrow. Unblocks: closing `docs/onboarding.md`.
+**9. Look at the welcome modal and Home.** First load of a session (the film opens over Home), and Home's "Watch the film": the fast-cut film (`console/assets/welcome/welcome.mp4`, Seedance 2.5 take 2, 105 credits; take 1 was rejected as too slow) and the four slides were checked with numbers only; are the on-screen words spelled right? Another take is a new price (one attempt each was approved). Home is reachable from the responsive rail. It now has two distinct sticker bands with welcome and supplied onboarding films; Dark / Light is in Settings → Appearance. Fake-data browser checks pass at 1440 / 900 / 390px, including film/card geometry and theme persistence; your visual verdict on the real media and wording remains open. Recommendation: look once on desktop and once narrow. Unblocks: closing the welcome review (`docs/design.md`).
 
 **10. Try accounts, the worker queue and transformations for real.** So far they have run on fakes and synthetic sheets only: `python -m mirsal user add Amira` then `curl -H "Authorization: Bearer <token>" localhost:8789/api/me` and `/api/openapi.json` (an account sees only its own chats and batches, 404 for a stranger's, and cannot spend unless `--spend`); `MIRSAL_JOB_MODE=queue` with `python -m mirsal worker` and one real Create (about 2 credits; never unattended); `MIRSAL_PAID_PARALLEL` (default 3) at the first real parallel use; "dog as banana" and "dog as banana, no dancing" in the chat. Recommendation: do the curl and the transformation phrases now (free), the queue and parallel runs with your first real Create (item 6). Unblocks: the queue panel for DEAD rows and the transformation lexicons (`docs/backlog.md`).
 
@@ -44,7 +44,7 @@ Recommendation: publish the accounts, telegram and troubleshooting entries first
 
 ## C. Product decisions in the Studio and the chat
 
-**16. Does Enter in the Studio's prompt box open the Generate prompt step, or still start a paid sheet at once?** Today Enter spends at once with no price on screen (the old Generate button's credit chip is gone). Recommendation: Enter opens the free prompt step like the button; the paid click is the separate *Generate sheet*, which shows the price on its own line (rule 13). Unblocks: closing the price-visibility gap of the Generate prompt step (`docs/engine-and-studio.md`).
+**16. Does Enter in the Studio's prompt box open the Generate prompt step, or still start a paid sheet at once?** Today Enter spends at once with no price on screen (the old Generate button's credit chip is gone). Recommendation: Enter opens the free prompt step like the button; the paid click is the separate *Generate sheet*, which shows the price on its own line (rule 13). Unblocks: closing the price-visibility gap of the Generate prompt step (`docs/architecture.md`).
 
 **18. OpenAI calls without a plan card.** The plan expander (`generation/expander.py`), the intent model (`agent/brain.py`) and pool embeddings (`services/embed.py`) call OpenAI when it is the provider, with no price and no go-ahead, which contradicts rule 13 as written. Recommendation: fold their cost into the plan card's estimate (or scope rule 13 to Higgsfield credits and add a monthly OpenAI budget); local models are free and unaffected. The Studio's AI enhancer now shows the engine and model next to the chip (Local free, Cloud one small OpenAI call) and the step says which one wrote the prompt, so the cloud call is visible; what stays open is whether it should also carry a price or a budget. Unblocks: the hosted-chat question (item 44) and any public user.
 
@@ -60,12 +60,12 @@ Recommendation: publish the accounts, telegram and troubleshooting entries first
 
 ## D. Particle verdicts (nothing is built on a guess)
 
-**27. Go for burst creation (P14), and its four questions.** Many packs from one liked sheet (`docs/burst_plan.md`): is the go given, and (1) is 6 lanes per burst the right cap (a setting?), (2) does each lane become its own pack automatically or a batch the person adds to a pack, (3) may the suggestions use the vision model on the sheet (with the one-time AI vision yes), (4) is `B###/Q###` acceptable as the lane id? Recommendation: build when explicitly authorized; answers 6, a batch (adding stays your click), yes with the one-time yes, yes. Unblocks: the whole burst-creation build.
+**27. Go for burst creation (P14), and its four questions.** Many packs from one liked sheet (burst creation, P14; proposal in git history): is the go given, and (1) is 6 lanes per burst the right cap (a setting?), (2) does each lane become its own pack automatically or a batch the person adds to a pack, (3) may the suggestions use the vision model on the sheet (with the one-time AI vision yes), (4) is `B###/Q###` acceptable as the lane id? Recommendation: build when explicitly authorized; answers 6, a batch (adding stays your click), yes with the one-time yes, yes. Unblocks: the whole burst-creation build.
 
 
 ## E. Repo, safety and housekeeping decisions (held questions: do not re-raise unless asked)
 
-**29. Is `mirsal/out/` in git on purpose?** It has 3,477 tracked files as measured on 2026-10-19; source and runtime data remain mixed. SQLite checkpoint/profile files are ignored. Recommendation: if not, ignore `mirsal/out/`, `git rm -r --cached` it (history keeps the old blobs unless rewritten) and write the backup command of item 30; `cache/` and `sessions/` are the obvious first candidates either way. Unblocks: a clean `git status` after every run, and the public-repo scrub (item 45).
+**29. Is `mirsal/out/` in git on purpose?** It has 3,480 tracked files as measured on 2026-10-21; source and runtime data remain mixed. SQLite checkpoint/profile files are ignored. Recommendation: if not, ignore `mirsal/out/`, `git rm -r --cached` it (history keeps the old blobs unless rewritten) and write the backup command of item 30; `cache/` and `sessions/` are the obvious first candidates either way. Unblocks: a clean `git status` after every run, and the public-repo scrub (item 45).
 
 **30. A backup command for `out/`.** Should the app get `python -m mirsal backup` (zip of `out/` minus the cache)? Recommendation: yes, small and free. Unblocks: item 29.
 
@@ -73,7 +73,7 @@ Recommendation: publish the accounts, telegram and troubleshooting entries first
 
 **32. Arabic prompts.** How should Arabic / Arabizi requests be handled (detection, planner, tags)? Recommendation: detect and pass through the local model, with your examples (item 15) as the test set. Unblocks: the Arabic edit commands and Arabic query parser in `docs/backlog.md`.
 
-**33. Keep or delete the parked React gateway `mirsal/web/` (not served).** Recommendation: delete it, git keeps it; ask first (`docs/dev-notes.md`, "Ask first"). Unblocks: a smaller tree and an unambiguous front end.
+**33. Keep or delete the parked React gateway `mirsal/web/` (not served).** Recommendation: delete it, git keeps it; ask first (`docs/rules.md`, "Session guardrails"). Unblocks: a smaller tree and an unambiguous front end.
 
 **34. Delete the retired History screen (`console/history.js`, `#/history`)?** It remains reachable as Watch folders, not conversation/batch history; the current audit finds collapsed phone rows (UX-09). Recommendation: retire it if no longer needed, otherwise repair the retained screen. Unblocks: legacy route disposition; no deletion or action retirement without your decision.
 
@@ -82,18 +82,18 @@ Recommendation: publish the accounts, telegram and troubleshooting entries first
 
 **39. Do you want the 3D text templates and the 3D parallax photos built at all?** Both are unstarted (`docs/backlog.md`, store and search 3D / 3E): CapCut-style flashing text-slot stickers with 30+ procedural starters, and photo depth with a gyroscope WebGL viewer. Recommendation: no for now; both are large and neither is on the golden path. Unblocks: deleting or scheduling two large backlog items.
 
-**49. Retire the old AddCollection password, then try the Telegram chat for real.** Export to collection has reached the real CMS: on 2026-10-14
+**51. Retire the old AddCollection password, then try the Telegram chat for real.** Export to collection has reached the real CMS: on 2026-10-14
 two packs ("Girl Emirati with hat", 9; "Generic Emojis", 10) were accepted by `emojicms.devinprocess.com` (`out/collection_exports.jsonl`). Still open: the
-old password pasted in `docs/Api/AddCollection-API .md` is in git history (commit dd17f61, pushed), so change it on the CMS if that is not done yet (the
+old password pasted in the former `docs/Api/AddCollection-API .md` is in git history (commit dd17f61, pushed), so change it on the CMS if that is not done yet (the
 developer key in `mirsal/.env` replaces it); and the Telegram chat with `serve --lan` restarted (`/start`, `/model`, a request: real stickers, the album, a
 creator run's edited message). Recommendation: both now, they cost nothing but a pack's credits. Unblocks: the backlog's Telegram chat items.
 
 **50. The paid proof of the face preset** (about 2 credits + one pack): see the backlog, Live generation. Recommendation: yes, once. Unblocks: the v4
 face clause.
 
-## F. Parked: the deployment questions (`docs/deployment_plan.md` section 17; do not raise unless asked)
+## F. Parked: the deployment questions (plan in git history, former section 17; do not raise unless asked)
 
-An answer goes into `docs/deployment_plan.md` and deletes the question here.
+An answer restores `docs/deployment_plan.md` from git history and deletes the question here.
 
 **40. Supabase Auth for Google, or our own OAuth client?** Recommendation: Supabase Auth (about 150 fewer lines we would own). Unblocks: Phase 1 (accounts).
 

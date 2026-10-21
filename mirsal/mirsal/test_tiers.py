@@ -40,7 +40,7 @@ FAST_TESTS = (
 
 # Reviewed regression profiles, not a random sample or a cap that drops tests.
 # The exact item-0 gate runs FIRST in every focused profile. Focused is never automatic:
-# at most once at the end of a gate/recovery/video-sheet phase (docs/testing.md, the test budget).
+# at most once at the end of a gate/recovery/video-sheet phase (README.md, the test budget).
 GOLDEN_GATE = "tests.test_golden.GoldenPathTests.test_switching_a_verdict_back_swaps_the_finished_clip_and_renders_nothing"
 FOCUSED_BASE = (GOLDEN_GATE, "tests.test_verify.RunnerTests", "tests.test_js.JavaScriptTests")
 FOCUSED_PROFILES = {

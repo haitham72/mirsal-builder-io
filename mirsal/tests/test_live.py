@@ -833,7 +833,7 @@ class LiveConsoleTests(Base):
         self.assertIn("generated/", (REPO / ".gitignore").read_text(encoding="utf-8").splitlines())
 
     def test_the_secrets_and_locks_of_out_are_never_committed(self):
-        """`out/` is tracked on purpose (docs/engine-and-studio.md), but the token digests, the signed-link key, the locks and the logs are not part of that."""
+        """`out/` is tracked on purpose (docs/architecture.md), but the token digests, the signed-link key, the locks and the logs are not part of that."""
         import subprocess
         from mirsal.runtime.paths import REPO
         lines = (REPO / ".gitignore").read_text(encoding="utf-8").splitlines()

@@ -267,7 +267,7 @@ ACT.egundo=async()=>{if(EG.busy)return;
 ['pointerup','keyup','blur'].forEach(ev=>document.addEventListener(ev,e=>{if(EG.drag&&e.target&&e.target.dataset&&e.target.dataset.edge)EG.drag=false},true));
 setInterval(()=>{egSync();applyEdgePreview()},800);       // egSync leaves the slider that is being dragged alone
 
-/* ---------- persistent history of batches: every batch ever made, in the shared second column (docs/design.md 6). The API is paged (50 at a time, it reads one result.json per batch);
+/* ---------- persistent history of batches: every batch ever made, in the shared second column (docs/design.md). The API is paged (50 at a time, it reads one result.json per batch);
    the column asks for the next page by itself when it is scrolled near the end, so the person sees one list that scrolls and no "Load more". Page 1 is read again now and then and merged
    over what is already loaded (nothing that was loaded is dropped). */
 const HB={items:[],more:false,total:0,loading:false,page:50,loaded:false,tried:false,sig:''};
@@ -361,7 +361,7 @@ ACT.gpurgeall=async()=>{const r=await api('/api/trash');if(!r.ok)return toast(r.
 ACT.gpurgeallgo=el=>{const i=document.getElementById('rem-typed'),typed=i?i.value.trim().toLowerCase():'';if(typed!==el.dataset.phrase)return toast(`Type exactly “${el.dataset.phrase}” to go on.`,1);
   closeDlg();remPurge('/api/trash/purge_all',{confirm:typed,kind:'batch'})};
 ACT.grestore=async el=>{const r=await post(`/api/generations/${el.dataset.n}/restore`,{});if(!r.ok){toast(r.j.error,1);return}toast(`${r.j.id} is back`);await remLoad();histLoad(false)};
-/* Batches (docs/design/15, UX-07): in the Studio the earlier batches open in a labelled drawer from the workspace, the left column being the creation panel.
+/* Batches (docs/design.md, UX-07): in the Studio the earlier batches open in a labelled drawer from the workspace, the left column being the creation panel.
    It is non-modal over the workspace: focus moves in, Escape or Close returns to the Batches button; opening a batch closes it. Create elsewhere keeps the column. */
 const BD={open:false,back:null};
 function bdEl(){let d=document.getElementById('bdrawer');if(d)return d;

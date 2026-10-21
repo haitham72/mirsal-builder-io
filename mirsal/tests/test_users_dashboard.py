@@ -1,4 +1,4 @@
-"""The Users dashboard routes (docs/api.md "Users", flow/user_report.py): the owner sees everyone, a member sees only themselves, a stranger nothing; and a member's answer
+"""The Users dashboard routes (docs/api-integration.md, flow/user_report.py): the owner sees everyone, a member sees only themselves, a stranger nothing; and a member's answer
 carries no other person's email, prompt, batch or media link. Fixture batches, jobs and ledger lines are written to a scratch out/; no provider is reached."""
 import json
 import time

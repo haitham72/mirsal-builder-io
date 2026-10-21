@@ -6,7 +6,7 @@ Two scorers behind ONE query path (the callers never fork):
   `cos(subject) >= SUBJECT_MIN and cos(action) >= ACTION_MIN`, so "penguin skiing" in a pool with no penguins returns nothing, never the nearest junk;
 - lexical (trigram + word coverage), used for rows that have no vectors yet and when no embedding backend is running.
 The thresholds are provisional until Haitham's eval set (`docs/inputs/search_queries.md`); the measured separation on the first 45 approved stickers is in
-`docs/measurements.md`. Nothing here spends: embeddings are local and free, and generation is never started by a search."""
+`docs/architecture.md ("Measurements")`. Nothing here spends: embeddings are local and free, and generation is never started by a search."""
 from __future__ import annotations
 
 import difflib

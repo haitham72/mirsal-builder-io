@@ -24,7 +24,7 @@ const strokeName=px=>(STROKES.find(s=>s[0]===px)||[px,px+' px'])[1];
 const glyph=px=>`<svg class=cp-gl viewBox="0 0 40 40" aria-hidden=true><rect width=40 height=40 rx=11 fill="#cbd5e1"/><circle cx="20" cy="20" r="${(11.5-px*0.12).toFixed(1)}" fill="#3B82F6" stroke="#fff" stroke-width="${(px*0.3).toFixed(1)}"/></svg>`;
 const liveReady=()=>!!(LIVE.hf&&LIVE.hf.available&&!LIVE.hf.error&&LIVE.m);
 
-/* The Studio's left creation panel (docs/design/15): on the Studio route the second column is the creation panel and the ONE composer lives there (#c2create).
+/* The Studio's left creation panel (docs/design.md): on the Studio route the second column is the creation panel and the ONE composer lives there (#c2create).
    Leaving the Studio keeps the composer node itself (CPKEEP), so its draft, references and open disclosures come back as they were; nothing is mounted twice. */
 let CPKEEP=null;
 const cpHost=()=>document.getElementById('c2create')||document.querySelector('.gen2');

@@ -1,4 +1,4 @@
-"""Lifecycle Console server: stdlib http.server + one index.html. Binds 127.0.0.1. One background job at a time."""
+"""The HTTP server: FastAPI on uvicorn over the original handler (byte-identical answers); `serve --stdlib` keeps the old ThreadingHTTPServer for one release. Binds 127.0.0.1."""
 from __future__ import annotations
 
 import contextvars
@@ -69,7 +69,7 @@ class Console:
         self.started, self._stale_checked, self._stale = time.time(), 0.0, False
         self._health = None
         self.users = UserStore(out)
-        self.lan = os.environ.get("MIRSAL_LAN", "").strip() in ("1", "true", "yes", "on")      # serve --lan: office colleagues reach this server (docs/api.md, Office accounts on the LAN)
+        self.lan = os.environ.get("MIRSAL_LAN", "").strip() in ("1", "true", "yes", "on")      # serve --lan: office colleagues reach this server (docs/api-integration.md)
         self.lan_names: set = set()
         if self.lan:
             from ..runtime import net
@@ -502,7 +502,7 @@ class Console:
             raise pl.PipelineError(str(e), getattr(e, "code", 400))
 
     def reserve(self, who: dict, est) -> float | None:
-        """Credits per person (docs/api.md, Office accounts on the LAN): an account with a balance pays from it. The price is checked BEFORE the job starts (an account
+        """Credits per person (docs/api-integration.md): an account with a balance pays from it. The price is checked BEFORE the job starts (an account
         without enough credits is refused in words, with the way to ask for more) and reserved; `jobs._settle` replaces it with the real cost when the job ends.
         The owner and token accounts without a balance spend as before (rule 13: the price was shown and accepted either way)."""
         u = self.users.get(who.get("id")) or {}
@@ -986,7 +986,7 @@ def make_handler(c: Console):
             super().send_response(code, message)
 
         def send_error(self, code, message=None, explain=None):
-            """The base class answers with an HTML page; every answer of this server is JSON (docs/api.md)."""
+            """The base class answers with an HTML page; every answer of this server is JSON (docs/api-integration.md)."""
             msg = message or (self.responses.get(code) or ("error",))[0]
             b = json.dumps({"error": msg}).encode()
             self.send_response(code, message)
@@ -1056,7 +1056,7 @@ def make_handler(c: Console):
                     raise pl.PipelineError(str(e), e.code)
             if pp[:2] == ["api", "packs"] and pp[-1] in ("particles", "reactions") and len(pp) in (4, 6) and (len(pp) == 4 or pp[3] == "stickers"):
                 # the particles made for a sticker (GET /api/packs/{id}/stickers/{sid}/particles) or the counts for a whole pack (GET /api/packs/{id}/particles): a pure read; effects are owner only,
-                # a member's answer is simply empty (docs/effects.md)
+                # a member's answer is simply empty (docs/architecture.md ("Reactions"))
                 # GET /api/packs/{id}/reactions: this pack's reaction variations (one row per emoji, motion inherited 🔒, art + Size/Energy vary)
                 if self.user.get("role") != "owner":
                     return self._json(200, {"sticker": pp[4], "created": [], "saved": [], "effects": [], "can_make": False} if len(pp) == 6 else {})
@@ -1067,7 +1067,7 @@ def make_handler(c: Console):
                         return self._json(200, fx_sets.reactions_for_pack(c.out, c.lib, pp[2]))
                     except fx_sets.SetError as e:
                         raise pl.PipelineError(str(e), e.code)
-                # the pack's particle studio (docs/particles.md 5): its sets and its bursts, plus the per-sticker counts the old answer carried
+                # the pack's particle studio (docs/architecture.md ("Reactions")): its sets and its bursts, plus the per-sticker counts the old answer carried
                 try:
                     return self._json(200, {**fx_sets.for_pack(c.out, c.lib, pp[2]), "counts": fx_sets.counts_for_pack(c.out, c.lib, pp[2])})
                 except fx_sets.SetError as e:
@@ -1340,7 +1340,7 @@ def make_handler(c: Console):
             raise pl.PipelineError(NO_ROUTE, 404)
 
         def _particles(self, method: str, path: str, body: dict):
-            """Particle sets `P###` (docs/particles.md section 6): the durable sticker-owned particle asset with derived pack views. The working
+            """Particle sets `P###` (docs/architecture.md ("Reactions")): the durable sticker-owned particle asset with derived pack views. The working
             session stays `/api/effects`; `POST /api/particles {from_effect}` is the bridge that saves one. Free: nothing here spends. A delete moves the
             folder to the trash and a set in use says which packs before it goes (rule 9's spirit: nothing is destroyed on a click)."""
             ps = fx_sets
@@ -1537,7 +1537,7 @@ def make_handler(c: Console):
             return False
 
         def _effects(self, method: str, path: str, body: dict):
-            """Particle effects (docs/effects.md section 7): a pack's stickers get a Telegram-style burst. Owner only for now (members are denied by the route gate). Paid work needs the price
+            """Particle effects (docs/architecture.md ("Reactions")): a pack's stickers get a Telegram-style burst. Owner only for now (members are denied by the route gate). Paid work needs the price
             shown (`estimate`) and `go: true` (`video`); everything else is free."""
             parts = path.strip("/").split("/")                     # api, effects[, id[, action]]
             if len(parts) == 2:
@@ -2407,7 +2407,7 @@ def make_handler(c: Console):
 def serve(out: Path, inp: Path, port: int = 8770, pace: float = 0.0, cfg=None, block: bool = True, stdlib: bool | None = None, lan: bool = False,
           tls: dict | None = None):
     """FastAPI on uvicorn (console/app.py) by default; `stdlib=True` or MIRSAL_SERVER=stdlib runs the old ThreadingHTTPServer (kept for one release).
-    Both serve the same handler, so every answer is the same. `lan`: office colleagues reach it on the local network (0.0.0.0; they sign in; docs/api.md, Office accounts on the LAN),
+    Both serve the same handler, so every answer is the same. `lan`: office colleagues reach it on the local network (0.0.0.0; they sign in; docs/api-integration.md),
     `tls`: {cert, key} for HTTPS."""
     if lan:
         os.environ["MIRSAL_LAN"] = "1"

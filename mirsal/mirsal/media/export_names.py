@@ -1,4 +1,4 @@
-"""Export-as-ZIP display names (`docs/export to team/mirsal-export-architecture.md` §1-2):
+"""Export-as-ZIP display names (`docs/api-integration.md`):
 
     {emoji}-{pack_slug}-{multi_action_tag}-{sNN}-{G###}-{date}[.{ext}]
 

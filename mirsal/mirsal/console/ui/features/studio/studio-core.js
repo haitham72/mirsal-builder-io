@@ -770,7 +770,7 @@ function stepsHtml(c) {
     ],
     ['Pack', allAdded ? 'done' : 'todo', allAdded ? `Added to “${esc(pk.name)}”` : 'Not added yet', 'pack'],
   ];
-  /* the journey (docs/redesign_plan.md §2): Idea · Prompt · Stickers · Motion · Pack · Telegram, one slim track; each stop is the view it always was (gtab), Pack adds, Telegram opens the pack */
+  /* the journey (docs/design.md): Idea · Prompt · Stickers · Motion · Pack · Telegram, one slim track; each stop is the view it always was (gtab), Pack adds, Telegram opens the pack */
   const tg = pk && ((pk.telegram || {}).sets || []).map((x) => x.link).find(Boolean);
   S[0][0] = 'Idea';
   S[3][0] = 'Motion';
@@ -787,7 +787,7 @@ ACT.gopenfolder = async (el) => {
 };
 
 /* ---------- polling: only while this screen is open */
-/* Motion size (Haitham, 2026-10-15, docs/size-position-lottie-proposal.md): one Resize box and one Size stepper on the batch row, and a frame editor
+/* Motion size (Haitham, 2026-10-15, docs/architecture.md): one Resize box and one Size stepper on the batch row, and a frame editor
    per sticker (Size + Position on ONE frame, guide grid on/off). Every test renders one frame (GET /api/generations/{id}/anim_preview -> a PNG), so a
    click answers at once; Apply cuts the clips once, free, from the stored video. Resize on: each sticker is sized and placed by its hot spot (the pixels
    opaque in at least half the frames, so drops flying out do not count) matched to its approved still. Off: every sticker is cut from its cell at one

@@ -8,7 +8,7 @@ from pydantic import ValidationError
 from .legacy_adapter import _identify
 
 def _native_headers(request) -> dict:
-    """The two headers every answer of this server carries (docs/api.md): the API version and the request id (the caller's when it is well formed)."""
+    """The two headers every answer of this server carries (docs/api-integration.md): the API version and the request id (the caller's when it is well formed)."""
     import re
     import uuid
     from .openapi import VERSION

@@ -1,4 +1,4 @@
-/* Theme: the Dark / Light preference (docs/dark-mode.md). Loaded before the stylesheets so the first paint already uses the right theme.
+/* Theme: the Dark / Light preference (docs/design.md). Loaded before the stylesheets so the first paint already uses the right theme.
    A browser preference only: kept in localStorage, no backend write. Top-level names carry the thm prefix (the console scripts share one global scope). */
 'use strict';
 const thmKey='mirsal.ui.theme';

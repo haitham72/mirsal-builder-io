@@ -1,7 +1,7 @@
 # deploy/: the hosted Mirsal, prepared (branch `deployment`)
 
 **Nothing here is switched on.** No Supabase project, no Vercel project, no Render service and no Google OAuth client exist yet; nothing was pushed to any of them. Everything below was written and tested on a PC against fakes,
-so that the next session (on another PC) only has to create the accounts and fill in `deploy/env.example`. `docs/deployment_plan.md` is the reasoning, the phases and the open questions; this file is the map of what exists.
+so that the next session (on another PC) only has to create the accounts and fill in `deploy/env.example`. `docs/deployment_plan.md` (in git history since the 2026-10-21 docs convergence; restore it first if deployment unparks) is the reasoning, the phases and the open questions; this file is the map of what exists.
 
 ```
 deploy/

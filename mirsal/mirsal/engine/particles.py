@@ -46,7 +46,7 @@ _POS_LIMIT = 50.0       # canvas units: positions are clipped here so nothing ca
 AIR_K = 1.5             # air=1 adds this much drag per second (on top of DRAG)
 WIND_K = 1.0            # wind=1 pushes at this many canvas/s^2
 TURB_K = 2.0            # turbulence=1 pushes up to this many canvas/s^2, a seeded smooth field
-# The settings modelled on Trapcode Particular (Haitham 2026-10-15, docs/size-position-lottie-proposal.md D): every one is off by default and draws
+# The settings modelled on Trapcode Particular (Haitham 2026-10-15, docs/architecture.md): every one is off by default and draws
 # its randoms from a SECOND generator (seed, 0x15), so a burst made before them keeps every byte.
 EMITTERS = ("point", "ring", "box", "line")
 SIZE_CURVES = ("none", "grow", "shrink", "swell", "pulse")

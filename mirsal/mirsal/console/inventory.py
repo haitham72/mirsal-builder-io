@@ -1,9 +1,9 @@
-"""What the browser sandbox can DO, read from its own scripts (docs/ui_inventory.md): every action (`ACT.<name>=` in console/*.js), the
+"""What the browser sandbox can DO, read from its own scripts: every action (`ACT.<name>=` in console/*.js), the
 scripts that draw a button for it (`data-act=<name>`), and the server routes its code names (`/api/...`, its own and its helpers' two calls deep, not into the helpers that only redraw a screen). Pure: reads files, writes nothing.
 
-Written for the redesign (docs/redesign_plan.md, Haitham 2026-10-10: "I am super scared any logic would be lost"): tests/test_ui_inventory.py
+Written for the redesign (docs/design.md, Haitham 2026-10-10: "I am super scared any logic would be lost"): tests/test_ui_inventory.py
 holds today's list as a baseline, so an action can only disappear from the console when the plan says where it went or Haitham retired it.
-`python -m mirsal.console.inventory` prints the tables of docs/ui_inventory.md; `--baseline` prints a fresh baseline (empty renamed / retired)."""
+`python -m mirsal.console.inventory` prints the action/screen/route tables; `--baseline` prints a fresh baseline (empty renamed / retired)."""
 from __future__ import annotations
 
 import re

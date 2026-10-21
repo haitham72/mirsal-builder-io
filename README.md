@@ -1,162 +1,76 @@
 # Mirsal Builder
 
-[Visual guide](GUIDE.md) · [Redesign acceptance](docs/uiux_review/acceptance-2026-10-19.md) · [Current app design and structure audit](docs/uiux_review/app-audit-2026-10-19.md)
+[Visual guide](GUIDE.md) · [Remaining work](plan.md) · [User app review checklist](user%20app%20review%20guide.md)
 
-[User app review checklist](user%20app%20review%20guide.md) · [Remaining work](plan.md)
+It turns plain words into video stickers for Telegram: it makes the pictures, cuts them, animates them and packs them. Every step is checkable ([architecture](docs/architecture.md)); the HTTP contract is [here](docs/api-integration.md), the live route inventory at `GET /api/openapi.json`.
 
-[Code structure](docs/architecture.md) · [Native API layout](docs/api-parts/22-native-router-layout.md)
+## Overview
 
-New generation plans default to **2×2 / four stickers**. Video prompts give each
-cell a natural sequence of two actions and an optional third, running cells
-concurrently; explicit grids and old plans remain supported.
-[Prompt contract](docs/generation/20-natural-cell-video-sequences.md).
+- **Intent → Spec** Each distinct sticker is fully specified. *Watch folders* (`img-NNN-<subject>/` + `vid-NNN-<subject>/`, see `inputs/`) hold prepared art; *tags* and *margin* fill empty cells; *subject* defaults are `banana` and `cherries`.
+- **Spec → Generation** Deterministic *prompt building* (template-locked text); a *plan* previews the cells; a *subject* carries fixed phrasing, references and per-user taste.
+- **Processing** Decoding, prep and reference frames accumulate real reusable state. *Reactions* (formerly particles) are bursts attached to stickers, stored as sets (`P###`).
+- **Validation** Every gate judges quality before the next step; *batch groups* link variations of one idea; the *pool* reuses approved stickers free.
+- **Animation** Video sheets (approved stickers recomposed, `A1`, `A2`, …) are animated, then cut into looping WebMs. *Higgsfield* (sheets) and *Kling v3.0* (animation) run through the Higgsfield CLI as paid jobs (`J###`); *Nano Banana 2* draws the sheets.
+- **Persistence** Decisions land in *Postgres* (searchable reviews) and history lines; *tickets* track problems; *model calls* log spend.
+- **The glasses** New ideas default to 2×2 (4 stickers); photographers can also ship flat PNG or WebP stickers. One screen holds the project.
 
-## Overview and glossary
+## Delivery
 
-Mirsal creates **Telegram stickers** from text, images or prepared sheets: request → plan → sheet → still stickers → video sheet → animations → pack → Telegram. One deterministic Python engine serves the **AI chat**, **Studio** and **JSON API**; the screens are a sandbox over that API. Higgsfield generates media through its CLI, local models assist with chat and vision, and `out/` is the source of truth with optional Postgres mirrors and Redis caching. Humans approve review gates and paid calls; tests use fake providers. Read `CLAUDE.md` for rules, `docs/backlog.md` and `docs/waiting-for-haitham.md` for open work, and `docs/` for each area's contract and design.
+The product is the API and the two sandboxes over it: `console/` (the page) and the AI chat. The engine (`mirsal/engine/`) and flow (`mirsal/flow/`) are deterministic and testable first, screens second.
 
-Mirsal Builder is a local, private app. The words below mean the same in
-`README.md`, `CLAUDE.md` and `docs/dev-notes.md`:
+**Start**: `python -m mirsal serve`, then open the printed address. Server default `127.0.0.1:8770`. First run needs: Python 3.11-3.13, venv `mirsal/.venv`, `pip install -r mirsal/requirements*.txt` (fastapi/pydantic/uvicorn for serve), ffmpeg on PATH, Postgres `mirsal-db` on 5434 for the mirror (`python -m mirsal db up`).
 
-- **Batch (`G###`)** — one generation run. Holds a sheet, stickers, a video
-  sheet, animations, and a pack.
-- **Sticker (`S#`)** — one cell of a batch. Its number never changes.
-- **Job (`J###`)** — one paid provider call. Its ticket is stored before
-  waiting, so a crash never pays twice.
-- **Gates (G1–G5)** — the five human approvals along the path. The vision
-  model pre-reviews only and never approves.
-- **"Use it anyway" (allow)** — a recorded, reversible human click that lets a
-  judgement-call block through. Only Telegram's own limits stay final.
-- **Reaction set / burst** — still/animated sprites owned by library stickers, and the
-  burst rendered from them. Adding the burst affirms it in a pack.
+## Run
 
-- **Plan** — saved character, cell, tag and prompt instructions before generation.
-- **Sheet / video sheet** — a 3×3 or 2×2 character image; the video sheet is rebuilt from approved stickers for animation.
-- **Pack / pool** — a named Telegram sticker collection, and the shared searchable sticker store.
-- **Test tiers** — the test budget comes first (`docs/testing.md`): one narrow run per change, nothing re-run that already passed, nothing for docs. `area`: mapped checks; `fast`: smoke; `focused`: about 22 reviewed regressions, at most once per phase. The slow tier is retired (Haitham, 2026-10-03): never run, never requested. Python runs alone; focused success is not full verification.
+- One checkout per task; check `git branch --show-current` before every commit. Live branches: `main`, `handpicked-lottie`, `redesign-ui-ux`, `code-audit` (docs convergence) — never merge without Haitham asking.
+- Restart the server from `mirsal/.venv` before judging the browser (the Studio warns when it runs older code). Never kill or automate the real-data server on :8770; it loads new code only when its owner restarts it.
+- `python -m mirsal doctor` is the one health check. `serve --lan` serves the office over HTTPS; `serve --stdlib` keeps the old server for one release.
+- Keep runs hermetic: tests and scratch runs use `MIRSAL_OUT` copies, never the shared `out/`; only the real `out/` writes through to Postgres.
+- Ports 5433/5436/5437 and the other project's `.env` lines are never touched.
 
-High-quality **animated stickers** (not emoji) for Telegram. You say what you want, in a chat or a prompt; the app makes the sheet, cuts and keys it into stickers, checks every one with a
-deterministic verifier, lets a human approve, animates the approved ones, and puts them in a pack that goes to a Telegram set. One engine; a chat and a Studio on top.
+## Test budget
 
-> **Delivery.** The product is an **API / app** for the existing Mirsal app. The screens in this repo (the Studio and the AI chat in `mirsal/mirsal/console/`) are a sandbox that drives and
-> demonstrates the engine through [the HTTP API](docs/api.md): every feature is an engine function and a stable JSON shape first, a screen second.
+One narrowest run per change: `mirsal test fast` / `focused` / `area <module>` (map in `mirsal/test_tiers.py`). Zero tests for docs-only changes; a pass stays valid until its files change. Uncertainty is not a reason to run a bigger suite. Paid tests need Haitham (`MIRSAL_RUN_PAID_TESTS=1`, ≤3 USD, serial). Quirks: Windows file locks (retry), Anaconda `python` ≠ venv, `MIRSAL_NO_REAL_CLI` for fakes.
 
-## Start
+## The architecture in one breath
 
-How to set up and run it, alone or for the office: **[run.md](run.md)**.
+The chat (natural language) and the Studio (explicit controls) share one engine: `engine/` pure (sheet, key, video, particles, `verify.py` 44 checks); `flow/` lifecycle (`pipeline`, `gates`, `groups`, `imports`, `support`, `tickets`); `generation/` paid jobs and prompts; `services/` Telegram and models; files are the truth, Postgres mirrors, Redis is disposable. Names carry meaning: `G###` (batch), `S#` (sticker), `J###` (paid job), outcome `READY`/`FAILED`.
 
-## Architecture
+## The golden path and the gates
 
-One engine, two interfaces over it. Every feature is an engine function and a stable JSON contract **first**, a screen second (`CLAUDE.md` rule 11) — the screens in this repo are a sandbox that drives the engine through [the HTTP API](docs/api.md).
-
-```
-mirsal/mirrors nothing:  one out/ directory is the source of truth, Postgres mirrors it
-browser ── console/ (Studio, AI chat, Library, Create)  ── FastAPI on uvicorn :8770
-                          │  JSON only (docs/api.md, OpenAPI in console/openapi.py)
-                          ▼
-   flow/     the golden path: pipeline.py (stages, result.json), gates.py (G1-G5)
-   engine/   pure: sheet, key, video, particles, verify.py (44 checks), no I/O, no deps
-   generation/ Higgsfield through its CLI: prompts, jobs (ticket-first), credits, ledger
-   vision/   the judge: pre-review only, and effect_plan (what a burst is made of)
-   agent/    LangGraph chat over the Studio's own functions; creator.py (run to Telegram)
-   store/    Postgres mirror + pgvector pool; media/ library, cutout; runtime/ cache, atomic
-   services/ llm, embed, telegram, collection (AddCollection export)   obs/ tracing   engine/ never imports any of these
-```
-
-**The invariants that hold it up** (each is a test, not a promise):
-
-| invariant | where it is enforced |
-|---|---|
-| the engine is deterministic, pure and free of I/O — no `psycopg`, no `redis`, no model client | `tests/test_store.py::test_engine_boundary` |
-| a ticket is written **before** the wait, so a crash never loses or double-charges a paid job | `generation/jobs.py` `fulfil`, `tests/test_jobs.py` |
-| no paid call without a shown price and a go-ahead | `agent/graph.py` `n_confirm`, `tests/test_agent.py` |
-| the vision model pre-reviews and **never** approves | `vision/judge.py`, `CLAUDE.md` rule 10 |
-| Python's blocks are final only where Telegram itself would refuse the file; every other block is a judgement call with one recorded, reversible **Use it anyway** on the picture itself | `engine/verify.py` `OVERRIDABLE` vs `TECHNICAL`, `flow/gates.py` |
-| history is append-only: rejection never deletes, a sticker keeps its `S#` | `flow/pipeline.py` `hist` |
-| a web page the owner visits cannot drive the local server; `/out/` cannot escape `out/` | `console/server.py` `_foreign` / `_authorize`, `tests/test_hardening.py` |
-| no secret ever reaches git or a response | `runtime/users.py`, `services/telegram.py`, `tests/test_hardening.py` |
-| one batch with an old or partial `result.json` never fails the generations list (or the health card that reads with it) | `flow/pipeline.py` `summary`, `tests/test_summary_robust.py` |
-
-## How a sticker is made (the golden path)
-
-```
-chat / prompt ─► plan (template-locked prompt, 1-5 tags per cell)  G1  you approve (the price is shown first)
-   ─► sheet (Higgsfield · Nano Banana 2, 2k)  ─► Python blocks bad cells  ─► stills                          G2  you approve
-   ─► video sheet from the approved stickers only  G3  ─► video (Kling v3.0)  ─► Python checks every frame   ─► animations  G4  you approve
-   ─► pack  G5  ─► Telegram
-```
-
-Python's blocks are final where Telegram itself would refuse the file, and nowhere else: every other block is a judgement call the person can allow with one recorded click — **on the picture itself** (the Studio tile, a cell of the left sheet, the chat tile), with a plain-words reason and one `Use all anyway` per batch. A human approves at every gate; the vision model only pre-reviews; rejection never deletes; a sticker keeps its `S#` through every stage. Details:
-[engine and gates](docs/engine-and-studio.md).
+Request → plan (G1) → sheet → stills (G2) → video sheet (G3) → video → per-frame check → animations (G4) → pack (G5). A person approves at every gate; the vision model only pre-reviews; Python blocks only what Telegram would reject, everything else gets "Use it anyway". Rejection never deletes; `S#` is stable; decisions are `reviews` rows + history lines.
 
 ## What is in it
 
-| | |
-|---|---|
-| **AI chat** (`#/agent`) | "What will you create today?": an agent with memory per subject, a step trace, plan cards with the price, swipeable carousels, one-tap selection, two settings. [docs/agent-and-chat.md](docs/agent-and-chat.md) |
-| **Studio** (`#/studio`) | the detailed workspace: request, prompt, stickers with issue colours, edge and stroke, animation, packs, Telegram. A compact composer (model, Style, Stroke, Loop, AI enhancer chips; the style tiles open from the Style chip). The Animation tab is a create view (the video sheet to be sent, the video prompt, motion suggestions per sticker). **Batch groups**: variations of one idea are one family (Earlier batches shows one entry; the variations strip sits above the steps; drag a batch onto another or *Add to group*: the target is the parent; Postgres `generations.group_id` / `relation`). **Removed batches** have Restore, Remove and Remove all (files and database rows). One motion language: the AI enhancer's rise-and-fade for what opens, soft transitions for what you touch. [docs/engine-and-studio.md](docs/engine-and-studio.md), [docs/design.md](docs/design.md) |
-| **"Use it anyway"** | every judgement-call block is allow-able in one click, on the picture, everywhere it appears (Studio tile, a clickable cell of the left sheet, the chat card, the agentic creator), reversible and recorded; only Telegram's own limits are final. [docs/engine-and-studio.md](docs/engine-and-studio.md), [docs/design.md](docs/design.md) |
-| **Engine** | sheet → key → scale → stickers → WEBM; a verifier of 44 checks over 9 stages; the five review gates; Studio edits as layers. [docs/engine-and-studio.md](docs/engine-and-studio.md) |
-| **Live generation** | template-locked prompts (v1-v3), an emotion bank, an AI slot filler with a lint, Higgsfield through its CLI, jobs as files, credits and a usage ledger. [docs/generation.md](docs/generation.md), [docs/higgsfield.md](docs/higgsfield.md), [docs/operator.md](docs/operator.md) |
-| **Store and search** | Postgres mirror (generations, decisions, tasks, jobs, ledger, chats), the sticker pool with local vector search, photo cutouts. [docs/store-and-search.md](docs/store-and-search.md) |
-| **Vision judge** | pre-reviews stickers and animations: Nararouter vision models (`agnes-2.5-flash`, `agnes-3-flash`, `deepseek-v4.1-flash-free`, `muse-spark-1.3-contributor-free`, `stepfun-3.7-flash`) first, then OpenAI vision models (`gpt-4o-mini`, `gpt-6.1-sol`), then local LM Studio as last resort. Configured with `MIRSAL_VISION_PROVIDER` and `MIRSAL_VISION_OPENAI_MODEL` in `.env`. [docs/agent-and-chat.md](docs/agent-and-chat.md) |
-| **HTTP API** | FastAPI on uvicorn (existing routes through an adapter over the original handler, byte-identical; new routes native with pydantic), JSON routes, SSE events per generation and per chat turn (`/api/chat/sessions/{id}/stream`), idempotency keys, signed asset links, accounts (owner / member tokens, per-user ownership), per-minute rate limits, an OpenAPI document, health. [docs/api.md](docs/api.md) |
-| **Export to collection** | A pack or one Studio batch sent, as its Download .zip holds it, to the external AddCollection API (an emoji CMS) as one collection: `Media` + `MediaThumbnails` (one PNG each) + `MediaMetadata` `{emoji_utf, tags}` paired by index, Bearer `sk-` developer key from `.env`; owner only, asks first, queued in the background (the dialog closes at once; success or failure arrives as a toast and a notification), every export logged. [docs/Api/AddCollection-API .md](docs/Api/AddCollection-API%20.md), [docs/api.md](docs/api.md) |
-| **Telegram chat** | The AI chat on the same bot as the admin cards: anyone can write (each person gets a member account with 0 credits; Haitham gets a +10 card), questions are native buttons, `/model` picks image / video / style / AI (starts on Nano Banana 2, Grok Lite, Glossy, GPT-5.6 Luna), finished animations arrive as real stickers, blocked ones with Use it anyway. [docs/agent-and-chat.md](docs/agent-and-chat.md) |
-| **Office accounts** | `serve --lan` on the office network with HTTPS; `@nadi.ae` or `@cpd.gov.ae` email + password (more domains: `MIRSAL_EMAIL_DOMAIN`, run.md); sign-up waits for approval; Users > People (add people with a generated password shown once, approve, roles, new password, credits); forgot password goes to Haitham; the Telegram bot sends Haitham a card per request (Approve / Reject / Admin / Send new password / +10 credits) and obeys only his user id. HTTPS set-up once: [certificate-guide.md](certificate-guide.md). [docs/api.md](docs/api.md) |
-| **Help & Support** | describe a problem in plain words: the local support agent answers from the published FAQ and `docs/` (staff also the code), reads a screenshot with the local vision model, and hands over to a person with one ticket and one Telegram ping; replies come back as notifications; a resolved issue proposes an FAQ entry for review. [docs/agent-and-chat.md](docs/agent-and-chat.md) "Support", [docs/api.md](docs/api.md) "Help & Support" |
-| **Tickets** | every server error, failed job or refused Telegram send, and every **Report** (batch, particle row, chat reply) is a ticket: what happened, the person's words, the issue, a proposed fix drafted by the local model, one-click questions; Settings > Tickets; a Postgres copy. LangSmith is gone. [docs/store-and-search.md](docs/store-and-search.md) |
-| **Testing** | tiers chosen by what a change can actually break: `mirsal test fast` (9s), `focused`, `area <module>` (what that file maps to). The slow tier is retired (Haitham, 2026-10-03): never run, never requested. Nothing maps, nothing runs. [docs/testing.md](docs/testing.md) |
-| **Reaction effects** | Create and Library share Emoji style / Lottie style / Super Emojis / Packs tabs. Super reaction (hold, release, the screen plays; sandbox `#/super` with a desktop window, played in its chat area, and an iPhone) uses the files in `mirsal/lottie`: a random look per file until saved, Save / Save as / Remove, presets, one-frame tuning, export as JSON or `superReactions.zip` ([docs/reaction/19-19-super-reaction.md](docs/reaction/19-19-super-reaction.md)). Emoji presets use the bank; Lottie style uses saved source files with its own editor and self-contained export. Selection and playback follow the visible screen. [docs/reaction.md](docs/reaction.md), [docs/effects.md](docs/effects.md) |
-| **Photo/video sheet imports** | Create > + New > From a photo offers Sticker (cutout/editor) or Emojis (image sheet → Studio); From a video imports a video sheet → Studio. Imports detect the image/first-frame grid and offer manual 2×2 / 3×3 overrides. Duplicate/recovery choices stay available. [Import behavior](docs/engine-and-studio/35-existing-sheet-imports.md), [API](docs/api-parts/20-import-an-existing-sheet-or-video-native-fastapi.md) |
-| **Emoji bank** | one canonical bank of iOS emoji (36 core + 1,898 extended) shared by reactions, export tags and the sticker planner; the saved per-sticker emoji always wins. [docs/emoji-bank.md](docs/emoji-bank.md) |
-| **Reaction sets** | Sets belong to library stickers, one saved version per row (v1, v2...); three equal sources (sticker sprites, AI image sprites, Kling from scratch); animated sprites in the simulator; Save / Save as new / Add to pack; mistaken-pack recovery; soft delete and restore. One fixed animation per emoji (the 1800 wall); each pack varies art + Size/Energy. Optional Lottie export (web only). [docs/reaction.md](docs/reaction.md) |
-| **Trending** | public packs to like, comment on and copy into your own Library; maker names, views and uses, with relative attention scoring. [docs/api.md](docs/api.md) |
-| **Open work** | [docs/backlog.md](docs/backlog.md) lists unbuilt work; [docs/waiting-for-haitham.md](docs/waiting-for-haitham.md) holds human decisions and paid checks. The theme, Home bands, console refactor and fake-server batch proofs are complete on `edit-design`; the reaction work since 2026-10-13 (Reaction effects and Lottie, the emoji bank, Export to collection) is on `reactions` (`edit-design` plus that work). Public hosting and Google OAuth remain paused: [deployment_plan.md](docs/deployment_plan.md). |
-| **Burst creation (proposal)** | many packs from one liked sheet: reuse the image, pick actions, one queue each, async; waits for Haitham's go (W27) | [docs/burst_plan.md](docs/burst_plan.md) |
-| **Architecture** | the whole app on one page: the layers, where the data lives, one request end to end, the HTTP server, how the browser sandbox is wired, every module. [docs/architecture.md](docs/architecture.md); everything the sandbox can do, generated: [docs/ui_inventory.md](docs/ui_inventory.md) |
-| **Redesign (built, merged into `main`; visual verdicts open)** | one clean app with nothing lost: a rail of four, Create = Chat \| Studio, the journey bar, the Studio's project map; a map of every Studio action to its new home; the phases and Haitham's decisions. [docs/redesign_plan.md](docs/redesign_plan.md), mockups in `mirsal/web/mockups/redesign/` |
-| **Dark / Light themes (`edit-design`)** | black surfaces and cyan accents in dark mode, the existing blue palette in light mode; a top-right sun/moon button on every screen, Settings → Appearance, browser persistence and cross-tab updates. [docs/dark-mode.md](docs/dark-mode.md) |
-| **Chat interaction proposal** | conditional rules for display, descriptions, context, replacement, clarification and pending plans; proposed behaviour beyond the current fixes. [docs/chat-interaction-proposal.md](docs/chat-interaction-proposal.md) |
-| **Design** | one shell and one palette for every screen: the rail, the second column, the token set, the style tiles, and the Earlier-batches column. [docs/design.md](docs/design.md) |
-| **Welcome / onboarding** | two distinct responsive sticker bands, each ending in a full-width film crop; the welcome modal and supplied onboarding video. Media provenance and controls: [docs/onboarding.md](docs/onboarding.md) |
-| **Diagrams** | seven Excalidraw diagrams of v1.0 (overview, golden path, AI chat turn, paid generation, particles, data, the office LAN) in [docs/diagrams/](docs/diagrams/README.md), regenerated by `docs/diagrams/build.py`; the prompt that drew them: [diagram-prompt.md](docs/diagrams/diagram-prompt.md) |
-| **App review and remaining work** | [Current measured audit](docs/uiux_review/app-audit-2026-10-19.md), [remaining plan](plan.md), [user review checklist](user%20app%20review%20guide.md). The older [review prompt](docs/uiux-review-prompt.md) is historical workflow reference, not current branch/server instructions. |
-| **Independent review** | the whole-app audit uses a ready-made prompt for another LLM to audit the whole app: [docs/review-prompt.md](docs/review-prompt.md), updating the single seeded baseline [docs/review.md](docs/review.md). The standing rules above are the outcome of those audits, now architecture here rather than reports. |
-| **Measurements** | recorded numbers — slot fill, search precision, vision-judge agreement, sharpness; no opinions: [docs/measurements.md](docs/measurements.md) |
-| **Telegram** | send a pack (images and video are split into two sets), a no-token fallback for @stickers. [docs/engine-and-studio.md](docs/engine-and-studio.md) |
+| Area | What it does | Doc |
+|---|---|---|
+| Engine + Studio | Pure media code, the golden path, gates, verifier, Studio flows, Telegram send, imports | [architecture](docs/architecture.md) |
+| Chat + agent | Turns, memory, creator, stages, vision judge, Redis, events, Telegram chat, support | [architecture](docs/architecture.md) |
+| Storage + search | Postgres mirror, pool, vectors, tickets, Help & Support records | [architecture](docs/architecture.md) |
+| Reactions | Presets, emoji map, Lottie slots, super reaction, emoji bank | [architecture](docs/architecture.md) (+ screens in [design](docs/design.md)) |
+| Generation (Higgsfield/Kling) | Prompts, jobs, credits, operator runbook | [generation](docs/generation.md) |
+| HTTP API | Contract, guards, accounts, office LAN, Users, Trending, integrations | [api-integration](docs/api-integration.md) |
+| Export to collection | Queue a pack/batch to the AddCollection CMS | [api-integration](docs/api-integration.md) |
+| Design | Shell, screens, themes, welcome, redesign contracts | [design](docs/design.md) |
+| Rules | The 13 rules in full + session guardrails | [rules](docs/rules.md) |
+| Trackers | Open work and owner verdicts | [backlog](docs/backlog.md), [waiting](docs/waiting-for-haitham.md) |
+| Inputs | Reference inputs (prompt samples, telegram spec, eval sets) | [inputs](docs/inputs/) |
 
-## Services, ports and models
+Public deployment and Google OAuth stay paused (plan in git history); the office LAN stands in. Open proposals live as one line each in the backlog, full text in git history.
 
-| | |
-|---|---|
-| Studio and API | `127.0.0.1:8770` (`serve --port N`; FastAPI on uvicorn, `serve --stdlib` for the old server; localhost only) |
-| Postgres + pgvector | `localhost:5434` (`mirsal-db`; 5433, 5436 and 5437 belong to other projects: never touched) |
-| Redis | `localhost:6380` (`mirsal-redis`; 6379 is another project's) |
-| LM Studio (or vLLM) | `localhost:1234` (`MIRSAL_LOCAL_URL`): **whatever the server lists** for the assistant, the plan expansion and the vision judge (the chat's model dropdown; a real readiness probe; a `:N` instance suffix falls back to the base id), **`text-embedding-nomic-embed-text-v1.5`** for the pool (hardcoded) |
-| Higgsfield | the `higgsfield` CLI (logged in): Nano Banana 2 at 2k for sheets, Kling v3.0 `pro` for animation, never 4k; every paid call is a line in `out/model_calls.jsonl` |
-| Cloud LLMs | Official OpenAI GPT-5.6 Luna is the built-in default, with `high` reasoning effort. The grouped selector lists available approved models from Nararouter (`MIRSAL_CLOUD_URL`, `NARAROUTER_API_KEY`) and official OpenAI (`OPENAI_API_KEY`); saved choices and explicit environment settings override the default. Each provider uses only its own key. [Model routing](docs/agent-and-chat.md#models-servicesllmpy) |
+## Services and ports
 
-ZIP exports resolve the expanded bank of 1,934 tokens (1,898 distinct base glyphs), validate complete Unicode emoji sequences and persist resolution snapshots for repeatable exports. Ambiguous or invalid mappings carry manifest diagnostics; library selections can be saved through the API. [Export architecture](docs/export%20to%20team/mirsal-export-architecture.md).
+| Service | Default | Notes |
+|---|---|---|
+| Local models | `MIRSAL_LOCAL_URL` | Whatever the server lists; readiness is a real probe; embeddings local hardcoded |
+| Cloud default | `openai:gpt-6-luna` | Official OpenAI only, effort high; old router ids normalize |
+| Database | `mirsal-db:5434` | Mirror; `MIRSAL_DB_WRITE=0` forces off |
+| CMS export | `MIRSAL_COLLECTION_API_URL` | `MIRSAL_COLLECTION_API_CREDENTIALS` = `sk-…` in `mirsal/.env`, never in git |
 
 ## Folders
 
-```
-README.md  CLAUDE.md                   this file · the short rules and routing every LLM session loads (the full text: docs/rules.md)
-docs/                                    the documentation (one file per area; the big areas are an index docs/<area>.md + one file per section in docs/<area>/) · docs/inputs/ (Haitham's inputs and reference)
-mirsal/                                  the app: requirements.txt, docker-compose.yml, migrations/, tests/, .env.example
-  mirsal/                                the Python package, one folder per concern: engine/ (pure engine) · flow/ (the golden path: pipeline, gates) · generation/ (Higgsfield, jobs, prompts, planner) ·
-                                         services/ (LLM, embeddings, Telegram) · runtime/ (cache, events, paths, accounts) · media/ (pack library, video projects, cutout) ·
-                                         store/ (Postgres, pool) · agent/ · vision/ · obs/ · console/ (server + Studio + AI screen) · cli.py
-  web/                                   a parked React gateway (not served)
-inputs/                                  prepared sheets and videos (git-ignored media)
-tools/tracker/                           a small tracker for hand-made sheets
-ref/                                     the UI design reference and mockup
-```
+`mirsal/` (package, tests, migrations, `out/`, `inputs/`), `docs/` (five files: architecture, design, api-integration, generation, rules · backlog/waiting trackers · `inputs/` reference · `shots/` reference screenshots), `deploy/` (parked), `tools/`, `Faz3/` (separate).
 
 ## Rules in one breath
 
-Build only what is asked; the engine is deterministic and independently testable; never open media to judge it (validators and metrics do); no dead controls; docs are part of every
-change; never commit a token, `.env` or `opencode.json`. The full list is in [CLAUDE.md](CLAUDE.md); the open work is in [docs/backlog.md](docs/backlog.md) and [docs/waiting-for-haitham.md](docs/waiting-for-haitham.md).
-
-**Existing files and personal Libraries:** the Studio imports an existing sheet or video with deduplication and a free Higgsfield history picker. A manual download completes its failed job (no second charge). A request that names a prepared subject is served from the watch folder (0 credits; Settings switch, `MIRSAL_PREFER_PREPARED`). A sticker is replaceable with a file edited outside the app (same S#/id, re-checked, one undo). Every person has their own packs and stickers; the maker controls public visibility in Trending. Contracts: [docs/api.md](docs/api.md).
+Telegram limits; lean deps; `pathlib` ASCII-only; file locks for processes/threads; engine never imports `psycopg`; rules live in `docs/rules.md`; errors are exceptions with messages; JSON reports; docs are five files and move with the code; files are the truth; the golden path and its gates; an exception never stands in for a missing feature. Adults accept anything that is genuinely adult; the product is an API: engines, contracts and tests in Python, no logic only in the browser. Strict separation of test/prod — tests use fakes and a temp `out/`. `docs/api-integration.md` is the HTTP contract.

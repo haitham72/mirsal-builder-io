@@ -254,7 +254,7 @@ button.ai-pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ai-card.multi .multi-ch span{padding:2px 10px;border-radius:var(--r-pill);background:#FEF3C7;color:#92400E;font-size:var(--fs-s)}
 .ai-card.multi .multi-assume{padding:8px 18px 0;font-size:var(--fs-s);color:var(--ink3)}
 
-/* the stage slider left of Send (docs/design.md "The stage slider"): how far a NEW request goes, six outline icons on one thin track.
+/* the stage slider left of Send (docs/design.md): how far a NEW request goes, six outline icons on one thin track.
    Minimal and flat (a reasoning-level slider); the ▾ opens only the task slider upwards. The left selector holds image/video models. */
 .ag-stage{position:relative;flex:none;align-self:flex-end;margin-bottom:5px}
 /* closed: the current stage icon and a caret, named by its tooltip and accessible label */

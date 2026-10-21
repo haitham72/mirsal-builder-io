@@ -447,7 +447,7 @@ class ConsoleTools:
         """Owned packs for manual emoji batches, including members' own packs."""
         return self.c.lib.snapshot(owner=self.user["id"])["packs"]
 
-    # ---- particle sets (docs/particles.md): the chat's reads and free edits, and the one call that spends (a sheet) ----
+    # ---- particle sets (docs/architecture.md ("Reactions")): the chat's reads and free edits, and the one call that spends (a sheet) ----
     def _owner(self) -> None:
         if self.member:
             raise ToolError("Particle sets are for the owner's account for now.", 403)

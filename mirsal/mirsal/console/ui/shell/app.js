@@ -235,7 +235,7 @@ const SCREENS = [
   ],
   RENDER = {};
 
-/* the rail of four (docs/redesign_plan.md D5): Home · Create · Library · Help, and the avatar (Settings & health, Team, Trash, Watch folders, Sign out).
+/* the rail of four (docs/design.md): Home · Create · Library · Help, and the avatar (Settings & health, Team, Trash, Watch folders, Sign out).
    Every old hash still opens; RAILOF says which item a screen lights. Create opens the tab used last (Chat or Studio). */
 const RAIL = [
     ['home', 'home', 'Home'],

@@ -4,7 +4,7 @@ Emoji style (flow/emoji_reactions.py) stays as it is; this is the second, perman
 in `mirsal/lottie/` (`emoji_reactions.handpicked_dir`) is one reaction, named by its file. Its settings (the neutral engine defaults until saved),
 its morph targets and its children live in out/particles/lottie/library.json `{files: {file: {settings, morph_targets, updated}}}`. The export
 (`compose`) embeds the origin and every morph target in ONE self-contained Lottie (`engine.lottie.export_lottie_burst`), 512 x 512, 2 s.
-docs/reaction/17-17-lottie-style-reactions.md. Errors are particle_sets.SetError (the HTTP layer maps its code). Free: nothing here spends.
+docs/architecture.md. Errors are particle_sets.SetError (the HTTP layer maps its code). Free: nothing here spends.
 """
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ SIZE = 512                                                                      
 SETTINGS = ("magnitude", "speed_var", "speed_pulse", "pulse_hz", "gravity", "vortex", "spin", "flip", "flip_var", "count", "spread",
             "particle_size", "size_var", "size_in_dur", "size_out_dur", "fade_start", "fade_dur", "fade_var",
             "morph_at", "morph_var", "morph_burst", "children", "child_size", "child_size_var", "seed",
-            # the Trapcode Particular-style groups (Haitham 2026-10-15, docs/size-position-lottie-proposal.md D): Emitter, Particle, Physics, Aux
+            # the Trapcode Particular-style groups (Haitham 2026-10-15, docs/architecture.md): Emitter, Particle, Physics, Aux
             "emitter", "origin_x", "origin_y", "emitter_w", "emitter_h", "emit_dur", "direction", "vel_dist", "lifetime", "life_var", "size_curve", "opacity_curve", "time_sampling",
             "air", "wind_x", "wind_y", "turbulence", "turb_scale", "turb_speed", "turb_size", "bounce", "floor_y", "slide", "aux_at", "aux_inherit", "aux_life")
 # The neutral start (Haitham: "just pure default", no vortex / confetti / motion preset): the engine's own defaults.
@@ -181,7 +181,7 @@ def export_zip(out: Path) -> bytes:
 
 
 # ---------- super reaction (Reactions 2.0, Haitham 2026-10-20): a dropped file played over the WHOLE screen. For now the sources are the files in
-# mirsal/lottie, listed fresh on every request by name (drop a file = a new super reaction). engine/super_reaction.py; docs/reaction/19-*.md.
+# mirsal/lottie, listed fresh on every request by name (drop a file = a new super reaction). engine/super_reaction.py; docs/architecture.md.
 def super_listing() -> dict:
     """GET /api/particles/super: {files: [{file, name, w, h, fps, frames}], buckets {name: width/height}, glow_modes, keys, start}."""
     from ..engine import super_reaction as sr

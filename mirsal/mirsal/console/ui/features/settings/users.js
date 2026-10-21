@@ -1,4 +1,4 @@
-/* Users: the people of this Mirsal and what each one made and spent (docs/api.md "Users", docs/design.md §5 Users). The owner and admins get the roster in the second column
+/* Users: the people of this Mirsal and what each one made and spent (docs/api-integration.md, docs/design.md). The owner and admins get the roster in the second column
    (filters by status and role) and, on the stage, the totals or one person: identity, credits, the 30-day spend and batches, jobs that worked or failed with cost against the
    estimate, the ledger, storage, and their batches by family with prompts and media. People management (add, approve, roles, passwords, credits) lives here, moved from Settings.
    A member opening Users sees only "My usage" (GET /api/users/me): the server never answers anyone else's page to them. The graphs are hand-drawn SVG on the shared tokens (no library).

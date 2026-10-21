@@ -1,5 +1,5 @@
 const {readConsoleFile,statement:consoleStatement}=require('./console_source');
-// The sign-in card, Waiting for approval, and Users > People (auth.js, docs/api.md, Office accounts on the LAN): the pure builders in AUV, run in a vm. Run: node --test tests/js
+// The sign-in card, Waiting for approval, and Users > People (auth.js, docs/api-integration.md): the pure builders in AUV, run in a vm. Run: node --test tests/js
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');

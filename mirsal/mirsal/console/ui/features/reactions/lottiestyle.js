@@ -4,7 +4,7 @@
    Routes: GET /api/particles/lottie-reactions, POST .../{file} (save), POST .../{file}/preview, GET .../{file}/export.json, GET .../lottie-reactions.zip.
    Engine fields: engine/particles.py ParticleParams; settings list: flow/lottie_reactions.py SETTINGS. */
 
-/* [key, label, min, max, step, unit, choices?], in Trapcode Particular's groups (Haitham 2026-10-15, docs/size-position-lottie-proposal.md D):
+/* [key, label, min, max, step, unit, choices?], in Trapcode Particular's groups (Haitham 2026-10-15, docs/architecture.md):
    Emitter -> Particle -> Physics -> Aux system, plus Mirsal's Morph. A setting with choices is a drop-down (its value is the choice's index). */
 const LSC={emitter:['Point','Ring','Box','Line'],size_curve:['None','Grow','Shrink','Swell','Pulse'],opacity_curve:['None','Fade in','Flicker','Blink out'],
  time_sampling:['Start at birth, once','Loop','Random start, loop','Random still'],aux_at:['At the morph','At death','At bounce','Trail (along its life)']};

@@ -1,4 +1,4 @@
-/* The Trash panel (Settings > Trash): what Remove batch / Delete pack left behind, exactly what a purge would remove, Restore, and the one real delete (flow/purge.py, docs/api.md "Trash").
+/* The Trash panel (Settings > Trash): what Remove batch / Delete pack left behind, exactly what a purge would remove, Restore, and the one real delete (flow/purge.py, docs/api-integration.md).
    A card appended to the Settings screen; no new screen. Top-level names start with TRX / trx (the console scripts share one global scope). The pure builders are exported for node. */
 const TRX=(()=>{
   const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

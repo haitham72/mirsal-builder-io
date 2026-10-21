@@ -17,5 +17,5 @@ For changes, use a disposable copy. Stop at a shown price; paid runs and sends n
 - [ ] **Every screen:** phone scrolling, labels, contrast, hover, keyboard Tab/Enter/Escape, menus, loading, empty/error states and recovery feel usable.
 - [ ] **Owner decisions:** record wording/pricing/visual verdicts; review paid quality, Telegram and collection delivery separately before authorizing them.
 
-Known defects and engineering limits: [app audit](docs/uiux_review/app-audit-2026-10-19.md).
+Known defects and engineering limits: [plan.md](plan.md), [backlog](docs/backlog.md) (past audits in git history).
 Record: **screen + action + expected/actual + theme/width + screenshot**. Mark each check Pass / Issue / Not checked; do not treat an unchecked item as accepted.

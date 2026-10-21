@@ -1,4 +1,4 @@
-/* Tickets (docs/tickets_plan.md): Settings > Tickets lists every report and every failure the server caught (GET /api/tickets), each with what happened,
+/* Tickets (docs/architecture.md ("Storage and search")): Settings > Tickets lists every report and every failure the server caught (GET /api/tickets), each with what happened,
    what the person meant, the AI's summary and proposed fix, and 2-4 small questions answered with one click (POST /api/tickets/{id}/answer). Report (any
    screen: data-act=tkreport data-k=<kind> data-id=<id>) opens one dialog and POSTs /api/tickets. Questions never block anything. Top-level names start
    with TK / tk (the console scripts share one global scope); TKV holds the pure builders for node. */

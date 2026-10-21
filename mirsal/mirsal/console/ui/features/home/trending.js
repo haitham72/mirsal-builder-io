@@ -1,4 +1,4 @@
-/* Trending (docs/api.md, Office accounts on the LAN): public packs in every person's Library Trending tab.
+/* Trending (docs/api-integration.md): public packs in every person's Library Trending tab.
    Cards: the cover, the name, likes and comments; Trending / New / Most liked; a card opens the pack with its stickers, its comments and Use in my workflow.
    The maker makes a pack public from its page (trShareBtn); staff can unshare. Everything is GET/POST /api/trending (console/app.py). Top-level names start with TR / tr;
    TRV holds the pure builders for node. */

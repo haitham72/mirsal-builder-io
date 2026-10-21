@@ -1,4 +1,4 @@
-/* Office accounts (docs/api.md, Office accounts on the LAN): on the LAN a browser signs in with an account of an allowed domain (MIRSAL_EMAIL_DOMAIN, sent as `domains` by /api/auth/me). GET /api/auth/me decides: signed out ->
+/* Office accounts (docs/api-integration.md): on the LAN a browser signs in with an account of an allowed domain (MIRSAL_EMAIL_DOMAIN, sent as `domains` by /api/auth/me). GET /api/auth/me decides: signed out ->
    the sign-in card (Sign in / Create account / Forgot password); `pending` -> Waiting for approval; must_change_password -> a new password first (only the new one: the given one was just used to sign in; 'Keep the given password for now' asks again at the next sign-in). On this
    machine (not the LAN) the owner is signed in already and nothing shows. Settings gets "Signed in as" (Sign out, Request credits) and, for the owner and
    admins, People: add people (passwords shown once), approve, reject, roles, new password, credits. Top-level names start with AU / au; AUV holds the pure

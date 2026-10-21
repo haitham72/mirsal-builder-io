@@ -50,7 +50,7 @@ def _cellkey(index: int, rect: tuple, raw: np.ndarray, k: Keyed, inset: int = 0,
 
 
 def key_sheet(sheet_rgb: np.ndarray, cfg, rects: list | None = None, inset: int = 0, particles: bool = False) -> list[CellKey]:
-    """rects = row-major (x, y, w, h) from grid.split_grid(); None = equal thirds (old behaviour). `particles` / `inset`: the cells of a particle sheet (docs/effects.md): judged by the
+    """rects = row-major (x, y, w, h) from grid.split_grid(); None = equal thirds (old behaviour). `particles` / `inset`: the cells of a particle sheet (docs/architecture.md ("Reactions")): judged by the
     particle rules, and `inset` px at every cell border are wiped after keying (the white divider lines an image model draws between cells would otherwise stay in the particle)."""
     if rects is None:
         h, w = sheet_rgb.shape[:2]

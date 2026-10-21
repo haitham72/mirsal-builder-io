@@ -1,7 +1,11 @@
 # HANDOFF - 2026-10-20 structural refactor
 
-Checkout G:/Haitham/VsCode/Mirsal-Builder, branch redesign-ui-ux. Never merge
-without Haitham asking. The five refactors and folder redesign are complete.
+## Latest - API integration + docs convergence (2026-10-21)
+
+Export to collection implemented on both servers (commit acca724f on redesign-ui-ux, pushed): stdlib dispatch + guards for the 4 routes, openapi rows fixed (202), StdlibCollectionTests (3 new). Docs converge here on code-audit to five files (architecture/design/api-integration/generation/rules) + backlog/waiting + inputs/; the draft docs/integration/API_DOCUMENTATION.md is superseded by docs/api-integration.md. Test: area services/collection 11/11, console/openapi 36/36; 2 console/server failures reproduce on the base (pre-existing). W29 recount 3,480; second W49 renumbered W51.
+
+Checkout G:/Haitham/VsCode/Mirsal-Builder, branch code-audit (docs convergence to five files; implementation stays on redesign-ui-ux). Never merge
+without Haitham asking.
 
 ## Latest request - super reaction (2026-10-20)
 
@@ -81,22 +85,8 @@ Owner wording/pricing/visual/merge decisions remain unapproved.
 
 ## Tools and local artifacts
 
-- Isolated :8797 server, exec session 49126, output/refactor-browser-out; DB
-  writes and providers off. Browser session refactor-check. Screenshots/scripts
-  under output/playwright/refactor-*.
-- Earlier :8796 (session 3670) may remain alive with older Python asset mapping.
-  Restart a task-owned server before using it after the folder move.
-- Do not automate/restart/repoint real-data :8770. Its owner must restart the app
-  to load the new Python asset resolver.
-- output/ and .playwright-cli/ remain local/untracked. Extraction scripts and
-  saved original agent source are under output/.
-
-## Unowned edits - leave untouched and unstaged
-
-Deletions: Recovered particles L002.lottie (2).json, smiling_face.json.
-Runtime writes: mirsal/out/G154-generic_test-20261015T054257/preview/anim-S1.png,
-mirsal/out/higgsfield_models.json, mirsal/out/model_calls.jsonl,
-mirsal/out/sessions/S020.json and subsequently observed S021.json.
+- Do not automate/restart/repoint real-data :8770. Its owner must restart the app to load new code.
+- output/ and .playwright-cli/ remain local/untracked.
 
 Explicit-path commits, branch check before each commit. No merge, deployment,
 paid calls or real Telegram/collection sends.

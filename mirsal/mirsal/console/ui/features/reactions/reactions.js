@@ -1,5 +1,5 @@
 /* Reaction effects (#/reactions, Create > + New): the ANIMATION PRESET LIBRARY (Haitham, 2026-10-14: "now it is not 1800+ emojis, it is 10-15
-   animation presets, grouped by motion, each with a couple of inner presets"). docs/reaction/ section 13.
+   animation presets, grouped by motion, each with a couple of inner presets"). docs/architecture.md ("Reactions").
    - Animation presets: the presets side by side by motion (burst, fountain, vortex, rain, confetti), id `{motion}_{NN}`, each previewed on the
      sample emoji; Open (edit), JSON, ×, "+ Variation" per motion; Export all (.zip: `{motion}_{NN}.json` + manifest.json with every emoji's preset).
      A preset's Lottie has NO picture and NO base64: one external image asset `emoji` the chat app fills (engine/lottie.py slot export).

@@ -1,4 +1,4 @@
-"""The shared FAQ (docs/agent-and-chat.md "Support"): what the support agent may answer from, written from resolved tickets and published by an admin.
+"""The shared FAQ (docs/architecture.md ("Chat and the agent")): what the support agent may answer from, written from resolved tickets and published by an admin.
 
 `out/faq/F###.json` is the record, mirrored to Postgres with the vector of its PUBLISHED text (migration 011). An entry is `draft` (never an answer),
 `published` (an answer), or `archived`. A proposal for an entry that is already published is kept beside it as `pending` and only replaces the published
@@ -264,7 +264,7 @@ def propose_from_ticket(out: Path, tid: str, by: str, complete=None) -> dict | N
     return f
 
 
-# ---------- seed entries written as Markdown files (faq/<category>/<slug>.md; docs/agent-and-chat.md "Support" describes the format)
+# ---------- seed entries written as Markdown files (faq/<category>/<slug>.md; docs/architecture.md ("Chat and the agent") describes the format)
 def parse_seed(text: str) -> dict:
     """A seed file: a `---` header of `key: value` lines (title, question, category, tags) and the answer as the body. ValueError when it is not one."""
     m = re.match(r"^\ufeff?---\s*\n(.*?)\n---\s*\n(.*)$", text.replace("\r\n", "\n"), re.S)
