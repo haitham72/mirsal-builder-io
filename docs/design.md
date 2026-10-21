@@ -11,7 +11,7 @@ The design half of the app: the shell every screen inherits, the screens, the th
 
 ## Screens
 
-- **Home** — the logo's target: first start of each browser session opens it; a two-band 24-sticker showcase with the welcome/onboarding films preserved across filter and resize (`home.js`).
+- **Home** — the logo's target: first start of each browser session opens it; a two-band 24-sticker showcase with the welcome/onboarding films preserved across filter and resize (`home.js`). An empty library shows the most-liked public packs instead of "No packs yet" (shared-only, so the admin's shared current work is the default until likes arrive), opening Trending detail.
 - **AI chat** — composer + Chat | Studio tabs, stage slider (Prompt · Stickers · Animation · Telegram · Export), model selectors and creation options as their own controls; box selection; newest-card polling.
 - **Studio** — 352px left creation panel (settings + fixed action footer) + artwork workspace + Batches drawer (earlier batches + project map). One control per cell; issue overlays + override queue; sheet/video panels; Prompt tab (what is typed is what is SENT); animation controls + Add-to-pack wizard; sticker detail panel (Checks · History · Measurements). Box selection; batch-grouped pack; sticky sections.
 - **Library / pack** — the caller's own packs only (the owner's too); pack page with viewer grid; sticker editor (named controls); selection box with focus-within; counts additive after the visibility filter.

@@ -149,7 +149,8 @@ def listing(out: Path, lib, viewer: str, order: str = "trending", users: list | 
                      "views": len(d["views"].get(pid, [])), "uses": len(d["uses"].get(pid, [])), "stickers": len(p["stickers"]), **pack_counts(p), "shared_at": sh["at"], "shared_by": sh["by"],
                      "likes": len(likes), "liked": any(x["user"] == viewer for x in likes),
                      "comments": sum(1 for c in d["comments"].get(pid, []) if not c.get("deleted")),
-                     "cover": {"id": cover["id"], "type": cover.get("type")} if cover else None, "score": score(d, pid)})
+                     "cover": {"id": cover["id"], "type": cover.get("type")} if cover else None, "score": score(d, pid),
+                 "sticker_list": [{"id": s["id"], "name": s.get("name"), "emoji": s.get("emoji"), "type": s.get("type")} for s in p["stickers"]]})   # the same projection as detail(): Home's showcase renders rows with no request per pack
     key = {"trending": lambda r: (-r["score"], -r["shared_at"]), "new": lambda r: -r["shared_at"], "liked": lambda r: (-r["likes"], -r["score"])}[order]
     return sorted(rows, key=key)
 
