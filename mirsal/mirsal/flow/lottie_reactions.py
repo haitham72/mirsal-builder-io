@@ -4,7 +4,7 @@ Emoji style (flow/emoji_reactions.py) stays as it is; this is the second, perman
 in `mirsal/lottie/` (`emoji_reactions.handpicked_dir`) is one reaction, named by its file. Its settings (the neutral engine defaults until saved),
 its morph targets and its children live in out/particles/lottie/library.json `{files: {file: {settings, morph_targets, updated}}}`. The export
 (`compose`) embeds the origin and every morph target in ONE self-contained Lottie (`engine.lottie.export_lottie_burst`), 512 x 512, 2 s.
-docs/reaction/17-17-lottie-style-reactions.md. Errors are particle_sets.SetError (the HTTP layer maps its code). Free: nothing here spends.
+docs/architecture.md. Errors are particle_sets.SetError (the HTTP layer maps its code). Free: nothing here spends.
 """
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ SIZE = 512                                                                      
 SETTINGS = ("magnitude", "speed_var", "speed_pulse", "pulse_hz", "gravity", "vortex", "spin", "flip", "flip_var", "count", "spread",
             "particle_size", "size_var", "size_in_dur", "size_out_dur", "fade_start", "fade_dur", "fade_var",
             "morph_at", "morph_var", "morph_burst", "children", "child_size", "child_size_var", "seed",
-            # the Trapcode Particular-style groups (Haitham 2026-10-15, docs/size-position-lottie-proposal.md D): Emitter, Particle, Physics, Aux
+            # the Trapcode Particular-style groups (Haitham 2026-10-15, docs/architecture.md): Emitter, Particle, Physics, Aux
             "emitter", "origin_x", "origin_y", "emitter_w", "emitter_h", "emit_dur", "direction", "vel_dist", "lifetime", "life_var", "size_curve", "opacity_curve", "time_sampling",
             "air", "wind_x", "wind_y", "turbulence", "turb_scale", "turb_speed", "turb_size", "bounce", "floor_y", "slide", "aux_at", "aux_inherit", "aux_life")
 # The neutral start (Haitham: "just pure default", no vortex / confetti / motion preset): the engine's own defaults.
@@ -178,3 +178,33 @@ def export_zip(out: Path) -> bytes:
             man.append({"file": f["file"], "json": arc, "morph_targets": rec.get("morph_targets") or [], "settings": {**START, **(rec.get("settings") or {})}})
         z.writestr("manifest.json", json.dumps({"reactions": man, "seconds": REACTION_SECONDS, "size": SIZE}, ensure_ascii=False, indent=1))
     return buf.getvalue()
+
+
+# ---------- super reaction (Reactions 2.0, Haitham 2026-10-20): a dropped file played over the WHOLE screen. For now the sources are the files in
+# mirsal/lottie, listed fresh on every request by name (drop a file = a new super reaction). engine/super_reaction.py; docs/architecture.md.
+def super_listing() -> dict:
+    """GET /api/particles/super: {files: [{file, name, w, h, fps, frames}], buckets {name: width/height}, glow_modes, keys, start}."""
+    from ..engine import super_reaction as sr
+    return {"files": [{k: f[k] for k in ("file", "name", "w", "h", "fps", "frames")} for f in handpicked_files()],
+            "buckets": {k: round(v, 4) for k, v in sr.BUCKETS.items()}, "glow_modes": list(sr.GLOW_MODES),
+            "keys": list(sr.SUPER_KEYS), "start": sr.SUPER_START}
+
+
+def super_compose(out: Path, file: str, aspect, *, glow: str = "auto", color=None, colors=None, settings=None) -> dict:
+    """POST /api/particles/super: {file, name, bucket, aspect, glow, color, lottie}. The file's saved Lottie-style look (sizes, spin, zoom; the neutral
+    defaults unsaved) rises from the bottom of a canvas shaped like the screen (`aspect` = width / height), lit by `glow`. Free; nothing is stored.
+    404 for a file not in the drop zone, 400 for a bad option."""
+    from ..engine import super_reaction as sr
+    if file not in {f["file"] for f in handpicked_files()}:
+        raise SetError(f"no Lottie file {file}", 404)
+    if isinstance(aspect, bool) or not isinstance(aspect, (int, float)):
+        raise SetError("aspect must be a number (the screen's width / height)")
+    rec = _read(out)["files"].get(file) or {}
+    try:
+        doc = sr.export_super(params(rec.get("settings") or {}), float(aspect), settings=settings, glow=str(glow), color=color, colors=colors,
+                              source=_doc(file), name=Path(file).stem)
+    except (TypeError, ValueError) as ex:
+        raise SetError(str(ex))
+    meta = doc.pop("mirsal")
+    return {"file": file, "name": Path(file).stem, "bucket": meta["bucket"], "aspect": meta["aspect"], "glow": meta["glow"], "color": meta["color"], "lottie": doc}
+

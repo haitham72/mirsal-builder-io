@@ -1,4 +1,4 @@
-"""In-app notifications (docs/agent-and-chat.md "Support"): what reaches a person when an admin answers or resolves their issue.
+"""In-app notifications (docs/architecture.md ("Chat and the agent")): what reaches a person when an admin answers or resolves their issue.
 
 One file per person, `out/notifications/<user>.json` (newest last), mirrored to Postgres (migration 011). Every notification carries the EVENT KEY that
 caused it (`reply:T012:3`, `resolved:T012:2`): adding the same key again is a no-op, so a retried request or a replayed step never notifies twice.

@@ -2,7 +2,7 @@ const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // The pure half of agent.js (the DOM half runs only in a browser). Run: node --test tests/js
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const U = require('../../mirsal/console/agent.js');
+const U = require(require('./console_source').resolveConsoleFile(require('node:path').join(__dirname,'../../mirsal/console/agent.js')));
 
 test('the model text is never trusted as HTML', () => {
   assert.equal(U.md('<img src=x onerror=alert(1)> **hi**'), '&lt;img src=x onerror=alert(1)&gt; <b>hi</b>');

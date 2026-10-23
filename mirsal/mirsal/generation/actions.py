@@ -1,4 +1,4 @@
-"""The canonical action bank for export tags (`docs/export to team/mirsal-export-architecture.md` §6-§6b).
+"""The canonical action bank for export tags (`docs/api-integration.md` §6-§6b).
 
 `ACTION_BANK`: the 36 core mood tokens (named presets and sentences).
 `next_tokens` draws from the complete bank, deduplicated by emoji.
@@ -2105,7 +2105,7 @@ def fallback_tag(key: str | None = None, tags: list | tuple | None = None, exclu
 
 
 # Saved nine-slot preset grids (row-major token order). A preset pack claims them in order: the first request takes
-# the first unclaimed grid, `generate more` the next (`docs/export to team/mirsal-export-architecture.md` §10).
+# the first unclaimed grid, `generate more` the next (`docs/api-integration.md` §10).
 PRESETS = {
     "core-v1": ["happy", "laugh", "love", "cry", "sad", "angry", "surprised", "scared", "thanks"],
     "social-v1": ["hello", "hug", "kiss", "wink", "shy", "celebrate", "clap", "approve", "disapprove"],

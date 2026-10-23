@@ -1,4 +1,4 @@
-"""Lifecycle Console server: stdlib http.server + one index.html. Binds 127.0.0.1. One background job at a time."""
+"""The HTTP server: FastAPI on uvicorn over the original handler (byte-identical answers); `serve --stdlib` keeps the old ThreadingHTTPServer for one release. Binds 127.0.0.1."""
 from __future__ import annotations
 
 import contextvars
@@ -16,12 +16,13 @@ from urllib.parse import parse_qs, unquote, urlparse
 
 from ..flow import batches, effects as fx_flow, gates, groups, metrics, particle_sets as fx_sets, purge, sources, sticker_history, watch
 from ..generation import higgsfield, jobs, model_catalog, prompter, styles, tasks, usage
-from ..services import llm, telegram
+from ..services import collection as col, llm, telegram
 from ..vision import consent as vision_consent, transcribe
 from ..flow import pipeline as pl
 from ..media.library import Library, LibraryError, cutout, decode_image, png_bytes
 from ..engine.config import EngineConfig
 from ..runtime.users import LOCAL, UserError, UserStore, email_domains
+from ..runtime.pricing import UNSET
 from ..store import idem as idem_store
 from ..media.video_project import MAX_UPLOAD, Projects, decode_overlays
 from ..runtime.writer_lock import WriterLock
@@ -30,7 +31,7 @@ from .openapi import VERSION as API_VERSION
 
 UI = Path(__file__).parent
 INDEX = UI / "index.html"            # the desktop builder: one page, one stdlib server, no build step
-UI_FILES = {"library.js": "text/javascript", "settings.js": "text/javascript", "studio-core.js": "text/javascript", "studio-tiles.js": "text/javascript", "studio-sheet.js": "text/javascript", "studio-animate.js": "text/javascript", "studio-prompt.js": "text/javascript", "studio-panel.js": "text/javascript", "chat-cards.js": "text/javascript", "chat-stage.js": "text/javascript", "chat-core.js": "text/javascript", "support.js": "text/javascript", "imports.js": "text/javascript", "studio.css": "text/css", "app.js": "text/javascript", "users.js": "text/javascript", "history.js": "text/javascript", "telegram.js": "text/javascript", "packs.js": "text/javascript", "editor.js": "text/javascript", "animate.js": "text/javascript", "chat.js": "text/javascript", "agent.js": "text/javascript", "agent.css": "text/css", "prepare.js": "text/javascript", "effects.js": "text/javascript", "reactions.js": "text/javascript", "lottiestyle.js": "text/javascript", "vendor/lottie-5.12.2.min.js": "text/javascript", "particles.js": "text/javascript", "welcome.js": "text/javascript", "home.js": "text/javascript", "theme.js": "text/javascript", "theme.css": "text/css", "live.js": "text/javascript", "composer.js": "text/javascript", "trash.js": "text/javascript", "tickets.js": "text/javascript", "auth.js": "text/javascript", "trending.js": "text/javascript", "sheet-recovery.js": "text/javascript", "job-recovery.js": "text/javascript", "projmap.js": "text/javascript", "fonts/InterVariable.woff2": "font/woff2"}
+from .assets import UI_FILES, asset_path
 
 
 # What a `member` may reach. Library packs/files are checked separately for every caller. Anything not listed here is owner-only: projects, Telegram, watch folders,
@@ -69,7 +70,7 @@ class Console:
         self.started, self._stale_checked, self._stale = time.time(), 0.0, False
         self._health = None
         self.users = UserStore(out)
-        self.lan = os.environ.get("MIRSAL_LAN", "").strip() in ("1", "true", "yes", "on")      # serve --lan: office colleagues reach this server (docs/api.md, Office accounts on the LAN)
+        self.lan = os.environ.get("MIRSAL_LAN", "").strip() in ("1", "true", "yes", "on")      # serve --lan: office colleagues reach this server (docs/api-integration.md)
         self.lan_names: set = set()
         if self.lan:
             from ..runtime import net
@@ -425,7 +426,7 @@ class Console:
             if body.get("from_generation"):
                 raise pl.PipelineError("Send either plan (the previewed one) or from_generation (a batch's own plan), not both", 400)
             style_id = body.get("style_id", "flat_vector")
-            previewed = tasks.plan_from_preview(body["plan"], body.get("prompt", ""), body.get("grid", "3x3"), style_id if isinstance(style_id, str) else "", bool(body.get("loop")))
+            previewed = tasks.plan_from_preview(body["plan"], body.get("prompt", ""), body.get("grid", "2x2"), style_id if isinstance(style_id, str) else "", bool(body.get("loop")))
         if what == "sheet":
             from ..generation.emoji_batches import validate_target
             validate_target((previewed or base_plan or {}).get("slots", {}).get("emoji_batch"), self.lib, who["id"])
@@ -442,7 +443,7 @@ class Console:
                     raise pl.PipelineError(f"{model_catalog.find('image', model)['label']} does not take reference images: pick another model or remove them.", 400)
                 base = base_plan or (self.plan_of(who, body["from_generation"]) if body.get("from_generation") else previewed)      # the plan the person approved on a card (in-process only, never from HTTP), or the Prompt tab: this batch's own plan, same cells and tags
                 validate_target((base or {}).get("slots", {}).get("emoji_batch"), self.lib, who["id"])
-                t = tasks.reserve(self.out, self.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
+                t = tasks.reserve(self.out, self.inp, body.get("prompt", ""), body.get("grid", "2x2"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
                                   base_plan=base, custom={"sheet_prompt": custom} if custom else None)
                 try:
                     clause = prompter.clean_custom(body.get("ref_clause"), "reference clause") if refs else None     # what the attached picture is for (a tweak keeps the design, a new action keeps the shape)
@@ -502,7 +503,7 @@ class Console:
             raise pl.PipelineError(str(e), getattr(e, "code", 400))
 
     def reserve(self, who: dict, est) -> float | None:
-        """Credits per person (docs/api.md, Office accounts on the LAN): an account with a balance pays from it. The price is checked BEFORE the job starts (an account
+        """Credits per person (docs/api-integration.md): an account with a balance pays from it. The price is checked BEFORE the job starts (an account
         without enough credits is refused in words, with the way to ask for more) and reserved; `jobs._settle` replaces it with the real cost when the job ends.
         The owner and token accounts without a balance spend as before (rule 13: the price was shown and accepted either way)."""
         u = self.users.get(who.get("id")) or {}
@@ -856,6 +857,12 @@ def make_handler(c: Console):
                 return None if user.get("status") != "pending" and c.lib.owns_file(path[5:], user["id"]) else (404, {"error": "not found"})
             if path in ("/api/stickers/move", "/api/stickers/delete") and user.get("status") != "pending":
                 return None
+            if self.command == "GET" and path == "/api/collection":      # Export-to-collection status reads like the FastAPI router: anyone signed in (pending included)
+                return None
+            if self.command == "GET" and len(parts) == 4 and parts[:3] == ["api", "collection", "exports"]:      # one export's state is its sender's; anyone else gets the router's 404
+                return None if user.get("role") == "owner" else (404, {"error": "not found"})
+            if self.command == "GET" and len(parts) == 4 and parts[:3] == ["api", "telegram", "sends"]:      # one send's state is its sender's; anyone else gets the router's 404
+                return None if user.get("role") == "owner" else (404, {"error": "not found"})
             if user.get("role") == "owner":
                 return None
             if user.get("status") == "pending":          # signed up, not approved yet: the page shows Waiting for approval and nothing else
@@ -868,6 +875,8 @@ def make_handler(c: Console):
                 if (act not in MEMBER_GEN_POST) if post else (act is not None and act not in MEMBER_GEN_GET):
                     return deny
                 return None if c.visible(user, gid) else gone
+            if post and len(parts) == 4 and parts[:2] == ["api", "generations"] and parts[3] == "export-collection":
+                return 403, {"error": "Exporting to the collection API is available to the owner only"}      # owner-only, in the router's own words (`_GEN_PATH` never matches the hyphen)
             if not post and path.startswith("/out/"):                    # authorise the file the URL RESOLVES to (`..` and symlinks included), never its prefix
                 gid = _out_batch(c.out, path)
                 return deny if gid is None else (None if c.visible(user, gid) else gone)
@@ -980,7 +989,7 @@ def make_handler(c: Console):
             super().send_response(code, message)
 
         def send_error(self, code, message=None, explain=None):
-            """The base class answers with an HTML page; every answer of this server is JSON (docs/api.md)."""
+            """The base class answers with an HTML page; every answer of this server is JSON (docs/api-integration.md)."""
             msg = message or (self.responses.get(code) or ("error",))[0]
             b = json.dumps({"error": msg}).encode()
             self.send_response(code, message)
@@ -1033,6 +1042,18 @@ def make_handler(c: Console):
                 return self._json(200, {"users": c.users.list()})
             if path == "/api/telegram":      # connected or not and which bot: never the token
                 return self._json(200, telegram.status(c.out))
+            if path == "/api/collection":    # Export to collection: where it sends and whether its credentials are set (never their value)
+                return self._json(200, col.status())
+            if len(gp) == 4 and gp[:3] == ["api", "collection", "exports"]:      # one export's outcome, its sender only (404 for anyone else, like the router)
+                st = col.export_state(c.out, gp[3])
+                if not st or self.user.get("role") != "owner" or st.get("by") != (self.user.get("id") or "human"):
+                    return self._json(404, {"error": "not found"})
+                return self._json(200, st)
+            if len(gp) == 4 and gp[:3] == ["api", "telegram", "sends"]:      # one queued send's outcome, its sender only (404 for anyone else, like the router)
+                st = telegram.send_state(c.out, gp[3])
+                if not st or self.user.get("role") != "owner" or st.get("by") != (self.user.get("id") or "human"):
+                    return self._json(404, {"error": "not found"})
+                return self._json(200, st)
             pp = path.strip("/").split("/")
             if len(pp) == 6 and pp[:2] == ["api", "packs"] and pp[3] == "stickers" and pp[5] == "particle-preview":
                 if self.user.get("role") != "owner":
@@ -1043,7 +1064,7 @@ def make_handler(c: Console):
                     raise pl.PipelineError(str(e), e.code)
             if pp[:2] == ["api", "packs"] and pp[-1] in ("particles", "reactions") and len(pp) in (4, 6) and (len(pp) == 4 or pp[3] == "stickers"):
                 # the particles made for a sticker (GET /api/packs/{id}/stickers/{sid}/particles) or the counts for a whole pack (GET /api/packs/{id}/particles): a pure read; effects are owner only,
-                # a member's answer is simply empty (docs/effects.md)
+                # a member's answer is simply empty (docs/architecture.md ("Reactions"))
                 # GET /api/packs/{id}/reactions: this pack's reaction variations (one row per emoji, motion inherited 🔒, art + Size/Energy vary)
                 if self.user.get("role") != "owner":
                     return self._json(200, {"sticker": pp[4], "created": [], "saved": [], "effects": [], "can_make": False} if len(pp) == 6 else {})
@@ -1054,7 +1075,7 @@ def make_handler(c: Console):
                         return self._json(200, fx_sets.reactions_for_pack(c.out, c.lib, pp[2]))
                     except fx_sets.SetError as e:
                         raise pl.PipelineError(str(e), e.code)
-                # the pack's particle studio (docs/particles.md 5): its sets and its bursts, plus the per-sticker counts the old answer carried
+                # the pack's particle studio (docs/architecture.md ("Reactions")): its sets and its bursts, plus the per-sticker counts the old answer carried
                 try:
                     return self._json(200, {**fx_sets.for_pack(c.out, c.lib, pp[2]), "counts": fx_sets.counts_for_pack(c.out, c.lib, pp[2])})
                 except fx_sets.SetError as e:
@@ -1102,7 +1123,7 @@ def make_handler(c: Console):
                 return self._json(200, tasks.inbox(c.out, c.inp))
             if path.startswith("/ui/") and path[4:] in UI_FILES:
                 ct = UI_FILES[path[4:]]
-                return self._send(200, (UI / path[4:]).read_bytes(), ct if ct.startswith("font") else ct + "; charset=utf-8")
+                return self._send(200, asset_path(path[4:]).read_bytes(), ct if ct.startswith("font") else ct + "; charset=utf-8")
             if path == "/api/library":
                 snap = c.lib.snapshot(owner=self.user["id"])
                 from ..flow import groups as _groups       # the Library sits the packs of one batch group together (flow/groups.pack_groups)
@@ -1288,7 +1309,10 @@ def make_handler(c: Console):
                     page, meta = self._page([g for g in pl.summary(c.out) if g.get("owner") == self.user["id"]])
                     return self._json(200, {"busy": c.lock.locked(), "generations": page, **meta})
                 page, meta = self._page(pl.summary(c.out))
-                return self._json(200, {"busy": c.lock.locked(), "health": c.health(), "paths": {"input": str(c.inp), "out": str(c.out)}, "stale": c.stale(), "generations": page, **meta})
+                from ..store import sync as _sync          # UX-06: the workspace identity contract (is this the real out/, decided here, never guessed from a port in the browser)
+                return self._json(200, {"busy": c.lock.locked(), "health": c.health(),
+                                         "paths": {"input": str(c.inp), "out": str(c.out), "default": _sync.is_default_out(c.out)},
+                                         "stale": c.stale(), "generations": page, **meta})
             if path == "/api/generations/removed":      # the trash of batches (owner only like the rest): Restore is reachable long after the remove
                 return self._json(200, {"batches": batches.list_removed(c.out)})
             if path == "/api/trash":                    # the whole trash (removed batches + deleted packs) with exactly what a purge would remove (owner only; flow/purge.py)
@@ -1324,7 +1348,7 @@ def make_handler(c: Console):
             raise pl.PipelineError(NO_ROUTE, 404)
 
         def _particles(self, method: str, path: str, body: dict):
-            """Particle sets `P###` (docs/particles.md section 6): the durable sticker-owned particle asset with derived pack views. The working
+            """Particle sets `P###` (docs/architecture.md ("Reactions")): the durable sticker-owned particle asset with derived pack views. The working
             session stays `/api/effects`; `POST /api/particles {from_effect}` is the bridge that saves one. Free: nothing here spends. A delete moves the
             folder to the trash and a set in use says which packs before it goes (rule 9's spirit: nothing is destroyed on a click)."""
             ps = fx_sets
@@ -1521,7 +1545,7 @@ def make_handler(c: Console):
             return False
 
         def _effects(self, method: str, path: str, body: dict):
-            """Particle effects (docs/effects.md section 7): a pack's stickers get a Telegram-style burst. Owner only for now (members are denied by the route gate). Paid work needs the price
+            """Particle effects (docs/architecture.md ("Reactions")): a pack's stickers get a Telegram-style burst. Owner only for now (members are denied by the route gate). Paid work needs the price
             shown (`estimate`) and `go: true` (`video`); everything else is free."""
             parts = path.strip("/").split("/")                     # api, effects[, id[, action]]
             if len(parts) == 2:
@@ -1686,13 +1710,14 @@ def make_handler(c: Console):
             if parts[:2] != ["api", "packs"]:
                 return False
             if len(parts) == 2:
-                self._json(200, lib.create_pack(self._body().get("name", ""), owner=self.user["id"]))
+                b = self._body()
+                self._json(200, lib.create_pack(b.get("name", ""), owner=self.user["id"], price=b.get("price")))
             elif len(parts) == 3:
                 b = self._body()
                 if b.get("parent") and not lib.owns(str(b["parent"]), self.user["id"]):     # a sub-pack only under one of your own packs
                     raise pl.PipelineError("not found", 404)
                 self._json(200, lib.update_pack(parts[2], b.get("name"), b.get("cover"), b.get("order"), b.get("lead"),
-                                                None if b.get("parent") is None else str(b.get("parent"))))
+                                                None if b.get("parent") is None else str(b.get("parent")), price=b.get("price", UNSET)))
             elif len(parts) == 4 and parts[3] == "delete":      # SOFT: to the trash, restorable (GET /api/trash lists it; POST /api/trash/purge deletes for good)
                 self._json(200, lib.delete_pack(parts[2], by=self.user.get("id") or "human"))
             elif len(parts) == 4 and parts[3] == "merge":       # fold this pack into another: animated stills upgrade their twins, the rest moves, the empty pack goes to the trash
@@ -1702,16 +1727,32 @@ def make_handler(c: Console):
                 self._json(200, lib.merge_pack(parts[2], into, by=self.user["id"]))
             elif len(parts) == 4 and parts[3] == "restore":     # back from the trash under the same id
                 self._json(200, lib.restore_pack(parts[2]))
-            elif len(parts) == 4 and parts[3] == "telegram":     # create the pack on Telegram (or add what is new to it)
+            elif len(parts) == 4 and parts[3] == "telegram":     # create the pack on Telegram (or add what is new to it): queued, one send at a time (services/telegram.py)
                 body = self._body()
+                mode = str(body.get("mode") or "once")
+                if mode not in telegram.MODES:
+                    raise pl.PipelineError(f"mode must be one of {', '.join(telegram.MODES)}", 400)
+                telegram.require_connected(c.out)                            # refused at once, like the collection API's missing key
+                pid = parts[2]
+                st = telegram.enqueue_send(c.out, pid, lambda: telegram.send(c.out, lib, pid, (body.get("name") or None), c.cfg, mode, retime=bool(body.get("retime"))), self.user.get("id") or "human")
                 from ..runtime import activity
+                activity.say(f"queued pack {pid} for Telegram ({st['id']}, #{st['position']} in line)")
+                self._json(202, st)
+            elif len(parts) == 4 and parts[3] == "export-collection":     # Export to collection: queue the pack's Download .zip as one collection (services/collection.py)
+                body = self._body()
+                pid = parts[2]
+                def make(retime=False, light=False):
+                    try:
+                        return lib.export_zip(pid, light=light, retime=retime)[0]
+                    except LibraryError as e:
+                        raise col.CollectionError(str(e), getattr(e, "code", 409))
                 try:
-                    sent = telegram.send(c.out, lib, parts[2], (body.get("name") or None), c.cfg, str(body.get("mode") or "once"), retime=bool(body.get("retime")))
-                except Exception as e:
-                    activity.say(f"Telegram send of pack {parts[2]} failed: {e}", error=True)
-                    raise
-                activity.say(f"sent pack {parts[2]} to Telegram" + (f" ({sent.get('name') or sent.get('url') or ''})" if isinstance(sent, dict) else ""))
-                self._json(200, sent)
+                    st = col.enqueue(c.out, f"pack {pid}", lambda: make(bool(body.get("retime")), bool(body.get("light"))),
+                                     body.get("name"), str(body.get("description") or ""), self.user.get("id") or "human",
+                                     price=body["price"] if "price" in body else lib.pack_price(pid))
+                except col.CollectionError as e:
+                    raise pl.PipelineError(str(e), e.code)
+                self._json(202, st)
             elif len(parts) == 4 and parts[3] == "stickers":
                 b = self._body()
                 g = b.get("from_generation") or {}
@@ -1804,10 +1845,11 @@ def make_handler(c: Console):
 
         def _import_bytes(self, name: str, data: bytes, q: dict, job_id: str | None = None):
             from ..flow import imports as im
-            options = {k: q[k][0] for k in ("prompt", "generation", "sheet", "job", "batch") if q.get(k)}
+            options = {k: q[k][0] for k in ("prompt", "generation", "sheet", "job", "batch", "grid") if q.get(k)}
             options["retry"] = q.get("retry", ["false"])[0].lower() in ("1", "true")
             options["as_new"] = q.get("as_new", ["false"])[0].lower() in ("1", "true")
             options["grid_ok"] = q.get("grid_ok", ["false"])[0].lower() in ("1", "true")
+            options["again"] = q.get("again", ["false"])[0].lower() in ("1", "true")
             try:
                 return self._json(*im.import_file(c, self.user, name, data, job_id=job_id, **options))
             except im.ImportError as e:
@@ -1954,10 +1996,10 @@ def make_handler(c: Console):
                     return self._json(200, emoji_batches.plan(body.get("prompt") or pack.get("name") or "Generic emojis", glyphs,
                         emoji_batches.sticker_emojis(pack.get("stickers")), body.get("decisions"), body.get("replacements"), pid,
                         body.get("style_id", "flat_vector"), bool(body.get("loop"))))
-                return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
+                return self._json(200, tasks.preview(body.get("prompt", ""), body.get("grid", "2x2"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
                                                      body.get("actions") or "creative"))
             if path == "/api/tasks":     # reserve: the next folder names + out/tasks/<NNN>.json (this is the G1 approval)
-                return self._json(200, tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "3x3"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
+                return self._json(200, tasks.reserve(c.out, c.inp, body.get("prompt", ""), body.get("grid", "2x2"), body.get("style_id", "flat_vector"), bool(body.get("ai")), bool(body.get("loop")),
                                                      actions_mode=body.get("actions") or "creative"))
             if path.startswith("/api/chat/sessions"):
                 from ..agent.memory import SessionError as _SE
@@ -2354,6 +2396,21 @@ def make_handler(c: Console):
                         return self._json(200, {"noop": True, "message": "Already animated."})
                     c.submit(lambda: pl.run_animate(c.out, gid, c.cfg, scope, index, c.pace))
                     return self._json(202, {"id": gid, "noop": False})
+                if parts[3] == "export-collection":      # Export to collection: queue the batch's Download .zip as one collection (services/collection.py)
+                    def make(retime=False, light=False):
+                        try:
+                            return batches.export_zip(c.out, gid, light=light, retime=retime)[0]
+                        except (ValueError, FileNotFoundError, pl.PipelineError) as e:
+                            missing = isinstance(e, (FileNotFoundError, pl.PipelineError)) or "invalid literal" in str(e)
+                            raise col.CollectionError("not found" if missing else str(e), 404 if missing else 409)
+                    if not pl.gen_dir(c.out, gid).is_dir() or not c.visible(self.user, gid):     # checked now: the zip is built later, in the queue
+                        raise pl.PipelineError("not found", 404)
+                    try:
+                        st = col.enqueue(c.out, f"G{gid}", lambda: make(bool(body.get("retime")), bool(body.get("light"))),
+                                         body.get("name"), str(body.get("description") or ""), self.user.get("id") or "human", price=body.get("price"))
+                    except col.CollectionError as e:
+                        raise pl.PipelineError(str(e), e.code)
+                    return self._json(202, st)
             raise pl.PipelineError(NO_ROUTE, 404)
     return H
 
@@ -2361,7 +2418,7 @@ def make_handler(c: Console):
 def serve(out: Path, inp: Path, port: int = 8770, pace: float = 0.0, cfg=None, block: bool = True, stdlib: bool | None = None, lan: bool = False,
           tls: dict | None = None):
     """FastAPI on uvicorn (console/app.py) by default; `stdlib=True` or MIRSAL_SERVER=stdlib runs the old ThreadingHTTPServer (kept for one release).
-    Both serve the same handler, so every answer is the same. `lan`: office colleagues reach it on the local network (0.0.0.0; they sign in; docs/api.md, Office accounts on the LAN),
+    Both serve the same handler, so every answer is the same. `lan`: office colleagues reach it on the local network (0.0.0.0; they sign in; docs/api-integration.md),
     `tls`: {cert, key} for HTTPS."""
     if lan:
         os.environ["MIRSAL_LAN"] = "1"
@@ -2371,7 +2428,7 @@ def serve(out: Path, inp: Path, port: int = 8770, pace: float = 0.0, cfg=None, b
     if stdlib:
         srv = ThreadingHTTPServer(("127.0.0.1", port), make_handler(c))
     else:
-        from .app import Server
+        from ..api.app import Server
         srv = Server(c, "0.0.0.0" if lan else "127.0.0.1", port, tls=tls)
     if lan:
         from ..services import admin_bot

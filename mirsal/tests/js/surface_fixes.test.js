@@ -1,9 +1,10 @@
+const {readRawConsoleFile}=require('./console_source');
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 // Surface repairs with no behavior change (F-24/T-065, F-36/T-086, F-30/T-074):
 // the cover badge never intercepts clicks, the phone viewer gives metadata a
 // full-width row, and welcome slides use their own readable ink in both themes.
-const css=fs.readFileSync(path.join(__dirname,'../../mirsal/console/studio.css'),'utf8');
-const theme=fs.readFileSync(path.join(__dirname,'../../mirsal/console/theme.css'),'utf8');
+const css=readRawConsoleFile(path.join(__dirname,'../../mirsal/console/studio.css'),'utf8');
+const theme=readRawConsoleFile(path.join(__dirname,'../../mirsal/console/theme.css'),'utf8');
 
 test('the #pkgrid cover badge keeps position/z-order but never intercepts a click',()=>{
   assert.match(css,/#pkgrid \.cell \.badge2\{pointer-events:none\}/);

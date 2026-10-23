@@ -187,10 +187,10 @@ def size_window(cfg, wh: tuple, m: dict, ref_alpha=None, same=None) -> tuple:
     return mode, (x0 + (side - side2) / 2 - dx * side2, y0 + (side - side2) / 2 - dy * side2, side2), s * f
 
 
-def window_box(window, scale_box: list) -> list:
-    """A box in cell pixels (x0 y0 x1 y1) as canvas pixels through `window` (x0, y0, side) -> 512: where the preview draws the hot spot."""
+def window_box(window, scale_box: list, size: int) -> list:
+    """A box in cell pixels (x0 y0 x1 y1) as canvas pixels through `window` (x0, y0, side) -> size: where the preview draws the hot spot."""
     x0, y0, side = window
-    k = 512 / side
+    k = size / side
     return [round((scale_box[0] - x0) * k, 1), round((scale_box[1] - y0) * k, 1), round((scale_box[2] - x0) * k, 1), round((scale_box[3] - y0) * k, 1)]
 
 
@@ -462,9 +462,9 @@ def preview_frame(path, cfg, index: int, frame: int = 0, m: dict | None = None, 
     img = render_kept([one], window, cfg)[0] if window else render_sticker(one, tuple(m["bbox"]), scale, cfg)
     out = {"frame": k, "frames": total, "mode": mode, "px_scale": round(scale, 4), "measured": not measured}
     if window and m.get("core_bbox"):
-        out["core_canvas"] = window_box(window, m["core_bbox"])
+        out["core_canvas"] = window_box(window, m["core_bbox"], cfg.size)
         cx, cy = m["core_centre"]
-        out["centre_canvas"] = window_box(window, [cx, cy, cx, cy])[:2]
+        out["centre_canvas"] = window_box(window, [cx, cy, cx, cy], cfg.size)[:2]
     return img, out
 
 
@@ -604,7 +604,7 @@ def _finish(idx, keyed, fps, cfg, m, slot=False, ref_alpha=None, waive=(), same=
     if window:
         out = render_kept(keyed, window, cfg)
         if m.get("core_bbox"):
-            m["core_canvas"] = window_box(window, m["core_bbox"])
+            m["core_canvas"] = window_box(window, m["core_bbox"], cfg.size)
     else:
         out = np.stack([render_sticker(k, union, scale, cfg) for k in keyed])       # ONE transform per clip
     ms["render"] = _ms(t); t = time.perf_counter()

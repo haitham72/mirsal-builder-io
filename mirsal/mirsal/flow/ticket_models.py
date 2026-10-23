@@ -1,4 +1,4 @@
-"""The ticket shapes (docs/tickets_plan.md), pydantic, written once: `flow/tickets.py` validates the local model's draft with them and the native routes
+"""The ticket shapes (docs/architecture.md ("Storage and search")), pydantic, written once: `flow/tickets.py` validates the local model's draft with them and the native routes
 (console/app.py, re-exported by console/app_models.py) validate requests and answers. The engine never imports this (rule 3)."""
 from __future__ import annotations
 

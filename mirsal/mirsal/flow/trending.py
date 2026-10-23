@@ -1,4 +1,4 @@
-"""Trending (docs/api.md, Office accounts on the LAN, Haitham 2026-10-04: "higgsfield 'trending' style … liked and commented, and use pack in your workflow"):
+"""Trending (docs/api-integration.md, Haitham 2026-10-04: "higgsfield 'trending' style … liked and commented, and use pack in your workflow"):
 packs the owner or an admin chose to Share, in a Library tab everyone signed in can open, like and comment on, ordered three ways:
 - `trending`: likes (3 points), comments (2) and the share itself (4), each fading with age (half of its weight after about 5 days), recomputed on read;
 - `new`: the most recently shared first; `liked`: the most likes first.
@@ -130,6 +130,7 @@ def score(d: dict, pid: str, now: float | None = None) -> float:
 def listing(out: Path, lib, viewer: str, order: str = "trending", users: list | None = None) -> list[dict]:
     if order not in ("trending", "new", "liked"):
         raise TrendingError("order must be trending, new or liked")
+    from ..media.library import pack_counts
     d = _read(out)
     with lib.lock:
         db = lib._load()
@@ -145,10 +146,11 @@ def listing(out: Path, lib, viewer: str, order: str = "trending", users: list | 
         cover = next((s for s in p["stickers"] if s["id"] == p.get("cover")), (p["stickers"] or [None])[0])
         maker = p.get("owner", "local")
         rows.append({"pack_id": pid, "name": p["name"], "by": names.get(maker, maker), "mine": maker == viewer,
-                     "views": len(d["views"].get(pid, [])), "uses": len(d["uses"].get(pid, [])), "stickers": len(p["stickers"]), "shared_at": sh["at"], "shared_by": sh["by"],
+                     "views": len(d["views"].get(pid, [])), "uses": len(d["uses"].get(pid, [])), "stickers": len(p["stickers"]), **pack_counts(p), "shared_at": sh["at"], "shared_by": sh["by"],
                      "likes": len(likes), "liked": any(x["user"] == viewer for x in likes),
                      "comments": sum(1 for c in d["comments"].get(pid, []) if not c.get("deleted")),
-                     "cover": {"id": cover["id"], "type": cover.get("type")} if cover else None, "score": score(d, pid)})
+                     "cover": {"id": cover["id"], "type": cover.get("type")} if cover else None, "score": score(d, pid),
+                 "sticker_list": [{"id": s["id"], "name": s.get("name"), "emoji": s.get("emoji"), "type": s.get("type")} for s in p["stickers"]]})   # the same projection as detail(): Home's showcase renders rows with no request per pack
     key = {"trending": lambda r: (-r["score"], -r["shared_at"]), "new": lambda r: -r["shared_at"], "liked": lambda r: (-r["likes"], -r["score"])}[order]
     return sorted(rows, key=key)
 

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import re
+import sqlite3
 import threading
 import time
 from pathlib import Path
@@ -79,6 +80,8 @@ class Profile:
     def __init__(self, out: Path, user: str = "local"):
         safe = re.sub(r"[^a-zA-Z0-9_-]", "_", str(user) or "local")[:40] or "local"
         self.path = Path(out) / "profile" / f"{safe}.json"
+        self.table = ProfileTable(Path(out) / "profiles.sqlite", safe)
+        self.table.ensure_import(self.load())
 
     def load(self) -> dict:
         try:
@@ -143,7 +146,30 @@ class Profile:
         return {k: (f.get(k) or {}).get("value", [] if k in LISTS else {} if k == "extra" else None) for k in FACT_KEYS}
 
     def name(self) -> str | None:
-        return self.facts()["name"]
+        return self.table.get().get("name") or self.facts()["name"]
+
+    def tone(self) -> str | None:
+        return self.table.get().get("tone")
+
+    def set_tone(self, tone: str | None, said: str = "") -> bool:
+        if not self.table.set_tone(tone):
+            return False
+        with _LOCK:
+            d = self.load()
+            d["tone"] = tone
+            self.save(d)
+        return True
+
+    def count_edit(self, kind: str) -> dict:
+        counts = self.table.count_edit(kind)
+        with _LOCK:
+            d = self.load()
+            d["edit_counts"] = counts
+            self.save(d)
+        return counts
+
+    def top_edit(self) -> tuple[str, int] | None:
+        return self.table.top_edit()
 
     def set_facts(self, new: dict, said: str = "") -> dict:
         """Write what `validate_facts` keeps of `new`: a scalar replaces the old value, a like / dislike is added (and taken out of the other list), an extra key replaces its own value.
@@ -168,6 +194,14 @@ class Profile:
                     f[k] = {"value": v, "at": now}
             d["log"] = (d["log"] + [{"ts": now, "kind": "fact", "key": ",".join(clean), "why": said[:120]}])[-60:]
             self.save(d)
+            if clean.get("name"):
+                self.table.set_name(clean["name"])
+            for x in clean.get("likes") or []:
+                self.table.add_like(x)
+            for x in clean.get("dislikes") or []:
+                self.table.add_dislike(x)
+            for k, v in (clean.get("extra") or {}).items():
+                self.table.set_pref(k, v)
         try:                                       # the Postgres copy (migration 011); the file stays the record and wins when the database is down
             from ..store import sync
             sync.sync_profile(self.path.parent.parent, self.path.stem, d["facts"])
@@ -191,3 +225,176 @@ class Profile:
             self.path.unlink()
         except OSError:
             pass
+        self.table.forget()
+
+TONE_WORDS = {
+    "brief": ("brief", "short", "quick", "concise", "to the point", "less talk", "terse"),
+    "warm": ("warm", "friendly", "chatty", "fun", "cheerful", "playful"),
+    "formal": ("formal", "polite", "professional", "courteous"),
+}
+TONE_ORDER = ("brief", "warm", "formal")
+EDIT_KINDS = ("tweak", "action", "redesign", "editor")
+EDIT_HINTS = {
+    "tweak": "tweak a detail, like 'tweak his smile'",
+    "action": "a new action, like 'make him dance'",
+    "redesign": "a redesign, like 'make him a lemon'",
+    "editor": "the editor, like 'rotate number 3'",
+}
+
+
+def detect_tone(text):
+    """The reply tone the person asks for ("be brief", "keep it warm"), or None. First match in TONE_ORDER wins."""
+    t = str(text or "").lower()
+    # A style adjective in a name or preference is not a reply-style request.
+    request = re.fullmatch(
+        r"\s*(?:please\s+)?(?:(?:can|could|would|will) you\s+)?(?:please\s+)?"
+        r"(?:be|keep|stay|respond|reply|answer)\s+(?:(?:it|your replies|your answers|the replies|the answers)\s+)?"
+        r"(?:more\s+)?(.+?)\s*[.!?]*\s*", t)
+    if not request or re.search(r"\b(?:not|never|no|don'?t)\b", t):
+        return None
+    style = request.group(1).rstrip(".!? ")
+    for tone in TONE_ORDER:
+        if any(re.fullmatch(re.escape(w), style) for w in TONE_WORDS[tone]):
+            return tone
+    return None
+
+
+class ProfileTable:
+    """One SQLite row per person (`out/profiles.sqlite`): predefined columns for the stable core
+    (`name`, `tone`), JSON columns for everything that grows (`likes`, `dislikes`, `preferences`,
+    `edit_counts`). The JSON file stays the human-readable export; this table is what the chat reads
+    every turn. Personal data like the JSON: never committed (see .gitignore)."""
+
+    SCHEMA = """CREATE TABLE IF NOT EXISTS profiles(
+        user_id TEXT PRIMARY KEY, name TEXT, tone TEXT,
+        likes JSON, dislikes JSON, preferences JSON, edit_counts JSON, updated_at REAL)"""
+
+    def __init__(self, path, user="local"):
+        self.path, self.user = Path(path), str(user or "local")
+
+    def _run(self, fn):
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        conn = sqlite3.connect(str(self.path), timeout=30)
+        try:
+            conn.execute(self.SCHEMA)
+            return fn(conn)
+        finally:
+            conn.close()
+
+    def _row(self, conn):
+        r = conn.execute("SELECT name, tone, likes, dislikes, preferences, edit_counts FROM profiles WHERE user_id=?",
+                         (self.user,)).fetchone()
+        if not r:
+            return {}
+        out = {"name": r[0], "tone": r[1]}
+        for k, raw in zip(("likes", "dislikes", "preferences", "edit_counts"), r[2:]):
+            try:
+                out[k] = json.loads(raw) if raw else ({} if k in ("preferences", "edit_counts") else [])
+            except ValueError:
+                out[k] = {} if k in ("preferences", "edit_counts") else []
+        return out
+
+    def get(self):
+        return self._run(self._row)
+
+    def ensure_import(self, json_doc):
+        """First open only: adopt the JSON file's facts so nothing learned before is lost."""
+        def _do(conn):
+            if conn.execute("SELECT 1 FROM profiles WHERE user_id=?", (self.user,)).fetchone():
+                return
+            f = dict((json_doc or {}).get("facts") or {})
+            val = lambda k: (f.get(k) or {}).get("value")
+            conn.execute("INSERT INTO profiles(user_id, name, tone, likes, dislikes, preferences, edit_counts, updated_at)"
+                         " VALUES(?,?,?,?,?,?,?,?)", (self.user, val("name"), None, json.dumps(val("likes") or []),
+                         json.dumps(val("dislikes") or []), json.dumps(val("extra") or {}), json.dumps({}), time.time()))
+            conn.commit()
+        self._run(_do)
+
+    def _insert_row(self, conn, name, tone, likes, dislikes, prefs, counts):
+        conn.execute("INSERT INTO profiles(user_id, name, tone, likes, dislikes, preferences, edit_counts, updated_at)"
+                     " VALUES(?,?,?,?,?,?,?,?)", (self.user, name, tone, likes, dislikes, prefs, counts, time.time()))
+
+    def _set(self, col, value):
+        if not value:
+            return False
+        def _do(conn):
+            conn.execute("UPDATE profiles SET " + col + "=?, updated_at=? WHERE user_id=?", (value, time.time(), self.user))
+            if conn.total_changes == 0:
+                self._insert_row(conn, value if col == "name" else None, value if col == "tone" else None,
+                                 "[]", "[]", "{}", "{}")
+            conn.commit()
+        self._run(_do)
+        return True
+
+    def set_name(self, name):
+        return self._set("name", _text(name, 40))
+
+    def set_tone(self, tone):
+        return self._set("tone", tone if tone in TONE_ORDER else None)
+
+    def _move(self, keep, drop, item):
+        clean = _text(item)
+        if not clean:
+            return False
+        def _do(conn):
+            row = self._row(conn)
+            have = [x for x in (row.get(keep) or []) if x.lower() != clean.lower()]
+            other = [x for x in (row.get(drop) or []) if x.lower() != clean.lower()]
+            conn.execute("UPDATE profiles SET " + keep + "=?, " + drop + "=?, updated_at=? WHERE user_id=?",
+                         (json.dumps((have + [clean])[-MAX_ITEMS:]), json.dumps(other), time.time(), self.user))
+            if conn.total_changes == 0:
+                self._insert_row(conn, None, None, json.dumps([clean] if keep == "likes" else []),
+                                 json.dumps([clean] if keep == "dislikes" else []), "{}", "{}")
+            conn.commit()
+        self._run(_do)
+        return True
+
+    def add_like(self, item):
+        return self._move("likes", "dislikes", item)
+
+    def add_dislike(self, item):
+        return self._move("dislikes", "likes", item)
+
+    def set_pref(self, key, value):
+        clean_key = re.sub(r"[^a-z0-9_]", "_", str(key).lower())[:24].strip("_")
+        clean_val = _text(value)
+        if not clean_key or not clean_val:
+            return False
+        def _do(conn):
+            prefs = dict(self._row(conn).get("preferences") or {})
+            prefs[clean_key] = clean_val
+            conn.execute("UPDATE profiles SET preferences=?, updated_at=? WHERE user_id=?",
+                         (json.dumps(prefs), time.time(), self.user))
+            if conn.total_changes == 0:
+                self._insert_row(conn, None, None, "[]", "[]", json.dumps(prefs), "{}")
+            conn.commit()
+        self._run(_do)
+        return True
+
+    def count_edit(self, kind):
+        """Count one edit of `kind` (tweak | action | redesign | editor); returns the full counts."""
+        def _do(conn):
+            counts = dict(self._row(conn).get("edit_counts") or {})
+            if kind in EDIT_KINDS:
+                counts[kind] = int(counts.get(kind, 0)) + 1
+            conn.execute("UPDATE profiles SET edit_counts=?, updated_at=? WHERE user_id=?",
+                         (json.dumps(counts), time.time(), self.user))
+            if conn.total_changes == 0:
+                self._insert_row(conn, None, None, "[]", "[]", "{}", json.dumps(counts))
+            conn.commit()
+            return counts
+        return self._run(_do)
+
+    def top_edit(self):
+        """The most used edit kind and its count, only when ahead (a split habit is no habit)."""
+        counts = self.get().get("edit_counts") or {}
+        ranked = sorted(((k, int(v)) for k, v in counts.items() if k in EDIT_KINDS), key=lambda kv: -kv[1])
+        if not ranked or (len(ranked) > 1 and ranked[0][1] == ranked[1][1]):
+            return None
+        return ranked[0]
+
+    def forget(self):
+        def _do(conn):
+            conn.execute("DELETE FROM profiles WHERE user_id=?", (self.user,))
+            conn.commit()
+        self._run(_do)

@@ -3,7 +3,7 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
-const JR=require('../../mirsal/console/job-recovery.js');
+const JR=require(require('./console_source').resolveConsoleFile(require('node:path').join(__dirname,'../../mirsal/console/job-recovery.js')));
 test('four explicit recovery actions are ordered cheapest first and paid Retry is not primary',()=>{
   const html=JR.controls({id:'J048',status:'TIMEOUT',external_task_id:'paid-ticket'});
   const names=[...html.matchAll(/data-act=(\w+)/g)].map(m=>m[1]);

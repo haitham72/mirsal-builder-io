@@ -1,30 +1,42 @@
 # docs/design.md — the look of Mirsal: one shell, one palette
 
-**Status: built design; updated 2026-10-11 for the dark/light themes, two-band Home showcase and console feature split.** It is the design half of the app, kept
-in `docs/` because it is architecture, not a log (rule 12): the screens are a sandbox over the API (rule 11), but the *shell* they share is a real, stable
-surface that every screen inherits. When a screen's look changes, this file changes in the same step.
+The design half of the app: the shell every screen inherits, the screens, the themes, the welcome modal, and the redesign contracts that guard them. Converged 2026-10-21 (branch `code-audit`); history lives in git. **Read this before changing any CSS, the Studio's markup, or adding a screen.** `docs/backlog.md` "Visual design" carries the work items; this file says what they add up to.
 
-`docs/backlog.md` "Visual design" carries the work items; this file says what they add up to.
+## Shell
 
----
+- One 96px rail of four — Home · Create · Library · Help (`app.js` RAIL) — with an avatar menu (Settings & health, Team, Trash, Watch folders, Sign out). A shared second column (392px) on list routes; a drawer under 900px, a bottom bar under 760px.
+- Create opens the last tab, new and empty. Chat | Studio segmented tabs + a New menu (From a photo, Particle effects, Super reaction).
+- One page, one global scope, one `ACT` object, file-prefixed top-level names, hash router (`docs/architecture.md` §6). No CDN, one self-hosted family (`ui/fonts/InterVariable.woff2`, served `/ui/fonts/`). New scripts go in `UI_FILES` (now via `console/assets.py`) and `index.html` in load order, or the page swallows a 404 silently.
+- Locked issue colours are never repainted: orange out of bounds, purple green screen, yellow loop, pink look/motion, blue file limit, red blocked or dropped. Checkerboards and export files are unthemed.
 
-## Sections
+## Screens
 
-This is an index: each section is its own file under [`design/`](design/); read only the one a task needs.
+- **Home** — the logo's target: first start of each browser session opens it; a two-band 24-sticker showcase with the welcome/onboarding films preserved across filter and resize (`home.js`). An empty library shows the most-liked public packs instead of "No packs yet" (shared-only, so the admin's shared current work is the default until likes arrive), opening Trending detail.
+- **AI chat** — composer + Chat | Studio tabs, stage slider (Prompt · Stickers · Animation · Telegram · Export), model selectors and creation options as their own controls; box selection; newest-card polling.
+- **Studio** — 352px left creation panel (settings + fixed action footer) + artwork workspace + Batches drawer (earlier batches + project map). One control per cell; issue overlays + override queue; sheet/video panels; Prompt tab (what is typed is what is SENT); animation controls + Add-to-pack wizard; sticker detail panel (Checks · History · Measurements). Box selection; batch-grouped pack; sticky sections.
+- **Library / pack** — the caller's own packs only (the owner's too); pack page with viewer grid; sticker editor (named controls); selection box with focus-within; counts additive after the visibility filter. The header shows Collection price and Edit price (saved with pack metadata; blank clears, 0 is free). Export to collection prefills that value in a labelled price input; edits there apply to that export only, and blank omits its price. Validation leaves the dialog and entered values intact. No currency is assumed; generation credits remain separate.
+- **Reactions** — Emoji | Lottie | Super Emojis | Packs tabs, one shared state. Emoji presets by motion (Assign, Lottie slot export); Lottie-style editor (Particular groups, START, export, `MAX_PARTICLES`); super sandbox `#/super` (desktop frame + iPhone, one-frame tuning); one scoped editor (draft/row/save-as-new); Echo badge/heart/tray for free lookup; wall 120/page, collapsed motion rows, open-only previews.
+- **Settings / Help / Users / Trending / Trash** — sticky Settings sections; native support controls; Users > People (approve/reject/admin); Trending gallery; trash rows with Remove/Restore/purge.
+- **Audit fixes built in** (2026-10-20): keyboard-reachable tiles (UX-03), named editor controls (UX-04), frame-card focus/Escape (UX-05), phone editors/Save (UX-01), watch-folder rows (UX-09), Test workspace badge (UX-06), reaction ownership heading + owner names (UX-08/11), compact Chat config (UX-10).
+- **Personal packs** (unverified against code — verify before building on it): per-person Library filter, Public toggle, Telegram-send hidden for members, Import-pack flows.
+- **LLM selector** (unverified): top-right popup grouping eligible models under Local / Nararouter / OpenAI from the server catalog; saved choices survive reopen.
 
-| section | what it covers |
-|---|---|
-| [1. Shared shell](design/01-1-shared-shell.md) | Every screen uses the same rail, palette, typography and responsive layout. Desktop has a 96px rail and, on list-bearing routes, a 392px second column; at wi… |
-| [2. Non-negotiables (breaking these breaks the app, not just the look)](design/02-2-non-negotiables-breaking-these-breaks-the-app.md) | No CDN, no runtime fetch (rule 8). One self-hosted family: `console/fonts/InterVariable.woff2` (`studio.css:1`), used by `body` at `studio.css:4`. |
-| [3. Foundations](design/03-3-foundations.md) | `studio.css` defines the light palette in `:root`; `theme.css` remaps it under `html[data-theme=dark]` and supplies component overrides. All screens share `-… |
-| [4. The shell — rules that hold on every screen](design/04-4-the-shell-rules-that-hold-on-every-screen.md) | 1. The rail is one fixed element in one place. Same width, same position, same order, on all sections. Its width is a token; it does not change |
-| [5. Per screen](design/05-5-per-screen.md) | The first screen and the Mirsal logo's target: `#/home`, an empty hash, and the first start of each browser session (`hmFirstStart`, `sessionStorage`; entity… |
-| [6. Earlier batches — the redesign (built 2026-10-02)](design/06-6-earlier-batches-the-redesign-built-2026-10-02.md) | Marks and choices (2026-10-05). A particle batch (`kind: particles`) carries the particles mark top-right of its row (`.lv-pbadge`): particles no stick… |
-| [7. What "done" means for this work](design/07-7-what-done-means-for-this-work.md) | One token set; `--pri` is the accent on every screen; no `#070b1c` island remains. |
-| [8. Built foundations](design/08-8-built-foundations.md) | Shared tokens, the responsive rail and list drawer, aligned Library/Chat/Settings, compact style tiles, type/radius scales, motion rules and per-picture over… |
-| [9. Every rejected picture carries its own override (2026-10-03)](design/09-9-every-rejected-picture-carries-its-own-overrid.md) | `CLAUDE.md` rule 10: a rejected picture is never a dead end and never a bare word. This is the design half of that rule. |
-| [10. The welcome modal and the particles gallery (2026-10-03)](design/10-10-the-welcome-modal-and-the-particles-gallery-2.md) | Welcome (`welcome.js`, `studio.css` `.wl-*`, `#welcome` above the dialogs at z 80): a card of five pages, the fast-cut ad film then four sliding feature im… |
-| [UI/UX pass of 2026-10-03 (what a click means)](design/11-ui-ux-pass-of-2026-10-03-what-a-click-means.md) | The AI vision switch is a chamfered box with a glowing outline (`agent.css` `.ai-vis` around a plain `.ai-chip`: cut corners by `clip-path`, a conic-gradie… |
-| [Browser look of 2026-10-03 (what Claude fixed, and what is still Haitham's eyes)](design/12-browser-look-of-2026-10-03-what-claude-fixed-and.md) | P1-P13 and the particle screens were walked in a headless Chromium (Playwright from `mirsal/venv`) on a scratch copy of `out/` (recipe: `docs/dev-notes.md`);… |
-| [Personal packs and existing-file controls](design/13-personal-packs-and-existing-file-controls.md) | Every signed-in person sees their own Library packs, Recent and My Stickers, with Trending as a tab. The owner's Library follows the same filter. A pack page… |
-| [LLM selector catalog](design/14-llm-selector-catalog.md) | The top-right LLM popup groups eligible listed models under Local, Nararouter and OpenAI, using the server catalog. Saved session choices survive reopen; the… |
+## Rejected pictures (the design half of rule 10)
+
+A rejected picture is never a dead end and never a bare word: on every surface that shows one — Studio tile, clickable sheet cell, chat card, creator message — the picture is visible, one plain sentence says why, and "Use it anyway" / "Take it back" sits on that picture. One bulk control per batch ("Use all anyway (N)" / "Take all back (N)"). A rejection with no picture and no override is a bug.
+
+## Themes
+
+Light tokens in `studio.css` `:root`, dark remap in `theme.css`; preference in `localStorage mirsal.ui.theme` (default dark), applied pre-paint, synced across tabs; sun/moon button top-right + Settings → Appearance.
+
+## Welcome and onboarding
+
+A 5-page modal over Home once per session (fast-cut film + four slides, sound after gesture); media in `console/assets/welcome/` (welcome + onboarding mp4, slides, posters) served with Range. Films: Seedance take 2 (105 credits, take 1 rejected as too slow); on-screen words never spell-checked by anyone but Haitham (W9).
+
+## Redesign contracts (still binding)
+
+- The JSON API, byte for byte. The engine, the gates, the verifier: redesign touches `console/` only. Rule 10 on every surface. No dead stubs, no CDN, one `ACT` + prefix rule, role gates, "Ask before spending" + price on every paid button.
+- The rail of four; avatar menu (Settings, Team, Trash, Watch folders, System health, Sign out); every old hash keeps working. Create = Chat | Studio + New menu. Project map (Project › Batch › Sheet › Video), breadcrumb + highlighted node, branch-where-it-stands with priced buttons.
+- D1–D7 (Haitham accepted all, 2026-10-11): Project/Batch/Sheet/Video words; project switcher replaces the column; Animate/Add act on the selected batch only ("Animate every batch" in a menu); retire `gbdrop`; rail of four + avatar menu; chat preview lives on the pack; two interfaces, one workspace, one project ("Ask Mirsal" side panel after phase 7, only if Haitham agrees).
+- **No action, screen or route may disappear** without a `renamed`/`retired` entry in `mirsal/tests/data/ui_baseline.json` (`tests/test_ui_inventory.py`); the baseline is never regenerated during the redesign. The inventory itself regenerates from `mirsal/mirsal/console/inventory.py`. When markup moves, the selector in the test changes, the behaviour it asserts does not.
+- Use code and on-demand screenshots for review; capture local browser artifacts under `output/playwright/`. The former fixed `docs/shots/` set has been removed.

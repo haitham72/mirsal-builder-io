@@ -6,6 +6,7 @@ import tempfile
 import threading
 import unittest
 from pathlib import Path
+from mirsal.console.assets import asset_path
 
 from mirsal.console.server import serve
 from mirsal.engine.config import EngineConfig
@@ -63,16 +64,16 @@ class WelcomeTests(unittest.TestCase):
         self.assertIn(b"/ui/welcome.js", html)
         self.assertIn(b"<div id=welcome>", html)
         self.assertEqual(self.get("/ui/welcome.js")[0], 200)
-        self.assertIn("data-act=home", (UI / "app.js").read_text(encoding="utf-8"))
+        self.assertIn("data-act=home", asset_path("app.js").read_text(encoding="utf-8"))
         self.assertIn(b"/ui/home.js", html)
         self.assertEqual(self.get("/ui/home.js")[0], 200)
 
     def test_the_session_and_home_rules(self):
-        js = (UI / "welcome.js").read_text(encoding="utf-8")
+        js = asset_path("welcome.js").read_text(encoding="utf-8")
         self.assertIn("sessionStorage,WL_SEEN", js, "the first open of a browser session")
         self.assertNotIn("ACT.home=", js, "the logo opens Home: home.js owns ACT.home")
-        self.assertIn("ACT.home=", (UI / "home.js").read_text(encoding="utf-8"))
-        self.assertIn("wlOpen()", (UI / "home.js").read_text(encoding="utf-8"), "Home's Watch the film opens the welcome")
+        self.assertIn("ACT.home=", asset_path("home.js").read_text(encoding="utf-8"))
+        self.assertIn("wlOpen()", asset_path("home.js").read_text(encoding="utf-8"), "Home's Watch the film opens the welcome")
         self.assertIn("ACT.wlclose", js)
         self.assertIn("Escape", js)
 

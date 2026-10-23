@@ -17,6 +17,14 @@ from tests.test_effects_flow import sticker_png
 
 
 class TrendingEngineTests(unittest.TestCase):
+    def test_public_summary_has_additive_counts_without_sharing_private_packs(self):
+        self.lib.add_bytes(self.a["id"], sticker_png(), "png", "reaction", "static", "🙂", source={"particle_set": "P1"})
+        tr.share(self.out, self.lib, self.a["id"], "local")
+        rows = tr.listing(self.out, self.lib, "U1")
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["pack_id"], self.a["id"])
+        self.assertEqual((rows[0]["stickers"], rows[0]["sticker_count"], rows[0]["reaction_count"]), (2, 1, 1))
+
     def setUp(self):
         self.out = Path(tempfile.mkdtemp())
         self.lib = Library(self.out)
@@ -47,6 +55,12 @@ class TrendingEngineTests(unittest.TestCase):
         with self.assertRaises(tr.TrendingError):
             tr.file_of(self.out, self.lib, self.b["id"], self.b["cover"] or "x")
         self.assertEqual(tr.score({"shared": {"p": {"at": 0}}, "likes": {}, "comments": {}, "uses": {"p": [{"at": 0}]}}, "p", now=5 * 86400), 2.0, "a use loses half its weight after five days")
+
+    def test_listing_rows_carry_the_stickers_for_the_home_showcase(self):
+        tr.share(self.out, self.lib, self.a["id"], "local")
+        rows = tr.listing(self.out, self.lib, "U1", "liked")
+        self.assertEqual([(s["name"], s["emoji"], s["type"]) for s in rows[0]["sticker_list"]], [("one", "🙂", "static")])
+        self.assertEqual(rows[0]["stickers"], 1, "the count keeps its key")
 
     def test_use_copies_for_the_owner_and_gives_a_member_a_prompt_and_a_reference(self):
         tr.share(self.out, self.lib, self.a["id"], "local")

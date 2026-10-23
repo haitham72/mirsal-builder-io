@@ -1,4 +1,4 @@
-"""The agent end to end on a fake provider (docs/agent-and-chat.md 4A-4C exits): no network, no spend, no files but the session."""
+"""The agent end to end on a fake provider (turn exits 4A-4C; docs/architecture.md): no network, no spend, no files but the session."""
 import json
 import tempfile
 import threading
@@ -27,9 +27,11 @@ class Base(unittest.TestCase):
         self.tools = FakeTools()
         self.said = []
         self.agent = Agent(self.store, self.tools, Brain(complete=self._llm), self.cache)
+        self.addCleanup(self.agent.close)
         self.sid = self.store.create()["id"]
 
     def tearDown(self):
+        Agent.close_all()
         self.td.cleanup()
 
     def _llm(self, system, user):
@@ -55,7 +57,7 @@ class NewAndConfirm(Base):
     def test_a_request_becomes_a_plan_with_a_price_and_nothing_is_spent(self):
         m = self.say("make me falcon stickers")
         self.assertEqual(m["cards"][0]["type"], "plan")
-        self.assertEqual((m["cards"][0]["estimate"], len(m["cards"][0]["names"])), (2.0, 9))
+        self.assertEqual((m["cards"][0]["estimate"], len(m["cards"][0]["names"])), (2.0, 4))
         self.assertEqual([c.get("action") for c in m["chips"] if c.get("action") in ("confirm", "cancel")], ["confirm"],
                          "the first answer of a chat carries the one-time AI vision switch beside Create it, and no Not yet (UI/UX spec P9)")
         self.assertFalse([c for c in self.tools.calls if c[0] == "create"])            # no credits until the user says so
@@ -568,6 +570,7 @@ class AdoptStudioBatches(StudioFiles):
         member = SessionStore(self.out, self.cache, user="U001", see_all=False)
         sess = member.create()
         agent = Agent(member, self.tools, Brain(complete=self._llm), self.cache)
+        self.addCleanup(agent.close)
         agent.run_turn(sess["id"], "make G002/S3 happier")
         self.assertEqual(member.load(sess["id"])["subjects"], [])                                    # a stranger's batch is never pulled into this chat
         agent.run_turn(sess["id"], "make G077/S3 happier")                                           # nor one that does not exist
@@ -802,7 +805,7 @@ class NamesFromPictures(Base):
 
 
 class ParticleIntents(Base):
-    """Chat intents for particle sets (docs/agent-and-chat.md, particle sets in the chat): make particles for a pack, generate more, delete, restore, also use them for another pack. Reading and the free list edits happen at once;
+    """Chat intents for particle sets (docs/architecture.md, particle sets in the chat): make particles for a pack, generate more, delete, restore, also use them for another pack. Reading and the free list edits happen at once;
     anything that SPENDS (a sheet) shows its price on a plan and waits for the go-ahead. FakeTools: no provider."""
 
     def setUp(self):

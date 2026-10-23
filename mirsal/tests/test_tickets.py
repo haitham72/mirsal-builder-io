@@ -1,4 +1,4 @@
-"""Tickets (flow/tickets.py, docs/tickets_plan.md): automatic tickets fold by fingerprint, a Report gathers what happened around its target, answers and
+"""Tickets (flow/tickets.py, docs/architecture.md ("Storage and search")): automatic tickets fold by fingerprint, a Report gathers what happened around its target, answers and
 status, the local model's draft validated strictly (a bad or missing one keeps the preset questions), and the native routes on the FastAPI server: a server
 error opens a ticket, the owner sees and closes them. No provider and no real model: a fake answer stands in."""
 import http.client

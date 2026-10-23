@@ -430,8 +430,9 @@ class PromptV2Tests(unittest.TestCase):
         p = prompter.expand("teddy bear", (3, 3))
         self.assertEqual(len({c["emoji"] for c in p["slots"]["cells"]}), 9)
         self.assertEqual(len({c["label"] for c in p["slots"]["cells"]}), 9)
-        lines = [l for l in p["video_prompt"].splitlines() if l[:2] in {f"{i}." for i in range(1, 10)}]
+        lines = [l for l in p["video_prompt"].splitlines() if ' (cell ' in l]
         self.assertEqual(len(lines), 9)
+        self.assertTrue(all(', then ' in line and 'Action 1:' not in line for line in lines))
         self.assertEqual(prompter.expand("teddy bear", (3, 3))["slots"], p["slots"])          # deterministic
         self.assertNotEqual([c["label"] for c in prompter.expand("a fox", (3, 3))["slots"]["cells"]], [c["label"] for c in p["slots"]["cells"]])
 
@@ -457,6 +458,14 @@ class PromptV2Tests(unittest.TestCase):
 
 
 class LiveConsoleTests(Base):
+    def test_unspecified_http_plan_grid_defaults_to_2x2(self):
+        status, plan = self.req('POST', '/api/plan', {'prompt': 'generic emojis', 'ai': False})
+        self.assertEqual(status, 200, plan)
+        self.assertEqual(plan['grid'], [2, 2])
+        self.assertEqual(len(plan['stickers']), 4)
+        status, explicit = self.req('POST', '/api/plan', {'prompt': 'generic emojis', 'grid': '3x3', 'ai': False})
+        self.assertEqual((status, len(explicit['stickers'])), (200, 9))
+
     """The whole chain through the HTTP API with the fake CLI: sheet job -> unchanged stills run -> G2 -> video sheet -> G3 -> Kling job -> sliced."""
 
     def setUp(self):
@@ -693,7 +702,12 @@ class LiveConsoleTests(Base):
         self.assertEqual(create[create.index("--mode") + 1], "pro")                          # always pro: 1440 px, never std
         prompt = create[create.index("--prompt") + 1]
         self.assertIn("Create a very expressive animation of each character, each having its own personality with a wide range of emotions.", prompt)   # Haitham's line, in every video prompt
-        self.assertLess(len(prompt), 1200, "short, direct and minimal")
+        self.assertIn('animate concurrently', prompt)
+        lines = [line for line in prompt.splitlines() if ' (cell ' in line]
+        self.assertEqual(len(lines), 4)
+        self.assertTrue(all(', then ' in line for line in lines))
+        self.assertNotIn('Action 1:', prompt)
+        self.assertLess(len(prompt), 2500, 'two short local actions per cell, not a long sheet-wide storyboard')
         self.assertEqual(self.req("POST", "/api/live/cost", {"kind": "video", "model": "kling3_0", "options": {"mode": "std"}})[0], 400)   # std is not offered any more
 
     def _stills_ready(self, prompt="blob"):
@@ -819,7 +833,7 @@ class LiveConsoleTests(Base):
         self.assertIn("generated/", (REPO / ".gitignore").read_text(encoding="utf-8").splitlines())
 
     def test_the_secrets_and_locks_of_out_are_never_committed(self):
-        """`out/` is tracked on purpose (docs/engine-and-studio.md), but the token digests, the signed-link key, the locks and the logs are not part of that."""
+        """`out/` is tracked on purpose (docs/architecture.md), but the token digests, the signed-link key, the locks and the logs are not part of that."""
         import subprocess
         from mirsal.runtime.paths import REPO
         lines = (REPO / ".gitignore").read_text(encoding="utf-8").splitlines()
@@ -903,7 +917,9 @@ class LiveConsoleTests(Base):
         self.assertEqual(create[create.index("--mode") + 1], "pro")
         self.assertNotIn("--end-image", create)                                                                     # Loop is off by default: no forced return to the first pose
         self.assertNotIn("loop", create[create.index("--prompt") + 1].lower())                                      # and no loop wording that makes the stickers bounce
-        self.assertIn("1. ", [l for l in create[create.index("--prompt") + 1].splitlines() if l[:3] == "1. "][0])  # per-character motion lines
+        video_prompt = create[create.index("--prompt") + 1]
+        self.assertIn('Top-left (cell 1):', video_prompt)
+        self.assertIn('Top-right (cell 3):', video_prompt)
         final = self.until(lambda: (lambda x: x if next(v for v in x["video_sheets"] if v["id"] == "A1")["status"] in ("SLICED", "VIDEO_BLOCKED") and not x["busy"] else None)(
             self.req("GET", f"/api/generations/{gid}")[1]), "slicing")
         self.assertEqual(next(v for v in final["video_sheets"] if v["id"] == "A1")["status"], "SLICED")

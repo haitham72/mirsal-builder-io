@@ -316,7 +316,7 @@ def prompt_cmd(out, args) -> int:
         ok = 0
         for req in LAB_INPUTS:
             try:
-                plan = _t.preview(req, "3x3", args.style, ai=False)
+                plan = _t.preview(req, "2x2", args.style, ai=False)
                 from .generation import prompter as _pr
                 _pr.validate_plan(dict(plan))
                 n, key = len(plan["stickers"]), plan["slots"]["key_colour"]
@@ -627,7 +627,7 @@ def main(argv=None) -> int:
     pr = sub.add_parser("profile", help="time the animation of a generation stage by stage (nothing is saved)")
     pr.add_argument("gid", nargs="?"); pr.add_argument("--sweep", default="", help="worker counts to compare, e.g. 1,4,9")
     s = sub.add_parser("serve"); s.add_argument("--port", type=int, default=8770); s.add_argument("--pace", type=float, default=0.0); s.add_argument("--stdlib", action="store_true", help="the old stdlib server (kept for one release)")
-    s.add_argument("--lan", action="store_true", help="serve the office network: colleagues sign in with an allowed email domain (MIRSAL_EMAIL_DOMAIN, default nadi.ae,cpd.gov.ae) (docs/api.md, Office accounts on the LAN)")
+    s.add_argument("--lan", action="store_true", help="serve the office network: colleagues sign in with an allowed email domain (MIRSAL_EMAIL_DOMAIN, default nadi.ae,cpd.gov.ae) (docs/api-integration.md)")
     s.add_argument("--no-tls", action="store_true", help="with --lan: plain HTTP (passwords cross the network unencrypted)")
     s.add_argument("--reload", action="store_true", help="restart the server by itself when a .py file of the app changes (the UI files are read from disk on every request already)")
     for p_ in (s, a):
@@ -645,7 +645,7 @@ def main(argv=None) -> int:
     se.add_argument("--generation"); se.add_argument("--since"); se.add_argument("--json", action="store_true", dest="as_json")
     ta = sub.add_parser("task", help="what happened to a provider task id"); ta.add_argument("ext", nargs="?"); ta.add_argument("--key")
     pr = sub.add_parser("prompt", help='print locks, concepts and template-built prompts (S1 lab: "prompt lab")')
-    pr.add_argument("request", nargs="?"); pr.add_argument("--grid", default="3x3"); pr.add_argument("--style", default="flat_vector")
+    pr.add_argument("request", nargs="?"); pr.add_argument("--grid", default="2x2"); pr.add_argument("--style", default="flat_vector")
     pr.add_argument("--ai", action="store_true"); pr.add_argument("--review-ai", action="store_true")
     pr.add_argument("--mode", default="sheet", choices=["sheet", "single"])
     js = sub.add_parser("jobs", help="pending generation jobs for the operator"); js.add_argument("--status")
@@ -663,9 +663,9 @@ def main(argv=None) -> int:
     jd.add_argument("--force", action="store_true", help="ask again even where a verdict of this judge version exists")
     jd.add_argument("--status", action="store_true", help="which model, which policy")
     mc = sub.add_parser("measure-cells", help="S4: the share of video cells that leave their slot, per slot_fill (reads result files only)")
-    mc.add_argument("--json", action="store_true", dest="as_json"); mc.add_argument("--record", action="store_true", help="append to docs/measurements.md")
+    mc.add_argument("--json", action="store_true", dest="as_json"); mc.add_argument("--record", action="store_true", help="append to docs/architecture.md Measurements section")
     ms_ = sub.add_parser("measure-sharpness", help="how soft each stored animation is next to its own still (edge detail ratio and the blur it equals)")
-    ms_.add_argument("--json", action="store_true", dest="as_json"); ms_.add_argument("--record", action="store_true", help="append to docs/measurements.md")
+    ms_.add_argument("--json", action="store_true", dest="as_json"); ms_.add_argument("--record", action="store_true", help="append to docs/architecture.md Measurements section")
     oa = sub.add_parser("openapi", help="the HTTP contract: print it, or write it (--json FILE) and TypeScript types (--ts FILE)")
     oa.add_argument("--json", dest="json_file"); oa.add_argument("--ts", dest="ts_file")
     us = sub.add_parser("user", help="accounts for the API: add | list | disable | enable | rotate | allow-spend | deny-spend (a token is shown once)")
@@ -842,7 +842,7 @@ def main(argv=None) -> int:
         m = measure.measure(out)
         print(_json.dumps(m, ensure_ascii=False, indent=2) if args.as_json else measure.render(m))
         if args.record and m["cells"]:
-            print("recorded in", measure.record(out, m, _Path(__file__).resolve().parent.parent.parent / "docs" / "measurements.md"))
+            print("recorded in", measure.record(out, m, _Path(__file__).resolve().parent.parent.parent / "docs" / "architecture.md"))
         return 0
     if args.cmd == "openapi":
         import json as _json
@@ -865,7 +865,7 @@ def main(argv=None) -> int:
         m = measure.sharpness(out)
         print(_json.dumps(m, ensure_ascii=False, indent=2) if args.as_json else measure.render_sharpness(m))
         if args.record and m["cells"]:
-            f = _Path(__file__).resolve().parent.parent.parent / "docs" / "measurements.md"
+            f = _Path(__file__).resolve().parent.parent.parent / "docs" / "architecture.md"
             import time as _t
             with open(f, "a", encoding="utf-8") as fh:
                 fh.write("\n## measure-sharpness " + _t.strftime("%Y-%m-%d %H:%M") + "\n\n```\n" + measure.render_sharpness(m) + "\n```\n")

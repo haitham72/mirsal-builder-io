@@ -619,7 +619,8 @@
    "fxgrid": "Retired 2026-10-13 on Haitham instruction: the #/effects pack picker is replaced by the emoji-bank picker (fxek/fxekgo). Pack-scoped creation still lives in the Studio Particles tab (spStart) and the E### detail view is untouched; no backend route was removed.",
    "fxgo": "Retired 2026-10-13 on Haitham instruction: the #/effects pack picker is replaced by the emoji-bank picker (fxek/fxekgo). Pack-scoped creation still lives in the Studio Particles tab (spStart) and the E### detail view is untouched; no backend route was removed.",
    "fxnovlm": "Retired 2026-10-13 on Haitham instruction: the #/effects pack picker is replaced by the emoji-bank picker (fxek/fxekgo). Pack-scoped creation still lives in the Studio Particles tab (spStart) and the E### detail view is untouched; no backend route was removed.",
-   "fxekgo": "Retired 2026-10-13 on Haitham instruction: Reaction effects is the emoji bank only (one emoji -> its fixed animation as its own glyph -> Download Lottie, fxek/fxekpreset/fxeklottie). Making a multi-emoji particle set from the bank still lives in Library > Reactions > Create and the Studio; POST /api/particles {from_request} is unchanged."
+   "fxekgo": "Retired 2026-10-13 on Haitham instruction: Reaction effects is the emoji bank only (one emoji -> its fixed animation as its own glyph -> Download Lottie, fxek/fxekpreset/fxeklottie). Making a multi-emoji particle set from the bank still lives in Library > Reactions > Create and the Studio; POST /api/particles {from_request} is unchanged.",
+   "pktab": "2026-10-15 Haitham plan.md item6/redesign prompt: stickers and reactions are always visible in order; no pack tabs. All section actions retained."
   },
   "screens": {},
   "routes": {}

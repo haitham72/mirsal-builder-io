@@ -25,7 +25,9 @@ class Transcript(Base):
     def setUp(self):
         super().setUp()
         self.tools = RealPlanner()
+        self.agent.close()
         self.agent = Agent(self.store, self.tools, self.agent.brain, self.cache)
+        self.addCleanup(self.agent.close)
 
     def plans(self, m):
         return [c for c in m["cards"] if c.get("type") in ("plan", "multi")]
@@ -113,6 +115,7 @@ class ProfileStore(Base):
         self.assertEqual(Profile(self.out, "U002").facts()["name"], None)
         b = SessionStore(self.out, self.cache, user="U002", see_all=False)
         agent = Agent(b, FakeTools(), self.agent.brain, self.cache)
+        self.addCleanup(agent.close)
         sid = b.create()["id"]
         m = agent.run_turn(sid, "what is my name?")
         self.assertNotIn("Amira", m["text"])
@@ -125,6 +128,7 @@ class ProfileStore(Base):
     def test_a_correction_the_rules_cannot_read_goes_to_the_model_and_through_the_validator(self):
         replies = ['{"intents": ["PROFILE"], "confidence": 0.9}', '{"name": "Haitham", "secret": "x", "age": 999}']
         brain_agent = Agent(self.store, FakeTools(), type(self.agent.brain)(complete=lambda s, u: (replies.pop(0) if replies else "{}", {"model": "fake"})), self.cache)
+        self.addCleanup(brain_agent.close)
         m = brain_agent.run_turn(self.sid, "my name is not Sam, it is haitham")
         self.assertIn("your name (Haitham)", m["text"])
         self.assertEqual(Profile(self.out, "local").facts()["age"], None, "the model's invalid age never reached the profile")

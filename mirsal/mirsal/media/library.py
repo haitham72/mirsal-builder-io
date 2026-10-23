@@ -31,6 +31,7 @@ from ..engine.config import EngineConfig
 from ..engine.sheet import encode_static
 from ..generation.prompter import slug
 from ..runtime import names
+from ..runtime.pricing import UNSET, normalize_price
 
 # Animated WebP download limit (the editor's WebP/GIF downloads; Telegram needs none of it).
 WA_ANIM_MAX = 500 * 1024
@@ -324,6 +325,13 @@ def light_webm(path: Path, cfg: EngineConfig, retime: bool = False):
     return data, meta
 
 
+def pack_counts(pack: dict) -> dict:
+    """Presentation counts, after the caller's existing pack visibility filter."""
+    items = pack.get("stickers") or []
+    reactions = sum(bool((item.get("source") or {}).get("particle_set")) for item in items)
+    return {"sticker_count": len(items) - reactions, "reaction_count": reactions}
+
+
 class Library:
     def __init__(self, out: Path):
         self.root = Path(out) / "library"
@@ -422,9 +430,11 @@ class Library:
             db = self._load()
         if owner is not None:
             db["packs"] = [p for p in db["packs"] if p.get("owner", "local") == owner]
+        db["packs"] = [dict(p, price=p.get("price"), **pack_counts(p)) for p in db["packs"]]
         allst = [dict(s, pack_id=p["id"], pack=p["name"]) for p in db["packs"] for s in p["stickers"]]
         allst.sort(key=lambda s: s["created"], reverse=True)
-        return {"packs": db["packs"], "recent": allst[:recent], "total": len(allst)}
+        return {"packs": db["packs"], "recent": allst[:recent], "total": len(allst),
+                "sticker_count": sum(p["sticker_count"] for p in db["packs"]), "reaction_count": sum(p["reaction_count"] for p in db["packs"])}
 
     # ---- packs
     def owns(self, pid: str, owner: str, trash: bool = False) -> bool:
@@ -439,22 +449,37 @@ class Library:
             return False
         return any((self.files / s["file"]).resolve() == target for p in self.snapshot(owner=owner)["packs"] for s in p["stickers"])
 
-    def create_pack(self, name: str, owner: str = "local") -> dict:
+    def pack_price(self, pid: str) -> str | None:
+        with self.lock:
+            return self._pack(self._load(), pid).get("price")
+
+    def create_pack(self, name: str, owner: str = "local", *, price: str | None = None) -> dict:
         name = (name or "").strip() or "My Pack"
+        try:
+            price = normalize_price(price)
+        except ValueError as e:
+            raise LibraryError(str(e)) from e
         with self.lock:
             db = self._load()
             p = {"id": uuid.uuid4().hex[:8], "name": name[:60], "slug": slug(name) or "pack", "cover": None, "owner": owner,
-                 "created": time.time(), "stickers": []}
+                 "created": time.time(), "stickers": [], "price": price}
             db["packs"].append(p)
             self._save(db)
             return p
 
-    def update_pack(self, pid: str, name=None, cover=None, order=None, lead=None, parent=None) -> dict:
+    def update_pack(self, pid: str, name=None, cover=None, order=None, lead=None, parent=None, *, price=UNSET) -> dict:
         """`lead: true` is the Studio's *Assign as parent*: this pack leads its batch group in the Library (flow/groups.pack_groups); the newest wins.
         `parent`: a pack id nests this pack under that one as a SUB-PACK (the Packs column's drag of a pack onto a pack; nothing moves, every sticker
         stays where it is) and makes that pack its group's parent; "" takes it out again. A pack is never nested under itself or its own sub-pack."""
+        if price is not UNSET:
+            try:
+                price = normalize_price(price)
+            except ValueError as e:
+                raise LibraryError(str(e)) from e
         with self.lock:
             db = self._load(); p = self._pack(db, pid)
+            if price is not UNSET:
+                p["price"] = price
             if parent is not None:
                 if parent == "":
                     p.pop("parent", None)

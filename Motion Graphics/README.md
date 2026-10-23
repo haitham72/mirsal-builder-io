@@ -104,14 +104,14 @@ The film may only say what the code does. If a line changes, check it against th
 
 | line | where it is true |
 |---|---|
-| approve-for-me on, one click runs the whole path | the agentic creator, `agent/creator.py`; bypass is **off by default** (`DEFAULTS`, line 29), and only with it on does the standing approval cover G2, G4 and G5 (`docs/agent-and-chat.md`). P2 must show the switch being turned on |
+| approve-for-me on, one click runs the whole path | the agentic creator, `agent/creator.py`; bypass is **off by default** (`DEFAULTS`, line 29), and only with it on does the standing approval cover G2, G4 and G5 (`docs/architecture.md`). P2 must show the switch being turned on |
 | you see the price | one plan card with the price of the whole run; nothing is spent before the click (rule 13) |
 | it remembers name, place, likes | the per-user profile, `agent/profile.py` (`out/profile/<user>.json`) |
 | cartoonish twice → offers it, never decides | taste memory: offered after two consistent signals, never applied unasked (Haitham, 2026-10-04) |
 | three packs of fruit, one price, all at once | `NEW_MULTI`, `subjects.pick`, `jobs.paid_parallel()` (default 3 in flight) |
 | every frame checked | `engine/verify.py`, and the boundary check on every frame of the animation (G4) |
-| a judgement call gets "Use it anyway" on the picture | rule 10, `docs/design.md` §9; a block where Telegram itself would refuse the file has no override, so the line says "a judgement call" |
-| sign in, approved, own credits and work | office LAN accounts, Users > People, credits per person (`docs/api.md`) |
+| a judgement call gets "Use it anyway" on the picture | rule 10, `docs/design.md` ("Rejected pictures"); a block where Telegram itself would refuse the file has no override, so the line says "a judgement call" |
+| sign in, approved, own credits and work | office LAN accounts, Users > People, credits per person (`docs/api-integration.md`) |
 | Trending: like, comment, make your own | `flow/trending.py`, "Use in my workflow" |
 | an engine with an API, built to live inside the Mirsal app | rule 11, `README.md` "Delivery" |
 
@@ -137,7 +137,7 @@ blood: '#2563EB',    // Primary Dark: pressed states, gradients
 acid: '#F59E0B',     // gold, at most once per plate: the falcon, the price, the heart
 ```
 
-Plus, inside UI mockups, the app's own semantic colours: Success `#10B981`, Danger `#EF4444`, and the locked issue colours of `docs/design.md` §2 on a blocked sticker.
+Plus, inside UI mockups, the app's own semantic colours: Success `#10B981`, Danger `#EF4444`, and the locked issue colours of `docs/design.md` ("Shell") on a blocked sticker.
 
 ### 4.2 Post-processing (`app/src/engine/post.ts`, built)
 
@@ -194,7 +194,7 @@ Estimated times assume a read of about 160 wpm. The real times come from the ali
 - From: `frames.ts` (the strip and scan) and `pipeline.ts`. Sound: a new `sheet_slice` per sheet, `scan_sweep`, `projector_run` as a bed under the parallel bars, `ui_blip` triplets.
 
 ### P5 `override`: ~49 to ~58 s. "And a rejection is never a dead end." / "Every blocked sticker says why… “Use it anyway”…"
-- A 3×3 sheet. One cell is blocked: hatched, with its issue colour (orange = out of bounds, from the locked palette in `docs/design.md` §2, kept here on purpose). **"dead end"**: a wall starts to draw, then is erased by the pen (`reverse_suck`).
+- A 3×3 sheet. One cell is blocked: hatched, with its issue colour (orange = out of bounds, from the locked palette in `docs/design.md` ("Shell"), kept here on purpose). **"dead end"**: a wall starts to draw, then is erased by the pen (`reverse_suck`).
 - **"says why, in plain words"**: one sentence types under the tile: *"The wing crosses the edge of its square."* **"Use it anyway"**: the button draws on **the picture itself**. It is clicked, the hatch dissolves, and a small "allowed by you" warning stays. A ghost "Take it back" appears beside it, so the click is visibly reversible.
 - From: `edits.ts`. Sound: `marker_strike` for the hatch, `typewriter` for the reason, `mouse_click` and `confirm_chime` on the allow.
 
@@ -398,7 +398,7 @@ All commands run from `Motion Graphics/`. Needed tools: bun, Google Chrome, ffmp
 - [ ] Real Mirsal stickers and the falcon, with no personal or real-person data
 - [ ] The P7 window matches `mirsal-ai-redesign-prompt.md`
 - [ ] The film loops (last frame = frame 0) and plays from `mirsal-creator_web.mp4` in a browser
-- [ ] Shipped files: the web MP4 and a poster JPG. If it replaces the welcome film (`docs/onboarding.md`), that doc changes in the same step
+- [ ] Shipped files: the web MP4 and a poster JPG. If it replaces the welcome film (`docs/design.md`), that doc changes in the same step
 
 ---
 

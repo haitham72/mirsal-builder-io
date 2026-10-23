@@ -44,6 +44,18 @@ class SpecShape(unittest.TestCase):
                 self.assertEqual(declared, declared_in_path, f"{method} {path}")
         self.assertEqual(len(ids), len(set(ids)))
 
+    def test_explicit_import_consents_validate_and_are_documented_as_booleans(self):
+        from pydantic import ValidationError
+        from mirsal.console.app_models import ImportOptions
+        options = ImportOptions.model_validate({"name": "again.mp4", "again": "1", "as_new": "1", "grid_ok": "true"})
+        self.assertTrue(options.again and options.as_new and options.grid_ok)
+        self.assertFalse(ImportOptions().again or ImportOptions().grid_ok)
+        with self.assertRaises(ValidationError):
+            ImportOptions.model_validate({"unknown_option": "1"})
+        params = {p["name"]: p["schema"] for p in self.spec["paths"]["/api/import"]["post"]["parameters"]}
+        self.assertEqual(params["again"]["type"], "boolean")
+        self.assertEqual(params["grid_ok"]["type"], "boolean")
+
     def test_the_chat_and_events_and_assets_are_typed(self):
         p = self.spec["paths"]
         send = p["/api/chat/sessions/{id}/messages"]["post"]

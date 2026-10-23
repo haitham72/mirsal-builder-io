@@ -4,7 +4,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const TRX = require('../../mirsal/console/trash.js');
+const TRX = require(require('./console_source').resolveConsoleFile(require('node:path').join(__dirname,'../../mirsal/console/trash.js')));
 
 const batch = (o = {}) => ({ type: 'batch', id: 'G012', number: 12, subject: 'Falcon', removed: 1790000000, by: 'local', stickers: 9, files_total: 40, bytes: 5 * 1048576,
   db: { available: true, indexed: 9, vectors: 9 }, copies_in_packs: [{ id: 'p1', name: 'Gold', stickers: 2, trashed: false }], in_flight: [], needs_confirm: false, confirm_words: null, blocked: null, ...o });
@@ -63,6 +63,10 @@ test('a finished purge is told in one sentence, failures and skipped items inclu
   assert.match(t, /need their own confirmation: G005/);
 });
 
+test('a purge that outlasts the 3-minute poll says so instead of going quiet', () => {
+  assert.match(TRX.outcome({ status: 'running', timedout: true, total: 9, results: [] }), /Still deleting after 3 minutes/);
+});
+
 test('the script follows the console rules: names prefixed, every data-act has a handler, one ACT object', () => {
   const src = readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'trash.js'), 'utf8');
   const top = [...src.matchAll(/^(?:const|let|function|class)\s+([A-Za-z_$][\w$]*)/gm)].map(m => m[1]);
@@ -72,7 +76,7 @@ test('the script follows the console rules: names prefixed, every data-act has a
   for (const a of acts) assert.ok(defined.has(a) || a === 'dlgx', `data-act=${a} has a handler`);
   const html = readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'index.html'), 'utf8');
   assert.match(html, /<script src=\/ui\/trash\.js><\/script>/);
-  assert.match(readConsoleFile(path.join(__dirname, '..', '..', 'mirsal', 'console', 'server.py'), 'utf8'), /"trash\.js": "text\/javascript"/);
+  assert.ok(require('./console_source').consoleFiles().includes('trash.js'), 'the served asset manifest includes the script');
 });
 
 test('a batch row shows the subject the way the Earlier-batches column does, not the raw key', () => {

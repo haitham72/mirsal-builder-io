@@ -1,4 +1,4 @@
-"""The HTTP contract's small promises (docs/api.md): a version and a request id on every answer, the `/api/v1` prefix, opt-in pagination that reports its total,
+"""The HTTP contract's small promises (docs/api-integration.md): a version and a request id on every answer, the `/api/v1` prefix, opt-in pagination that reports its total,
 `no-store` on a 429, an SSE `retry:` hint, and a JSON access log when asked for."""
 import contextlib
 import http.client

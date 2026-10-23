@@ -1,14 +1,15 @@
-"""What the browser sandbox can DO, read from its own scripts (docs/ui_inventory.md): every action (`ACT.<name>=` in console/*.js), the
+"""What the browser sandbox can DO, read from its own scripts: every action (`ACT.<name>=` in console/*.js), the
 scripts that draw a button for it (`data-act=<name>`), and the server routes its code names (`/api/...`, its own and its helpers' two calls deep, not into the helpers that only redraw a screen). Pure: reads files, writes nothing.
 
-Written for the redesign (docs/redesign_plan.md, Haitham 2026-10-10: "I am super scared any logic would be lost"): tests/test_ui_inventory.py
+Written for the redesign (docs/design.md, Haitham 2026-10-10: "I am super scared any logic would be lost"): tests/test_ui_inventory.py
 holds today's list as a baseline, so an action can only disappear from the console when the plan says where it went or Haitham retired it.
-`python -m mirsal.console.inventory` prints the tables of docs/ui_inventory.md; `--baseline` prints a fresh baseline (empty renamed / retired)."""
+`python -m mirsal.console.inventory` prints the action/screen/route tables; `--baseline` prints a fresh baseline (empty renamed / retired)."""
 from __future__ import annotations
 
 import re
 import sys
 from pathlib import Path
+from .assets import script_sources
 
 UI = Path(__file__).resolve().parent
 _DEF = re.compile(r"\bACT\.([A-Za-z_][A-Za-z0-9_]*)\s*=(?!=)")
@@ -76,11 +77,16 @@ def _routes(body: str, helpers: dict[str, str], depth: int = DEPTH) -> set[str]:
     return found
 
 
+def _sources(ui: Path) -> dict[str, str]:
+    if ui == UI:
+        return dict(sorted(script_sources().items()))
+    return {p.name: p.read_text(encoding="utf-8") for p in sorted(ui.glob("*.js"))}
+
+
 def actions(ui: Path = UI) -> list[dict]:
     """Every action, sorted by file then line: {name, file, line, drawn_in: [files], routes: [routes]}. A name defined twice is listed twice
     (tests/test_js.py says which double definitions are intentional)."""
-    files = sorted(p for p in ui.glob("*.js"))
-    texts = {p.name: p.read_text(encoding="utf-8") for p in files}
+    texts = _sources(ui)
     drawn: dict[str, set[str]] = {}
     for f, t in texts.items():
         for m in _USE.finditer(t):
@@ -96,16 +102,16 @@ def actions(ui: Path = UI) -> list[dict]:
 def screens(ui: Path = UI) -> list[tuple[str, str]]:
     """(screen, file) for every `RENDER.<screen>=`: the routes `#/<screen>` the router can show."""
     out = []
-    for p in sorted(ui.glob("*.js")):
-        out += [(m.group(1), p.name) for m in re.finditer(r"\bRENDER\.([A-Za-z_]\w*)\s*=(?!=)", p.read_text(encoding="utf-8"))]
+    for name, text in _sources(ui).items():
+        out += [(m.group(1), name) for m in re.finditer(r"\bRENDER\.([A-Za-z_]\w*)\s*=(?!=)", text)]
     return out
 
 
 def routes_called(ui: Path = UI) -> list[str]:
     """Every server route named anywhere in the console's scripts (normalised): what the page needs the API to keep answering."""
     found = set()
-    for p in ui.glob("*.js"):
-        found |= {_norm(r) for r in _ROUTE.findall(p.read_text(encoding="utf-8"))}
+    for text in _sources(ui).values():
+        found |= {_norm(r) for r in _ROUTE.findall(text)}
     return sorted(found)
 
 

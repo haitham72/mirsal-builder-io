@@ -1,0 +1,57 @@
+{
+ "versions": {
+  "V001": {
+   "id": "V001",
+   "file": "like button.json",
+   "name": "like button",
+   "look": {
+    "settings": {
+     "count": 22,
+     "size": 0.65,
+     "rise": 0.65,
+     "float": 0.2,
+     "sway": 0.35,
+     "spread": 70,
+     "glow_strength": 0.8,
+     "pop": 1
+    },
+    "glow": "gradient",
+    "colors": [
+     "#ff75e1",
+     "#f41515"
+    ],
+    "seed": 1755518059
+   },
+   "created": 1792502733.742,
+   "updated": 1792502733.742
+  }
+ },
+ "presets": {
+  "P001": {
+   "id": "P001",
+   "name": "Preset 1",
+   "look": {
+    "settings": {
+     "count": 22,
+     "size": 0.65,
+     "rise": 0.65,
+     "float": 0.2,
+     "sway": 0.35,
+     "spread": 70,
+     "glow_strength": 0.8,
+     "pop": 1
+    },
+    "glow": "gradient",
+    "colors": [
+     "#ff75e1",
+     "#f41515"
+    ]
+   },
+   "created": 1792502726.328
+  }
+ },
+ "n": {
+  "preset": 1,
+  "version": 4
+ }
+}

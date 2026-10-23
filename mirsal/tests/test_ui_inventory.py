@@ -1,4 +1,4 @@
-"""The redesign's safety net (docs/redesign_plan.md, Haitham 2026-10-10: "I am super scared any logic would be lost").
+"""The redesign's safety net (docs/design.md, Haitham 2026-10-10: "I am super scared any logic would be lost").
 
 tests/data/ui_baseline.json is the console as it was before the redesign: every action (`ACT.<name>=`), every screen (`RENDER.<name>=`) and every
 server route the page names. While the screens are rebuilt, each of them must still exist, OR be listed in the same file under `renamed`
@@ -18,11 +18,19 @@ class UIInventoryTests(unittest.TestCase):
         renamed, retired = BASE["renamed"].get(kind, {}), BASE["retired"].get(kind, {})
         lost = [x for x in BASE[kind] if x not in now and x not in renamed and x not in retired]
         self.assertEqual(lost, [], f"{kind} gone with no new home: add each to `renamed` (old -> new) or, with Haitham's approval, to `retired` "
-                                   f"in tests/data/ui_baseline.json, and to the map in docs/redesign_plan.md")
+                                   f"in tests/data/ui_baseline.json (contracts: docs/design.md)")
         dangling = {old: new for old, new in renamed.items() if new not in now}
         self.assertEqual(dangling, {}, f"{kind} renamed to something that does not exist")
         for name, why in retired.items():
             self.assertTrue(str(why).strip(), f"{kind} {name} is retired without a reason")
+
+    def test_every_shell_script_is_served(self):
+        import re
+        from mirsal.console.server import UI_FILES
+        shell = (inventory.UI / "index.html").read_text(encoding="utf-8")
+        scripts = re.findall(r"<script src=/ui/([^>]+)>", shell)
+        self.assertTrue(scripts)
+        self.assertEqual([name for name in scripts if UI_FILES.get(name) != "text/javascript"], [])
 
     def test_no_action_is_lost(self):
         self.check("actions", {a["name"] for a in inventory.actions()})

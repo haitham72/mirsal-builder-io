@@ -1,7 +1,7 @@
 {
- "fetched_at": 1792039484.846,
+ "fetched_at": 1792471470.361,
  "counts": {
-  "image": 38,
+  "image": 39,
   "video": 42,
   "audio": 8,
   "text": 1
@@ -1689,6 +1689,68 @@
    ]
   },
   {
+   "job_type": "recraft_v4_styles",
+   "display_name": "Recraft V4 Styles",
+   "type": "image",
+   "params": [
+    {
+     "name": "aspect_ratio",
+     "type": "string",
+     "default": "1:1",
+     "required": false,
+     "enum": [
+      "1:1",
+      "2:1",
+      "1:2",
+      "3:2",
+      "2:3",
+      "4:3",
+      "3:4",
+      "5:4",
+      "4:5",
+      "6:10",
+      "14:10",
+      "10:14",
+      "16:9",
+      "9:16"
+     ]
+    },
+    {
+     "name": "prompt",
+     "type": "string",
+     "default": null,
+     "required": true
+    },
+    {
+     "name": "resolution",
+     "type": "string",
+     "default": "1k",
+     "required": false,
+     "enum": [
+      "1k",
+      "2k"
+     ]
+    },
+    {
+     "name": "style_id",
+     "type": "string",
+     "default": null,
+     "required": true
+    },
+    {
+     "name": "style_match",
+     "type": "string",
+     "default": "precise",
+     "required": false,
+     "enum": [
+      "precise",
+      "flexible"
+     ]
+    }
+   ],
+   "rules": []
+  },
+  {
    "job_type": "recraft_v4_1",
    "display_name": "Recraft V4.1",
    "type": "image",
@@ -2812,7 +2874,9 @@
      "required": false,
      "enum": [
       "720p",
-      "1080p"
+      "1080p",
+      "2k",
+      "4k"
      ]
     },
     {

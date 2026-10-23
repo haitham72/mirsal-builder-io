@@ -170,6 +170,11 @@ def _grid_sheet(size, centres, r=40, seed=7):
 
 
 class HotSpotTests(unittest.TestCase):
+    def test_hot_spot_canvas_coordinates_follow_configured_size(self):
+        from mirsal.engine.video import window_box
+        for size in (256, 512, 768):
+            self.assertEqual(window_box((10, 20, 100), [10, 20, 110, 120], size), [0, 0, size, size])
+
     """Resize on (anim_hotspot, 2026-10-15): the pixels opaque in at least half the frames size the sticker, so tear drops flying out do not shrink the face."""
 
     def test_drops_flying_out_do_not_change_the_hot_spot(self):

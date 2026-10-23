@@ -1,7 +1,0 @@
-# Personal packs and existing-file controls
-
-<sub>Part of [design.md](../design.md).</sub>
-
-Every signed-in person sees their own Library packs, Recent and My Stickers, with Trending as a tab. The owner's Library follows the same filter. A pack page has a Public toggle; public cards and details show maker, views and uses. Members can add their batches to their own packs, download them and copy public packs; their Telegram-send button is hidden. The owner and admins can remove a public pack from Trending.
-
-The existing Studio composer adds Use my own sheet and Import from Higgsfield for the owner. The import dialog asks for a file and optional description; videos name the approved destination batch/sheet, or leave it empty to become a batch of their own. The Library's **+** on Packs asks *New pack* (a name, as before) or *Import pack* (owner only: a sheet or a video with no destination; it is cut, a video also animated, and the Studio opens on the batch waiting for review). Provider history distinguishes Import from Open existing. Interrupted imports offer a free Retry import. A file that names a failed provider job offers "Is this the result of …?" (the person's own failed jobs, prompt + time + thumbnail, or Import as a new batch). A replaced pack sticker offers Update in the other packs that hold the same batch sticker. It uses the existing dialog, button and field styles; no new screen or palette is introduced.

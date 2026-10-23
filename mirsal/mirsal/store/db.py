@@ -3,11 +3,12 @@ Default is the local mirsal-db on 5434 (never the workspace's other databases)."
 from __future__ import annotations
 
 import os
+import time
 from pathlib import Path
 
 DEFAULT_URL = "postgresql://mirsal:mirsal_local@localhost:5434/mirsal"
 
-_state: dict = {"ok": None}   # process-cached availability: None = untried, True/False
+_state: dict = {"ok": None, "at": 0.0}   # process-cached availability: None = untried, True/False; at = last probe
 
 
 def _load_dotenv() -> None:
@@ -27,15 +28,20 @@ def connect():
     return psycopg.connect(url(), connect_timeout=2)
 
 
+REPROBE_AFTER = 30.0   # a cached miss re-probes after this long, so a database started after the server is picked up without a restart
+
+
 def available() -> bool:
-    """Cached per process: is Postgres reachable right now? A first failure disables the process silently."""
-    if _state["ok"] is None:
+    """Cached per process: is Postgres reachable right now? A miss re-probes after REPROBE_AFTER seconds."""
+    now = time.monotonic()
+    if _state["ok"] is None or (_state["ok"] is False and now - _state.get("at", 0.0) > REPROBE_AFTER):
         try:
             with connect() as c:
                 c.execute("select 1")
             _state["ok"] = True
         except Exception:
             _state["ok"] = False
+        _state["at"] = now
     return _state["ok"]
 
 

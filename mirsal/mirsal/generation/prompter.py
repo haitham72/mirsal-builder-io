@@ -1,11 +1,11 @@
 """Stub of the AI prompter agent (Phase 1 = deterministic, plain JSON, no LLM/pydantic/langgraph).
-Expands one user task into one prompt per grid cell (3x3 default, 2x2, 1x1). Phase 3 swaps this for a real agent with the SAME JSON shape."""
+Expands one user task into one prompt per grid cell (2x2 default, 3x3, 1x1). Phase 3 swaps this for a real agent with the SAME JSON shape."""
 from __future__ import annotations
 
 import re
 from pathlib import Path
 
-from . import actions, emotions, spelling, styles
+from . import actions, emotions, spelling, styles, video_sequences
 
 TEMPLATES = Path(__file__).resolve().parent.parent / "prompts" / "templates"
 MARGIN = ("full body, centred, generous empty margin on every side (at least 20% of the cell), "
@@ -65,7 +65,7 @@ def slug(text: str) -> str:
 
 REFERENCE_CLAUSE = ("Reference: the attached image shows the subject to draw. Keep its design, colours and proportions for every character; "
                     "change only the expression and the pose.")
-GRIDS = {(3, 3), (2, 2), (1, 1)}     # user's choice: 3x3 (default) or 2x2; 1x1 = regenerate one sticker
+GRIDS = {(3, 3), (2, 2), (1, 1)}     # 2x2 default; explicit 3x3; 1x1 = regenerate one sticker
 TEMPLATE_OF = {(3, 3): "sheet_3x3", (2, 2): "sheet_2x2", (1, 1): "single_1x1"}
 
 
@@ -112,20 +112,42 @@ def render_plan(slots: dict, template_id: str, version: int = TEMPLATE_VERSION) 
                   ending="End on the starting pose so the clip loops." if slots.get("loop") else "")
     sheet = load_template(template_id, version).format(**common).strip()
     face = bool(slots.get("face"))
-    video = load_template(*VIDEO_TEMPLATE).format(seconds=3, units="emojis" if face else "characters", unit="emoji" if face else "character",
-                                                  expressive=expressive(face), faces=" Faces only: no bodies, no hands." if face else "",
-                                                  **{**common, "motions": "\n".join(f"{c['pos']}. {c.get('motion') or c['label']}" for c in cells)}).strip()
+    video_template = slots.get("video_template") or {"id": "video_short", "version": 1}
+    narrative = video_template["id"] == "video_independent" and int(video_template["version"]) >= 2
+    sequences = (video_sequences.narratives(cells, rows, cols, face, bool(slots.get("loop"))) if narrative
+                 else local_sequences(cells, rows, cols, face))
+    faces = video_sequences.face_policy(cells) if narrative and face else " Faces only: no bodies, no hands." if face else ""
+    video = load_template(video_template["id"], video_template["version"]).format(seconds=3, units="emojis" if face else "characters", unit="emoji" if face else "character",
+                                                  expressive=expressive(face), faces=faces,
+                                                  **{**common, "motions": "\n".join(f"{c['pos']}. {c.get('motion') or c['label']}" for c in cells),
+                                                     "local_sequences": sequences}).strip()
     video = re.sub(r"\n{2,}", "\n", video)
     return {"sheet_prompt": sheet, "video_prompt": video, "prompts": {c["pos"]: cell_prompt(slots, c) for c in cells}}
 
 
 CUSTOM_PROMPTS = ("sheet_prompt", "video_prompt")
-VIDEO_TEMPLATE = ("video_short", 1)      # every video prompt, whatever the plan's version (Haitham, 2026-10-09: "short, direct and minimal": a long one misses the point on a 3x3)
+VIDEO_TEMPLATE = ("video_independent", 2)  # saved per new plan; earlier video templates keep their exact wording
 EXPRESSIVE = "Create a very expressive animation of each {unit}, each having its own personality with a wide range of emotions."     # Haitham's line, in every video prompt
 
 
 def expressive(face: bool) -> str:
     return EXPRESSIVE.format(unit="emoji" if face else "character")
+
+
+def local_sequences(cells: list, rows: int, cols: int, face: bool) -> str:
+    """Bind state and two actions to a spatial cell, never a sheet-wide storyboard."""
+    vertical = {1: ("Centre",), 2: ("Top", "Bottom"), 3: ("Top", "Middle", "Bottom")}[rows]
+    horizontal = {1: ("centre",), 2: ("left", "right"), 3: ("left", "centre", "right")}[cols]
+    lines = []
+    for cell in cells:
+        r, c = divmod(cell['pos'] - 1, cols)
+        actions = [p.strip(' .') for p in re.split(r",|\bthen\b|\bwhile\b", str(cell.get('motion') or ''), flags=re.I) if p.strip(' .')]
+        if not actions:
+            actions = ["animates its stated expression clearly in place"]
+        if len(actions) < 2:
+            actions.append("tilts its head slightly and blinks" if face else "leans slightly and settles in place")
+        lines.append(f"{vertical[r]}-{horizontal[c]} (cell {cell['pos']}): State: {cell['label']}. Action 1: {actions[0]}. Then Action 2: {actions[1]}.")
+    return '\n'.join(lines)
 
 
 def with_expressive(prompt: str, face: bool = False) -> str:
@@ -166,7 +188,7 @@ def clean_custom(text, what: str) -> str | None:
 TEMPLATE_GRID = {"sheet_3x3": (3, 3), "sheet_2x2": (2, 2), "single_1x1": (1, 1)}
 
 
-def expand(task: str, grid: tuple = (3, 3), face: bool | None = None, preset: str | None = None, tokens: list | None = None) -> dict:
+def expand(task: str, grid: tuple = (2, 2), face: bool | None = None, preset: str | None = None, tokens: list | None = None) -> dict:
     """`face` (emoji-style: faces only, never bodies) auto-detects from the request (`generic emojis`, `an emoji pack`,
     ...) and stays on the plan, so recuts and rebuilds keep it. `preset` (a saved nine-slot grid from the canonical
     bank) names the nine directly; a face-mode sheet without one takes `core-v1`. `tokens` (explicit bank tokens, "Next batch" on a
@@ -205,6 +227,7 @@ def expand(task: str, grid: tuple = (3, 3), face: bool | None = None, preset: st
     else:
         entries = ACTIONS[kind][: rows * cols]
     for i, (suffix, phrase, emoji, motion) in enumerate(entries, 1):
+        motion = video_sequences.default_motion(motion, bool(face))
         key = f"{subject_slug}_{suffix}"                  # searchable action name; also the file name tail
         if preset or tokens:
             seed = [suffix, *actions.generation_bank()[suffix]["aliases"]] + ctx_tags
@@ -213,7 +236,8 @@ def expand(task: str, grid: tuple = (3, 3), face: bool | None = None, preset: st
         tags = clean_tags(key, seed)
         cells.append({"pos": i, "label": phrase, "tags": tags, "emoji": emoji, "motion": motion})      # every cell prompt starts with the subject description, scene included
     slots = {"subject_description": described, "style_id": "flat_vector", "mode": TEMPLATE_OF[(rows, cols)], "cells": cells,
-             "action_guidance": kind, "key_colour": "green", "face": bool(face), "preset": preset}
+             "action_guidance": kind, "key_colour": "green", "face": bool(face), "preset": preset,
+             "video_template": {"id": VIDEO_TEMPLATE[0], "version": VIDEO_TEMPLATE[1]}}
     tid = TEMPLATE_OF[(rows, cols)]
     version = 4 if face else TEMPLATE_VERSION
     built = render_plan(slots, tid, version)

@@ -46,7 +46,104 @@ def form(seen: dict) -> list:
     return [(p.get_param("name", header="content-disposition"), p.get_filename(), p.get_content_type(), p.get_payload(decode=True)) for p in msg.iter_parts()]
 
 
+def check_collection_prices(case):
+    """Saved metadata -> queued snapshot -> actual multipart receiver, on either server."""
+    cms = http.server.ThreadingHTTPServer(("127.0.0.1", 0), FakeCMS)
+    threading.Thread(target=cms.serve_forever, daemon=True).start()
+    try:
+        with patch.dict(os.environ, {"MIRSAL_COLLECTION_API_URL": f"http://127.0.0.1:{cms.server_address[1]}",
+                                     "MIRSAL_COLLECTION_API_CREDENTIALS": "sk-price-test"}), \
+             patch.object(FakeCMS, "answer", (200, b'{"Success": true, "Result": {"CollectionId": 123}}', "application/json")):
+            def fields():
+                return {n: v.decode() for n, f, _, v in form(FakeCMS.seen[-1]) if f is None}
+
+            def exported(path, body, expected):
+                status, queued = case.req(path, body)
+                case.assertEqual(status, 202, queued)
+                case.assertEqual(queued["price"], expected)
+                case.assertTrue(col.wait(30))
+                status, outcome = case.req("/api/collection/exports/" + queued["id"], method="GET")
+                case.assertEqual((status, outcome["state"], outcome["price"]), (200, "done", expected), outcome)
+                case.assertEqual(fields().get("Price"), expected)
+                log = json.loads((case.c.out / "collection_exports.jsonl").read_text(encoding="utf-8").splitlines()[-1])
+                case.assertEqual(log["price"], expected)
+                return outcome
+
+            result = pl.read_result(case.c.out, case.gid)
+            index = next(s["index"] for s in result["stickers"] if s.get("status") == "READY" and s.get("png"))
+            for prefix in ("/api", "/api/v1"):
+                status, pack = case.req(prefix + "/packs", {"name": "Priced pack", "price": "0002.5000"})
+                case.assertEqual((status, pack["price"]), (200, "2.5"), pack)
+                pid = pack["id"]
+                case.assertEqual(case.req(f"{prefix}/packs/{pid}/stickers", {"from_generation": {"id": case.gid, "index": index, "kind": "static"}})[0], 200)
+                case.assertEqual(case.req(f"{prefix}/packs/{pid}", {"name": "Renamed"})[1]["price"], "2.5")
+                from mirsal.media.library import Library
+                case.assertEqual(Library(case.c.out).pack_price(pid), "2.5", "saved metadata survives a fresh reader")
+                path = f"{prefix}/packs/{pid}/export-collection"
+                for body, expected in (({}, "2.5"), ({"price": "3.7500"}, "3.75"), ({"price": "0"}, "0"), ({"price": None}, None)):
+                    exported(path, body, expected)
+                case.assertEqual(case.c.lib.pack_price(pid), "2.5", "export overrides never rewrite the saved price")
+                for action in ("delete", "restore"):
+                    case.assertEqual(case.req(f"{prefix}/packs/{pid}/{action}", {})[0], 200)
+                case.assertEqual(case.c.lib.pack_price(pid), "2.5")
+                case.assertEqual(case.req(f"{prefix}/packs/{pid}", {"price": None})[1]["price"], None)
+                exported(path, {}, None)
+                exported(f"{prefix}/generations/{case.gid}/export-collection", {"price": "9007199254740993.1200"}, "9007199254740993.12")
+                before = len(FakeCMS.seen)
+                for invalid in ("", "-1", "NaN", "Infinity", "1e2", "1,25", True, 2, 2.5):
+                    for route in (f"{prefix}/packs/{pid}", path, f"{prefix}/generations/{case.gid}/export-collection"):
+                        status, error = case.req(route, {"price": invalid})
+                        case.assertEqual(status, 400, (route, invalid, error))
+                        case.assertIn("price", error["error"].lower())
+                    case.assertIsNone(case.c.lib.pack_price(pid))
+                case.assertEqual(len(FakeCMS.seen), before, "invalid prices never reach the receiving API")
+
+            # Hold zip preparation while the pack is repriced: the queued price must stay fixed.
+            case.c.lib.update_pack(pid, price="4.25")
+            entered, release = threading.Event(), threading.Event()
+            original = case.c.lib.export_zip
+
+            def delayed(*args, **kwargs):
+                entered.set()
+                if not release.wait(15):
+                    raise RuntimeError("price snapshot test was not released")
+                return original(*args, **kwargs)
+
+            try:
+                with patch.object(case.c.lib, "export_zip", side_effect=delayed):
+                    status, queued = case.req(f"/api/packs/{pid}/export-collection", {})
+                    case.assertEqual((status, queued["price"]), (202, "4.25"))
+                    case.assertTrue(entered.wait(5))
+                    case.assertEqual(case.req(f"/api/packs/{pid}", {"price": "9"})[0], 200)
+                    release.set()
+                    case.assertTrue(col.wait(30))
+                outcome = case.req("/api/collection/exports/" + queued["id"], method="GET")[1]
+                case.assertEqual((outcome["state"], outcome["price"], fields()["Price"]), ("done", "4.25", "4.25"))
+                case.assertEqual(case.c.lib.pack_price(pid), "9")
+            finally:
+                release.set()
+                col.wait(30)
+    finally:
+        cms.shutdown()
+        cms.server_close()
+
+
 class CollectionTests(unittest.TestCase):
+    def test_chat_export_uses_the_saved_pack_price(self):
+        from mirsal.agent.tools import ConsoleTools
+        pack = self.c.lib.create_pack("Chat price", price="8.5000")
+        result = pl.read_result(self.c.out, self.gid)
+        index = next(s["index"] for s in result["stickers"] if s.get("status") == "READY" and s.get("png"))
+        status, _ = self.req(f"/api/packs/{pack['id']}/stickers", {"from_generation": {"id": self.gid, "index": index, "kind": "static"}})
+        self.assertEqual(status, 200)
+        outcome = ConsoleTools(self.c).collection_export(pack["id"], "Chat price")
+        self.assertEqual((outcome["ok"], outcome["price"]), (True, "8.5"))
+        fields = {n: value.decode() for n, filename, _, value in form(FakeCMS.seen[-1]) if filename is None}
+        self.assertEqual(fields["Price"], "8.5")
+
+    def test_saved_prices_reach_the_api_without_float_rounding(self):
+        check_collection_prices(self)
+
     @classmethod
     def setUpClass(cls):
         from mirsal.console.server import serve
@@ -200,7 +297,7 @@ class CollectionTests(unittest.TestCase):
             self.assertEqual(FakeCMS.seen[-1]["auth"], "Bearer sk-test-key-123")
 
     def test_the_developer_key_api_answers(self):
-        """docs/Api/AddCollection-API .md: 200 {Success: true, Result}; a 200 {Success: false} is a refusal; 400 explains in ErrorMessages; 401 is the key."""
+        """docs/api-integration.md: 200 {Success: true, Result}; a 200 {Success: false} is a refusal; 400 explains in ErrorMessages; 401 is the key."""
         g = f"G{self.gid:03d}"
         FakeCMS.answer = (200, b'{"Success": true, "Result": {"CollectionId": 42, "Status": "Pending"}, "ErrorMessages": []}', "application/json")
         s, j = self.export(f"/api/generations/{g}/export-collection", {"name": "Approval pack", "description": "for review"})
@@ -258,6 +355,72 @@ class CollectionTests(unittest.TestCase):
         self.assertEqual(col.thumbnail("a.png", b"same bytes"), b"same bytes")
         with self.assertRaises(col.CollectionError):
             col.thumbnail("a.webm", b"not a video")
+
+
+class StdlibCollectionTests(unittest.TestCase):
+    """The same 4 routes on serve --stdlib (console/server.py): status, state reads, and both queues refuse like the FastAPI router."""
+
+    def test_saved_prices_reach_the_api_without_float_rounding(self):
+        check_collection_prices(self)
+
+    @classmethod
+    def setUpClass(cls):
+        from mirsal.console.server import serve
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.env = patch.dict(os.environ, {"MIRSAL_API_TOKEN": "collection-test-owner"})
+        cls.hf = patch.object(hf, "available", return_value=False)
+        cls.env.start(); cls.hf.start()
+        cls._saved = {k: os.environ.pop(k) for k in ("MIRSAL_COLLECTION_API_URL", "MIRSAL_COLLECTION_API_CREDENTIALS") if k in os.environ}
+        cls.srv, cls.c = serve(Path(cls.tmp.name) / "out", Path(cls.tmp.name) / "in", 0, cfg=EngineConfig(min_sheet_px=256), block=False, stdlib=True)
+        cls.port = cls.srv.server_address[1]
+        threading.Thread(target=cls.srv.serve_forever, daemon=True).start()
+        _, cls.member = cls.c.users.create("Member")
+        data = cv2.imencode(".png", cv2.cvtColor(synth.make_sheet(), cv2.COLOR_RGB2BGR))[1].tobytes()
+        s, j = cls.req(cls, "/api/import?name=own.png", data)
+        assert s == 202, j
+        cls.gid = j["id"]
+        cls.c.wait_jobs()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.c.wait_jobs()
+        cls.srv.shutdown(); cls.c.release_writer()
+        os.environ.update(cls._saved)
+        cls.hf.stop(); cls.env.stop(); cls.tmp.cleanup()
+
+    def req(self, path, body=b"", token="collection-test-owner", method="POST"):
+        conn = http.client.HTTPConnection("127.0.0.1", self.port, timeout=60)
+        conn.request(method, path, body if isinstance(body, bytes) else json.dumps(body).encode(), {"Authorization": "Bearer " + token, "Content-Type": "application/octet-stream"})
+        r = conn.getresponse()
+        result = r.status, json.loads(r.read())
+        conn.close()
+        return result
+
+    def test_status_reads_and_unknown_exports_are_404_not_unserved(self):
+        s, j = self.req("/api/collection", method="GET")
+        self.assertEqual((s, j["configured"], j["url"]), (200, False, col.DEFAULT_URL), j)
+        self.assertEqual(self.req("/api/v1/collection", method="GET")[0], 200)
+        s, j = self.req("/api/collection/exports/X0", method="GET")
+        self.assertEqual((s, j["error"]), (404, "not found"), j)
+
+    def test_batch_export_refusals_come_from_the_service(self):
+        s, j = self.req(f"/api/generations/{self.gid}/export-collection", {"name": "n" * 41})
+        self.assertEqual(s, 400, j)
+        self.assertIn("40", j["error"])
+        s, j = self.req(f"/api/generations/{self.gid}/export-collection", {"name": "Ok", "description": "d"})
+        self.assertEqual((s, "MIRSAL_COLLECTION_API_CREDENTIALS" in j["error"]), (503, True), j)
+        s, j = self.req("/api/generations/999/export-collection", {"name": "Ok"})
+        self.assertEqual((s, j["error"]), (404, "not found"), j)
+        s, j = self.req(f"/api/generations/{self.gid}/export-collection", {"name": "Ok"}, token=self.member)
+        self.assertEqual((s, j["error"]), (403, "Exporting to the collection API is available to the owner only"), j)
+
+    def test_pack_export_route_is_served(self):
+        s, p = self.req("/api/packs", {"name": "Stdlib"})
+        self.assertEqual(s, 200, p)
+        s, j = self.req(f"/api/packs/{p['id']}/export-collection", {"name": "x"})
+        self.assertEqual(s, 503, j)
+        s, j = self.req("/api/packs/NOPE/export-collection", {"name": "x"})
+        self.assertEqual((s, j["error"]), (404, "not found"), j)
 
 
 if __name__ == "__main__":

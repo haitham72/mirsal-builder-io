@@ -13,6 +13,7 @@ function column(packs) {
     nodes.c2q = {focus() {}, setSelectionRange() {}};
   }};
   nodes.col2 = col;
+  nodes.c2tog = {setAttribute() {}};
   const ctx = vm.createContext({
     LIB: {packs}, route_: 'library', PACK_ID: null, C2Q: '', PKFOLD: new Map(),
     COL2: ['library', 'pack'], $: id => nodes[id],
@@ -51,4 +52,13 @@ test('opening packs preserves the list scroll through both router and async pack
   c.nodes.c2q.oninput({target: {value: 'new', selectionStart: 3}});
   assert.equal(c.nodes['c2-packs'].scrollTop, 0, 'a new search starts at its first result');
   assert.deepEqual(c.ids(), ['new']);
+});
+
+
+test('Library count wording uses backend classifications and neutral filtered fallback',()=>{
+ const {readConsoleFile,statement}=require('./console_source');const vm=require('node:vm'),path=require('node:path');
+ const source=readConsoleFile(path.join(__dirname,'../../mirsal/console/library.js'));
+ const ctx=vm.createContext({});vm.runInContext(statement(source,'function libCountLabel('),ctx);
+ assert.equal(ctx.libCountLabel({sticker_count:2,reaction_count:1},3),'2 stickers · 1 reaction');
+ assert.equal(ctx.libCountLabel(null,1),'1 item');assert.equal(ctx.libCountLabel({},3),'3 items');
 });

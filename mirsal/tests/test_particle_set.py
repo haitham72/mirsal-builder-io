@@ -1,4 +1,4 @@
-"""The particle SET of an effect (docs/effects.md): ONE sheet of particles drawn for the whole pack, shared by every sticker.
+"""The particle SET of an effect (docs/architecture.md ("Reactions")): ONE sheet of particles drawn for the whole pack, shared by every sticker.
 
 What is pinned here:
   * the cut: a particle sheet is cut into EXACT equal cells (the layout is the plan's, never detected) and no sticker rule can stop a cell; the real bug (G100: a 2x2 sheet with a white divider

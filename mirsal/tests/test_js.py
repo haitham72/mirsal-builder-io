@@ -6,17 +6,20 @@ import subprocess
 import unittest
 from pathlib import Path
 from functools import lru_cache
+from mirsal.console.assets import ASSETS, UI_FILES, asset_path
 
 
 @lru_cache(maxsize=1)
 def console_sources():
     import json
     helper = Path(__file__).parent / 'js' / 'console_source.js'
-    return json.loads(subprocess.check_output(['node', str(helper)], text=True))
+    return json.loads(subprocess.check_output(['node', str(helper)], text=True, encoding='utf-8'))
 
 
 def read_console(path):
-    return console_sources()[path.name] if path.suffix == '.js' else path.read_text(encoding='utf-8')
+    if path.suffix == '.js':
+        return console_sources()[path.name]
+    return (asset_path(path.name) if path.name in ASSETS else path).read_text(encoding='utf-8')
 
 
 class JavaScriptTests(unittest.TestCase):
@@ -53,7 +56,7 @@ class StudioActionTests(unittest.TestCase):
         self.assertTrue(order)
         defs: dict[str, list[str]] = {}
         for name in order:
-            src = (ui / name).read_text(encoding='utf-8')
+            src = (asset_path(name) if name in ASSETS else ui / name).read_text(encoding='utf-8')
             for m in re.finditer(r"\bACT\.([A-Za-z0-9_]+)\s*=(?!=)", src):
                 defs.setdefault(m.group(1), []).append(name)
         twice = {act: files for act, files in defs.items() if len(files) > 1}
@@ -66,7 +69,7 @@ class StudioActionTests(unittest.TestCase):
         ui, order = self.scripts()
         defined, used = set(), {}
         for name in order + ["index.html"]:
-            src = (ui / name).read_text(encoding='utf-8')
+            src = (asset_path(name) if name in ASSETS else ui / name).read_text(encoding='utf-8')
             defined |= set(re.findall(r"\bACT\.([A-Za-z0-9_]+)\s*=(?!=)", src))
             for m in re.finditer(r"data-act=\"?([A-Za-z0-9_]+)", src):
                 used.setdefault(m.group(1), name)
@@ -152,7 +155,7 @@ class StudioActionTests(unittest.TestCase):
         html = read_console(ui / "index.html")
         self.assertIn("particles.js", order, "index.html loads it")
         self.assertLess(order.index("effects.js"), order.index("particles.js"), "it uses effects.js's functions: loaded after it")
-        self.assertIn('"particles.js": "text/javascript"', read_console(ui / "server.py"), "the server serves it")
+        self.assertEqual(UI_FILES['particles.js'], 'text/javascript', 'the server serves it')
         sp = read_console(ui / "particles.js")
         mine = re.findall(r"^(?:const|let|function|class)\s+([A-Za-z_$][\w$]*)", sp, re.M)
         self.assertTrue(mine)
@@ -164,9 +167,11 @@ class StudioActionTests(unittest.TestCase):
                     others.setdefault(name, n)
         self.assertEqual({n: others[n] for n in mine if n in others}, {}, "a top-level name declared by two scripts kills the second one")
         self.assertIn("GS.tab==='particles'", sp)
-        self.assertIn("gbodyHtml=function", sp)
-        self.assertIn("stepsHtml=function", sp)
-        self.assertIn("data-act=gtab data-t=particles", sp, "the step is a tab like the others (generate.js's ACT.gtab)")
+        self.assertIn("GSTUDIO.set('particles'", sp)
+        self.assertNotIn("gbodyHtml=function", sp)
+        self.assertNotIn("stepsHtml=function", sp)
+        core = read_console(ui / "studio-core.js")
+        self.assertIn("gExtraSteps(S,c)", core, "registered steps use Studio's renderer and numbering")
         for route in ("/api/effects", "data-fxx=sp"):
             self.assertIn(route, sp)
         css = read_console(ui / "studio.css")
@@ -226,7 +231,7 @@ class StudioActionTests(unittest.TestCase):
 
 
 class ShellTests(unittest.TestCase):
-    """docs/design.md 4: ONE shell for every screen. The rail is declared in app.js (six items, AI first), the column widths are tokens, and the narrow-screen layout is the
+    """docs/design.md: ONE shell for every screen. The rail is declared in app.js (six items, AI first), the column widths are tokens, and the narrow-screen layout is the
     shell's, not one screen's: it used to exist only under `body.agent-view` in agent.css, so only AI had a phone layout."""
 
     @staticmethod
@@ -239,7 +244,7 @@ class ShellTests(unittest.TestCase):
         app = read_console(ui / "app.js")
         rail = re.search(r"const RAIL=\[(.*?)\],RAILOF", app).group(1)
         items = re.findall(r"\['(\w+)','(\w+)','([^']+)'\]", rail)
-        self.assertEqual([i[2] for i in items], ["Home", "Create", "Library", "Help"])     # the rail of four (Haitham, 2026-10-11, docs/redesign_plan.md D5)
+        self.assertEqual([i[2] for i in items], ["Home", "Create", "Library", "Help"])     # the rail of four (Haitham, 2026-10-11, docs/design.md)
         for to in ("settings", "users", "history"):                                           # the avatar menu keeps every screen the old rail reached
             self.assertIn(f"data-act=nav data-to={to}", app)
         self.assertIn("data-act=rtrash", app); self.assertIn("data-act=aulogout", app)
@@ -271,7 +276,7 @@ class ShellTests(unittest.TestCase):
         self.assertIn("id=c2tog", read_console(ui / "index.html"))
 
     def test_every_screen_shares_the_glow_the_page_width_and_the_row_states_of_ai(self):
-        """docs/design.md 5: Library takes AI's glow and AI's hover / selection; the plain screens sit in ONE page width with ONE header; a heading's icon is sized (the Settings
+        """docs/design.md: Library takes AI's glow and AI's hover / selection; the plain screens sit in ONE page width with ONE header; a heading's icon is sized (the Settings
         Telegram icon used to fill the page because nothing sized it)."""
         import re
         ui = self.ui()
@@ -294,7 +299,7 @@ class ShellTests(unittest.TestCase):
         return src[src.index(marker):].split("\n", 1)[0]
 
     def test_the_composer_has_no_palette_of_its_own_and_the_style_tiles_are_compact(self):
-        """docs/design.md 5, Studio: the composer panel was a near-black navy island in a light app. It takes the shared glass surface, and the style tiles are small wrapping
+        """docs/design.md, Studio: the composer panel was a near-black navy island in a light app. It takes the shared glass surface, and the style tiles are small wrapping
         squares chosen by a ring and a check (they were six huge portrait cards in a horizontal scroller). The tiles are read from the API, never listed in the page."""
         import re
         ui = self.ui()
@@ -315,7 +320,7 @@ class ShellTests(unittest.TestCase):
         self.assertIn(".cp-styles:empty{display:none}", css)
 
     def test_sizes_and_radii_come_from_one_scale_and_everything_answers_focus(self):
-        """docs/design.md 3.2: six type steps and one radius scale, so a screen cannot drift; every interactive thing has a keyboard focus ring; motion respects the user's setting."""
+        """docs/design.md: six type steps and one radius scale, so a screen cannot drift; every interactive thing has a keyboard focus ring; motion respects the user's setting."""
         import re
         ui = self.ui()
         css = {n: read_console(ui / n) for n in ("studio.css", "agent.css")}
@@ -348,7 +353,7 @@ class ShellTests(unittest.TestCase):
         self.assertNotIn("#ai-sheet", js)
 
     def test_the_particle_effects_screen_is_wired_into_create_and_calls_the_api(self):
-        """docs/effects.md: Create has a Reaction effects tool that opens #/effects; the entry is the emoji bank (no auto-playing stickers) and reads GET /api/particles/emoji-motions; the screen reads and writes only /api/effects and, for the burst, /api/particles (nothing is decided in the browser), a paid video needs
+        """docs/architecture.md ("Reactions"): Create has a Reaction effects tool that opens #/effects; the entry is the emoji bank (no auto-playing stickers) and reads GET /api/particles/emoji-motions; the screen reads and writes only /api/effects and, for the burst, /api/particles (nothing is decided in the browser), a paid video needs
         `go`, and the fixed Queue pill must not be able to cover its last buttons."""
         import re
         ui = self.ui()
@@ -356,31 +361,38 @@ class ShellTests(unittest.TestCase):
         html = read_console(ui / "index.html")
         self.assertIn("id=s-effects", html)
         self.assertIn("/ui/effects.js", html)
-        self.assertIn('"effects.js"', (ui.parent / "console" / "server.py").read_text(encoding="utf-8"))
+        self.assertIn('effects.js', UI_FILES)
         app = read_console(ui / "app.js")
         self.assertIn("'effects'", re.search(r"const SCREENS=\[(.*?)\]", app).group(1))
         self.assertIn("effects:'agent'", app, "the rail keeps Create lit on the effects screen")
         self.assertNotIn("data-act=fxopen", read_console(ui / "editor.js"), "Create no longer offers Reaction effects: reactions start in the Studio (Haitham, 2026-10-05)")
         for route in ("/api/effects", "/estimate", "/video", "/add", "/plan"):
             self.assertIn(route, fx)
-        # docs/particles.md section 4: the burst (Motion and Finish) is the SET's, one preview for the pack: effects.js no longer previews or renders per sticker, particles.js calls the set's routes
+        # docs/architecture.md ("Reactions"): the burst (Motion and Finish) is the SET's, one preview for the pack: effects.js no longer previews or renders per sticker, particles.js calls the set's routes
         pt = read_console(ui / "particles.js")
         for route in ("/api/particles/${id}/preview", "/api/particles/${s.id}/render", "/api/particles/${id}/add"):
             self.assertIn(route, pt)
         for gone in ("/preview`", "/render`", "sticker_id:sid"):
             self.assertNotIn(gone, fx, "effects.js has no per-sticker preview or render any more")
-        # docs/reaction.md section 13: Create > + New > Reaction effects is its own screen (#/reactions, reactions.js), the emoji bank only; #/effects stays the Studio's particle editor
+        # docs/architecture.md ("Reactions"): Create > + New > Reaction effects is its own screen (#/reactions, reactions.js), the emoji bank only; #/effects stays the Studio's particle editor
         rx = read_console(ui / "reactions.js")
         self.assertIn("id=s-reactions", html)
         self.assertIn("/ui/reactions.js", html)
-        self.assertIn('"reactions.js"', (ui.parent / "console" / "server.py").read_text(encoding="utf-8"))
+        self.assertIn('reactions.js', UI_FILES)
         self.assertIn("'reactions'", re.search(r"const SCREENS=\[(.*?)\]", app).group(1))
         self.assertIn("reactions:'agent'", app, "the rail keeps Create lit on Reaction effects")
         self.assertIn("data-to=reactions", app, "+ New > Reaction effects opens #/reactions, not the Studio's #/effects")
-        for act in ("data-act=rxpick ", "data-act=rxcreate", "data-act=rxdl", "data-act=rxedit", "data-act=rxclose"):
+        for act in ("data-act=rxpick ", "data-act=rxcreate", "data-act=rxsave", "data-act=rxdl", "data-act=rxclose"):
             self.assertIn(act, rx)
+        for group in ("rxGroup('Motion'", "rxGroup('Size'", "data-rxadvanced"):
+            self.assertIn(group, rx)
+        tabs = read_console(ui / "lottiestyle.js")
+        for tab in ("emoji", "lottie", "packs"):
+            self.assertIn(f"data-act=rxstyle data-s={tab}", tabs)
+        for label in ("Emoji style", "Lottie style", "Packs"):
+            self.assertIn(label, tabs)
         for route in ("/api/particles/emoji-motions", "/api/particles/emoji-preview", "/api/particles/emoji-lottie"):
-            self.assertIn(route, rx, "the bank, the preview, create and the created list are the server's")
+            self.assertIn(route, rx + read_console(ui / "particles.js"), "the bank, preview and shared Packs list use the server")
         for gone in ("data-act=fxek", "/api/particles/emoji-lottie"):
             self.assertNotIn(gone, fx, "the emoji screen left effects.js")
         for gone in ("data-act=fxpack", "data-act=fxgo", "data-act=fxst", "coverMedia", "fx-cv"):

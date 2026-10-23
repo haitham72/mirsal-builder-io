@@ -80,7 +80,14 @@ class ConsoleTests(unittest.TestCase):
         from PIL import Image
         for f in ("studio.css", "app.js", "packs.js", "editor.js", "animate.js", "chat.js", "prepare.js"):
             self.assertEqual(self.req("GET", f"/ui/{f}")[0], 200)
+        from mirsal.console.assets import ASSETS
+        for name in ("app.js", "lifecycle.js", "studio-core.js", "reaction-preview-cache.js", "agent.css"):
+            legacy = self.req("GET", f"/ui/{name}")
+            canonical = self.req("GET", f"/ui/{ASSETS[name]}")
+            self.assertEqual(legacy[0], 200)
+            self.assertEqual(canonical, legacy, name)
         self.assertEqual(self.req("GET", "/ui/server.py")[0], 404)
+        self.assertEqual(self.req("GET", "/ui/features/../../server.py")[0], 404)
         s, pk = self.req("POST", "/api/packs", {"name": "API Pack"}); self.assertEqual(s, 200)
         png = _io.BytesIO(); Image.new("RGBA", (512, 512), (0, 0, 0, 0)).save(png, "PNG")
         h = http.client.HTTPConnection("127.0.0.1", self.port, timeout=30)

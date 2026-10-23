@@ -1,7 +1,8 @@
 // Slider/frame-editor sends wait out a 409 busy and retry (Haitham, 2026-10-15: a quick second edit
 // after a release died on "busy: a job is running"). Runs in a vm with stubbed timers/server. Run: node --test tests/js
-const test = require('node:test'), assert = require('node:assert/strict'), fs = require('node:fs'), path = require('node:path'), vm = require('node:vm');
-const source = fs.readFileSync(path.join(__dirname, '../../mirsal/console/studio-core.js'), 'utf8');
+const test = require('node:test'), assert = require('node:assert/strict'), path = require('node:path'), vm = require('node:vm');
+const { readRawConsoleFile } = require('./console_source');
+const source = readRawConsoleFile(path.join(__dirname, '../../mirsal/console/studio-core.js'), 'utf8');
 const controllers = source.slice(source.indexOf('/* Motion size'), source.indexOf("/* the batch's Download .zip"));
 function setup() {
   const writes = [], timers = new Map(), events = {}; let serial = 0, reply = async () => ({ ok: true, j: {} });

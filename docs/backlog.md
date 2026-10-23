@@ -4,47 +4,59 @@
 
 Status words: **open** (can be built now) · **needs Haitham** (a verdict first, W#) · **needs a paid test** (money first, W#) · **parked** (paused on purpose, do not touch).
 
-**v1.0 is done (2026-10-04).** This file lists everything still open, by area.
+## API delivery (`docs/api-integration.md`)
+
+- Verify the live receiving CMS stores the intended name/price, and confirm its currency, monetary range/precision and omitted/free behavior. Pack persistence, UI controls, both API servers/aliases, queued snapshots, chat export and multipart `Price` are implemented and locally verified ([pricing evidence](../DELIVERY_CHECKLIST.md#pricing-verification-2026-10-23)); only receiving-system confirmation remains. **open**.
+- Connect reaction JSON exports to the final API: the app's pack exporter currently refuses JSON (409), while direct CMS simulator/Lottie/super-like requests report success with zero inserts, even with paired thumbnails. Resolve the receiving contract before claiming delivery. **open**.
+- Define the final API/client representation of super-like reactions: `ContentType: super_like` is rejected; allowed values are `emoji` and `emoji_reaction`. Sending the saved super-like JSON under `emoji_reaction` also reported zero inserts. **open**.
+- Validate delivered asset counts in export outcomes; a 2xx/`Success: true` response with zero inserted/updated assets must not become a false success message. **open**.
+- Handle collection upload cooldowns using the CMS's `retryAfterSeconds` response (429); the current export worker marks the request failed. [Smoke results](../DELIVERY_CHECKLIST.md#smoke-test-results-2026-10-23). **open**.
 
 ## Visual design (`docs/design.md`)
+
+- Remaining app-audit scope: UX-07 unbuilt; UX-10 built, verdict open; AR-02/03/04, DOC-01, QA-01 verdicts open (full audit in git history). Implemented phone editing/Save, keyboard controls/labels, frame focus and ownership fixes are recorded in [design](design.md). **open / needs Haitham** (W1).
+- Unverified app states: loaded artwork and Prepare video, busy/error states, route-wide keyboard/menu/destructive combinations, LAN roles, all Settings/Help substates and opened/hover states. The empty Creative/Predefined pill report remains unconfirmed. Use the [unified checklist](../DELIVERY_CHECKLIST.md); completed empty-workspace/theme/width sweeps are evidence, not outstanding reruns. **open**.
 
 - Real tile art for the twelve style presets: the swatches are abstract placeholders; drop `<id>.png` into `console/assets/styles/`. **needs Haitham** (the art).
 - Inline `style="font-size:..."` in the scripts is still off the type scale. **open**.
 - Haitham's eyes on every screen. **needs Haitham** (W1).
 
-## Particles and the welcome modal (`docs/effects.md` section 8, `docs/reaction.md`, `docs/onboarding.md`)
+## Particles and the welcome modal (`docs/design.md`, `docs/architecture.md` "Reactions")
 - **Animated sprites on their own.** A stand-alone set (the Studio's Particles choice, the chat's "on their own") draws still sprites only: the Kling path (`/more {mode: video}`) builds an effect from a pack's stickers and refuses a set no sticker owns. It needs an effect without a pack. **open**
 
 - A real paid run of the AI-drawn particle sheet from the screen, to see how a real Nano Banana particle sheet cuts (the price and the job path are tested on the fake CLI). **needs a paid test** (W2).
-- Separate Telegram effect/download delivery. **needs Haitham** (per-emoji motion is settled: reaction.md section 8).
-- Burst creation, many packs from one liked sheet (P14; `docs/burst_plan.md`). **needs Haitham** (W27).
+- Separate Telegram effect/download delivery. **needs Haitham** (per-emoji motion is settled: docs/architecture.md "Reactions").
+- Burst creation, many packs from one liked sheet (P14; proposal in git history). **needs Haitham** (W27).
 - Particle sets are not part of the trash purge yet (a deleted set waits in `out/trash/particles/`). **open**.
 - `DEFAULT_SPRITE_PX` 100 vs 200. **needs Haitham** (W21).
 - A preview of the would-be sticker in the video-sheet override dialog. **open**.
+- Optional Lottie Pre-run, Time scale, silhouette feasibility and blend modes require an owner decision and unchanged-default proof before implementation. **needs Haitham**.
 - Older batches with no keyed/raw sheet on disk are not rebuilt when a slice of an animation edit merges back into the sheet (`rebuild_sheet` returns null; nothing breaks). **open, low**.
 - Rule for all of it: effect checks are warnings with "use it anyway"; only Telegram's own limits may block.
 
-## Chat and the agent (`docs/agent-and-chat.md`)
+## Chat and the agent (`docs/architecture.md`)
 
-Still open from the chat audit of 2026-10-02 and the browser look of 2026-10-03, in order of harm:
+Remaining leads from the older chat audit follow. Checkpoint/profile implementation is now in durable turns (`docs/architecture.md` "Chat and the agent"); all five later memory findings are fixed. Reproduce old leads against current source before treating them as confirmed current defects.
 
 1. **Short-message resolution.** "more like this" with a click redoes the clicked sticker; Arabic / Arabizi edit commands become new plans; "the first two" / "the rest" / "them all" resolve to one sticker; "make 5 same as 2" also redoes 2; "redo 3 of the previous batch" edits the current batch; a model-picked sticker is not confirmed; "I loved the last batch" records feedback on the last sticker. **open** (Arabic: also W32).
-2. **Remaining context and feedback limits.** The rule classifier takes booleans, but the model classifier receives profile, last question, held plan, rendered structured summary and a compact focus fence. `summary_structured()` provides direct memory access. The CHAT prose fence still caps at 2,000 characters, so newer subject details/narrative can be omitted; a fresh paid batch leaves `focus.stickers` empty (`graph.py`), so "it / make number 3 happier" can target the OLD batch; the latest pass can be a job with no generation ("animate" says nothing to animate; a FAILED job stays in the summary); subject keys come from the deterministic expander ("falcon" / "falcon stickers" / "a falcon dancing" are three subjects, Arabic collapses to one subject "sticker"); "another" appends the old "Avoid..." text each time (the REQUEST fence cuts at 600 chars, so new preferences are cut first) and the built-in planner pastes that chat wording and the word "sticker" into the Subject line; feedback is consumed while planning and leaks across subjects; "I like 2 and hate 3" records 3 as liked. **open**.
-3. **State and storage.** There is no LangGraph checkpointer or thread id: `out/sessions/S###.json` is the only memory (the Redis `session:S###` copy and most of the Postgres mirror are never read). The settings route (`server.py`) takes no session lock, so a toggle made mid-turn is overwritten by the turn's next save (ask-before-spending turned ON mid-turn reverts to OFF and creates without asking). The session lock (5 min, `cache.py`) outlives a dead server with real Redis, so the chat stays "Thinking" and new messages get 409 for up to 5 minutes, and a turn longer than 5 min loses a user message. Delete during a running turn resurrects the chat; `create` reuses `max(id)+1` after deleting the newest chat, which drops the new chat's rows in Postgres (`ON CONFLICT DO NOTHING`); `n_confirm` clears `pending` before `tools.create`; the generation card is attached only at the final save, so a started job may lack its chat card after a restart (the interruption text now directs the person to the Queue and makes no no-spend promise); a typed message is cleared before the send and lost when it is refused (409 / network); a card for a removed batch makes the page poll forever; every poll downloads the whole session (~600 KB at the caps) and builds a new Agent; one `save_session` is ~900 Postgres statements at the caps, run on every trace step. **open**.
+2. **Remaining context and feedback limits.** The rule classifier takes booleans, but the model classifier receives profile, last question, held plan, rendered structured summary and a compact focus fence. `summary_structured()` provides direct memory access. The CHAT prose fence still caps at 2,000 characters, so newer subject details/narrative can be omitted; focus recovery when a fresh generation has no saved sticker selection still needs current reproduction (checkpoint recovery now searches the same generation); the latest pass can be a job with no generation ("animate" says nothing to animate; a FAILED job stays in the summary); subject keys come from the deterministic expander ("falcon" / "falcon stickers" / "a falcon dancing" are three subjects, Arabic collapses to one subject "sticker"); "another" appends the old "Avoid..." text each time (the REQUEST fence cuts at 600 chars, so new preferences are cut first) and the built-in planner pastes that chat wording and the word "sticker" into the Subject line; feedback is consumed while planning and leaks across subjects; "I like 2 and hate 3" records 3 as liked. **open**.
+3. **Remaining state/storage leads requiring current reproduction.** Settings edits during a turn; Redis lease expiry/restart behavior; delete-during-turn and session ID reuse; initial job/card linkage across interruptions; preserving typed input on 409/network refusal; polling a removed generation; full-session polling and Postgres write volume. Check these against the implemented checkpoints/resume boundary rather than assuming the pre-checkpointer behavior. A complete profile dual-write audit also remains open; taste votes are still JSON-only. **open / revalidate**.
 4. **Smaller.** "continue with a dragon pack instead" at a creator gate approves the pack; the model's intent is trusted unchecked; a down model can cost up to 45 s per call; `ai: True` is hardcoded in another / edit / retry; the edit trace and stored pass show the stub, not the prompt sent. **open**.
 5. **Gaps from the browser look**: an empty "New chat" created by clicking a setting other than stage with no chat open (W22); a chat edit of an animated sticker opens Prepare; "undo" has no "redo"; a bare "the last one" / "wear a hat" with no person and no focus still plans a new batch (W23). **needs Haitham**.
 
 6. **The Telegram chat** (`services/tg_chat.py`, 2026-10-09): a picture sent to the bot is not read yet (it says so); single sheet cells, the editor and
-   the gap slider stay in the browser; never run against the real bot (W49). **open**.
+   the gap slider stay in the browser; never run against the real bot (W51). **open**.
 7. **The claim ledger behind Next batch** (`generation/claims.py`, migration 012, built and tested, not wired): "unclaimed" is still derived from the
    batches (`tasks.session_state`), not from the ledger. Wire `claim_next` for a pack request and "generate more", `mark_requested` when the sheet job
    is created, `link_generation` when its batch exists; the loser of a double click reads the winner's row; `ClaimError` text as the answer. Source:
-   `docs/export to team/mirsal-export-architecture.md` §9-§10.7. **open**.
+   the export architecture §9-§10.7 (full text in git history). **open**.
 8. **A local-model judge run** (no human labels, Haitham 2026-10-07): run `mirsal/local_eval/run.py run` on the current local pick (free), compare
    with the 2026-10-05 baseline (usable rate, median latency, UNJUDGED count), a two-model disagreement re-check, one dated block in
-   `docs/measurements.md`. **open**.
+   `docs/architecture.md` ("Measurements"). **open**.
 
 Other open items:
+
+- Chat interaction proposal (conversational state, conditional decisions, stage slider, target resolution, plan confirmations; built slice in `docs/architecture.md`, decision tables + acceptance checks pending; full text in git history). **needs Haitham**.
 
 - Creator recovery at every external side effect is not proven: checkpoints and tagged video-job lookup cover the lost-animation-pointer window, but initial sheet/session linkage and pack creation can still be interrupted between durable writes. A tagged REQUESTED job not yet scheduled may need Queue recovery. **open**; live crash validation belongs with W6.
 
@@ -56,41 +68,42 @@ Other open items:
 - There is no terminal `mirsal chat`. The reducer's model summary has only run against fakes. **open, low**.
 - A real chat -> Create run and a creator run against the real Higgsfield and a real bot. **needs a paid test** (W6).
 
-## Engine and Studio (`docs/engine-and-studio.md`)
+## Engine and Studio (`docs/architecture.md`)
 
 - **Short export codes** (exports stop emitting `G###`): registry `out/export_codes.json` + allocator (random 4, check, retry) at claim time, lazy
-  backfill at the first export, `export_names` id = the code, the manifest carries both ids, a Postgres column. Source: the export architecture §9-§10.7. **open**.
+  backfill at the first export, `export_names` id = the code, the manifest carries both ids, a Postgres column. Source: the export architecture §9-§10.7 (full text in git history). **open**.
 - **The exporter's bank picker** (Studio export dialog): a bank choice per `unresolved` cell, recorded and reversible. The library update API and resolver diagnostics are built; the picker screen and generation-cell choice route remain open. **open**.
 - **In-batch versions, the rest**: a switcher to look at an earlier animation clip without re-cutting, the Postgres mirror of picks and versions,
   export naming per version (`revision`). **open**.
 - `batch_import_inputs.py` at the repo root does not run (it calls `pl.Config.default()` / `pl.Pace.default()`, which do not exist, prints characters
   cp1252 cannot encode, ignores its arguments and would import a folder twice). Fix it before anyone runs it against the real `out/`. **open**.
 
-- The Studio's JavaScript has node tests on the pure builders (`tests/js`) but no browser smoke test: add one for issue colours, Include anyway, the history folds, the AI captions panel and the bulk move (checked by hand in Chromium on a scratch copy of `out/`; `tests/test_js.py` only guards the shared `ACT` names, that every button has a handler and the shell rules). **open**.
+- **Repeatable browser smoke coverage:** turn the documented copied-data checks into maintained automation for issue colours, reversible overrides, history folds, captions and bulk move; unsampled combinations remain. Browser sweeps now exist in the acceptance/audit evidence, so this is automation maintenance rather than an absence of browser verification. **open**.
+- **Remaining shared-code follow-ups:** Studio edge synchronization and other watcher consumers; range/segment/download/preview/cache presenters. T-024/025 concern saved-set/Emoji sliders; T-031/034/035 retain other download/preview/cache consumers. Revalidate old leads against current code; the five reviewed refactors and API/agent/UI folder redesign are implemented. **open**.
 - A second request while the *pipeline* is busy gets 409 (the provider jobs have their own durable queue). `result.json` is read-modify-write under one in-process lock plus the cross-process writer lock: two request threads can still interleave inside one server (two processes are kept out by the writer lock; every file write is atomic: `tests/test_multiprocess.py`). **open, low**.
-- Add a focused-tier profile for the trash purge / storage area (`docs/testing.md`: the existing profiles do not cover it). **open**.
+- Add a focused-tier profile for the trash purge / storage area (`README.md` "Test budget": the existing profiles do not cover it). **open**.
 
-## Live generation (`docs/generation.md`, `docs/higgsfield.md`, `docs/operator.md`)
+## Live generation (`docs/generation.md`)
 
 - **Paid proof of the face preset**: one `generic emojis` sheet (v4 + core-v1), measure keying and the cut only (never open the media); if limbs
   persist, tighten the v4 clause once (new `_v5` files, never edit v4) and retry once; then one pack at the default gap. About 2 credits + one pack.
   **needs a paid test** (W50).
 
-- S4 re-run with Kling `pro` and the default gap decision (`slot_fill`); S7 decisions (one 3x3 sheet vs single stickers; the engine's outline vs a model-drawn one). **needs a paid test** (W7).
+- S4 re-run with Kling `pro` and the default gap decision (`slot_fill`); remaining S7 outline decision (engine versus model-drawn). **needs a paid test** (W7).
 - The vision judge's recovery is a recommendation (`vision/recovery.py`); nothing executes it. Executing means paid regenerations, so it needs a confirmation flow. **needs Haitham**.
-- Original planner leftovers, ask before building: UAE content rules as a lint (no flags / emblems / text, no real people or rulers, the falcon is always a young brown saker falcon chick, Emirati dress, Commemoration Day solemn), English + Arabic Telegram search keywords per cell (0-20, 64 characters, English first), 4x4 and 16:9 sheets (`split_grid` handles 2x2 and 3x3), no trademarks in pack titles and tags, whether the animation sheet should default to 2x2 (2.25x the pixels per sticker). **needs Haitham**.
+- Original planner leftovers, ask before building: UAE content rules as a lint (no flags / emblems / text, no real people or rulers, the falcon is always a young brown saker falcon chick, Emirati dress, Commemoration Day solemn), English + Arabic Telegram search keywords per cell (0-20, 64 characters, English first), 4x4 and 16:9 sheets (`split_grid` handles 2x2 and 3x3), no trademarks in pack titles and tags. **needs Haitham**.
 - The built-in prompt planner drops everything after `for / in / at / during / with / on` into the file name only (`prompter.SPLIT`: "spiderman in dubai" sends `Subject: spiderman`); the Generate prompt step makes it visible, a context-as-setting-line fix is open. **open**.
 - The Generate prompt step: Enter, the non-live button, the cost of an OpenAI call made by the enhancer. **needs Haitham** (W16, W18, W19).
 - The Higgsfield `wait` and the plan expander have timeouts (300 s create, `timeout_s + 60` wait, 60 s per model call); a *hung chat* was never reproduced, only a turn orphaned by a server restart (fixed). If "thinking" sticks again with a live server, capture the session's last step label: `out/sessions/S###.json` `messages[-1].steps`. **watch**.
 - Stalled-job recovery has not run against the real Higgsfield (J022-J025). **needs a paid test** (W5).
 - Per-chat paid parallelism and `MIRSAL_JOB_MODE=queue` have only run on the fake CLI. **needs a paid test** (W10).
 
-## Batch groups (`docs/engine-and-studio.md`, "Batch groups")
+## Batch groups (`docs/architecture.md`)
 
 - **Suggest a family by meaning**: a batch whose subject/prompt embedding (local `nomic-embed-text`) is close to another family's (G103 "superhero in dubai" vs the Superhero Dubai family) shows one chip *"Looks like Superhero Dubai: Join?"* with **Join** / **Not related** (remembered, never asked again); moving a sticker into a pack whose stickers belong to another family asks the same. Never merges without a click. **open**.
 - **Trace a batch to its request**: jobs carry no chat session (`J046-J048: session None`); record `origin {session, message}` and `intent` (the person's words) on jobs and batches, mirrored to Postgres, so a chat edit is linked both ways. **open**.
 
-## Store and search (`docs/store-and-search.md`)
+## Store and search (`docs/architecture.md`)
 
 - 3B: the eval set and precision@5 >= 0.8; an Arabic / Arabizi query parser (a small model; deterministic patterns today); a search-result cache keyed by a `pool_version` counter (embeddings and plans are cached, hits are not); the gap flow shows no price. **needs Haitham** (W12).
 - 3C: an `edge_quality` check (a soft alpha gradient, not a binary edge), `--subject N`, a stronger matte (BiRefNet, MIT) and SAM 2 click-to-refine, HEIC input (`pillow-heif`), `SOURCE_PHOTO` asset rows, optional paid AI motion (price first), a composites test (IoU >= 0.92). **needs Haitham** (W14).
@@ -101,30 +114,30 @@ Other open items:
 - The trash purge's SQL (`store/purge_rows.py`) has only run against a recording fake connection, never a real Postgres. **needs a run** (W4).
 - Embeddings stay local and hardcoded (`services/embed.py` `EMBED_MODEL`, decided): no hosted embeddings, no swap of the embedding model (it would change the vector dimension and invalidate every stored vector in `005_vectors.sql`).
 
-## API and production (`docs/api.md`)
+## API and production (`docs/api-integration.md`)
 
-- Reference images per user, the Redis cache keys (`u:local`), moving accounts out of `out/users.json` (packs and the Library are per person since 2026-10-05, `docs/api.md`). **open** (the office LAN).
+- Reference images per user, the Redis cache keys (`u:local`), moving accounts out of `out/users.json` (packs and the Library are per person since 2026-10-05, `docs/api-integration.md`). **open** (the office LAN).
 - Per-job temp directories and retention policies; the Studio has no queue panel for DEAD rows yet (`mirsal queue status` shows them). **open**.
 - **Contract polish:** a role-dependent shape for `GET /api/generations` (an owner also gets `health`, `paths`, `stale`); `GET /api/live/cost` answers `200 {"credits": null, "error"}` when a price is unknown (by design for the page, not a status code); camelCase leaks in a snake_case API (`updatedAt` in `media/video_project.py`, `packId` in `console/server.py`: the Studio reads them); the Host check needs the port in the header; no `Deprecation` policy yet; pagination is opt-in on three lists only (`/api/library`, `/api/tasks`, `/api/usage`, `/api/watch` still return everything); `415` for a wrong `Content-Type` is not built (W35). **open**.
 - The regression suites (visual, chroma, transformation, conversation datasets) in one command. The metrics (`flow/metrics.py`) count what happened; what they mean for taste waits for the judge's calibration (W11). **open**.
-- The React frontend `mirsal/web/`: extend or delete (W33); the editor's mobile screens. **needs Haitham**.
-- **Sticker export follow-up.** [Export architecture](export%20to%20team/mirsal-export-architecture.md) §9–10. **Open:** pack-intent resolver and chat/claim wiring, public generation short-code allocator and backfill, exporter bank picker UI and generation-cell choice endpoint, filename length/NFC checks, in-batch versions and custom presets. Current exports use `G###` and revision 1. **needs Haitham** (the go for this remaining scope; needs a W number).
+- The parked React frontend `mirsal/web/`: retain or delete (W33). **needs Haitham**. Populated editor phone repairs are technical findings UX-01, not an owner acceptance gate.
+- **Sticker export follow-up.** the export architecture §9–10 (full text in git history). **Open:** pack-intent resolver and chat/claim wiring, public generation short-code allocator and backfill, exporter bank picker UI and generation-cell choice endpoint, filename length/NFC checks, in-batch versions and custom presets. Current exports use `G###` and revision 1. **needs Haitham** (the go for this remaining scope; needs a W number).
 - The retired History screen (`console/history.js`, `#/history`). **needs Haitham** (W34).
 - Content safety, OpenAI calls without a plan card, `out/` in git, a backup command. **needs Haitham** (W18, W29, W30, W31).
-- A native FastAPI rewrite of the legacy routes (today they run through the adapter over the original handler, byte-identical; `docs/http_route_inventory.md` is the baseline). After v1.0: it changes nothing a person sees. **open, low**.
-- The office LAN runs on this PC: if it sleeps or restarts, everyone is offline (`serve --lan` says so on start). A machine that stays on, or a hosted server (paused: `deployment_plan.md`), would remove this. **needs Haitham**.
-- Public rate limiting and Google OAuth: **parked** (Haitham, 2026-10-02; the office LAN uses email + password instead, `api.md` "Office accounts on the LAN"). The engine's per-minute 429 (`console/server.py` `_wait`, 65/min keyed on user id + kind, `Retry-After`) stays as it is.
+- A native FastAPI rewrite of the legacy routes (today they run through the adapter over the original handler, byte-identical; `GET /api/openapi.json` is the baseline). After v1.0: it changes nothing a person sees. **open, low**.
+- The office LAN runs on this PC: if it sleeps or restarts, everyone is offline (`serve --lan` says so on start). A machine that stays on, or a hosted server (paused), would remove this. **needs Haitham**.
+- Public rate limiting and Google OAuth: **parked** (Haitham, 2026-10-02; the office LAN uses email + password instead, `docs/api-integration.md`). The engine's per-minute 429 (`console/server.py` `_wait`, 65/min keyed on user id + kind, `Retry-After`) stays as it is.
 
-## Office LAN (`docs/api.md` "Office accounts on the LAN", "Trending")
+## Office LAN (`docs/api-integration.md`)
 
 - **The admin role** manages people (Users > People, the bot's buttons via `admin_bot.apply`) and can take any pack off Trending (making a pack public is its maker's); everywhere else it is treated as a member. Whether an admin should also see everyone's batches is undecided. **needs Haitham**.
 - The Telegram admin bot runs only with `serve --lan` and a configured bot; its cards have run against a fake Telegram only (`tests/test_accounts.py`). The first real sign-up is the live check. **needs a run**.
 - Ticket drafts use the LOCAL model only (free); with no local model every ticket keeps its preset questions. **open, low**.
 - `GET /api/chat/sessions/{id}/stream` sends the last message only; a turn that adds two messages at once is caught by the full read at `done`. **open, low**.
 
-## Help & Support (`docs/agent-and-chat.md` "Support")
+## Help & Support (`docs/architecture.md` "Chat and the agent")
 
-- FAQ retrieval is measured on the seeds only (`docs/agent-and-chat.md` "Measured so far"). Still unmeasured, all agent-runnable on a scratch copy with the local 9B:
+- FAQ retrieval is measured on the seeds only (`docs/architecture.md` "Chat and the agent"). Still unmeasured, all agent-runnable on a scratch copy with the local 9B:
   - answers end to end: cited, nothing invented, latency;
   - real screenshots read by the vision model (the 30-case set has ten text descriptions, not images);
   - ranking over the combined FAQ + docs + notes corpus;
@@ -138,13 +151,15 @@ Other open items:
 
 ## Testing
 
+- Agent area inherits **322 tests / 4 failures / 9 errors**; triage existing failures with fakes. Current JS 390/390 and wrapper 18/18 are evidence, not outstanding reruns. **open**.
+
 - `tests.test_batches.RemoveRoutes` fails now and then on Windows in teardown (a file still locked). **open**.
 
 - `tests.test_golden` failed intermittently once under heavy load (another Python suite running at the same time): one test left the server busy (`409 busy`) for the next. It passes alone and as a suite on a quiet machine (FastAPI and stdlib alike). If it returns, make `GoldenPathTests.wait` also wait for `busy` to stay false for a moment before the next create. **watch**.
 
 ## Deployment: parked
 
-Paused by Haitham on 2026-10-02: nothing here is worked on, extended, turned on or deleted until he asks. The reasoning, phases, runbook and open questions are in [`deployment_plan.md`](deployment_plan.md); the prepared files are `deploy/` (map: `deploy/README.md`); the questions are W40-W48. The groundwork is merged into `main`; only `main` and `edit-design` remain. Of the prepared slice, only **Telegram never-twice** (`services/telegram.py` `fingerprint()`, `send(mode="once" | "replace" | "new_set")`, `tests/test_telegram.py::NeverTwice`) and the **library fingerprint** are app work worth keeping; the gateway, SQL, Docker and Render files stay untouched. `deploy/gateway/ratelimit.py` stays inert.
+Paused by Haitham on 2026-10-02: nothing here is worked on, extended, turned on or deleted until he asks. The reasoning, phases, runbook and open questions are in [`deployment_plan.md`](deployment_plan.md); the prepared files are `deploy/` (map: `deploy/README.md`); the questions are W40-W48. The groundwork and current implementation are consolidated in `main`; deployment remains parked. Of the prepared slice, only **Telegram never-twice** (`services/telegram.py` `fingerprint()`, `send(mode="once" | "replace" | "new_set")`, `tests/test_telegram.py::NeverTwice`) and the **library fingerprint** are app work worth keeping; the gateway, SQL, Docker and Render files stay untouched. `deploy/gateway/ratelimit.py` stays inert.
 
 ## Redesign
 

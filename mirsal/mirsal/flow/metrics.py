@@ -6,7 +6,7 @@
   count for neither side.
 - **regeneration rate**: the share of batches that are a redo (`regen_of` set: one sticker made again as a 1x1 child).
 - **failed batches**: batches with no READY sticker at all.
-Counts only: what the numbers mean for taste is Haitham's call (the vision judge is still uncalibrated, docs/measurements.md)."""
+Counts only: what the numbers mean for taste is Haitham's call (the vision judge is still uncalibrated, docs/architecture.md ("Measurements"))."""
 from __future__ import annotations
 
 import statistics

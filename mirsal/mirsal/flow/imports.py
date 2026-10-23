@@ -357,7 +357,7 @@ def sheet_match(res: dict, d: Path, frame: Path) -> dict:
     return {"sheet": best, "distance": dist[best], "distances": dist}
 
 
-def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "", grid_ok: bool = False) -> tuple[int, dict]:
+def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "", grid_ok: bool = False, again: bool = False, grid=None) -> tuple[int, dict]:
     """Import INSIDE a batch (Haitham, 2026-10-08: "import in Stickers and in Animation, proper naming").
     - A picture becomes the NEXT GENERATION of this batch, like Regenerate: the batch's own plan (cells, tags, emoji) and naming, `parent` = the batch's root,
       `regen_of` = its main generation; the stills are cut from the picture.
@@ -365,8 +365,8 @@ def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "", 
       the image sheet -> it is the batch's prepared 3x3 video and animates the kept stickers (the earlier clips kept as versions; when its first frame
       shows another grid than the batch's, a 409 with `detected_grid` asks first and `grid_ok` cuts it with the batch's grid anyway); a video sheet -> attached
       as the next animation (a sheet that already has a video is retired first with `redo_video`, and a new one is built at the same gap).
-    The answer says which one was used. Free: nothing here calls a provider. No duplicate check (Haitham, 2026-10-15: "i dont need that check, user picks
-    an image -> slice -> picks another video used before -> slice -> export"): a file used before is simply cut again."""
+    The answer says which one was used. Free: nothing here calls a provider. Never twice by accident: the same bytes answer where they already are,
+    unless `again` (Haitham, 2026-10-15: "import video sheet manually should allow 'add to pack' and then import again as batch or as gen#")."""
     from . import pipeline as pl, gates, groups, sources
     from ..generation import prompter
     ext = Path(name).suffix.lower()
@@ -376,6 +376,9 @@ def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "", 
     res = pl.read_result(c.out, main)
     if res.get("kind") == "particles":
         raise ImportError("This batch is a particle sheet: import into a sticker batch", 409)
+    hit = None if again else known(c.out, "", data)
+    if hit:
+        return 200, {"duplicate": True, "batch": fam["root"], **hit}
     if not c.lock.acquire(blocking=False):
         raise ImportError("busy: a job is running, wait for it to finish", 409)
     handed_off, row = False, None
@@ -384,7 +387,7 @@ def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "", 
         info: dict = {"batch": fam["root"], "main": fam["picked"]}
         if ext in IMAGE:
             try:
-                pl.load_rgb(f)
+                rgb = pl.load_rgb(f)
             except Exception as e:
                 f.unlink(missing_ok=True)
                 raise ImportError("This image cannot be opened; choose a valid PNG, JPEG or WebP") from e
@@ -392,6 +395,10 @@ def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "", 
                 plan = prompter.validate_plan(json.loads((pl.gen_dir(c.out, main) / "prompts.json").read_text(encoding="utf-8")))
             except (OSError, ValueError) as e:
                 raise ImportError(f"{res['generation_id']} has no saved plan to cut this picture with", 409) from e
+            from ..engine.grid import detect_grid
+            detected = tuple(map(int, grid.split("x"))) if grid else detect_grid(rgb, c.cfg.chroma)
+            if detected in ((2, 2), (3, 3)) and tuple(plan["grid"]) != detected:
+                plan = prompter.expand(res.get("prompt") or prompt or res["task"], detected)
             src = res.get("source") or {}
             pick = sources.Pick(subject=src.get("subject") or res["task_slug"], subject_id=str(src.get("subject_id") or "import"), variant=1, n_variants=1, sheet=f, video=None)
             tok = pl.OWNER.set(user["id"])
@@ -401,14 +408,14 @@ def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "", 
             finally:
                 pl.OWNER.reset(tok)
             new = pl.read_result(c.out, gid)
-            new["plan_source"] = f"the plan of {res['generation_id']} (imported picture)"
+            new["plan_source"] = f"imported picture ({plan['grid'][0]}x{plan['grid'][1]}) into {res['generation_id']}"
             new["imported"] = {"name": str(name)[:200], "into": fam["root"]}
             for st in new["stickers"]:
                 pl.hist(st, "sheet", "human", "IMPORT", f"imported {Path(name).name} into the batch of {fam['root']}")
             pl.write_result(c.out, gid, new)
             work = lambda: pl.run_stills(c.out, gid, c.cfg, c.pace)
             kind, info["generation"] = "sheet", f"G{gid:03d}"
-            said = f"Imported as the next generation of {fam['root']} ({new['generation_id']}), cut with the batch's own cells and tags."
+            said = f"Imported as the next generation of {fam['root']} ({new['generation_id']}), cut as {plan['grid'][0]}x{plan['grid'][1]}."
         else:
             from ..engine.ffmpeg import probe
             try:
@@ -506,7 +513,7 @@ def _into_batch(c, user: dict, name: str, data: bytes, batch, prompt: str = "", 
 
 
 def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generation=None, sheet=None, job_id=None, retry=False, job=None, as_new=False,
-                batch=None, grid_ok=False) -> tuple[int, dict]:
+                batch=None, grid_ok=False, again=False, grid=None) -> tuple[int, dict]:
     """One serialized import lifecycle. Console holds the cross-process writer lock.
 
     The ledger reserves bytes before mutation, records the batch before background
@@ -517,11 +524,12 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
     `as_new` imports as an unrelated batch even when a failed job matches.
     `batch` (any G### of a batch) imports INSIDE that batch (`_into_batch`): a picture is its next generation, a video its next animation;
     `grid_ok` cuts a video of the image sheet with the batch's grid although its first frame looks like another one.
-    A file Mirsal already has is imported again, a new batch each time (Haitham, 2026-10-15: no duplicate check for a person's own file); only
-    `retry` looks the earlier import up, to finish that same batch.
+    `again` imports bytes Mirsal already has once more (into `batch`, or as a new batch), instead of answering where they already are.
     """
     from . import pipeline as pl, gates, sources
     from ..media.video_project import MAX_UPLOAD
+    if grid not in (None, "2x2", "3x3"):
+        raise ImportError("Grid must be Auto, 2x2 or 3x3")
     if not data or len(data) > MAX_UPLOAD:
         raise ImportError("empty upload" if not data else "file too large", 400 if not data else 413)
     ext = Path(name).suffix.lower()
@@ -529,7 +537,17 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
         raise ImportError("Import a PNG, JPEG, WebP, MP4, MOV or WebM file")
     with _LOCK:
         if batch is not None and str(batch).strip():
-            return _into_batch(c, user, name, data, batch, prompt, grid_ok=grid_ok)
+            if grid:
+                from . import groups
+                main = generation_id(groups.family(c.out, generation_id(batch))["picked"])
+                existing = pl.read_result(c.out, main)
+                if tuple(existing.get("grid") or (3, 3)) != tuple(map(int, grid.split("x"))):
+                    return import_file(c, user, name, data, prompt=prompt, as_new=True, again=again, grid=grid)
+            return _into_batch(c, user, name, data, batch, prompt, grid_ok=grid_ok or bool(grid), again=again, grid=grid)
+        if grid and generation is not None and ext in VIDEO:
+            existing = pl.read_result(c.out, generation_id(generation))
+            if tuple(existing.get("grid") or (3, 3)) != tuple(map(int, grid.split("x"))):
+                generation, sheet, as_new = None, None, True
         if job:
             return _recover(c, user, name, data, _linkable(c.out, user, job_id or job_id_of(name), job, name), prompt)
         ticket = job_id or job_id_of(name)
@@ -540,9 +558,9 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
                                   409, hint={"candidates": candidates(c.out, ticket, user["id"])})
             if len(cands) == 1:
                 return _recover(c, user, name, data, cands[0], prompt)
-        hit = known(c.out, "" if as_new else name, data, None if as_new else job_id) if retry else None      # only a retry looks for the earlier import
-        if hit and not (hit.get("import") and hit.get("recoverable")):
-            hit = None                                                   # nothing to finish there: a new batch
+        hit = None if again else known(c.out, "" if as_new else name, data, None if as_new else job_id)      # as new: only the same bytes are a duplicate, not the failed job's id; again: none
+        if hit and not (retry and hit.get("import") and hit.get("recoverable")):
+            return 200, {"duplicate": True, **hit}
         if not c.lock.acquire(blocking=False):
             raise ImportError("busy: a job is running, wait for it to finish", 409)
         row = None
@@ -617,7 +635,9 @@ def import_file(c, user: dict, name: str, data: bytes, prompt: str = "", generat
                                         sheet=first_frame(f) if alone else f, video=f if alone else None)
                     tok = pl.OWNER.set(user["id"])
                     try:
-                        gid = pl.start(subject, c.out, c.inp, pick=pick)
+                        from ..generation import prompter
+                        plan = prompter.expand(subject, tuple(map(int, grid.split("x")))) if grid else None
+                        gid = pl.start(subject, c.out, c.inp, pick=pick, regen_plan=plan)
                     finally:
                         pl.OWNER.reset(tok)
 

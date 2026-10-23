@@ -26,7 +26,7 @@ MOTION_PATH = 0.01       # ... or the alpha centroid travels at least 1% of the 
 PASS, WARN = "PASS", "WARN"
 
 # ---- the screen of a video from text (measured on the returned clip BEFORE keying; every number is in 0..255 colour levels) ----
-# Calibrated 2026-10-03 on the three real Kling clips (docs/effects.md section 3), numbers as (panel_step, quarter_step, bg_std, seam_line):
+# Calibrated 2026-10-03 on the three real Kling clips (docs/architecture.md ("Reactions")), numbers as (panel_step, quarter_step, bg_std, seam_line):
 #   J037 2x2, rated great:                       (2.8, 3.0, 1.6, 27.2)     J038 3x3, poor, patches of darker blue: (4.2, 5.8, 8.5, 0.8)
 #   J039 2x2 from the app, drew walls and panels: (20.0, 9.0, 11.0, 2.0)
 # A limit sits well above the clean clip and below the clip that drew walls; the screen text in the console reads `key_is_seamless`.

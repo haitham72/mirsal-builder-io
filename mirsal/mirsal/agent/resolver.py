@@ -8,6 +8,7 @@ Ambiguity: when two candidates are equally plausible, ask ONE short question; wh
 from __future__ import annotations
 
 from .subjects import parse_multi as _parse_multi
+from .profile import detect_tone
 
 import re
 from dataclasses import dataclass, field
@@ -445,7 +446,7 @@ NAMES_RX = (r"\b(?:rename|re-name|better names?|new names?|nicer names?|suggest 
 
 
 def particles_intent(text: str, has_set: bool) -> str | None:
-    """Which request about PARTICLE SETS this is (docs/agent-and-chat.md, particle sets in the chat): make | more | delete | restore | assign, or None. "particle effects" (the working-session card), a singular "particle burst"
+    """Which request about PARTICLE SETS this is (docs/architecture.md, particle sets in the chat): make | more | delete | restore | assign, or None. "particle effects" (the working-session card), a singular "particle burst"
     and a sticker request are not it. A request that names no particles ("generate more", "also use them for the Princess pack") is about the set the chat has in focus, so it needs one."""
     t = text.lower()
     if re.search(r"\beffects?\b", t):
@@ -499,6 +500,8 @@ def classify(text: str, has_pending: bool, has_generation: bool, has_selection: 
         return ["CONFIRM"], 0.95
     if has_pending and is_no(t):
         return ["CANCEL"], 0.95
+    if detect_tone(t):
+        return ["PROFILE"], 0.95
     polite = re.match(r"^(?:please\s+)?(?:can|could|would|will) you\s+(?:please\s+)?(.*?)\s*\??$", t)
     if polite and re.match(r"^(?:make|create|generate|give|draw|design|build|redo|regenerate|change|fix|replace|swap|improve|animate|add|remove|turn|put)\b", polite.group(1)):
         t = polite.group(1)                                          # "can you make me a falcon?" is a request, not a question about me

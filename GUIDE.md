@@ -98,12 +98,12 @@ Naming (never hand-build paths): batches `out/G###-<slug>-<UTC>/`, jobs
 | you click | in | it posts | backend |
 |---|---|---|---|
 | Resize / Size stepper | `studio-core.js` `motionRow` | `/resize`, `/video_size` | `flow/pipeline.py` |
-| Tile Size / X / Y sliders, Reset | `studio-core.js` `vsizeRow` | `/position {index, offset, scale}` | `flow/pipeline.py` |
+| Tile Size / X / Y sliders, Reset | `studio-core.js` `vsizeRow` | `/position` + `/video_size`; Reset clears position without reslice then clears scale with one reslice | `flow/pipeline.py` |
 | Frame editor Apply | `studio-core.js` `vzCard` | `/position` + `/anim_preview` (one-frame test) | same |
 | Download .zip | batch header | `/generations/{id}/export.zip` | `flow/batches.py` |
 | Export to collection | pack / batch menu | `/export-collection` (queued) | `services/collection.py` |
 | Send to Telegram | pack screen | Telegram routes | `services/telegram.py` |
-| Use my own sheet | import dialog | `/api/import` (raw bytes) | `flow/imports.py` — a used file is cut fresh, no duplicate check |
+| Use my own sheet | import dialog | `/api/import` (raw bytes) | `flow/imports.py` — duplicates offer Open existing / Import again as a new batch, with grid-mismatch consent |
 | Use it anyway (any rejected picture) | tile / sheet cell / chat card | `/generations/{id}/allow` | `engine/verify.py` catalogue |
 
 Every `data-act=<name>` in markup has an `ACT.<name>` handler posting a URL —
@@ -133,10 +133,10 @@ listed under `renamed`/`retired` in `mirsal/tests/data/ui_baseline.json`
 | Zip manifest rows | `flow/batches.py` `export_zip` (batch), `media/library.py` `export_zip` (pack) | per-sticker fields |
 | Grey PNG | `media/grey.py` (`alpha_of` → first visible frame, `grey_png` → #BFBFBF) | silhouette logic |
 | CMS emoji/tags | `services/collection.py` (`tags_of`, `items_from_zip`, `thumbnail`) | metadata + thumbnail bytes |
-| CMS reference | `docs/Api/AddCollection-API .md` | field docs |
+| CMS reference | `docs/api-integration.md` | field docs |
 | Telegram send | `services/telegram.py` | delivery |
 | Size/codec/duration rules | `engine/verify.py` (stage `telegram`) | limits |
-| API shape | `console/app_models.py` + `console/openapi.py` + `docs/api-parts/` + label in `console/*.js` | contract end to end |
+| API shape | `api/schemas/` + `api/routers/` + `console/openapi.py` + `docs/api-integration.md` + label in `console/ui/` | contract end to end |
 
 > Debugging rule: the CMS shows **our** thumbnail PNG at
 > `user_media/Emoji_Assets/{emoji}.png` — a wrong picture there means our
@@ -151,7 +151,7 @@ listed under `renamed`/`retired` in `mirsal/tests/data/ui_baseline.json`
 |---|---|
 | Where is feature X? | `rg <DistinctiveName>` from root (`vsizeRow`, `export_zip`, `spLibHtml`…) |
 | What does this button do? | search `data-act=<name>` → `ACT.<name>` → its `post(...)` URL |
-| Is this route real? | `docs/http_route_inventory.md`, then `console/app.py` |
+| Is this route real? | `GET /api/openapi.json`, then `api/app.py` |
 | What should this screen do? | `docs/<area>.md` index → read only that section file |
 | Which actions exist? | `console/inventory.py` + `tests/data/ui_baseline.json` |
 | How is this tested? | `mirsal/tests/test_<area>.py`, `mirsal/tests/js/*.test.js` (browser-less UI) |

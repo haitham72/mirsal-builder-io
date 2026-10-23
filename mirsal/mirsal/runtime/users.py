@@ -187,7 +187,7 @@ class UserStore:
             return None
         return None if u.get("disabled") else dict(u, via="gateway")
 
-    # ---------- office accounts on the LAN (docs/api.md, Office accounts on the LAN): email + password, approval, sessions ----------
+    # ---------- office accounts on the LAN (docs/api-integration.md): email + password, approval, sessions ----------
     def _norm_email(self, email: str) -> str:
         e = str(email or "").strip().lower()
         if not re.fullmatch(r"[a-z0-9._%+-]{1,64}@[a-z0-9.-]{1,190}", e):
@@ -328,7 +328,7 @@ class UserStore:
         return self.public(u)
 
     def charge(self, uid: str, credits: float) -> dict | None:
-        """Credits per person (docs/api.md, Office accounts on the LAN): `credits` > 0 spends, < 0 gives back. The owner `local` has no balance."""
+        """Credits per person (docs/api-integration.md): `credits` > 0 spends, < 0 gives back. The owner `local` has no balance."""
         if uid == "local":
             return None
         with _LOCK:

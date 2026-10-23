@@ -181,7 +181,7 @@ def _pieces_from_note(note: str) -> list[str]:
         return []
 
 
-# ---------- the particle SET of a whole effect (one set for the pack, drawn once: docs/effects.md) ----------
+# ---------- the particle SET of a whole effect (one set for the pack, drawn once: docs/architecture.md ("Reactions")) ----------
 SET_VERSION = "effect_set_v1"
 SET_MAX = 12                     # candidate particles offered at most
 SET_ASK = "8 to 12"              # what the model is asked for ...

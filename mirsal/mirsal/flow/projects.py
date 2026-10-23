@@ -1,4 +1,4 @@
-"""The project map (docs/redesign_plan.md §6, redesign phase 3): ONE JSON tree of everything a batch belongs to, so the Studio's map column never stitches it
+"""The project map (docs/design.md, redesign phase 3): ONE JSON tree of everything a batch belongs to, so the Studio's map column never stitches it
 from four calls in the browser (rule 11). A pure read of what exists; nothing is migrated or written.
 
     Project = one idea: a "pack of batches" (pipeline._packs: the same request by the same person within PACK_GAP_S, or a drag-and-drop link)

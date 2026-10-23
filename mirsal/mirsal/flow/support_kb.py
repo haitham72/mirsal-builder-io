@@ -1,4 +1,4 @@
-"""What the support agent may read (docs/agent-and-chat.md "Support"): published FAQ entries, the repo's `docs/`, and, for the owner and admins only, its code.
+"""What the support agent may read (docs/architecture.md ("Chat and the agent")): published FAQ entries, the repo's `docs/`, and, for the owner and admins only, its code.
 
 The repo is the path in `MIRSAL_SUPPORT_REPO` (`mirsal/.env`; unset = the FAQ alone). `reindex` cuts `docs/**/*.md` into heading sections and the app's
 source (`mirsal/mirsal/**`, `migrations/`) into blocks, keeps them in `out/support/index.json` (the record, with each file's sha256 so an unchanged file is
@@ -24,7 +24,7 @@ from ..runtime import atomic
 REPO_VAR = "MIRSAL_SUPPORT_REPO"
 ENOUGH = {"vector": 0.70, "lexical": 0.45}         # the best FAQ/doc hit at or above this answers; below it staff also get code (nomic scores loosely related text 0.6-0.7)
 # the trackers, plans, reviews and developer notes are for staff (kind `note`): they answer the owner and admins, never a member
-INTERNAL_DOCS = {"waiting-for-haitham.md", "backlog.md", "review.md", "dev-notes.md", "testing.md", "http_route_inventory.md", "measurements.md"}
+INTERNAL_DOCS = {"waiting-for-haitham.md", "backlog.md"}
 INDEX_VERSION = 2                                   # a new version cuts every file again (the kinds or the cut changed)
 STAFF_KINDS = ("note", "code")
 NEVER_NAMES = {".env", "opencode.json", "telegram-id.md", ".env.local"}

@@ -4,7 +4,7 @@
  --paper:#F7F9FC;--surface:#FFFFFF;--ink:#172235;--ink-2:#46566B;--muted:#7A889B;--line:#E4EAF1;--fill:#EFF3F8;
  --blue:#3B82F6;--blue-d:#2563EB;--blue-l:#EAF2FF;--blue-bd:#C9DCFD;
  --ok:#12A16B;--ok-l:#E8F7F0;
- /* the app's locked issue colours (docs/dev-notes.md): orange out of bounds, purple bad green screen, yellow bad loop, pink look or motion, blue file limit, red blocked */
+ /* the app's locked issue colours (README.md): orange out of bounds, purple bad green screen, yellow bad loop, pink look or motion, blue file limit, red blocked */
  --i-bounds:#F08A24;--i-green:#8B5CF6;--i-loop:#E5B400;--i-look:#E0559A;--i-file:#3B82F6;--i-block:#E5484D;
  --fs-1:12px;--fs-2:13.5px;--fs-3:15px;--fs-4:18px;--fs-5:24px;--fs-6:34px;
  --r-1:8px;--r-2:12px;--r-3:18px;--r-pill:999px;

@@ -133,3 +133,39 @@ test('the first start of a session opens Home from any screen, once; a link to o
   assert.equal(first('#/pack/20b742ee'), 'false,false', 'a deep link is kept');
   assert.equal(run(`hmFirstStart({getItem(){throw 0}},'')`), false, 'no storage: the hash decides, as before');
 });
+
+const loadPub = () => loadConsole(['trending.js', 'home.js'], { extra: STUB });
+const trow = (pid, name, by, likes, stickers) => ({ pack_id: pid, name, by, likes, liked: false, comments: 0, views: 5, uses: 0,
+  shared_at: 10, shared_by: 'local', cover: stickers.length ? { id: stickers[0].id, type: stickers[0].type } : null,
+  sticker_list: stickers, stickers: stickers.length, sticker_count: stickers.length, reaction_count: 0, mine: false, score: likes });
+const pubPacks = [trow('sp1', 'Sun', 'Haitham', 2, [st('s1', 'animated'), st('s2')]), trow('sp2', 'Moon', 'Rana', 0, [st('s3')])];
+
+test('an empty library shows the most-liked public packs, opening Trending detail', async () => {
+  const run = loadPub();
+  run(`LIB={packs:[]};APIREPLIES.push({ok:true,j:{packs:${JSON.stringify(pubPacks)}}})`);
+  await run(`RENDER.home()`);
+  const page = run(`$('s-home').innerHTML`), gal = run(`$('hm-gal').innerHTML`);
+  assert.equal(run('APICALLS'), 1, 'one Trending read feeds the showcase');
+  assert.match(page, /Loved by the community/);
+  assert.match(page, /Search public stickers/);
+  assert.doesNotMatch(page, /No packs yet/);
+  for (const id of ['sp1', 'sp2']) assert.match(gal, new RegExp(`data-act=tropen data-id="${id}"`));
+  assert.ok(gal.indexOf('sp1') < gal.indexOf('sp2'), 'the most-liked order is kept');
+  assert.match(gal, /\/api\/trending\/sp1\/file\/s1/);
+  assert.match(gal, /Sun · Haitham/);
+  assert.match(gal, /♥ 2 · View ↗/);
+  assert.match(page, /data-act=hmtr/, 'more lives in the Trending tab');
+});
+
+test('a library of your own never asks Trending; nothing anywhere still asks for a first pack', async () => {
+  const run = loadPub();
+  run(`LIB={packs:${JSON.stringify(packs)}}`);
+  await run(`RENDER.home()`);
+  assert.equal(run('APICALLS'), 0);
+  assert.match(run(`$('hm-gal').innerHTML`), /data-act=openpack data-id="p1"/);
+  run(`LIB={packs:[]};APIREPLIES.push({ok:true,j:{packs:[]}})`);
+  await run(`RENDER.home()`);
+  assert.match(run(`$('s-home').innerHTML`), /No packs yet/);
+  run(`ACT.hmtr()`);
+  assert.equal(run(`location.hash`), '#/library');
+});

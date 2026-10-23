@@ -1,4 +1,4 @@
-"""The verifier: ONE catalogue of every check on the golden path (docs/engine-and-studio.md, "The verifier").
+"""The verifier: ONE catalogue of every check on the golden path (docs/architecture.md, "Engine").
 
 Python judges what is *correct*; humans (and from Phase 3 the VLM) judge what is *good*. A BLOCK failure is final: the
 API refuses an APPROVE on it. A WARN is shown to the human at the gate. The verifier is deterministic (same bytes in,
@@ -110,7 +110,7 @@ def check(stage: str, cid: str, severity: str, gate: bool = False):
     return deco
 
 
-# A PARTICLE sheet (`inp["particles"]`, a batch with `kind: particles`, docs/effects.md) is not a Telegram sticker: its layout is known and its cells are the inputs of a simulation, so no
+# A PARTICLE sheet (`inp["particles"]`, a batch with `kind: particles`, docs/architecture.md ("Reactions")) is not a Telegram sticker: its layout is known and its cells are the inputs of a simulation, so no
 # sticker rule may stop a cell (Haitham, 2026-10-03: never a block a person cannot get past). Only what makes a cell unusable at all still blocks: a file that does not open, a sheet with
 # no key screen at all (one free click, "Cut it anyway"), a cell with nothing in it. Every other failing BLOCK is reported as a WARN with its note, and the cell stays READY.
 PARTICLE_KEEP = {"sheet": ("sheet_decodes", "background_is_key"), "still": ("blank_cell",)}

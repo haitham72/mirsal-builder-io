@@ -32,6 +32,8 @@ class TelegramChatTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.c.wait_chat(); cls.c.wait_jobs()
         cls.srv.shutdown(); cls.c.release_writer()
+        from mirsal.agent.graph import Agent
+        Agent.close_all()
         cls.hf.stop(); cls.env.stop(); cls.tmp.cleanup()
 
     def setUp(self):

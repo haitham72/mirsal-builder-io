@@ -7,6 +7,26 @@ const { loadConsole } = require('./console_vm');
 const FILES = "[{file:'Sad Emoji.json',name:'Sad Emoji',w:1500,h:1500,fps:25,frames:54,saved:false,settings:{},morph_targets:[]},{file:'Star.json',name:'Star',w:512,h:512,fps:30,frames:45,saved:true,settings:{count:10},morph_targets:[]}]";
 const START = "{magnitude:1,speed_var:0,speed_pulse:0,pulse_hz:2,gravity:1,vortex:0,spin:1,flip:0,flip_var:0,count:28,spread:360,particle_size:1,size_var:.375,size_in_dur:0,size_out_dur:0,fade_start:0,fade_dur:0,fade_var:0,morph_at:0,morph_var:0,children:0,child_size:.5,child_size_var:0,seed:1}";
 
+test('Library selection redraws the visible screen and mounts its player despite a hidden reaction editor', async () => {
+  const r=loadConsole(['reactions.js','lottiestyle.js']);
+  r(`route_='library';LS.files=${FILES};LS.start=${START};RXS.tab='lottie';
+    let redraws=0,mounted=null;
+    function spLibRefresh(){redraws++}
+    const visible={isConnected:true,querySelector:()=>null},hidden={isConnected:true};
+    DOMSTUB['s-library']={querySelector:()=>visible};
+    DOMSTUB['s-reactions']={querySelector:()=>hidden};
+    document.querySelector=()=>hidden;
+    globalThis.window={lottie:{loadAnimation:o=>{mounted=o;return {destroy(){}}}}};
+    ACT.lspick({dataset:{f:'Star.json'}});`);
+  assert.equal(r('redraws'),1);
+  assert.equal(r('LS.sel'),'Star.json');
+  await r('Promise.resolve()');
+  r('LS.doc={layers:[]};');
+  await r('lsMount()');
+  assert.equal(r('mounted.container===visible'),true);
+  assert.equal(r('mounted.autoplay'),true);
+});
+
 test('the Style switch: Emoji style and Lottie style, both always offered', () => {
   const r = loadConsole(['reactions.js', 'lottiestyle.js']);
   const h = r('rxStyleBar()');

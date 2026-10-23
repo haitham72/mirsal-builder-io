@@ -1,4 +1,4 @@
-"""What each person made and spent (the Users dashboard, docs/api.md "Users"): aggregates computed on request from the stores that already exist, nothing new is written.
+"""What each person made and spent (the Users dashboard, docs/api-integration.md): aggregates computed on request from the stores that already exist, nothing new is written.
 
 - `users.json` (runtime/users.py): identity, role, status, credits left / spent.
 - `out/jobs/J###.json` (generation/jobs.py): every paid provider job, its person (`request.user`), its estimate and its real cost, DONE / FAILED.

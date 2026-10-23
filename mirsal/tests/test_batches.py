@@ -1,5 +1,5 @@
 """Remove batch (Haitham, 2026-10-03, "like remove pack"): a batch G### moves to out/trash/batches/ and can be restored, nothing is deleted, its number is never given to a new
-batch while it is in the trash, a batch with a job in flight is refused in words, and the three routes are owner-only JSON (docs/api.md)."""
+batch while it is in the trash, a batch with a job in flight is refused in words, and the three routes are owner-only JSON (docs/api-integration.md)."""
 import http.client
 import json
 import tempfile
@@ -73,7 +73,7 @@ class RemoveABatch(unittest.TestCase):
 
 
 class RemoveRoutes(unittest.TestCase):
-    """The three owner-only routes over the real server (docs/api.md): remove, the trash listing, restore. Nothing reaches a provider."""
+    """The three owner-only routes over the real server (docs/api-integration.md): remove, the trash listing, restore. Nothing reaches a provider."""
 
     def setUp(self):
         self.td = tempfile.TemporaryDirectory(); self.tmp = Path(self.td.name)

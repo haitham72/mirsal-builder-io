@@ -1,4 +1,4 @@
-"""Durable sticker-owned particle sets (`docs/particles.md`).
+"""Durable sticker-owned particle sets (`docs/architecture.md ("Reactions")`).
 
 P### stores owner sticker links, selected still/animated sprites, saved motion,
 source jobs/credits and rendered bursts. Packs are derived read views; adding a
@@ -1670,13 +1670,13 @@ def export_lottie(out: Path, lib, pid: str, *, preset: str | None = None, params
     The same deterministic trajectories as the preview and the render (`_burst`: the set's motion under the person's params),
     with the set's picked sprites embedded as PNG image assets (`engine.lottie.export_lottie`), so a player shows the real
     sprites flying. Telegram stays WebM. Stored under `renders/L###.lottie.json` beside the WebM renders. Free."""
-    from ..engine import lottie
+    from ..engine import lottie, particles
     s = migrate(out, lib, pid)
     pack = _pick_pack(s, lib, None, required=False)
     name, px, sc, base = _burst(s, preset, params)
     pcs, _source = sprites_of(out, lib, s, pack, sprite_px=max(1, round(px * sc)))
     try:
-        doc = lottie.export_lottie(base, _sprite_pngs(pcs), size=base.size)
+        doc = lottie.export_lottie(base, _sprite_pngs(particles.erode_sprites(pcs, base.erosion_px)), size=base.size)
     except ValueError as ex:
         raise SetError(str(ex))
     d = _dir(out, pid)

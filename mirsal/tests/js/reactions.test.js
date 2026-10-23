@@ -14,6 +14,30 @@ const screen = () => {
   return r;
 };
 
+test('preview cache deduplicates requests, retries failures and rejects invalidated completions', async () => {
+  const r = screen();
+  r(`globalThis.pending=[];
+     globalThis.values={};globalThis.params={};
+     globalThis.cache=rxPreviewCache(values,params,(u,b)=>new Promise(resolve=>pending.push(resolve)))`);
+  const a=r("cache.load('a',{})"), b=r("cache.load('a',{})");
+  assert.equal(r('pending.length'),1);
+  r("pending.shift()({ok:false,j:{error:'temporary'}})");
+  assert.equal(await a,null);assert.equal(await b,null);
+  assert.equal(r("cache.entries.get('a').status"),'error');
+  const retry=r("cache.load('a',{})");
+  r("pending.shift()({ok:true,j:{url:'/retry.webp',params:{count:4}}})");
+  assert.equal((await retry).url,'/retry.webp');
+  assert.equal(r("values.a"),'/retry.webp');
+  const old=r("cache.load('b',{})");
+  r("cache.invalidate(k=>k==='b')");
+  const fresh=r("cache.load('b',{})");
+  r("pending.shift()({ok:true,j:{url:'/old.webp',params:{}}})");
+  assert.equal(await old,null);
+  assert.equal(r('values.b'),undefined);
+  r("pending.shift()({ok:true,j:{url:'/new.webp',params:{}}})");
+  assert.equal((await fresh).url,'/new.webp');
+});
+
 test('the library: one row per motion, collapsed (its ids in a line) until opened; an open motion shows its variations, each with an x', () => {
   const r = screen();
   let h = r('rxHtml()');
@@ -113,4 +137,12 @@ test('a pack sticker finds its predefined emoji (the longest match) and asks for
   assert.equal(url, '/api/particles/emoji-preview');
   assert.equal(body.fit, true);
   assert.equal(r("RXS.pv[rxHovKey('laugh')]"), '/l.webp', 'one cache shared with the wall');
+});
+
+test('current Emoji editor discloses advanced controls without changing its payload or losing a descriptor',()=>{
+ const r=screen();r("ACT.rxpick({dataset:{t:'kiss'}})");const before=r('JSON.stringify(rxBody(RXS.ek))');const html=r('rxEditor()');
+ assert.match(html,/<b>Motion<\/b>/);assert.match(html,/<b>Size<\/b>/);assert.match(html,/<details class=rx-grp data-rxadvanced>/);
+ const advanced=html.slice(html.indexOf('<details class=rx-grp data-rxadvanced>'));assert.match(advanced,/rotation/);assert.match(advanced,/data-rxo=spin/);assert.match(advanced,/data-rxo=size_var/);
+ const keys=J(r,'RXSIM.concat(RXO).map(o=>o[0])');for(const key of keys)assert.equal((html.match(new RegExp('data-rxo='+key+'(?=[ >])','g'))||[]).length,1,key);
+ assert.equal(r('JSON.stringify(rxBody(RXS.ek))'),before);r('RXS.ek.sim.spin=2');assert.match(r('rxAdvSummary(RXS.ek)'),/rotation ×2/);
 });

@@ -1,9 +1,8 @@
 // A helper of the node tests (it is not a test: only *.test.js run): load whole console scripts into ONE vm context, the way the browser shares one global scope, with the few globals they use
 // (app.js, generate.js, live.js, packs.js) stubbed. `run(code)` evaluates in that context, so the top-level `const`s of the scripts are reachable. Nothing here touches a DOM or a server.
 const vm = require('node:vm');
-const fs = require('node:fs');
 const path = require('node:path');
-const { GROUPS } = require('./console_source');
+const { GROUPS, readConsoleFile, readRawConsoleFile, statement } = require('./console_source');
 
 const CONSOLE = path.join(__dirname, '..', '..', 'mirsal', 'console');
 const BASE = `
@@ -23,13 +22,17 @@ const packById=id=>LIB.packs.find(p=>p.id===id);
 const loadLib=async()=>LIB;
 const VLM={then:null},vlmState=()=>'0',vlmSet=()=>{};
 `;
-const STUDIO = `
+const shellSource=readConsoleFile(path.join(CONSOLE,'app.js'));
+const routeScopes=['const ROUTELIFE','function routeOwner'].map(marker=>statement(shellSource,marker)).join('\n');
+const studioSource=readConsoleFile(path.join(CONSOLE,'studio-core.js'));
+const studioExtensions=['const GSTUDIO','function gExtraBody','function gExtraSteps'].map(marker=>statement(studioSource,marker)).join('\n');
+const STUDIO = studioExtensions + `
 const GS={tab:'stickers',outline:12};
 const GM=new Map();
 let SES={prompt:'',gens:[],off:[],pack:''},glast='';
 const sessionGens=()=>SES.gens.map(id=>GM.get(id)).filter(Boolean);
 const tick=()=>{};
-function gbodyHtml(gs,c){return 'ORIGINAL BODY'}
+function gbodyHtml(gs,c){return gExtraBody(GS.tab,gs,c)??'ORIGINAL BODY'}
 function stepsHtml(c){return 'ORIGINAL STEPS'}
 const PKPT={d:{},c:{}};
 function ptBody(j,s){return '<ptbody data-for='+(s?s.id:'')+'>'+(j?'data':'null')+'</ptbody>'}
@@ -43,8 +46,8 @@ function loadConsole(files, { studio = false, extra = '' } = {}) {
     document: { addEventListener() {}, getElementById: () => null, querySelector: () => null, hidden: false },
     localStorage: { getItem: () => null, setItem() {} },
   });
-  vm.runInContext(BASE + (studio ? STUDIO : '') + extra, ctx, { filename: 'stubs.js' });
-  for (const f of files.flatMap(f=>GROUPS[f]||[f])) vm.runInContext(fs.readFileSync(path.join(CONSOLE, f), 'utf8'), ctx, { filename: f });
+  vm.runInContext(BASE + routeScopes + (studio ? STUDIO : '') + extra, ctx, { filename: 'stubs.js' });
+  for (const f of files.flatMap(f=>GROUPS[f]||[f])) vm.runInContext(readRawConsoleFile(path.join(CONSOLE, f), 'utf8'), ctx, { filename: f });
   return code => vm.runInContext(code, ctx);
 }
 module.exports = { loadConsole };

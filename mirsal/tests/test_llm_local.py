@@ -12,6 +12,7 @@ import time
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from mirsal.console.assets import asset_path
 from unittest import mock
 
 from mirsal.services import llm
@@ -113,6 +114,8 @@ class LocalCase(unittest.TestCase):
             os.environ.pop(k, None) if v is None else os.environ.__setitem__(k, v)
         llm._ENV_LOADED = self._loaded
         self.reset()
+        from mirsal.agent.graph import Agent as _Ag
+        _Ag.close_all()
         self.td.cleanup()
 
     def age(self, seconds):
@@ -423,6 +426,7 @@ class BrainHonestyTests(LocalCase):
         cache = cachemod.Cache(force_memory=True)
         store = SessionStore(Path(self.td.name), cache)
         agent = Agent(store, FakeTools(), Brain(complete=failing), cache)
+        self.addCleanup(agent.close)
         sid = store.create()["id"]
         m = agent.run_turn(sid, "blorp zzz qqq vvv www xxx yyy zzz aaa bbb ccc")      # the rules are unsure: the model is asked, and cannot answer
         notes = [s for s in m["steps"] if s["kind"] == "note" and s["label"].startswith("answered by rules")]
@@ -537,8 +541,8 @@ class UiWiringTests(unittest.TestCase):
 
     def setUp(self):
         ui = Path(__file__).resolve().parent.parent / "mirsal" / "console"
-        self.js = (ui / "agent.js").read_text(encoding="utf-8")
-        self.css = (ui / "agent.css").read_text(encoding="utf-8")
+        self.js = asset_path("agent.js").read_text(encoding="utf-8")
+        self.css = asset_path("agent.css").read_text(encoding="utf-8")
 
     def test_the_engine_row_has_a_dropdown_fed_by_the_server_without_a_count_limit(self):
         row = self.block(self.js, "function modelRow()")

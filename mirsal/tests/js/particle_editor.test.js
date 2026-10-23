@@ -5,6 +5,24 @@ const setup=()=>loadConsole(['effects.js','particles.js'],{studio:true,extra:'co
 const owner="LIB.packs=[{id:'parent',name:'Parent',stickers:[{id:'target',name:'Target',source:{generation:'G001',index:1},particles:['P001']}]}];SP.scope={pack_id:'parent',sticker_id:'target'};SP.sel=new Set(['target']);SP.pack='parent';SP.entry=1;SP.target='P001'";
 const set="{id:'P001',name:'Particles',owner:[{pack_id:'parent',sticker_id:'target'}],packs:['parent'],source:{kind:'drawn'},elements:['stars'],cells:[{n:1,picked:true,url:'/poster.png',clip_url:'/animated.webm'}],n_cells:1,n_picked:1,renders:[]}";
 
+test('route ownership cancels timers and invalidates earlier reads without losing saved drafts',async()=>{
+ const run=setup();
+ run(`globalThis.callbacks=[];globalThis.cleared=[];
+ setTimeout=fn=>{callbacks.push(fn);return callbacks.length};clearTimeout=id=>cleared.push(id);
+ globalThis.calls=0;globalThis.scope=routeOwner(n=>n==='pack');
+ scope.enter('pack');scope.schedule(()=>calls++,2500);scope.leave();scope.enter('home');callbacks[0]();`);
+ assert.equal(run('calls'),0);
+ assert.ok(run('cleared.includes(1)'));
+ run(`SPL.detail.P001={id:'P001',name:'draft'};SPROUTES.enter('library');
+ APIREPLIES.push(new Promise(resolve=>globalThis.finishRead=resolve));`);
+ const pending=run('spLibSync(true)');
+ run(`SPROUTES.leave();SPROUTES.enter('reactions');finishRead({ok:true,j:{sets:[{id:'old'}]}})`);
+ await pending;
+ assert.equal(run('SPL.sets'),null,'stale read cannot populate the new route');
+ assert.equal(run('SPL.detail.P001.name'),'draft');
+ assert.equal(run('SPL.busy'),false);
+});
+
 test('new AI choice shows image and animated sprite choices with prompt and both grids',()=>{
  const run=setup();run(owner+";spKind('video')");const html=run('spSetupHtml(SP,LIB.packs,[])');
  for(const label of ['AI image sprites','Kling animated · from scratch','Reaction prompt','2 × 2','3 × 3'])assert.ok(html.includes(label),label);
@@ -98,4 +116,26 @@ test('recovery without a parent has a reachable create action',()=>{
 });
 test('mixed sources keep their Kling provenance visible',()=>{
  const run=setup();assert.match(run("spKindChip({source:{kind:'drawn'},cells:[{clip_url:'/clip.webm',job:'J039'}]})"),/Mixed sprites.*Kling/);
+});
+
+
+test('UX-08: the set heading tag agrees with its real owner list, never a hard-coded "on their own"',()=>{
+ const run=setup();
+ run(`SP.scope={set:'P001'};SP.set={...${set},owner:[{pack_id:'parent',sticker_id:'a'},{pack_id:'parent',sticker_id:'b'}]}`);
+ assert.match(run('spBody([])'),/<b>Particles<\/b><span class=mut>made for 2 stickers<\/span>/);
+ run(`SP.set={...${set},owner:[]}`);
+ assert.match(run('spBody([])'),/<b>Particles<\/b><span class=mut>on their own<\/span>/);
+});
+test('Open and save mode writes a new row and leaves the source row unchanged',async()=>{
+ const run=setup();run(owner+`;SPBS.P001=${set};spBurstState(SPBS.P001,'parent');SP.saveAsNew='P001';POSTREPLIES.push({ok:true,j:{...SPBS.P001,id:'P002'}})`);
+ await run("ACT.psbsave({dataset:{id:'P001'}})");
+ assert.equal(run("POSTS.filter(([u])=>!u.endsWith('/preview')).length"),1);assert.equal(run('POSTS[0][0]'),'/api/particles/P001/save-as-new');
+ assert.equal(run('SPBS.P001.id'),'P001');assert.equal(run('SP.set.id'),'P002');assert.equal(run('SP.saveAsNew'),false);
+});
+test('saved set disclosure keeps controls, omits zero spend and combines Advanced',()=>{
+ const run=setup();const html=run(`spSetCard(${set})`);
+ for(const act of ['psassign','psopennew','psdup','psrename','psdel'])assert.ok(html.includes('data-act='+act));
+ assert.doesNotMatch(html,/nothing spent yet/);assert.match(html,/aria-label="Set options"/);
+ run(`SPL.detail.P001=${set};SPL.open='P001'`);const open=run(`spSetCard(${set})`);
+ assert.match(open,/Manage stickers/);assert.equal((open.match(/class=fx-adv/g)||[]).length,1);assert.match(open,/Motion: burst · Change/);
 });

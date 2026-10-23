@@ -1,5 +1,5 @@
 const {readConsoleFile,statement:consoleStatement}=require('./console_source');
-// Settings > Tickets and the Report dialog (tickets.js, docs/tickets_plan.md): the pure builders in TKV, run in a vm. Run: node --test tests/js
+// Settings > Tickets and the Report dialog (tickets.js, docs/architecture.md ("Storage and search")): the pure builders in TKV, run in a vm. Run: node --test tests/js
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');

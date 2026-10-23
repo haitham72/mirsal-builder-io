@@ -47,6 +47,30 @@ class ImportTests(unittest.TestCase):
         (self.out / "imports.jsonl").write_text("null\n[]\nmalformed\n", encoding="utf-8")
         self.assertIsNone(im.known(self.out, job_id=TICKET))
 
+    def test_import_grid_auto_and_manual_override(self):
+        rgb = synth.make_sheet()[:400, :400].copy()
+        rgb[:] = (0, 255, 0)
+        for y in (100, 300):
+            for x in (100, 300):
+                cv2.circle(rgb, (x, y), 50, (255, 210, 0), -1)
+        data = cv2.imencode('.png', cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR))[1].tobytes()
+        for grid, expected in ((None, [2, 2]), ('3x3', [3, 3])):
+            _, got = im.import_file(self.c, self.user, 'two.png', data, grid=grid, again=True)
+            self.wait()
+            result = pl.read_result(self.out, got['id'])
+            self.assertEqual(result['grid'], expected)
+            self.assertEqual(len(result['stickers']), expected[0] * expected[1])
+
+    def test_batch_manual_grid_creates_new_batch_and_preserves_original(self):
+        _, original = im.import_file(self.c, self.user, 'sheet.png', self.data)
+        self.wait()
+        _, got = im.import_file(self.c, self.user, 'sheet.png', self.data,
+                                batch=f"G{original['id']:03d}", grid='2x2', again=True)
+        self.wait()
+        self.assertNotEqual(got['id'], original['id'])
+        self.assertEqual(pl.read_result(self.out, original['id'])['grid'], [3, 3])
+        self.assertEqual(pl.read_result(self.out, got['id'])['grid'], [2, 2])
+
     def test_filenames_and_ledger_ids_do_not_collide(self):
         with patch.object(im.time, "strftime", return_value="fixed"):
             a = im.save(self.out, "same.png", b"first")
@@ -58,18 +82,16 @@ class ImportTests(unittest.TestCase):
         self.assertEqual(len({r["id"] for r in rows}), 2)
         self.assertEqual(len(list(im._lines(self.out / "imports.jsonl"))), 2)
 
-    def test_a_file_used_before_is_cut_again_as_a_new_batch(self):
-        """No duplicate check for a person's own file (Haitham, 2026-10-15: "user picks an image -> slice -> picks another video used before -> slice
-        -> export"): the same bytes, under any name, make a new batch each time."""
-        code, first = im.import_file(self.c, self.user, "sheet.png", self.data)
-        self.wait()
-        code2, second = im.import_file(self.c, self.user, "renamed.png", self.data)
-        self.wait()
-        self.assertEqual((code, code2), (202, 202))
-        self.assertNotIn("duplicate", second)
-        self.assertNotEqual(first["id"], second["id"])
-        self.assertEqual(len(pl.list_ids(self.out)), 2)
-        self.assertEqual(pl.read_result(self.out, second["id"])["owner"], "local")
+    def test_identical_uploads_allocate_one_batch_and_renaming_deduplicates(self):
+        with patch.object(pl, "start", wraps=pl.start) as start:
+            with ThreadPoolExecutor(max_workers=2) as ex:
+                results = list(ex.map(lambda _: im.import_file(self.c, self.user, "sheet.png", self.data), range(2)))
+            self.wait()
+            self.assertEqual(sorted(code for code, _ in results), [200, 202])
+            self.assertEqual(start.call_count, 1)
+        code, hit = im.import_file(self.c, self.user, "renamed.png", self.data)
+        self.assertEqual((code, hit["generation"], hit["status"]), (200, "G001", "READY"))
+        self.assertEqual(pl.read_result(self.out, 1)["owner"], "local")
 
     def test_failed_processing_retries_the_same_batch(self):
         with patch.object(pl, "run_stills", side_effect=RuntimeError("interrupted")), patch.object(pl, "start", wraps=pl.start) as start:
@@ -129,7 +151,8 @@ class ImportTests(unittest.TestCase):
         self.assertEqual((two["regen_of"], two["parent"], two["task_slug"]), ("G001", 1, one["task_slug"]))        # the batch's own naming
         self.assertEqual([s["key"] for s in two["stickers"]], [s["key"] for s in one["stickers"]])               # the batch's own cells and tags
         self.assertEqual([m["id"] for m in groups.family(self.out, 1)["members"]], [1, 2])
-        code, got = im.import_file(self.c, self.user, "again.png", other, batch="G001")                                 # the same picture again: cut again (2026-10-15)
+        self.assertEqual(im.import_file(self.c, self.user, "again.png", other, batch="G001")[1]["duplicate"], True)   # never twice by accident
+        code, got = im.import_file(self.c, self.user, "again.png", other, batch="G001", again=True)                     # ... but on purpose (2026-10-15)
         self.wait()
         self.assertEqual((code, got["kind"], got["generation"]), (202, "sheet", "G003"))
         # a video drawn from the image sheet: the main generation (G002, the newest) gets it as its 3x3 video
@@ -266,7 +289,5 @@ class ImportRouteTests(unittest.TestCase):
         code, created = self.req("/api/v1/import?name=own.png", data)
         self.assertEqual(code, 202)
         self.c.wait_jobs()
-        code, again = self.req("/api/import?name=renamed.png", data)                       # used before: a new batch (no duplicate check, 2026-10-15)
-        self.assertEqual(code, 202)
-        self.assertNotEqual(again["id"], created["id"])
-        self.c.wait_jobs()
+        code, hit = self.req("/api/import?name=renamed.png", data)
+        self.assertEqual((code, hit["generation"]), (200, f"G{created['id']:03d}"))

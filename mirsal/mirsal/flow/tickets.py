@@ -1,4 +1,4 @@
-"""Tickets: every problem is one record of what happened, what the person meant, what the issue is and what should be fixed (docs/tickets_plan.md).
+"""Tickets: every problem is one record of what happened, what the person meant, what the issue is and what should be fixed (docs/architecture.md ("Storage and search")).
 LangSmith is retired; this is where a failure or a Report goes.
 
 The file store is the source of truth (`out/tickets/T###.json`, like `result.json`); Postgres mirrors it when it is up (`store/repo.py` `save_ticket`).

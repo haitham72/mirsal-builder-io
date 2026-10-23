@@ -1,3 +1,4 @@
+const {readRawConsoleFile}=require('./console_source');
 const {readConsoleFile,statement:consoleStatement}=require('./console_source');
 // F-26/F-27 (T-072): the Settings bar is built from a registry and rebuilt
 // after the render wrappers mount, so it only offers mounted cards: no dead
@@ -48,7 +49,7 @@ test('the bar keeps only mounted cards: LAN Account stays, local Account and for
 
 test('the auth, tickets and trash wrappers rebuild the bar after mounting',()=>{
   for(const f of ['auth.js','tickets.js','trash.js']){
-    const s=fs.readFileSync(path.join(__dirname,'../../mirsal/console',f),'utf8');
+    const s=readRawConsoleFile(path.join(__dirname,'../../mirsal/console',f),'utf8');
     assert.match(s,/if\(typeof setNavSync==='function'\)setNavSync\(\);/,`${f} rebuilds the bar`);
   }
 });

@@ -146,7 +146,7 @@ MIRSAL_EMAIL_DOMAIN=nadi.ae,cpd.gov.ae
 
 Allowed sign-up domains (the full list). Empty = any domain.
 
-The built-in cloud LLM default is `openai:gpt-6-luna`, always through official OpenAI with `high` reasoning effort. An existing `MIRSAL_LLM_MODEL=mimo-v2.6-flash` still takes precedence: choose Luna in the **OpenAI** group, or set `MIRSAL_LLM_MODEL=openai:gpt-6-luna` and restart. In `mirsal/.env`, use `OPENAI_API_KEY` for official OpenAI and `NARAROUTER_API_KEY` for Nararouter; set `MIRSAL_CLOUD_URL` to the router's base URL when using it. Each provider needs its own key, including Nararouter vision recovery. A saved global cloud choice also takes precedence; select **Default** to clear it. Existing chat selections stay saved; old bare/router Luna ids automatically use official OpenAI on their next call. After updating the code, restart the server and hard reload the browser. [Model settings and provider keys](docs/agent-and-chat.md#models-servicesllmpy).
+The built-in cloud LLM default is `openai:gpt-6-luna`, always through official OpenAI with `high` reasoning effort. An existing `MIRSAL_LLM_MODEL=mimo-v2.6-flash` still takes precedence: choose Luna in the **OpenAI** group, or set `MIRSAL_LLM_MODEL=openai:gpt-6-luna` and restart. In `mirsal/.env`, use `OPENAI_API_KEY` for official OpenAI and `NARAROUTER_API_KEY` for Nararouter; set `MIRSAL_CLOUD_URL` to the router's base URL when using it. Each provider needs its own key, including Nararouter vision recovery. A saved global cloud choice also takes precedence; select **Default** to clear it. Existing chat selections stay saved; old bare/router Luna ids automatically use official OpenAI on their next call. After updating the code, restart the server and hard reload the browser. [Model settings and provider keys](docs/architecture.md#models-servicesllmpy).
 
 Cloud choices appear only when the configured provider's authenticated `/models` catalog lists them. A missing key or failed catalog read leaves that provider's group empty. Catalog reads do not invoke a model. Luna appears only in the OpenAI group and requires its key. A listing does not guarantee that your plan allows the model.
 
@@ -170,4 +170,4 @@ postgresql://mirsal:PASSWORD@localhost:5434/mirsal
 
 `PASSWORD`: from `MIRSAL_DATABASE_URL` in `mirsal/.env` (default `mirsal_local`).
 
-Never delete the `mirsal-db` container: its data is in the volume `mirsal_pgdata`. More: [certificate-guide.md](certificate-guide.md), `docs/dev-notes.md`.
+Never delete the `mirsal-db` container: its data is in the volume `mirsal_pgdata`. More: [certificate-guide.md](certificate-guide.md), `README.md`.

@@ -61,3 +61,21 @@ test('wiring: Cancel buttons and the backdrop share the settling close path',()=
   assert.match(packsSrc,/onDismiss:\(\)=>settle\(null\)/,'retime registers the dismissal settlement');
   assert.match(packsSrc,/dlgForget\(\);closeDlg\('answer'\)/,'an answer clears the dismissal before closing');
 });
+
+
+test('Escape settles retime and does not close a covered dialog or underlying viewer',async()=>{
+ const {ctx,run}=rig();const classes={dlg:new Set(),welcome:new Set()};
+ ctx.$=id=>({innerHTML:'',addEventListener(){},classList:{add:v=>classes[id].add(v),remove:v=>classes[id].delete(v),contains:v=>classes[id].has(v)}});
+ run(appSt('function dlgEscape('));const promise=run(`retimeAsk(${JSON.stringify(SHORT)},'zip')`);
+ let prevented=0,stopped=0;ctx.EVENT={key:'Escape',preventDefault(){prevented++},stopImmediatePropagation(){stopped++}};
+ classes.welcome.add('on');assert.equal(run('dlgEscape(EVENT)'),false);assert.equal(run('typeof RTA'),'function');
+ classes.welcome.delete('on');assert.equal(run('dlgEscape(EVENT)'),true);assert.equal(await promise,null);
+ assert.equal(prevented,1);assert.equal(stopped,1);assert.equal(run('dlgEscape(EVENT)'),false);
+});
+
+test('dialog dismissal restores the visible summary when its opener menu folded',()=>{
+ const {ctx,run}=rig();let focused='';
+ const summary={focus(){focused='summary'}};
+ const opener={isConnected:true,closest(selector){return selector==='details:not([open])'?{querySelector(){return summary}}:null},focus(){focused='hidden opener'}};
+ ctx.document={activeElement:opener};run("dlg('<h2>Rename</h2>')");run('closeDlg()');assert.equal(focused,'summary');
+});

@@ -1,0 +1,187 @@
+{
+ "id": "S021",
+ "user": "local",
+ "title": "do you know what is my name?",
+ "created": 1792482646.699,
+ "updated": 1792482654.905,
+ "settings": {
+  "grid": "2x2",
+  "style_id": "glossy_3d",
+  "ask_before_spending": true,
+  "ai": true,
+  "actions": "predefined",
+  "allow_vlm": null,
+  "stage": "export",
+  "creator": {
+   "on": false,
+   "scope": "images",
+   "bypass": false
+  }
+ },
+ "focus": {
+  "generation": null,
+  "stickers": []
+ },
+ "subjects": [],
+ "preferences": {
+  "persistent": []
+ },
+ "feedback": [],
+ "interactions": [
+  {
+   "seq": 1,
+   "ts": 1792482646.985,
+   "user": "do you know what is my name?",
+   "assistant": "You're Batates.",
+   "intents": [
+    "ASK"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  },
+  {
+   "seq": 2,
+   "ts": 1792482654.903,
+   "user": "my name is Haitham",
+   "assistant": "Nice to meet you, Haitham! I'll remember your name (Haitham). What will you create today?",
+   "intents": [
+    "PROFILE"
+   ],
+   "resolved": {
+    "stickers": [],
+    "positive": [],
+    "negative": [],
+    "generation": null,
+    "references": [],
+    "needs_clarification": false,
+    "clarification": "",
+    "options": [],
+    "how": "",
+    "spent_estimate": 0.0
+   },
+   "generation_id": null
+  }
+ ],
+ "messages": [
+  {
+   "id": "m1",
+   "role": "user",
+   "text": "do you know what is my name?",
+   "cards": [],
+   "steps": [],
+   "ts": 1792482646.895
+  },
+  {
+   "id": "m2",
+   "role": "assistant",
+   "text": "You're Batates.",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "looking it up",
+     "detail": null,
+     "status": "running",
+     "ts": 1792482646.925
+    },
+    {
+     "kind": "step",
+     "label": "understood: a question",
+     "detail": null,
+     "status": "done",
+     "ts": 1792482646.943
+    },
+    {
+     "kind": "final",
+     "label": "answered from what you told me",
+     "detail": null,
+     "status": "done",
+     "ts": 1792482646.971
+    }
+   ],
+   "ts": 1792482646.895,
+   "status": "done",
+   "chips": []
+  },
+  {
+   "id": "m3",
+   "role": "user",
+   "text": "my name is Haitham",
+   "cards": [],
+   "steps": [],
+   "ts": 1792482654.785
+  },
+  {
+   "id": "m4",
+   "role": "assistant",
+   "text": "Nice to meet you, Haitham! I'll remember your name (Haitham). What will you create today?",
+   "cards": [],
+   "steps": [
+    {
+     "kind": "task",
+     "label": "reading your message",
+     "detail": null,
+     "status": "running",
+     "ts": 1792482654.802
+    },
+    {
+     "kind": "step",
+     "label": "understood: something about you",
+     "detail": null,
+     "status": "done",
+     "ts": 1792482654.827
+    },
+    {
+     "kind": "task",
+     "label": "remembering what you told me",
+     "detail": null,
+     "status": "running",
+     "ts": 1792482654.852
+    },
+    {
+     "kind": "final",
+     "label": "saved: your name (Haitham)",
+     "detail": null,
+     "status": "done",
+     "ts": 1792482654.889
+    }
+   ],
+   "ts": 1792482654.785,
+   "status": "done",
+   "chips": [
+    {
+     "label": "a teddy bear waving",
+     "text": "a teddy bear waving"
+    },
+    {
+     "label": "falcon stickers",
+     "text": "falcon stickers"
+    },
+    {
+     "label": "my dog as a banana",
+     "text": "my dog as a banana"
+    },
+    {
+     "label": "Eid mubarak greetings",
+     "text": "Eid mubarak greetings"
+    }
+   ]
+  }
+ ],
+ "summary": {
+  "narrative": "",
+  "upto": 0
+ },
+ "pending": null
+}

@@ -1,4 +1,4 @@
-"""The prompt of the particle sheet of a particle effect (docs/effects.md): template-locked, built from the linted plan only. The rest of that feature (the base plan the normal sheet path
+"""The prompt of the particle sheet of a particle effect (docs/architecture.md ("Reactions")): template-locked, built from the linted plan only. The rest of that feature (the base plan the normal sheet path
 accepts, the price first, the job, the particle batch and its link to every group, the pick, the old records) is `tests/test_particle_set.py`. Nothing here reaches a provider."""
 import unittest
 

@@ -1,4 +1,4 @@
-"""The pack claim ledger (`docs/export to team/mirsal-export-architecture.md` §10.7): which preset grid each pack session has taken, and which generations
+"""The pack claim ledger (`docs/api-integration.md`): which preset grid each pack session has taken, and which generations
 each claim produced. File store leads, Postgres mirrors (`store/repo.save_pack_session`, `migrations/012_pack_claims.sql`).
 
   session  out/pack_sessions/<slug>.json      `pack-<slug>`, one per pack subject ("generate sticker pack for falcon" -> pack-falcon)
@@ -164,7 +164,7 @@ def _grid(grid) -> tuple:
     return g
 
 
-def claim_next(out: Path, subject: str, grid=(3, 3), owner: str | None = None, title: str | None = None, plan: bool = True) -> dict:
+def claim_next(out: Path, subject: str, grid=(2, 2), owner: str | None = None, title: str | None = None, plan: bool = True) -> dict:
     """Open the subject's pack session when it does not exist yet and claim its next unclaimed preset, in one lock hold.
     {session, claim, created: bool (the session is new), complete: bool}. When all four presets are claimed, `claim` is None and `complete` True:
     the caller says so in words with the next choices (a custom pick from the bank, or a new pack); nothing is repeated silently."""

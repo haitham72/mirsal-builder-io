@@ -8,6 +8,9 @@ mirsal/.venv/
 __pycache__/
 *.pyc
 wheels/
+output/
+.playwright-cli/
+.playwright-mcp/
 
 # AI cutout models: isnet-general-use is 178MB (over GitHub's 100MB file limit); u2netp (4.6MB) stays in git as the fallback
 mirsal/mirsal/models/*.onnx
@@ -69,6 +72,9 @@ mirsal/out/tickets/
 mirsal/out/trending.json
 # what the chat knows about each person (name, place, age, likes): personal, never committed (agent/profile.py)
 mirsal/out/profile/
+mirsal/out/profiles.sqlite*
+# LangGraph turn checkpoints: disposable, rewritten every turn (agent/graph.py)
+mirsal/out/checkpoints.sqlite*
 
 # runtime temp (Haitham, 2026-10-05: commit the media and batch data, never the temp)
 mirsal/out/cache/
