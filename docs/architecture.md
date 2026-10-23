@@ -333,7 +333,7 @@ The chat's backend is the Studio: `agent/tools.py` is a small interface over the
 - **Edits by meaning** (`editroute.py`, pure) — editor/tweak/action/redesign, `REF_CLAUSES`; a person reference reuses the parent prompt (`delta_of`); reference roles for numbered edits; undo has a defined scope, no redo (W23).
 - **Subjects** — several subjects per request; per-subject feedback and refine; presets-only styles.
 - **Reaction sets in chat** — intent routing into set flows with `_focus_set` order; the Echo overlay offers free lookup.
-- **Support** (`flow/support.py`, local-only model) — cite-or-decline from published FAQ + `docs/` (+ code for staff), watches, private replies, notifications, one ticket + one Telegram ping per escalation. FAQ seeds in `faq/<category>/<slug>.md` (`mirsal support import-faq`); drafts publish in Help > FAQ review. Screenshots read by the local vision model.
+- **Support** (`flow/support.py`, local-only model) — cite-or-decline from published FAQ + `docs/` (+ code for staff), watches, private replies, notifications, one ticket + one Telegram ping per escalation. FAQ data in one versioned `faq/seed.json` bundle (`mirsal support import-faq`); legacy seed paths are stable identities, and migration hashes preserve existing imports across LF/CRLF checkouts; drafts publish in Help > FAQ review. Screenshots read by the local vision model.
 - **Telegram chat** (`services/tg_chat.py`) — the same agent on the bot: each writer gets a member account, questions are native buttons, finished animations arrive as real stickers. A picture sent to the bot is not read yet; never run against the real bot without W51.
 
 ## 10. Storage and search
@@ -396,7 +396,7 @@ those clips were made with the cheaper Kling `std` model. **Open:** re-run with 
 
 Embeddings: `text-embedding-nomic-embed-text-v1.5` on LM Studio (768-d, hardcoded), documents as `search_document: ...`, queries as
 `search_query: ...`. Thresholds are **provisional** (`SUBJECT_MIN` 0.50, `ACTION_MIN` 0.40; `MIRSAL_POOL_SUBJECT_MIN` / `MIRSAL_POOL_ACTION_MIN`
-override them) until Haitham's eval set (`docs/inputs/search_queries.md`, not written) exists.
+override them) until Haitham's labelled query dataset (not supplied; W12 in the backlog) exists.
 
 | query | result | cosine subject / action |
 |---|---|---|
@@ -451,7 +451,7 @@ Method: deterministic round-robin sampling across existing batches, unique sourc
 
 Scope: this tests local vision responses, parser compatibility and latency. It does not evaluate animation motion, reference-image consistency, pool search or chat resolution. The sample is not a balanced or representative accuracy benchmark. **83.3% is the usable-response rate, not model accuracy.** Independent labels are empty, so the judge remains uncalibrated against Haitham's judgments. Saved review states are context only and are never provided to the model as answers.
 
-Artifacts and runner: [results](../mirsal/local_eval/results.md), [summary](../mirsal/local_eval/summary.json), [dataset](../mirsal/local_eval/dataset.json), [instructions](../mirsal/local_eval/README.md). Haitham does not want manual testing; no labelling task remains in the waiting tracker. Human agreement stays unmeasured. Future objective checks can be prepared and run by an agent with explicit expected outputs; model-to-model agreement must not be presented as human accuracy. Independent labels remain optional, and the advisory judge does not require them to run.
+Artifacts and runner: [raw results](../mirsal/local_eval/results.jsonl), [summary](../mirsal/local_eval/summary.json), [dataset](../mirsal/local_eval/dataset.json), [procedure](#help-data-and-evaluation). Haitham does not want manual testing; no labelling task remains in the owner-decision section of the backlog. Human agreement stays unmeasured. Future objective checks can be prepared and run by an agent with explicit expected outputs; model-to-model agreement must not be presented as human accuracy. Independent labels remain optional, and the advisory judge does not require them to run.
 
 ## Photo cutout (3C), test photo `ref/upload.jpeg` (2026-10-02)
 
@@ -502,8 +502,20 @@ Synthetic H.264 (crf 18, 480 px, five subject colours on green), mean |alpha - t
 Rejected: a guided filter on the mask with luma as guide (4x worse on an orange subject, whose luma equals the green's), keying after enlarging the RGB
 (worse once the colour is interpolated). Test: `tests/test_video_decode.py`.
 
-## 14. Where to read more
+## 14. Operations and data references
 
-`README.md` (index), `CLAUDE.md` (rules and the routing table), `run.md` (how to run), `docs/rules.md` (rules in full),
-`docs/design.md` (the look), `docs/api-integration.md` (the HTTP contract), `docs/generation.md` (live generation),
-`docs/backlog.md` and `docs/waiting-for-haitham.md` (what is open).
+### Optional cutout models
+
+`media/matte.py` uses onnxruntime offline (no rembg/PyTorch/network); without a model it falls back to OpenCV GrabCut. `u2netp.onnx` (4.6 MB, MD5 `8e83ca70e441ab06c318d82300c84806`) is the tracked video fallback; optional `isnet-general-use.onnx` (178 MB, MD5 `fc16ebd8b0c10d971d3513d564d01e29`) is used for photos and is not tracked. Both are Apache-2.0 U2-Net/IS-Net models distributed in rembg releases. `MIRSAL_MATTE_MODEL=<path>` forces a model. Install `onnxruntime` in the venv; offline wheels must match the target OS/Python.
+
+### Help data and evaluation
+
+`faq/seed.json` holds all 87 Help entries as structured fields: stable `path`, title, question, answer, category, tags, screen and looks_like. The path is a legacy import identity, not a file to open. `legacy` hashes preserve the original Markdown import hash only while its migrated content is unchanged; edits receive their own hash. The importer validates the entire bundle before writes, retains IDs and draft/published revision gates, and accepts old Markdown folders for compatibility. Help publication remains explicit; no app state is changed by consolidating repository files.
+
+`mirsal/local_eval/faq/validate_chains.py` reads that bundle and the retained JSON cases for isolated import/retrieval checks with providers and database writes disabled. Original seed copies, one-off builders/installers, staged doc updates and handoff prose are retired to Git history. Their dated JSON evidence remains historical, not a new run. This is one canonical Help dataset rather than three copies.
+
+The vision evaluation in `mirsal/local_eval/run.py` remains pinned to local `qwen/qwen3.5-9b` at `http://localhost:1234/api/v1/chat`, temperature 0, reasoning off, store false, no cloud fallback. Commands from `mirsal/`: `python local_eval/run.py prepare|smoke|run|summary`. The 30 existing images are hash-pinned; outputs/results are isolated evaluation evidence, not application model routing or human accuracy. Inspect failed cases before retrying; a passing dataset is not rerun for documentation. The generated text report belongs in ignored `output/local-eval/`.
+
+### Documentation ownership
+
+The ten maintained Markdown files are indexed in [README.md](../README.md). Running and LAN certificates live there; API/CMS/paused-hosting guidance lives in [api-integration.md](api-integration.md); open work and owner decisions share [backlog.md](backlog.md). The API route inventory is generated at `GET /api/openapi.json`. Original design inputs, prompt examples and old handoffs remain recoverable from Git before the consolidation (`51f327b1`); they are not maintained specs. New labelled pool/resolver examples belong in structured evaluation data when supplied, not new Markdown placeholders.

@@ -1,85 +1,101 @@
 # Mirsal Builder
 
-**Last updated: 2026-10-23 · implementation baseline `27009185` · `main` only.**
+**Updated 2026-10-23.** The product is the API; Studio and AI chat are its sandboxes. All implementation branches were merged into `main` at `27009185`. Pricing is implemented and locally verified. Live CMS JSON delivery, stored-price readback, zero-count success handling and cooldown recovery remain open.
 
-[Visual guide](GUIDE.md) · [App and API delivery checklist](DELIVERY_CHECKLIST.md) · [Remaining work](docs/backlog.md)
+New requests default to **2×2 / four stickers**. Explicit and imported 3×3 grids remain supported. The current video catalog default is **Kling 3.0**; the requested Kling 4.0 default is pending verification. The existing animated pack sent as `test` reported four inserted assets. See the [delivery checklist](DELIVERY_CHECKLIST.md) for evidence and acceptance scope.
 
-It turns plain words into video stickers for Telegram: it makes the pictures, cuts them, animates them and packs them. Every step is checkable ([architecture](docs/architecture.md)); the HTTP contract is [here](docs/api-integration.md), the live route inventory at `GET /api/openapi.json`.
+## Documentation: ten files
 
-## Overview
+| File | Purpose |
+|---|---|
+| [README.md](README.md) | Start, run, office LAN and documentation index |
+| [CLAUDE.md](CLAUDE.md) | Agent instructions and routing |
+| [DELIVERY_CHECKLIST.md](DELIVERY_CHECKLIST.md) | One acceptance checklist and dated delivery evidence |
+| [Architecture](docs/architecture.md) | Engine, Studio/chat, storage, reactions and measurements |
+| [API](docs/api-integration.md) | HTTP contract, accounts, collection pricing and receiving CMS |
+| [Generation](docs/generation.md) | Prompts, provider jobs, model defaults and credits |
+| [Design](docs/design.md) | Screens, themes, accessibility and browser acceptance tools |
+| [Rules](docs/rules.md) | Locked behavior, gates, spending and engineering guardrails |
+| [Backlog](docs/backlog.md) | Engineering work and numbered owner decisions in one tracker |
+| [Film kit](Motion%20Graphics/README.md) | Separate motion-graphics source and rendering instructions |
 
-- **Intent → Spec** Each distinct sticker is fully specified. *Watch folders* (`img-NNN-<subject>/` + `vid-NNN-<subject>/`, see `inputs/`) hold prepared art; *tags* and *margin* fill empty cells; *subject* defaults are `banana` and `cherries`.
-- **Spec → Generation** Deterministic *prompt building* (template-locked text); a *plan* previews the cells; a *subject* carries fixed phrasing, references and per-user taste.
-- **Processing** Decoding, prep and reference frames accumulate real reusable state. *Reactions* (formerly particles) are bursts attached to stickers, stored as sets (`P###`).
-- **Validation** Every gate judges quality before the next step; *batch groups* link variations of one idea; the *pool* reuses approved stickers free.
-- **Animation** Video sheets (approved stickers recomposed, `A1`, `A2`, …) are animated, then cut into looping WebMs. *Higgsfield* (sheets) and *Kling v3.0* (animation) run through the Higgsfield CLI as paid jobs (`J###`); *Nano Banana 2* draws the sheets.
-- **Persistence** Decisions land in *Postgres* (searchable reviews) and history lines; *tickets* track problems; *model calls* log spend.
-- **The glasses** New ideas default to 2×2 (4 stickers); photographers can also ship flat PNG or WebP stickers. One screen holds the project.
+The repository has a budget of **10 maintained Markdown files**. Update the file that owns the topic; do not create plans, handoffs, duplicate guides or Markdown evaluation snapshots. Superseded material is available in Git history before this consolidation (baseline `51f327b1`). The 87 Help answers are application data in `faq/seed.json`; the Lottie MIT notice is retained verbatim as `mirsal/mirsal/console/ui/vendor/lottie-LICENSE`.
 
-## Delivery
+## Running locally
 
-The product is the API and the two sandboxes over it: `console/` (the page) and the AI chat. The engine (`mirsal/engine/`) and flow (`mirsal/flow/`) are deterministic and testable first, screens second.
+Use Python 3.11–3.13, a local `mirsal/.venv`, ffmpeg and Docker Desktop for the Postgres mirror (`mirsal-db`, port 5434) and Redis. Virtual environments and `.env` are local to each machine. Run the following from the repository root for first setup.
 
-Current delivery status:
+Windows PowerShell:
 
-- Saved pack prices, export overrides, free/unset handling, validation and multipart `Price` forwarding are implemented on both servers and route aliases, including chat export. Use **Pack → Edit price** or the price field in **Export to collection**.
-- The live CMS accepted the animated pack named `test` with four inserted assets. Simulator/Lottie/super-like JSON delivery remains unconfirmed: success responses reported zero inserts; `super_like` is rejected as a content type.
-- Pricing has 25 focused backend checks and desktop/phone browser evidence; the merge added 27 passing UI checks. Live CMS stored-price/currency verification, JSON delivery, zero-count success handling and upload cooldown recovery remain open.
-- New requests default to 2×2. The current video catalog default is Kling 3.0; Kling 4.0 is an unverified delivery target. See the [single acceptance checklist](DELIVERY_CHECKLIST.md) for the remaining work and dated evidence.
+```powershell
+cd mirsal
+py -3 -m venv .venv
+& .\.venv\Scripts\python.exe -m pip install -r requirements.txt
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
+# Fill keys in .env, then, with Docker Desktop running:
+& .\.venv\Scripts\python.exe -m mirsal db up
+& .\.venv\Scripts\python.exe -m mirsal doctor
+& .\.venv\Scripts\python.exe -m mirsal serve
+```
 
-**Start**: `python -m mirsal serve`, then open the printed address. Server default `127.0.0.1:8770`. First run needs: Python 3.11-3.13, venv `mirsal/.venv`, `pip install -r mirsal/requirements*.txt` (fastapi/pydantic/uvicorn for serve), ffmpeg on PATH, Postgres `mirsal-db` on 5434 for the mirror (`python -m mirsal db up`).
+macOS Terminal:
 
-## Run
+```bash
+cd mirsal
+python3 -m venv .venv
+./.venv/bin/python -m pip install -r requirements.txt
+cp -n .env.example .env
+# Fill keys in .env, then, with Docker Desktop running:
+./.venv/bin/python -m mirsal db up
+./.venv/bin/python -m mirsal doctor
+./.venv/bin/python -m mirsal serve
+```
 
-- One checkout per task; check `git branch --show-current` before every commit. Work on `main`; prior work branches were consolidated at Haitham's request on 2026-10-23. Use an isolated branch only when the task calls for one.
-- Restart the server from `mirsal/.venv` before judging the browser (the Studio warns when it runs older code). Never kill or automate the real-data server on :8770; it loads new code only when its owner restarts it.
-- `python -m mirsal doctor` is the one health check. `serve --lan` serves the office over HTTPS; `serve --stdlib` keeps the old server for one release.
-- Keep runs hermetic: tests and scratch runs use `MIRSAL_OUT` copies, never the shared `out/`; only the real `out/` writes through to Postgres.
-- Ports 5433/5436/5437 and the other project's `.env` lines are never touched.
+For daily use, run only `db up` and `serve` from `mirsal/` with the platform's venv Python. Open <http://127.0.0.1:8770>. Stop with Ctrl+C. After pulling, the server owner restarts from the venv and hard-refreshes the browser. Use `--reload` only on your own development server; a restart interrupts in-flight work. Automation must use a disposable `MIRSAL_OUT` and a separate port, never the real-data :8770 server. `serve --stdlib` retains the legacy server for one release.
 
-## Test budget
+## Office LAN
 
-One narrowest run per change: `mirsal test fast` / `focused` / `area <module>` (map in `mirsal/test_tiers.py`). Zero tests for docs-only changes; a pass stays valid until its files change. Uncertainty is not a reason to run a bigger suite. Paid tests need Haitham (`MIRSAL_RUN_PAID_TESTS=1`, ≤3 USD, serial). Quirks: Windows file locks (retry), Anaconda `python` ≠ venv, `MIRSAL_NO_REAL_CLI` for fakes.
+Office sharing uses `serve --lan` over HTTPS. Public hosting and Google OAuth remain paused. Install mkcert once: `choco install mkcert` in an administrator shell on Windows, or `brew install mkcert` on macOS; then run `mkcert -install` on the host. Find the host's current Wi-Fi IPv4 address (`ipconfig` on Windows, network settings on macOS).
 
-## The architecture in one breath
+From the repository root on Windows, replace the example IP:
 
-The chat (natural language) and the Studio (explicit controls) share one engine: `engine/` pure (sheet, key, video, particles, `verify.py` 44 checks); `flow/` lifecycle (`pipeline`, `gates`, `groups`, `imports`, `support`, `tickets`); `generation/` paid jobs and prompts; `services/` Telegram and models; files are the truth, Postgres mirrors, Redis is disposable. Names carry meaning: `G###` (batch), `S#` (sticker), `J###` (paid job), outcome `READY`/`FAILED`.
+```powershell
+New-Item -ItemType Directory -Force mirsal/out/tls
+mkcert -cert-file mirsal/out/tls/cert.pem -key-file mirsal/out/tls/key.pem 192.168.1.66 localhost 127.0.0.1
+cd mirsal
+& .\.venv\Scripts\python.exe -m mirsal serve --lan
+```
 
-## The golden path and the gates
+On macOS, from `mirsal/`:
 
-Request → plan (G1) → sheet → stills (G2) → video sheet (G3) → video → per-frame check → animations (G4) → pack (G5). A person approves at every gate; the vision model only pre-reviews; Python blocks only what Telegram would reject, everything else gets "Use it anyway". Rejection never deletes; `S#` is stable; decisions are `reviews` rows + history lines.
+```bash
+mkdir -p out/tls
+mkcert -cert-file out/tls/cert.pem -key-file out/tls/key.pem 192.168.1.66 localhost 127.0.0.1
+./.venv/bin/python -m mirsal serve --lan
+```
 
-## What is in it
+Colleagues open `https://<host-ip>:8770`. Run `mkcert -CAROOT` on the host and distribute only `rootCA.pem`; install it as a trusted root on each colleague's computer (Keychain Access on macOS; Local Machine → Trusted Root Certification Authorities on Windows). Keep `rootCA-key.pem` on the host. If the address changes, regenerate the host certificate and restart. A certificate warning means the client trust or host name/address needs correction. `--no-tls` uses plain HTTP and is unsuitable for office passwords.
 
-| Area | What it does | Doc |
-|---|---|---|
-| Engine + Studio | Pure media code, the golden path, gates, verifier, Studio flows, Telegram send, imports | [architecture](docs/architecture.md) |
-| Chat + agent | Turns, memory, creator, stages, vision judge, Redis, events, Telegram chat, support | [architecture](docs/architecture.md) |
-| Storage + search | Postgres mirror, pool, vectors, tickets, Help & Support records | [architecture](docs/architecture.md) |
-| Reactions | Presets, emoji map, Lottie slots, super reaction, emoji bank | [architecture](docs/architecture.md) (+ screens in [design](docs/design.md)) |
-| Generation (Higgsfield/Kling) | Prompts, jobs, credits, operator runbook | [generation](docs/generation.md) |
-| HTTP API | Contract, guards, accounts, office LAN, Users, Trending, integrations | [api-integration](docs/api-integration.md) |
-| Export to collection | Queue a pack/batch to the AddCollection CMS | [api-integration](docs/api-integration.md) |
-| Design | Shell, screens, themes, welcome, redesign contracts | [design](docs/design.md) |
-| Rules | The 13 rules in full + session guardrails | [rules](docs/rules.md) |
-| Trackers | Open work and owner verdicts | [backlog](docs/backlog.md), [waiting](docs/waiting-for-haitham.md) |
-| Inputs | Reference inputs (prompt samples, telegram spec, eval sets) | [inputs](docs/inputs/) |
+Users sign up with a domain allowed by `MIRSAL_EMAIL_DOMAIN` (default `nadi.ae,cpd.gov.ae`) and await approval in Users → People. Accounts, role boundaries and credits are described in the [API guide](docs/api-integration.md#office-lan).
 
-Public deployment and Google OAuth stay paused (plan in git history); the office LAN stands in. Open proposals live as one line each in the backlog, full text in git history.
+## Settings and delivery
 
-## Services and ports
+Set provider keys only in `mirsal/.env`, then restart. `OPENAI_API_KEY` authenticates official OpenAI; `NARAROUTER_API_KEY` and `MIRSAL_CLOUD_URL` configure Nararouter. The built-in cloud choice is `openai:gpt-6-luna` with high reasoning; saved user/global choices and explicit environment settings take precedence. Local chat uses the configured local server's listed model and a real readiness probe. Full routing and vision fallback behavior are in [architecture](docs/architecture.md).
 
-| Service | Default | Notes |
-|---|---|---|
-| Local models | `MIRSAL_LOCAL_URL` | Whatever the server lists; readiness is a real probe; embeddings local hardcoded |
-| Cloud default | `openai:gpt-6-luna` | Official OpenAI only, effort high; old router ids normalize |
-| Database | `mirsal-db:5434` | Mirror; `MIRSAL_DB_WRITE=0` forces off |
-| CMS export | `MIRSAL_COLLECTION_API_URL` | `MIRSAL_COLLECTION_API_CREDENTIALS` = `sk-…` in `mirsal/.env`, never in git |
+**Pack → Edit price** saves the collection price. **Export to collection** allows an override for one export: blank omits, `0` means free. Currency and live stored-price behavior remain unconfirmed. Configure `MIRSAL_COLLECTION_API_URL` and `MIRSAL_COLLECTION_API_CREDENTIALS` in `.env`; the [API guide](docs/api-integration.md#export-to-collection-the-mirsal-creator-cms) owns the complete contract.
 
-## Folders
+Import Help data from `mirsal/` with your venv Python:
 
-`mirsal/` (package, tests, migrations, `out/`, `inputs/`), `docs/` (five files: architecture, design, api-integration, generation, rules · backlog/waiting trackers · `inputs/` reference), `deploy/` (parked), `tools/`, `Faz3/` (separate). On-demand screenshots stay in local `output/playwright/` artifacts.
+```text
+python -m mirsal support import-faq --json
+```
 
-## Rules in one breath
+The command reads repository `faq/seed.json` and creates drafts; repeat imports are idempotent. Existing seed identities, approvals and revisions are preserved. Review/publish in Help → FAQ review. `--publish` is an explicit publishing choice. `--repo` accepts a bundle or a legacy Markdown folder. No live FAQ publishing occurs as part of documentation consolidation.
 
-Telegram limits; lean deps; `pathlib` ASCII-only; file locks for processes/threads; engine never imports `psycopg`; rules live in `docs/rules.md`; errors are exceptions with messages; JSON reports; docs are five files and move with the code; files are the truth; the golden path and its gates; an exception never stands in for a missing feature. Adults accept anything that is genuinely adult; the product is an API: engines, contracts and tests in Python, no logic only in the browser. Strict separation of test/prod — tests use fakes and a temp `out/`. `docs/api-integration.md` is the HTTP contract.
+## Development and verification
+
+- Work on `main`; check the current branch before every commit. Commit explicit paths, never secrets or a blind `git add -A`. Superseded source documents can be recovered with `git show 51f327b1:<path>`.
+- Run the narrowest relevant check once (`mirsal test fast`, `focused` or `area <module>`); zero application tests for documentation-only changes. Full `unittest discover` is retired. Use the venv, not Anaconda's base Python.
+- Tests and scratch servers set `MIRSAL_NO_REAL_CLI=1`, `MIRSAL_LLM_PROVIDER=none`, `MIRSAL_VISION_PROVIDER=none`, `MIRSAL_DB_WRITE=0` and a temporary `MIRSAL_OUT`. They never call real providers. Paid calls require a shown price and consent.
+- Files are primary state; Postgres mirrors them. Never touch ports 5433/5436/5437 or another project's environment settings. `python -m mirsal doctor` is the health check; `db check` reports drift without silently changing constraints.
+- Keep private inputs, keys, accounts and runtime scratch artifacts out of commits. Browser evidence belongs in ignored `output/playwright/`. Preserve the watch-folder and output naming rules in [rules](docs/rules.md).

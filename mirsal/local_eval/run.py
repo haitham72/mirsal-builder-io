@@ -114,7 +114,9 @@ def summarise(dataset, rows):
     for row in rows:
         detail = row.get("error") or ", ".join(row.get("judgement", {}).get("reasons", [])) or "—"
         lines.append(f"| {row['id']} | {row['decision']} | {row['seconds']:.2f} | {detail.replace('|', '/').replace(chr(10), ' ')} |")
-    (HERE / "results.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    report = HERE.parents[1] / "output" / "local-eval" / "vision.txt"
+    report.parent.mkdir(parents=True, exist_ok=True)
+    report.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return summary
 
 
@@ -157,7 +159,7 @@ def run(limit, timeout, max_seconds):
                 file.write(json.dumps(row, ensure_ascii=False) + "\n")
             print(f"{len(rows)}/{len(dataset['cases'])} {case['id']}: {row['decision']} ({row['seconds']}s)", flush=True)
             if failures >= 3:
-                print("Stopped after three consecutive failures; see results.md.", flush=True)
+                print("Stopped after three consecutive failures; see output/local-eval/vision.txt.", flush=True)
                 break
     finally:
         summary = summarise(dataset, list(rows.values()))

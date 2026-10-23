@@ -15,7 +15,7 @@ This is the single checklist for app review and final API delivery. These are ac
 - Record **build/commit + environment + screen/API route + action + expected/actual + theme/width + pack/batch/job/export IDs + screenshot or sanitized request/response evidence**, as applicable. Omit credentials.
 - Record wording, pricing and visual verdicts explicitly. Review Telegram delivery separately when requested; the final delivery gate here is the collection API.
 
-References: [final API contract](docs/API/API_DOCUMENTATION.md), [Mirsal API integration](docs/api-integration.md), [generation](docs/generation.md), [known defects and engineering limits](docs/backlog.md), [owner decisions](docs/waiting-for-haitham.md). Past audits live in git history.
+References: [final API contract](docs/api-integration.md#receiving-cms-contract), [Mirsal API integration](docs/api-integration.md), [generation](docs/generation.md), [known defects and engineering limits](docs/backlog.md), [owner decisions](docs/backlog.md#owner-decisions). Past audits live in git history.
 
 Latest verification: [2026-10-23 smoke-test results](#smoke-test-results-2026-10-23). Checked boxes below apply to that smoke scope; broader scenarios remain open.
 
@@ -80,7 +80,7 @@ Evidence links below refer to local artifacts under ignored `output/playwright/`
     - [x] Invalid values return a useful validation error.
     - [x] The delivery preview and API request use the saved, approved price.
   - [ ] Final API contract: `POST /api/v1/Upload/AddCollection`
-    - [x] Use Bearer authentication and `multipart/form-data` as specified in [docs/API](docs/API/API_DOCUMENTATION.md).
+    - [x] Use Bearer authentication and `multipart/form-data` as specified in the [receiving CMS contract](docs/api-integration.md#receiving-cms-contract).
     - [x] Enforce a 40-character collection name and 160-character description; longer values fail before queuing.
     - [ ] Send `CollectionName`, `Description`, `ContentType`, `ContentSubType`, `Media` and `MediaMetadata`.
     - [ ] Send **`Price` as a string** and verify the receiving API stores the intended value.
@@ -201,7 +201,6 @@ Evidence: [browser results](output/playwright/pricing-20261023/browser-results.j
 
 - Implementation and all former branch histories are retained in merge `27009185`; `main` is the sole local/remote branch. The feature/documentation commit is `fd53a633`.
 - All 27 focused UI merge checks passed for slider retries, resize/frame controls, duplicate import choices and reaction tabs. Application source after conflict resolution matches the verified pricing branch.
-- Reviewed all 207 versioned Markdown files against git, code and the filesystem; updated 23 current guides and scope notes. Local links in maintained docs and the live FAQ resolve. Original design inputs, evaluation seeds/results and the vendor license retain their historical content. No application tests, model generation or external submissions were run for the documentation-only sync.
 
 ## Known checks to resolve
 
@@ -236,3 +235,12 @@ An earlier diagnostic submission `Smoke 1023 2d6bc270` also reported 4 inserted 
 Evidence: [receipt summary](output/playwright/pack-smoke-20261023/receipt-summary.json), [reaction receipts](output/playwright/pack-smoke-20261023/reaction-delivery.json), [thumbnail/type retry receipts](output/playwright/pack-smoke-20261023/reaction-delivery-with-thumbnails.json), [browser summary](output/playwright/pack-smoke-20261023/browser-matrix-summary.json), [naming and super-like checks](output/playwright/pack-smoke-20261023/browser-targeted-summary.json), [pack confirmation](output/playwright/pack-smoke-20261023/test-pack-result.png), [super-like preview](output/playwright/pack-smoke-20261023/super-phone.png).
 
 Not checked in this smoke test: new-user/LAN access, image/video generation and Kling 4.0 delivery, new pack creation/expansion, editing/trash/role combinations, final replacement Lottie assets, and CMS readback of stored names/prices or downstream client playback.
+
+
+## Documentation consolidation: 2026-10-23
+
+Reduced 207 tracked Markdown files to the ten indexed in README. Running/certificates moved into README, CMS details into the API guide, owner decisions into the backlog, and acceptance-tool/model/evaluation notes into their owning area docs. Original design inputs, duplicate seed copies, old reports and one-off Markdown builders/installers are retired to Git history at `51f327b1`; the vendor MIT notice is retained verbatim as a license file.
+
+All 87 Help answers and their import identities/hashes are retained in one `faq/seed.json` dataset. Importer support preserves existing IDs, draft/published status, idempotence and the revision gate for later edits. Validation is isolated with no model generation, live publishing or external submissions.
+
+Verification: four focused seed-import tests passed, including invalid-bundle refusal, revision gates and LF/CRLF migration. An isolated check compared every bundled answer with its original, imported all 87 legacy entries, and proved that two default CLI bundle imports left every existing record byte-identical (including a published entry). Fresh imports created 87 drafts. All local documentation links resolve; the Lottie MIT notice is unchanged. Local evidence: `output/markdown-consolidation-results.json`.

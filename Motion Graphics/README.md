@@ -8,7 +8,7 @@ This folder is a motion-as-code kit. Every frame of the film is a deterministic 
 - **`reel` (the current one):** the 48 s fast-cut ad, `app/src/scenes/reel.ts`, cut to the Suno track `audio/suno-48.mp3` (129.75 BPM, first beat 0.22 s, measured): the chat box, the green sheet keyed and cut, checks, stickers alive, particle bursts, one-click export to Mirsal going live, three packs at once, "Use it anyway", taste, team, Trending, the logo. Liam explains it in nine lines (`audio/reel48-vo/`); `analysis/reel_mix.py` places them, 277 effect cues and the music. Output `out/mirsal-reel-48s_sound.mp4`. Real pictures from the library, copied into `app/public/` and not committed. Render with `--url` on a port of its own: another project's dev server may hold 5173.
 - **`voiced`:** the 87 s cut with Liam's voiceover (aligned; analysis in `data/voiced/audio.json`), its hook a real scene (`scenes/hook.ts`), the rest still rough-cut cards.
 
-Companion file: [`mirsal-ai-redesign-prompt.md`](mirsal-ai-redesign-prompt.md) holds the prompt for the new look of Mirsal AI, a full redesign of the original Mirsal chat. Plate 7 of the film shows that new look, so both pieces should agree.
+The original Mirsal AI redesign prompt is archived in Git (`51f327b1:Motion Graphics/mirsal-ai-redesign-prompt.md`). Plate 7 and the film should follow the current [screen design](../docs/design.md).
 
 ---
 

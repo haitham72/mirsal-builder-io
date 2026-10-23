@@ -447,7 +447,8 @@ def support_cmd(out, args) -> int:
     if args.action == "import-faq":
         from .flow import faq as _faq
         try:
-            r = _faq.import_seeds(out, Path(args.repo or "faq"), "local", publish=args.publish)
+            seeds = Path(args.repo) if args.repo else Path(__file__).resolve().parents[2] / "faq"
+            r = _faq.import_seeds(out, seeds, "local", publish=args.publish)
         except _faq.FAQError as e:
             print(e)
             return 1
@@ -681,7 +682,7 @@ def main(argv=None) -> int:
     po.add_argument("--no-vectors", action="store_true", help="reindex: lexical rows only (no embedding calls)"); po.add_argument("--style")
     po.add_argument("--count", type=int, default=9); po.add_argument("--json", action="store_true", dest="as_json")
     su = sub.add_parser("support", help="Help & Support: index docs/ and the code of MIRSAL_SUPPORT_REPO for the support agent (free)")
-    su.add_argument("action", choices=["reindex", "status", "import-faq"]); su.add_argument("--repo", help="reindex: this folder instead of MIRSAL_SUPPORT_REPO; import-faq: the seed folder (default faq/)")
+    su.add_argument("action", choices=["reindex", "status", "import-faq"]); su.add_argument("--repo", help="reindex: this folder instead of MIRSAL_SUPPORT_REPO; import-faq: JSON bundle or legacy seed folder (default repository faq/seed.json)")
     su.add_argument("--publish", action="store_true", help="import-faq: publish the imported entries at once (default: drafts to review)")
     su.add_argument("--no-vectors", action="store_true", help="reindex: the lexical index only (no embedding calls)"); su.add_argument("--json", action="store_true", dest="as_json")
     pa = sub.add_parser("particles", help="adopt: older effect runs that made something become saved particle rows under their stickers (idempotent, free); adopt-emoji-map: migrate random sets onto the per-emoji reaction map")
@@ -892,7 +893,7 @@ def main(argv=None) -> int:
                 key = Path(os.environ.get("MIRSAL_TLS_KEY") or out / "tls" / "key.pem")
                 if not (cert.is_file() and key.is_file()):
                     print(f"ERROR   serve --lan uses HTTPS and needs a certificate: {cert} and {key}.\n"
-                          f"        Make it once with mkcert: see certificate-guide.md at the repository root.\n"
+                          f"        Make it once with mkcert: see README.md, Office LAN.\n"
                           f"        Or serve --lan --no-tls (plain HTTP: passwords cross the network unencrypted).")
                     return 1
                 tls = {"cert": str(cert), "key": str(key)}

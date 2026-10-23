@@ -1,10 +1,10 @@
 # docs/api-integration.md — the HTTP contract and the outside world
 
-**Last synchronized: 2026-10-23 · `main` · implementation baseline `27009185`.** Collection pricing is implemented; live CMS stored-price verification and JSON reaction delivery remain open. The [receiving API reference](API/API_DOCUMENTATION.md) distinguishes declared JSON support from observed delivery results.
+**Last synchronized: 2026-10-23 · `main` · implementation baseline `27009185`.** Collection pricing is implemented; live CMS stored-price verification and JSON reaction delivery remain open. The [receiving CMS contract](#receiving-cms-contract) below distinguishes declared JSON support from observed delivery results.
 
 All JSON, served by `python -m mirsal serve` (FastAPI on uvicorn, `127.0.0.1:8770`). Every route below is served by an adapter over the original handler, so its answer is byte-identical to the stdlib server (`serve --stdlib` still runs that one); new routes are native FastAPI with pydantic models. **The Studio is a sandbox over this API** (rule 11): every feature is an engine function and a stable JSON shape first, a screen second. Everything is addressable by id (generation `12` in a URL and `G012` in `result.json` and the chat, sticker `G012/S3`, job `J004`, session `S002`, video sheet `A1`).
 
-Converged 2026-10-21 (branch `code-audit`); it supersedes the former `docs/api.md`, `docs/api-parts/`, the frozen `docs/http_route_inventory.md`, `docs/Api/AddCollection-API .md` and the draft `docs/integration/API_DOCUMENTATION.md`. Full text of all of them lives in git history.
+The former route inventories and separate CMS reference are consolidated here; earlier text remains in Git history.
 
 ## Contract
 
@@ -79,3 +79,35 @@ curl -H "Authorization: Bearer <owner-token>" localhost:8770/api/collection/expo
 ```
 
 A fake CMS covers this in `tests/test_collection.py` (multipart pairing by index, queue lifecycle, restart-failure, both servers). Open CMS questions: why the documented JSON upload reports success without inserts, whether `ContentType` is required (the app currently omits it), how a super-like is represented within the accepted content types, stored price/name readback, comma- vs underscore-joined tags acceptance, per-collection caps and the full `ContentSubType` set. Live smoke responses returned `Result: {insertedCount, updatedCount, existingList}` without a collection ID.
+
+
+## Receiving CMS contract
+
+`POST /api/v1/Upload/AddCollection` uses Bearer developer-key authentication and multipart form data. Mirsal enforces a 40-character collection name and 160-character description. The field table and pricing semantics above are the canonical request reference.
+
+- The supplied contract declares `CollectionName`, `Description`, `ContentType`, `ContentSubType`, `Media` and `MediaMetadata` required; `Price` is optional. `MediaMetadata` is one JSON array of `{emoji_utf, tags}` objects, one per media file in matching order. Upload filenames include extensions and appropriate MIME types. Mirsal sends paired PNG `MediaThumbnails` in that same order.
+- The current app omits `ContentType`; the animated `test` pack was accepted anyway. Direct probes explicitly used `emoji_reaction`; `super_like` returned 400: `ContentType must be emoji or emoji_reaction.` Reconcile this discrepancy before extending reaction delivery.
+- Current pack export supports WEBM/PNG/WebP and rejects JSON with 409. The supplied JSON contract is unproven: simulator, Lottie and super-like JSON probes produced no inserts, including attempts with thumbnails. Final replacement Lottie assets are still deferred.
+- `Price` is a string; `"0"` means free and unset omits it. No currency, precision or monetary range is established. Local persistence/forwarding is verified; live stored-price/name readback is not.
+
+Observed four-asset response:
+
+```json
+{
+  "Success": true,
+  "Message": null,
+  "TotalCount": 0,
+  "Result": {"insertedCount": 4, "updatedCount": 0, "existingList": []},
+  "ErrorMessages": []
+}
+```
+
+Use the result counts, not `TotalCount`. HTTP 200 / `Success: true` alone does not prove delivery: the JSON probes returned both counts zero. A client should reject a refusal flag, compare inserted/updated counts with the intended files, and inspect duplicate/existing entries or ambiguous receipts before a deliberate retry. No returned collection ID confirms stored naming/price, final approval or downstream playback. The app worker's count validation remains backlog work; this guidance does not claim that it is implemented.
+
+Observed errors include 400 for invalid content type and 429 with `retryAfterSeconds: 57` for back-to-back collections. Respect the receiver's cooldown; the current app marks that export failed rather than scheduling a retry. A 2xx with `Success: false` is an application refusal. Never blindly repeat a zero-count or ambiguous upload.
+
+## Prepared hosting: paused
+
+Public deployment and Google OAuth remain paused. Prepared assets remain in `deploy/`: the FastAPI gateway, SQL migrations for accounts/analysis/credits, Docker launcher/compose and Render blueprint. Historical fake/scratch verification and the full deployment runbook are in Git (`51f327b1:deploy/README.md` and the earlier deployment plan). No hosted project was created or enabled by this consolidation.
+
+Only resume on an explicit request, using the parked W40–W48 decisions in [the backlog](backlog.md#owner-decisions). Keep Supabase SQL separate from the local migration runner; hosting still requires identity, shared asset storage, credit-ledger integration, retention/export/delete and secret rotation decisions. Collection sale prices remain separate from hosted account credits.

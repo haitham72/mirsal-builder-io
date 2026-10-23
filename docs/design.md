@@ -42,3 +42,12 @@ A 5-page modal over Home once per session (fast-cut film + four slides, sound af
 - D1–D7 (Haitham accepted all, 2026-10-11): Project/Batch/Sheet/Video words; project switcher replaces the column; Animate/Add act on the selected batch only ("Animate every batch" in a menu); retire `gbdrop`; rail of four + avatar menu; chat preview lives on the pack; two interfaces, one workspace, one project ("Ask Mirsal" side panel after phase 7, only if Haitham agrees).
 - **No action, screen or route may disappear** without a `renamed`/`retired` entry in `mirsal/tests/data/ui_baseline.json` (`tests/test_ui_inventory.py`); the baseline is never regenerated during the redesign. The inventory itself regenerates from `mirsal/mirsal/console/inventory.py`. When markup moves, the selector in the test changes, the behaviour it asserts does not.
 - Use code and on-demand screenshots for review; capture local browser artifacts under `output/playwright/`. The former fixed `docs/shots/` set has been removed.
+
+
+## Browser acceptance toolkit
+
+`tools/acceptance/redesign/` contains isolated browser scripts, not a second review guide. From the repository root, `prepare.py` copies G146 artwork and imports a synthetic 3×3 G156 video into disposable output; its location is written to ignored `output/playwright/scratch.txt`. Start a task-owned server on free port 8797 with that `MIRSAL_OUT`, real CLI/providers/database writes disabled. Never point these tools at real output or :8770.
+
+Use the Playwright CLI skill and `playwright-cli -s=<isolated-session> run-code --filename <script>` after opening the server and taking a snapshot. `sliders.js` covers the eight theme/width cells; `retry.js` busy retries; `reactions.js` both surfaces; `frame.js` the frame editor; `hover-contrast.js` contrast; `defaults.js` fresh 2×2 defaults and unchanged 3×3 fixtures. `extended.js` currently selects one retry cell; restore its width/theme arrays for a full run. Seed nonempty reactions and the synthetic long session in the scratch copy when needed. Screenshots are recreated on demand, not maintained documentation.
+
+Latest pricing/delivery evidence and the single app-review checklist are in [DELIVERY_CHECKLIST.md](../DELIVERY_CHECKLIST.md). The historical October 19 acceptance report is in Git. Technical browser checks do not establish owner visual acceptance or paid-model quality. The separate [film kit](../Motion%20Graphics/README.md) documents rendering, not product acceptance.

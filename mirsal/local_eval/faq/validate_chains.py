@@ -16,7 +16,9 @@ from mirsal.flow import faq,support,support_kb
 from mirsal.store import sync
 
 def contract():
-    paths={p.relative_to(REPO/'faq').as_posix() for p in (REPO/'faq').rglob('*.md')}
+    seeds, bad = faq.read_seeds(REPO/'faq')
+    assert not bad
+    paths={rel for rel, _, _ in seeds}
     new=json.loads((HERE/'chain-sources.json').read_text(encoding='utf-8'))
     cases=json.loads((HERE/'cases.json').read_text(encoding='utf-8'))
     assert 20<=len(cases)<=30 and len({c['id'] for c in cases})==len(cases)
@@ -51,9 +53,8 @@ def contract():
                 fixture_results.append(dict(case=c['id'],visible_ids=[h['id'] for h in hits],foreign_job_hidden=True))
     assert unknowns>=5
     assert {e['path'] for e in new}<=paths
-    for p in (REPO/'faq').rglob('*.md'):
-        s=faq.parse_seed(p.read_text(encoding='utf-8'))
-        assert s['category']==p.parent.name and bool(s['screen'])==bool(s['looks_like'])
+    for rel, _, s in seeds:
+        assert s['category']==rel.rsplit('/', 1)[0] and bool(s['screen'])==bool(s['looks_like'])
     return dict(chains=len(cases),turns=sum(len(c['turns']) for c in cases),no_answer_turns=unknowns,
                 referenced_faqs=len(cited),new_entries=len(new),total_entries=len(paths),fixtures=fixture_results)
 

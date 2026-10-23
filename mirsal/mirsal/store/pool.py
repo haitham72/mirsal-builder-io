@@ -5,7 +5,7 @@ Two scorers behind ONE query path (the callers never fork):
 - vectors (`subject_vec` / `action_vec`, 768-d, `mirsal/services/embed.py`): `0.5*cos(subject) + 0.4*cos(action) + 0.1*lexical`, with the quality gate
   `cos(subject) >= SUBJECT_MIN and cos(action) >= ACTION_MIN`, so "penguin skiing" in a pool with no penguins returns nothing, never the nearest junk;
 - lexical (trigram + word coverage), used for rows that have no vectors yet and when no embedding backend is running.
-The thresholds are provisional until Haitham's eval set (`docs/inputs/search_queries.md`); the measured separation on the first 45 approved stickers is in
+The thresholds are provisional until Haitham's labelled query set (docs/backlog.md, calibration); the measured separation on the first 45 approved stickers is in
 `docs/architecture.md ("Measurements")`. Nothing here spends: embeddings are local and free, and generation is never started by a search."""
 from __future__ import annotations
 

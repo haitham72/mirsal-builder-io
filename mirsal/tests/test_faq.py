@@ -185,6 +185,71 @@ class SeedTests(unittest.TestCase):
         r3 = faq.import_seeds(self.out, self.seeds, publish=True)
         self.assertEqual(r3["unchanged"], 2)
 
+    def test_json_migration_preserves_existing_ids_and_published_revision_gate(self):
+        import hashlib
+        text = "---\ntitle: Sending a pack\nquestion: Why is my pack refused?\ncategory: telegram\ntags: telegram, size\n---\nRe-export smaller.\n"
+        self.write("telegram/send.md", text)
+        first = faq.import_seeds(self.out, self.seeds)
+        fid = first["created"][0]
+        faq.publish(self.out, fid, "local")
+        entry = faq.parse_seed(text)
+        canonical = json.dumps(entry, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        entry.update(path="telegram/send.md", legacy={"source_sha256": hashlib.sha256((self.seeds / "telegram/send.md").read_bytes()).hexdigest(),
+                                                      "alternate_sha256": [hashlib.sha256(text.encode()).hexdigest()],
+                                                      "content_sha256": hashlib.sha256(canonical).hexdigest()})
+        data = {"version": 1, "entries": [entry]}
+        bundle = self.seeds / "seed.json"
+        bundle.write_text(json.dumps(data), encoding="utf-8")
+        (self.seeds / "telegram/send.md").unlink()
+        migrated = faq.import_seeds(self.out, self.seeds)
+        self.assertEqual((migrated["created"], migrated["updated"], migrated["unchanged"]), ([], [], 1))
+        before = faq.read(self.out, fid)
+        self.assertEqual((before["status"], before["revision"], before["pending"]), ("published", 1, None))
+        entry["answer"] = "Re-export smaller and try again."
+        bundle.write_text(json.dumps(data), encoding="utf-8")
+        changed = faq.import_seeds(self.out, bundle)
+        self.assertEqual(changed["updated"], [fid])
+        after = faq.read(self.out, fid)
+        self.assertEqual(after["answer"], before["answer"])
+        self.assertEqual(after["pending"]["answer"], entry["answer"])
+        self.assertEqual(after["seed"]["path"], "telegram/send.md")
+        self.assertEqual(faq.import_seeds(self.out, bundle)["unchanged"], 1)
+        self.assertEqual(len(faq.listing(self.out)), 1)
+
+    def test_migration_accepts_the_other_platforms_line_ending_hash(self):
+        import hashlib
+        text = "---\nquestion: Why is it empty?\ncategory: library\n---\nPacks are per person.\n"
+        self.write("library/empty.md", text)
+        fid = faq.import_seeds(self.out, self.seeds)["created"][0]
+        actual = (self.seeds / "library/empty.md").read_bytes()
+        other = text.replace("\n", "\r\n").encode() if b"\r\n" not in actual else text.encode()
+        entry = faq.parse_seed(text)
+        canonical = json.dumps(entry, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()
+        entry.update(path="library/empty.md", legacy={"source_sha256": hashlib.sha256(other).hexdigest(),
+                                                      "alternate_sha256": [hashlib.sha256(actual).hexdigest()],
+                                                      "content_sha256": hashlib.sha256(canonical).hexdigest()})
+        (self.seeds / "seed.json").write_text(json.dumps({"version": 1, "entries": [entry]}), encoding="utf-8")
+        result = faq.import_seeds(self.out, self.seeds)
+        self.assertEqual((result["created"], result["updated"], result["unchanged"]), ([], [], 1))
+        self.assertEqual(faq.listing(self.out)[0]["id"], fid)
+
+    def test_invalid_bundle_is_rejected_before_importing_any_entry(self):
+        valid = {"path": "telegram/send.md", "question": "Why?", "answer": "Re-export.", "tags": ["telegram"]}
+        invalid = [
+            {"version": 2, "entries": [valid]},
+            {"version": 1, "entries": [valid, valid]},
+            {"version": 1, "entries": [valid, {**valid, "path": "../escape.md"}]},
+            {"version": 1, "entries": [valid, {**valid, "path": "bad/entry.md", "tags": "wrong"}]},
+            {"version": 1, "entries": [valid, {**valid, "path": "bad/entry.md", "answer": ""}]},
+        ]
+        bundle = self.seeds / "seed.json"
+        for data in invalid:
+            with self.subTest(data=data):
+                bundle.write_text(json.dumps(data), encoding="utf-8")
+                with self.assertRaises(faq.FAQError):
+                    faq.import_seeds(self.out, bundle)
+                self.assertEqual(faq.listing(self.out), [])
+
 
 if __name__ == "__main__":
     unittest.main()

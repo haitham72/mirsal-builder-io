@@ -1,0 +1,1836 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "path": "accounts/access-request.md",
+      "title": "How do I request something only an admin can provide",
+      "question": "How do I request something only an admin can provide?",
+      "answer": "After signing in and being approved, describe the access, credits or credentials you need in Help. Choose Ask the admin when it is offered; the request goes to an admin, who decides what can be provided. The request does not grant access automatically. If this does not match what you see, send a screenshot in Help.",
+      "category": "accounts",
+      "tags": [
+        "accounts",
+        "access",
+        "request"
+      ],
+      "screen": "Help",
+      "looks_like": "Only an admin can give this. appears above Ask the admin.",
+      "legacy": {
+        "source_sha256": "418c80ba11f12330fc159c66991a9ef2eac21b47e69a5197657d8e9bd206ed41",
+        "content_sha256": "f7330fcabb8eee14e8b67f60a7482c9d8a599ecb86c8d9600fe0394e085f8069",
+        "alternate_sha256": [
+          "988a16b7c979b4ee818f8d625b2f1bc5e0dbc562f9b582fccecff39addb18bc4"
+        ]
+      }
+    },
+    {
+      "path": "accounts/choose-password.md",
+      "title": "Why am I asked to choose my own password",
+      "question": "Why am I asked to choose my own password?",
+      "answer": "Your account was given a starting password. Enter a new password of at least eight characters and press Save; Keep the given password for now postpones the change until a later sign-in. If this does not match what you see, send a screenshot in Help once you are in the app.",
+      "category": "accounts",
+      "tags": [
+        "accounts",
+        "choose",
+        "password"
+      ],
+      "screen": "Sign in",
+      "looks_like": "Choose your own password shows Your new password (8 characters or more), Save and Keep the given password for now.",
+      "legacy": {
+        "source_sha256": "88f85ee27d4ccbbe3cc0127b7c934e775f8439d4941244668569ee656d99d082",
+        "content_sha256": "9e181ca3067b1dd4dc16d8e3216c6a0bf2b0060c86995bfd67cfe23903afaeb3",
+        "alternate_sha256": [
+          "c0a1981836f4010fccf0513ece63b9850faff54155aaf02ba523c224306256a9"
+        ]
+      }
+    },
+    {
+      "path": "accounts/create-account.md",
+      "title": "How do I create an office account",
+      "question": "How do I create an office account?",
+      "answer": "Choose Create account on the sign-in screen and enter your name, an email from an allowed office domain, and a password. A new account waits for approval before the app opens. Help opens only after you are signed in and approved, so if you are stuck before that, ask an admin of your office's Mirsal.",
+      "category": "accounts",
+      "tags": [
+        "accounts",
+        "create",
+        "account"
+      ],
+      "screen": "Sign in",
+      "looks_like": "Sign in to Mirsal has Create account and Forgot password links.",
+      "legacy": {
+        "source_sha256": "d293dc40c1dabead62530554be0868ae4594820b578a6a314351acc377bf2e5c",
+        "content_sha256": "1c9045dfd5ded1f127c3dceae3aeafff71ca18e495ece71013476fdcb8a68db1",
+        "alternate_sha256": [
+          "22f34864aa4742162859425e741a4bc2c9232ac3789c2f976895e71c50024c26"
+        ]
+      }
+    },
+    {
+      "path": "accounts/forget-private-reply.md",
+      "title": "How do I remove a private reply after saving it",
+      "question": "How do I remove a private reply after saving it?",
+      "answer": "After saving the information somewhere appropriate, choose I saved it, forget it in your Help conversation. This erases the private message text from the conversation record; the screen then shows that it was forgotten. It does not erase information you already copied elsewhere. If this does not match what you see, send a screenshot in Help.",
+      "category": "accounts",
+      "tags": [
+        "accounts",
+        "forget",
+        "private",
+        "reply"
+      ],
+      "screen": "Help",
+      "looks_like": "I saved it, forget it is available on the private message; afterward the message says A private message (you saved it and it was forgotten).",
+      "legacy": {
+        "source_sha256": "c73cb928cb5e50c2efa3571bf11c535f23425179494de3c31fc246e9b85a04ed",
+        "content_sha256": "38b728a50edc292ba8d1921a3a6eb04e0557179991d44d6274cbb74cac9c44db",
+        "alternate_sha256": [
+          "5700e45f22f7e16d99d9345dad07160b6c1747f5f279a5650cc586fc7ac3c7c4"
+        ]
+      }
+    },
+    {
+      "path": "accounts/forgot-password.md",
+      "title": "How do I reset a forgotten password",
+      "question": "How do I reset a forgotten password?",
+      "answer": "Choose Forgot password, enter your account email, and press Ask for a new password. This requests a new password from support staff; it is not an automatic email reset. Help opens only after you are signed in, so if no new password reaches you, ask an admin of your office's Mirsal.",
+      "category": "accounts",
+      "tags": [
+        "accounts",
+        "forgot",
+        "password"
+      ],
+      "screen": "Sign in",
+      "looks_like": "Forgot password has an Ask for a new password button.",
+      "legacy": {
+        "source_sha256": "00e11af55a04027506ae2ac5f4c83682317347c12d44fa94a868436cbd44775b",
+        "content_sha256": "8ffbe2b7bd56ed97735f1e922a95fcd12c983cd24f4f1da7e18147384c1466b0",
+        "alternate_sha256": [
+          "e948804a86f1e2fa60fa1dd71abe006d8a3155efd1b74fcce90d7a007b8ab346"
+        ]
+      }
+    },
+    {
+      "path": "accounts/private-reply.md",
+      "title": "How do I read a private reply from support",
+      "question": "How do I read a private reply from support?",
+      "answer": "Open your Help conversation when support sends a private reply. The message is masked: Reveal shows it and Copy copies it, so keep the contents private. Notifications tell you that a private message arrived without including its contents. If this does not match what you see, send a screenshot in Help.",
+      "category": "accounts",
+      "tags": [
+        "accounts",
+        "private",
+        "reply"
+      ],
+      "screen": "Help",
+      "looks_like": "A private message for you appears with a masked value, Reveal, Copy and I saved it, forget it.",
+      "legacy": {
+        "source_sha256": "e069af4b55defaa583a128d2ab3e14103c01486ddca92b86cf6cc194781d6f1d",
+        "content_sha256": "501e5040cb5b10acefb958ed443e734ca18d3c916551d643cabba06914a03450",
+        "alternate_sha256": [
+          "f00c166da0a7e59d66d2c6e9037f247b4e4fd30111a9198e072db2f36fbaea14"
+        ]
+      }
+    },
+    {
+      "path": "accounts/sign-out.md",
+      "title": "Where can I sign out",
+      "question": "Where can I sign out?",
+      "answer": "Open Settings and find Signed in as. Press Sign out to leave the account. If this does not match what you see, send a screenshot in Help.",
+      "category": "accounts",
+      "tags": [
+        "accounts",
+        "sign",
+        "out"
+      ],
+      "screen": "Sign in",
+      "looks_like": "Signed in as appears beside Sign out and Request credits.",
+      "legacy": {
+        "source_sha256": "8d95d40ca8a9c468bab966d29180bdefc7532f2adfc38f77853ce0cd43310e0d",
+        "content_sha256": "9bf775fc4f95b624ed252df824f8f0f3b80302428e80a27457eb9b31531b6ada",
+        "alternate_sha256": [
+          "51244b2a448a43b5050603d38c39eb931003165dffdb541e5bea2ebb0d903b9b"
+        ]
+      }
+    },
+    {
+      "path": "accounts/waiting-approval.md",
+      "title": "Why does my account say Waiting for approval",
+      "question": "Why does my account say Waiting for approval?",
+      "answer": "Your account has not been approved yet. Keep the waiting page open; it opens the app by itself after approval. Help opens only after approval, so if this page does not change, ask an admin of your office's Mirsal to approve you.",
+      "category": "accounts",
+      "tags": [
+        "accounts",
+        "waiting",
+        "approval"
+      ],
+      "screen": "Sign in",
+      "looks_like": "Waiting for approval appears with a Sign out button.",
+      "legacy": {
+        "source_sha256": "443be255be65143747a115b0e4c536b9948624dd2bad857fefa0bb306123e4fb",
+        "content_sha256": "f38b38ec4b3d3facae93addfa2e157f6d496c5b7fb584bbb3ba28f2b21c17e15",
+        "alternate_sha256": [
+          "23abdcf80212228d983f85bbc36dfd0aa5511d3198071b4e9a1a7d10c77fcbbf"
+        ]
+      }
+    },
+    {
+      "path": "ai-chat/not-yet.md",
+      "title": "How do I postpone a proposed generation",
+      "question": "How do I postpone a proposed generation?",
+      "answer": "Choose Not yet on the plan card instead of accepting it. With Ask before spending enabled, the plan shows the price and waits for your go-ahead.",
+      "category": "ai-chat",
+      "tags": [
+        "ai-chat",
+        "not",
+        "yet"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "18a54040bb0d35301d974d9ad1477546873a57f824330989d92c5887277cf47b",
+        "content_sha256": "1a32076bb7c19305fc6842cb82ec70f409742706240e264071f231d552514759",
+        "alternate_sha256": [
+          "8df6f7ffa899e7b890d2f38d1653c3f8c4606f86808c1d8518565ffab4be1798"
+        ]
+      }
+    },
+    {
+      "path": "ai-chat/persistent-feedback.md",
+      "title": "How can I make a preference apply beyond the next generation",
+      "question": "How can I make a preference apply beyond the next generation?",
+      "answer": "Ordinary feedback shapes the next generation. State a lasting preference explicitly, such as saying that you never want dark outlines, to make it persistent.",
+      "category": "ai-chat",
+      "tags": [
+        "ai-chat",
+        "persistent",
+        "feedback"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "a2ea9a5e016d679ed3a01ec9e502f718703e9e2f30e60ee135d1b1bbdc963ecc",
+        "content_sha256": "b85ebc72f498c4de4a5d5b53c4a32e6ab83e7d948e5a61d68042d74d551df7ca",
+        "alternate_sha256": [
+          "66f88df515ae6a9d6c70e16a077e7447a5096625a5c5318cc8ed73524f635b40"
+        ]
+      }
+    },
+    {
+      "path": "ai-chat/remember-subject.md",
+      "title": "What does the AI chat remember about my stickers",
+      "question": "What does the AI chat remember about my stickers?",
+      "answer": "Within a conversation, the chat keeps each subject and its generations, together with what you liked or disliked. This context helps it interpret follow-up requests about the same subject.",
+      "category": "ai-chat",
+      "tags": [
+        "ai-chat",
+        "remember",
+        "subject"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "080ec5ab1d4eaa5e27dd0e80461f6a63e964d79c0a33995779cd65cbf95d5d3e",
+        "content_sha256": "8511ace111cea7bc40c27ac1091d4e8973b6e287125ab3f1284ee0e3045868e6",
+        "alternate_sha256": [
+          "2d1697e6b4a00383868bbf3cddda9a940aaea5577c6f9dc65decf5ed8f27893d"
+        ]
+      }
+    },
+    {
+      "path": "ai-chat/which-sticker.md",
+      "title": "How do I answer when the AI asks which sticker I mean",
+      "question": "How do I answer when the AI asks which sticker I mean?",
+      "answer": "Reply with the sticker number, an ordinal such as number three, or select the sticker and say this one. The chat uses that answer to continue the request it just asked about.",
+      "category": "ai-chat",
+      "tags": [
+        "ai-chat",
+        "which",
+        "sticker"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "59c7109748f996461a4a4158a15cecda7dfab89f79c4baf112a8e0198b618cba",
+        "content_sha256": "72b61a68b4fab232c1b437f3eeeeef286beea970523f215f8fe6b01e003a2c4c",
+        "alternate_sha256": [
+          "b75266bda15aaba63f444a6ba8d1d9c9d5a4a130a19c450f7b458224a9ef1ccd"
+        ]
+      }
+    },
+    {
+      "path": "ai-vision/captions.md",
+      "title": "What are AI captions for my stickers",
+      "question": "What are AI captions for my stickers?",
+      "answer": "AI captions describe what each ready sticker shows, including visible text. They do not change your approval or rejection decisions, and stored captions are reused until the picture changes.",
+      "category": "ai-vision",
+      "tags": [
+        "ai-vision",
+        "captions"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "f0e9e2f8dd5765ea30092ace13b4b2c74e302204b269e7867f96a47ff73aa39e",
+        "content_sha256": "867df7767f6a74c3253b43b1894b522eab92723f509bb9233ebef04df6571b5d",
+        "alternate_sha256": [
+          "15ac705a4639eaba9a5781dc5f98fd606bc614bfa67559ce448d78ff672de1f6"
+        ]
+      }
+    },
+    {
+      "path": "ai-vision/consent.md",
+      "title": "Why does the app ask me to allow AI vision",
+      "question": "Why does the app ask me to allow AI vision?",
+      "answer": "The app asks for permission before sending generated pictures to a vision model. Allow AI vision permits the requested look; Not now declines it, and the chat also has an AI vision switch.",
+      "category": "ai-vision",
+      "tags": [
+        "ai-vision",
+        "consent"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "b710cb2298cda434263217c8edc0076f5750781db3d06aae01e35c00bfed4245",
+        "content_sha256": "fb62a5796c0cdce9c91e8f18b8319281d7ca8b1284aa25636bd78963809b9f45",
+        "alternate_sha256": [
+          "25b70f358b6f10f70c98e4e0b9e055083cca0251cb09be4f55b64d7f84f455de"
+        ]
+      }
+    },
+    {
+      "path": "ai-vision/help-screenshot.md",
+      "title": "How can I send a screenshot to Help",
+      "question": "How can I send a screenshot to Help?",
+      "answer": "Open Help, describe the problem and use Attach a screenshot, or paste an image with Ctrl+V. The local vision model reads the support screenshot on the office machine; that support reading does not send it to a cloud model. If this does not match what you see, send a screenshot in Help.",
+      "category": "ai-vision",
+      "tags": [
+        "ai-vision",
+        "help",
+        "screenshot"
+      ],
+      "screen": "Help",
+      "looks_like": "Help has Attach a screenshot and Paste a screenshot with Ctrl+V; the local AI reads it.",
+      "legacy": {
+        "source_sha256": "ae5e1e5ad0005f80469acfd001fcfc8c51aac819247bb2b0e7d90647e77379b1",
+        "content_sha256": "0cccdd9af4215a2989cd0cc7dd71f071606e36c42bd45c3934548b0095e98946",
+        "alternate_sha256": [
+          "dca606fd7bd8480a248fdd6488b257e40c41522ab97d8dfdf721d984bff183af"
+        ]
+      }
+    },
+    {
+      "path": "ai-vision/review-not-approval.md",
+      "title": "Does the AI pre-review approve stickers for me",
+      "question": "Does the AI pre-review approve stickers for me?",
+      "answer": "No, the vision model only pre-reviews the pictures. Human review still decides whether to approve or reject them.",
+      "category": "ai-vision",
+      "tags": [
+        "ai-vision",
+        "review",
+        "not",
+        "approval"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "2c24e19b1847d69cb6c5079cf540f1762248bc0888b0f4d2ef596faea9144a4a",
+        "content_sha256": "0d7216e46cb9e6eaae7ac2aa7804f75100cbe5510452ae0b0ff15e39fab0cad5",
+        "alternate_sha256": [
+          "09c4ec33261bd110a391575da0f0b1d967fc1672d47f82dcfe50ca501de84b6b"
+        ]
+      }
+    },
+    {
+      "path": "ai-vision/review-time.md",
+      "title": "How long does the local AI pre-review take",
+      "question": "How long does the local AI pre-review take?",
+      "answer": "One test of thirty stickers measured about ten seconds per sticker with the local model. Actual time depends on the model and workload, so that measurement is not a promised wait time.",
+      "category": "ai-vision",
+      "tags": [
+        "ai-vision",
+        "review",
+        "time"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "0d947b8e8ec878187f4a75dcc0929e7ca748c793281c648883fbdd3205bdd261",
+        "content_sha256": "1499e5009626de145739fe48fe45b307938ae244b5505abb4245fcdaafb14866",
+        "alternate_sha256": [
+          "177f380800e4fb9b6951056b6a30e08d7a5e86f29eab5aba5662cc9d3fad1893"
+        ]
+      }
+    },
+    {
+      "path": "ai-vision/unjudged.md",
+      "title": "Why can the AI leave a sticker unjudged",
+      "question": "Why can the AI leave a sticker unjudged?",
+      "answer": "A model answer that cannot be accepted leaves the sticker unjudged rather than pretending the review succeeded. In one local test, five of thirty answers used unsupported reasons; that is one measurement, not a guarantee about future reviews.",
+      "category": "ai-vision",
+      "tags": [
+        "ai-vision",
+        "unjudged"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "c58d3d3decfca420ed561b8ae06031b40a2db32562f494294920467c26f57569",
+        "content_sha256": "0fee6c750f4c6a0bbb450392677c4b43143f3e3560226d2b5ee9293684ad6dcd",
+        "alternate_sha256": [
+          "8cd0c2a810745937aae84282938bdea8ea1e626fb042937cd57110a90da5d970"
+        ]
+      }
+    },
+    {
+      "path": "ai-vision/useful-screenshot.md",
+      "title": "What should I include in a useful support screenshot",
+      "question": "What should I include in a useful support screenshot?",
+      "answer": "Capture the app window with the relevant screen, controls and error message visible. Add what you did, what you expected and what happened so Help has both the picture and your explanation.",
+      "category": "ai-vision",
+      "tags": [
+        "ai-vision",
+        "useful",
+        "screenshot"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "f3f101df17063fda723170b1229ecdd8106e801e85142ca12139c1284e5eeb31",
+        "content_sha256": "646aca8c2b5d53c1315a12aab71de5f8e9bc7d150512d224d80ef765674d8bc4",
+        "alternate_sha256": [
+          "d0c00d00261a1c972f2f54e3ccbcded48ec05cd3fd46d324eae9c9b9fcc81185"
+        ]
+      }
+    },
+    {
+      "path": "animation/bad-loop.md",
+      "title": "Why does an animation show Bad loop",
+      "question": "Why does an animation show Bad loop?",
+      "answer": "The end of the animation does not join cleanly to its beginning. Loop quality is a judgement call that can be allowed where the tile offers Use it anyway. If this does not match what you see, send a screenshot in Help.",
+      "category": "animation",
+      "tags": [
+        "animation",
+        "bad",
+        "loop"
+      ],
+      "screen": "Studio > Animation",
+      "looks_like": "The problem category says Bad loop and the reason says the loop does not close.",
+      "legacy": {
+        "source_sha256": "b75e704743918155caecbe03082f84f1c0e4cce5c8a4f4aaff4860fd18cc16d9",
+        "content_sha256": "d982095af2d7e68cc6d1af7d4cfa4849ddefc0ee580536bd37df313822d3da97",
+        "alternate_sha256": [
+          "26e25c90f37b4f2a482316b231233a4de51de7250930aba8865bf62fe997e51f"
+        ]
+      }
+    },
+    {
+      "path": "animation/edge-changed.md",
+      "title": "Why must I animate again after changing the edge",
+      "question": "Why must I animate again after changing the edge?",
+      "answer": "Changing the outline or rim trim makes animations created with the previous edge stale. Animate again to apply the new edge to those animations. If this does not match what you see, send a screenshot in Help.",
+      "category": "animation",
+      "tags": [
+        "animation",
+        "edge",
+        "changed"
+      ],
+      "screen": "Studio > Animation",
+      "looks_like": "The tile says edge changed: Animate again to apply it.",
+      "legacy": {
+        "source_sha256": "9dbb0198224f235f07fb67e6cfd1beef1de3a4a9fe8d443fe53efa4a8fcecb37",
+        "content_sha256": "3b3b97264e7a791105b49058a2a19c45b3d9e139914e3757f83afe533acbbf7a",
+        "alternate_sha256": [
+          "2b05fecc7ff2b15ea9c2d38be6080d8fb102af933d63f7e28b487343390fdf2f"
+        ]
+      }
+    },
+    {
+      "path": "animation/edited-size-limit.md",
+      "title": "Why can saving an edited animation be refused",
+      "question": "Why can saving an edited animation be refused?",
+      "answer": "An edited animation still has to fit Telegram’s 256 KB limit. If Save to sticker refuses the edited result because of its size, adjust the edit so the output fits; a technical file limit cannot be bypassed with Use it anyway.",
+      "category": "animation",
+      "tags": [
+        "animation",
+        "edited",
+        "size",
+        "limit"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "be6390476da289fcfcd4d517171755c3b0df390c547bf7bfa0fe9638b46f98b4",
+        "content_sha256": "a7f2111c01f96309bf77f7e3c814b6c37d36eeda387159a61c0b3e05bf02afff",
+        "alternate_sha256": [
+          "9386ab494bc25e96ab4be7ea3eb7ae9b3c747c2eaa82ab7c2794f037a9f9e13b"
+        ]
+      }
+    },
+    {
+      "path": "animation/frame-checks.md",
+      "title": "What does the app check while animating",
+      "question": "What does the app check while animating?",
+      "answer": "It checks each animation frame by frame, including file size, the loop and whether the character stays within its cell. Finished animations appear as they become ready.",
+      "category": "animation",
+      "tags": [
+        "animation",
+        "frame",
+        "checks"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "9327ae0c351614fcf2f7b131fad674fee91db65fd2774dc5122460656bd9814a",
+        "content_sha256": "48c8435abeb2ad2e3b482a7db003ccfd16e0d1cae871c8002f504c6fff60ecce",
+        "alternate_sha256": [
+          "4e9c71c18952d1103798b3fdaeff46b8752c49fd1dd4e00fe7323fb5710fe960"
+        ]
+      }
+    },
+    {
+      "path": "animation/not-animated.md",
+      "title": "Why does a sticker say Not animated yet",
+      "question": "Why does a sticker say Not animated yet?",
+      "answer": "The still picture is ready but does not have an animation yet. Animation needs the prepared video, and the Animation stage reports when no video is prepared. If this does not match what you see, send a screenshot in Help.",
+      "category": "animation",
+      "tags": [
+        "animation",
+        "not",
+        "animated"
+      ],
+      "screen": "Studio > Animation",
+      "looks_like": "A sticker tile says Not animated yet; the Animation stage can say No video prepared.",
+      "legacy": {
+        "source_sha256": "6a70ac67f29463ca2774134b726631c38ddd2837f22a06193d35dacd7d98f3ea",
+        "content_sha256": "7fa32518f45c72ada60211eedba4db02c1b787d21973d605ebcc69a0e984ee57",
+        "alternate_sha256": [
+          "54bf8fe6a6f663ea358c551639a3a6fe5af69e9ac60b3a97a66108b8354136b8"
+        ]
+      }
+    },
+    {
+      "path": "animation/outside-slot.md",
+      "title": "Why is an animation out of bounds",
+      "question": "Why is an animation out of bounds?",
+      "answer": "The character leaves its own slot or reaches into a neighbouring slot on the animation sheet. It is off by default, but a judgement-call boundary warning can be allowed with the visible override. If this does not match what you see, send a screenshot in Help.",
+      "category": "animation",
+      "tags": [
+        "animation",
+        "outside",
+        "slot"
+      ],
+      "screen": "Studio > Animation",
+      "looks_like": "Animation shows out of bounds (off), and the tile can offer Include anyway.",
+      "legacy": {
+        "source_sha256": "ea8f30c553a6dcd2c3335d02ed7de64f46c004fc82e015a8e0426e415ecdd851",
+        "content_sha256": "604fd60b020b66fceb69070fe62b016f0f1ee57c54227572e50dd7037df17d80",
+        "alternate_sha256": [
+          "6ba032436cbbddc05a5e49b9d0867e8cda0b1d0ef481adedd59177900c764949"
+        ]
+      }
+    },
+    {
+      "path": "credits/automatic-refill.md",
+      "title": "Do my office credits refill automatically",
+      "question": "Do my office credits refill automatically?",
+      "answer": "Office credits do not refill automatically. Use Request credits in Settings, or ask in Help and choose Ask the admin when offered; adding credits requires an admin’s decision.",
+      "category": "credits",
+      "tags": [
+        "credits",
+        "automatic",
+        "refill"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "2c7876d0670a4f774690ff07f0e29b353678de021e8edb3dd6131142d7c5f01e",
+        "content_sha256": "31b580ddfff574217f893016606fa7a1aec9bd99b1fd588e571fb1e0745f29df",
+        "alternate_sha256": [
+          "1a0cff2507b40ccb9347b4a4b1b2eb3d861ba9fa79cc94a486c478cab54e9481"
+        ]
+      }
+    },
+    {
+      "path": "credits/failed-job-refund.md",
+      "title": "What happens to reserved credits when a generation fails",
+      "question": "What happens to reserved credits when a generation fails?",
+      "answer": "A failed job returns its reserved credits when the failure is settled. If your balance does not look right, ask Help about that job instead of assuming a new paid generation is necessary.",
+      "category": "credits",
+      "tags": [
+        "credits",
+        "failed",
+        "job",
+        "refund"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "c33e35b1729325d464bab0cab1cde903188cebc80fa2a8654114c31d237f5a3d",
+        "content_sha256": "42b672328020996dd3b1f28caf8cae52efc9e8b5f5b6ceef841d5e10196b3d37",
+        "alternate_sha256": [
+          "aedb5ffe5be44b84a68dbdce3fbcb12e7f5740af5185a7d2105653d27c972552"
+        ]
+      }
+    },
+    {
+      "path": "credits/request-more.md",
+      "title": "How can I ask for more credits",
+      "question": "How can I ask for more credits?",
+      "answer": "Open Settings and press Request credits beside Signed in as. This sends a request rather than immediately adding credits to your balance. If this does not match what you see, send a screenshot in Help.",
+      "category": "credits",
+      "tags": [
+        "credits",
+        "request",
+        "more"
+      ],
+      "screen": "Settings",
+      "looks_like": "Signed in as shows credits left and Request credits.",
+      "legacy": {
+        "source_sha256": "9b908ee19125da12696e952fb07a5a86e9bd443ee2429f0f6bb67da8f0f022f1",
+        "content_sha256": "bfb1dc8b2b6d0747b18ac37b9dd24c7a444ffafa924226ef52b283868975700d",
+        "alternate_sha256": [
+          "ad771b00cc099f694b4de81bd4f8591115ea54495b79683225c92f1e2c4dd2ae"
+        ]
+      }
+    },
+    {
+      "path": "credits/reserved-balance.md",
+      "title": "Why does my credit balance change before a job finishes",
+      "question": "Why does my credit balance change before a job finishes?",
+      "answer": "Before a paid sheet or video job starts, the quoted cost is reserved against your balance. When the job ends, the real cost replaces that reservation. Help can check your job’s recorded status if you are unsure whether it has finished.",
+      "category": "credits",
+      "tags": [
+        "credits",
+        "reserved",
+        "balance"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "f949c8ae03adea62b13fb87dbf12d87b2396e049011161c05f22b6f32168ab89",
+        "content_sha256": "978c7fa731f35f2808f44279dbdab8921ca0ba30829d197bab115fd3c343b9e2",
+        "alternate_sha256": [
+          "a178740c9ae19c46e0e5947379fa36a000479785ae9a92470a205a548a53bb33"
+        ]
+      }
+    },
+    {
+      "path": "credits/spend-confirmation.md",
+      "title": "Will the AI start spending without asking me",
+      "question": "Will the AI start spending without asking me?",
+      "answer": "With Ask before spending enabled, a plan shows the price and waits for confirmation. Turning it off lets the chat start generation immediately, so keep it on if you want to approve each spend. If this does not match what you see, send a screenshot in Help.",
+      "category": "credits",
+      "tags": [
+        "credits",
+        "spend",
+        "confirmation"
+      ],
+      "screen": "AI > settings",
+      "looks_like": "The AI settings have Ask before spending and Show the price and wait for your go-ahead.",
+      "legacy": {
+        "source_sha256": "a522ece4423a32acb88ab0f80ee1ff93e215452c60d13e1a2fd9ee9e0f9772ff",
+        "content_sha256": "c55ca87598cfff915d1c382374baa0dee19a77e8294a181103bb16af7d6da6c4",
+        "alternate_sha256": [
+          "e71a5f1f9a84c6d05c341e5abfa250f67ad09f96bc5eb9f385e7383e9addff9a"
+        ]
+      }
+    },
+    {
+      "path": "getting-started/batch-and-sheet.md",
+      "title": "What is the difference between a batch and a sheet",
+      "question": "What is the difference between a batch and a sheet?",
+      "answer": "A batch is one generation of stickers. Its sheet contains the individual pictures arranged in cells; each sticker keeps its original cell number through review and animation.",
+      "category": "getting-started",
+      "tags": [
+        "getting-started",
+        "batch",
+        "and",
+        "sheet"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "151a05075d1302ef6afd2e8e0805c5c752d7fc8f6a2368548cbe37fa5e30ca54",
+        "content_sha256": "22355468c96e1a9468be0297d051151f142ef194720f7433ef812d4271701cbc",
+        "alternate_sha256": [
+          "9bd91b315ba6fa9d4adc29b5197228820a61db52e092cdff5c8a0b63e91ed944"
+        ]
+      }
+    },
+    {
+      "path": "getting-started/stickers-not-emoji.md",
+      "title": "Does Mirsal make stickers or custom emoji",
+      "question": "Does Mirsal make stickers or custom emoji?",
+      "answer": "Mirsal makes Telegram stickers, including animated stickers. The emoji attached to a sticker is its tag, not a custom emoji output.",
+      "category": "getting-started",
+      "tags": [
+        "getting-started",
+        "stickers",
+        "not",
+        "emoji"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "f83ea06cd7977034ee38676596e72630607ac3f29371fd32dfe3a5eee1c9007f",
+        "content_sha256": "58c9a8bbc453aed30948110f52e9a784eeaeb2fa848fd3608d60949d17ee0d7d",
+        "alternate_sha256": [
+          "8ec09f53548187083c78a4516702aef474a4f0db9462f5d0f6b8006496e9c801"
+        ]
+      }
+    },
+    {
+      "path": "getting-started/two-ways.md",
+      "title": "Should I use the AI chat or Studio",
+      "question": "Should I use the AI chat or Studio?",
+      "answer": "Use the AI chat to describe what you want in everyday words and refine it in conversation. Use Studio when you want explicit controls for the prompt and sticker settings.",
+      "category": "getting-started",
+      "tags": [
+        "getting-started",
+        "two",
+        "ways"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "f7d55a0a57fc5b95ac2850e52531cc538da76d85b3756eca8f5cbd0cbfd22b89",
+        "content_sha256": "e8b22cdcce950e41420408a119c4dffaceda9f83733283fa914bbf6e49df3851",
+        "alternate_sha256": [
+          "30a0f17200c3cc2528544e03a812c437183652d916f53a415095049f25b60e73"
+        ]
+      }
+    },
+    {
+      "path": "getting-started/welcome-again.md",
+      "title": "How can I watch the welcome introduction again",
+      "question": "How can I watch the welcome introduction again?",
+      "answer": "Press the Mirsal logo to open the welcome introduction again. It also opens automatically once per browser session after sign-in and approval. If this does not match what you see, send a screenshot in Help.",
+      "category": "getting-started",
+      "tags": [
+        "getting-started",
+        "welcome",
+        "again"
+      ],
+      "screen": "Studio",
+      "looks_like": "The Mirsal logo opens the welcome introduction.",
+      "legacy": {
+        "source_sha256": "d8953a6923788794db1450123caf81b9dda8228076ed504bf3ac4a94825f17ea",
+        "content_sha256": "a50e319da79c264642e155a01ca2e5c9c16be7edb5757200bc6e49d6df7e0c13",
+        "alternate_sha256": [
+          "40c527450bc53fa9267db2decec0814187fb9e9c1961b25330b0555a796b2d03"
+        ]
+      }
+    },
+    {
+      "path": "imports/member-controls.md",
+      "title": "Why can I not see the sheet import controls",
+      "question": "Why can I not see the sheet import controls?",
+      "answer": "Use my own sheet and Import from Higgsfield are available to the owner account. They are not member controls. After signing in and approval, ask in Help if you need an admin’s assistance with access, rather than assuming the controls are broken.",
+      "category": "imports",
+      "tags": [
+        "imports",
+        "member",
+        "controls"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "ee20a73a413fa00d41e9808c68e1c772f71cd588494831586b72249bb6edff5e",
+        "content_sha256": "dc38ebb83adfeca7b866b5886aa19f0d86bd30eed507560e1d1311aa47cff9d7",
+        "alternate_sha256": [
+          "e5d0c2921d98b4a0cd58a9beeeff106a4febb6ffa0701ed7a6e1ec3576d1a60c"
+        ]
+      }
+    },
+    {
+      "path": "library/bulk-select.md",
+      "title": "How can I select multiple Library stickers",
+      "question": "How can I select multiple Library stickers?",
+      "answer": "Tick the square selection markers or drag a box over the stickers. Shift adds to the selection and Ctrl un-selects, so you can delete selected stickers together. If this does not match what you see, send a screenshot in Help.",
+      "category": "library",
+      "tags": [
+        "library",
+        "bulk",
+        "select"
+      ],
+      "screen": "Library",
+      "looks_like": "My Stickers says Tick the square, or drag a box over the stickers (Shift adds, Ctrl un-selects).",
+      "legacy": {
+        "source_sha256": "b35a9bb855c2ab147c6ed42a36d3168b2c45f89cc9e2c31620ac194e1ab5f669",
+        "content_sha256": "7e82bda1fce57c3e56eb803466fc22e19ed478df50bdf58475ee72975de74f96",
+        "alternate_sha256": [
+          "62a7b9a113f0dde84b6e20cf22f103287d271c1326e26795963013336aac8153"
+        ]
+      }
+    },
+    {
+      "path": "library/delete-pack.md",
+      "title": "Can I restore a deleted pack",
+      "question": "Can I restore a deleted pack?",
+      "answer": "Delete pack moves it to the trash with its sticker files intact. Use Settings > Trash to restore it or explicitly delete it for good; copies that came from batches stay in those batches. If this does not match what you see, send a screenshot in Help.",
+      "category": "library",
+      "tags": [
+        "library",
+        "delete",
+        "pack"
+      ],
+      "screen": "Library",
+      "looks_like": "The pack has Delete pack; Settings has Trash and Restore.",
+      "legacy": {
+        "source_sha256": "46e457c5b6e328ab3ceba37304af37f84f61a0de80ef9da035cbc5215794423b",
+        "content_sha256": "2091809f2c83ab28069b5a816f910d1d5fae49b0cc974452369998682990e9dc",
+        "alternate_sha256": [
+          "f0d8b4a864b8ca9cc21036e0dbd595565e6ca96808e27c0e85e7c954e41bf81a"
+        ]
+      }
+    },
+    {
+      "path": "library/download-pack.md",
+      "title": "Can I download all sticker files in a pack together",
+      "question": "Can I download all sticker files in a pack together?",
+      "answer": "Open the pack in Library and press Download .zip. The download contains its animated and static sticker files together. If this does not match what you see, send a screenshot in Help.",
+      "category": "library",
+      "tags": [
+        "library",
+        "download",
+        "pack"
+      ],
+      "screen": "Library",
+      "looks_like": "The pack header offers Download .zip.",
+      "legacy": {
+        "source_sha256": "8991ddcd4c0eeb1ca3116ba083cee651a91f35844893016a814b1b0f019a9f72",
+        "content_sha256": "83ba7c9a973835347342ae2d983134a520f709115d7e2529b08f18ac0e95b734",
+        "alternate_sha256": [
+          "de82c00b3e8bdebb78a04ed0a779af945cac24301b6f16b415af2bca4dff804a"
+        ]
+      }
+    },
+    {
+      "path": "library/empty-library.md",
+      "title": "Why does my Library say Nothing here yet",
+      "question": "Why does my Library say Nothing here yet?",
+      "answer": "Your Library has no packs or stickers to show yet. Use Open Studio to make a pack, or Create from photo to create a sticker from a photo. If this does not match what you see, send a screenshot in Help.",
+      "category": "library",
+      "tags": [
+        "library",
+        "empty",
+        "library"
+      ],
+      "screen": "Library",
+      "looks_like": "Nothing here yet appears with Open Studio and Create from photo.",
+      "legacy": {
+        "source_sha256": "24fda3500e0bc14d420654b1e4195468f6cb7c4c5e2e10c185b04251758780e9",
+        "content_sha256": "b35c1b4fc6bb611e2ceaf69368f895749a67918517a308411180e6e58f3c3cf9",
+        "alternate_sha256": [
+          "8106d97c0f2099fd55c264fa5dfba982a24f749744dfb9e17a126e88c977ae9e"
+        ]
+      }
+    },
+    {
+      "path": "library/my-stickers.md",
+      "title": "Where can I see all my stickers grouped by pack",
+      "question": "Where can I see all my stickers grouped by pack?",
+      "answer": "Open Library and choose My Stickers. It groups the stickers under their pack names, with Open pack beside each group. If this does not match what you see, send a screenshot in Help.",
+      "category": "library",
+      "tags": [
+        "library",
+        "my",
+        "stickers"
+      ],
+      "screen": "Library",
+      "looks_like": "My Stickers shows pack headings and Open pack buttons.",
+      "legacy": {
+        "source_sha256": "a7dd72da2480184ac7a2eb1e53f6ae86eb9a9ad31d8a1719dab83c96d66eb8f3",
+        "content_sha256": "6b5dbc50f168e1a00c7f67c2554e6909b63fc4e0c09043affa078efb1abf080e",
+        "alternate_sha256": [
+          "dbc917f08affdea64a6da3ca0fd27dbb5320f8fdaeb6afd297a67c36f166442a"
+        ]
+      }
+    },
+    {
+      "path": "library/open-studio-edit.md",
+      "title": "How do I open a Library sticker for editing in Studio",
+      "question": "How do I open a Library sticker for editing in Studio?",
+      "answer": "For a sticker that came from a Studio batch, choose Edit in Studio to edit it or Open in Studio to view its batch. Saving the Studio edit updates that sticker and its copies in packs, rather than creating an unrelated batch. If this does not match what you see, send a screenshot in Help.",
+      "category": "library",
+      "tags": [
+        "library",
+        "open",
+        "studio",
+        "edit"
+      ],
+      "screen": "Library > a sticker",
+      "looks_like": "A batch-derived Library sticker offers Edit in Studio and Open in Studio.",
+      "legacy": {
+        "source_sha256": "827d1ce80b48fa8cc06c74be9ca2ac04876f2848df5b621b068c694016f6813a",
+        "content_sha256": "5ec49f8863d698d0251560417d767c3e3b0b2ae203ec0f65dc768586a7cbd19f",
+        "alternate_sha256": [
+          "1325fc1419e32dc750b8f9c938cec82a5a1827e623bc93d9e4f4dc8df8b2f417"
+        ]
+      }
+    },
+    {
+      "path": "library/search-library.md",
+      "title": "What does the Library search match",
+      "question": "What does the Library search match?",
+      "answer": "The Library filter matches sticker names, emoji and pack names. A filter with no matching results can leave the Recent section showing No matches. If this does not match what you see, send a screenshot in Help.",
+      "category": "library",
+      "tags": [
+        "library",
+        "search",
+        "library"
+      ],
+      "screen": "Library",
+      "looks_like": "Recent can show No matches when the filter has no results.",
+      "legacy": {
+        "source_sha256": "d1bd1edf7c0f34fa6a30b2d8d98a142ad9a707809c032813628b0b46dd826984",
+        "content_sha256": "60c03ae9d5c235b4b74574b214d0f678fc2b35531d7b98edbfeac80afcb860b9",
+        "alternate_sha256": [
+          "8a2a3dd717538730e9cc3a4973f19a4a3ca6bfbd8946189f2ed57a1028ecca62"
+        ]
+      }
+    },
+    {
+      "path": "particles/add-more.md",
+      "title": "Does Add more replace my existing particle sprites",
+      "question": "Does Add more replace my existing particle sprites?",
+      "answer": "Add more appends sprites to the set you have open. Existing sprites are preserved, and a set can contain both image and video sources. If this does not match what you see, send a screenshot in Help.",
+      "category": "particles",
+      "tags": [
+        "particles",
+        "add",
+        "more"
+      ],
+      "screen": "Library > Particles",
+      "looks_like": "The open particle set offers Add more.",
+      "legacy": {
+        "source_sha256": "76c0bbeb2b9e32dc748a6c041bb8dd25a50be540792872fa6732e7bd3335af72",
+        "content_sha256": "64113fd4144b5f1c992503d110f570ecdf389291c172fae3d0c21c6b7932354e",
+        "alternate_sha256": [
+          "cccebe0d1c755648aefe515446c56a200e6824c1ef4781e1d2a089dc3bc64463"
+        ]
+      }
+    },
+    {
+      "path": "particles/deleted-parent-pack.md",
+      "title": "Does deleting a sticker pack destroy its particle sets",
+      "question": "Does deleting a sticker pack destroy its particle sets?",
+      "answer": "Deleting the pack does not destroy its particle sets. The sets stay in the Library, and a permanent pack removal detaches ownership links while retaining those sets.",
+      "category": "particles",
+      "tags": [
+        "particles",
+        "deleted",
+        "parent",
+        "pack"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "0e9188d600662630a21f4df497250bf1e43e35bbeb0397e196fa0f7039e4be5d",
+        "content_sha256": "021e3be385a529ec6a14eba5a8e1041e278e6ae9e75a0e17c3108c7ae79974c0",
+        "alternate_sha256": [
+          "818ecfd64b9696836ce75859e94f577a812f8465632489d180bef605b662a19d"
+        ]
+      }
+    },
+    {
+      "path": "particles/echo-preview.md",
+      "title": "Can I test particles in chat without rendering a pack sticker",
+      "question": "Can I test particles in chat without rendering a pack sticker?",
+      "answer": "Use Assign to stickers followed by Test in chat. Echo plays the assigned set using its saved settings, without requiring a rendered pack sticker. If this does not match what you see, send a screenshot in Help.",
+      "category": "particles",
+      "tags": [
+        "particles",
+        "echo",
+        "preview"
+      ],
+      "screen": "Library > Particles",
+      "looks_like": "The particle controls include Assign to stickers and Test in chat.",
+      "legacy": {
+        "source_sha256": "7370ad84058f5b212fe5a1f29ad9aeaffa8840a008bd8a95d4d22dfc25f65a6e",
+        "content_sha256": "473ceaf77e1985db8a76e65485996d47c028767c3a0777496aa0c7356f187cdd",
+        "alternate_sha256": [
+          "f11e3c20185ac4f163902daf0d1ceb2ffde3795a793feaca545cf76b449e2b9a"
+        ]
+      }
+    },
+    {
+      "path": "particles/free-source.md",
+      "title": "Can I make particles without spending credits",
+      "question": "Can I make particles without spending credits?",
+      "answer": "Choose Sprites from the sticker and select existing artwork. Use selected · free reuses those sprites without a paid generation. If this does not match what you see, send a screenshot in Help.",
+      "category": "particles",
+      "tags": [
+        "particles",
+        "free",
+        "source"
+      ],
+      "screen": "Library > Particles",
+      "looks_like": "The source card says Sprites from the sticker and Use selected · free.",
+      "legacy": {
+        "source_sha256": "87258862526e1edc796c68d4fdedf8e1fc526e453690e3364946afb44025c11f",
+        "content_sha256": "e8c1f5b2142a5b510eee7a2f043733b31ce1918eeb8385c895b211c196241008",
+        "alternate_sha256": [
+          "cd092dff1909105032466963a62aca4725af97299d687a45b4e470e862377768"
+        ]
+      }
+    },
+    {
+      "path": "particles/open-version.md",
+      "title": "Why does entering Particles start a new version",
+      "question": "Why does entering Particles start a new version?",
+      "answer": "Entering Particles starts a new draft rather than reopening an old saved set automatically. To edit a particular saved version, press Open on that version row. If this does not match what you see, send a screenshot in Help.",
+      "category": "particles",
+      "tags": [
+        "particles",
+        "open",
+        "version"
+      ],
+      "screen": "Library > Particles",
+      "looks_like": "Saved version rows have Open buttons and version numbers.",
+      "legacy": {
+        "source_sha256": "9cb3b6ba85e1eefe5a162fdd8f8329d6cfde3cac5420cb4c918eeecc6f562181",
+        "content_sha256": "c3bd81aac2f6defd410953edca4452e7f967a659b60191cff1a3ab60a8836906",
+        "alternate_sha256": [
+          "a0365a279c6be607c8d470363289bbc519eda0955ed0652197a9bd338a908671"
+        ]
+      }
+    },
+    {
+      "path": "particles/paid-sources.md",
+      "title": "Which particle sources use credits",
+      "question": "Which particle sources use credits?",
+      "answer": "AI image sprites and Kling animated · from scratch create new artwork using credits. Check the quoted price before choosing Generate. If this does not match what you see, send a screenshot in Help.",
+      "category": "particles",
+      "tags": [
+        "particles",
+        "paid",
+        "sources"
+      ],
+      "screen": "Library > Particles",
+      "looks_like": "The source choices include AI image sprites and Kling animated · from scratch.",
+      "legacy": {
+        "source_sha256": "d1cefd81de762d3258d768eba47b28e6fa5d6b44b25b0185627e84c3fcb5b728",
+        "content_sha256": "85537e973535459bcb4611b608817d9f69836f281b474b35c31e287b773ede29",
+        "alternate_sha256": [
+          "cd1f9ff0f9cb0372ab99088f705397242155ebe3b17839912d335da3c7699ccd"
+        ]
+      }
+    },
+    {
+      "path": "particles/put-in-pack.md",
+      "title": "How do I add a particle burst to a pack",
+      "question": "How do I add a particle burst to a pack?",
+      "answer": "Render the burst, then use Add to pack on its row. In pack ✓ indicates that the burst has been added as an animated pack sticker. If this does not match what you see, send a screenshot in Help.",
+      "category": "particles",
+      "tags": [
+        "particles",
+        "put",
+        "in",
+        "pack"
+      ],
+      "screen": "Library > Particles",
+      "looks_like": "The row offers Add to pack or shows In pack ✓.",
+      "legacy": {
+        "source_sha256": "35dd26c4b2e9d125ae4895a73c34743f9f5233d319ef2b222c7a0a0b07dda955",
+        "content_sha256": "7852110f4d4f801bda55287dcad3106cdb2fb1cfe2ace8244655b9771fdb54a0",
+        "alternate_sha256": [
+          "4576bb76238cb2f50761b6106e4ec589575107473e0f18104a8d572a3b1f32fb"
+        ]
+      }
+    },
+    {
+      "path": "particles/restore-set.md",
+      "title": "Can I restore a particle set I deleted",
+      "question": "Can I restore a particle set I deleted?",
+      "answer": "Deleting a particle set moves it to the trash instead of destroying it. Use Restore to bring it back with its ownership retained. If this does not match what you see, send a screenshot in Help.",
+      "category": "particles",
+      "tags": [
+        "particles",
+        "restore",
+        "set"
+      ],
+      "screen": "Library > Particles",
+      "looks_like": "The deleted-set notice says it is in the trash, nothing is destroyed, and offers Restore.",
+      "legacy": {
+        "source_sha256": "d895b4f5ea8c8f2b7ed49ef18336155374e1bcd8053397c9c4ea896144a55770",
+        "content_sha256": "20a35884a14358ff2d96414d402acc409862fa33839cd02c3ea033d0321b1c40",
+        "alternate_sha256": [
+          "697da133a7e5e33fd68582dd6c2f983989bd167ea51c121c2a5470e05488a2ea"
+        ]
+      }
+    },
+    {
+      "path": "particles/save-version.md",
+      "title": "How do I save a new particle version",
+      "question": "How do I save a new particle version?",
+      "answer": "Save turns a draft into the next saved version. When editing a saved row, Save replaces that row, while Save as new preserves the old row and creates a new one with the changed settings. If this does not match what you see, send a screenshot in Help.",
+      "category": "particles",
+      "tags": [
+        "particles",
+        "save",
+        "version"
+      ],
+      "screen": "Library > Particles",
+      "looks_like": "A saved particle version offers Save and Save as new.",
+      "legacy": {
+        "source_sha256": "7b4a752a9fe212bb50fb0f5bab6c96cd3d69686e172e0d1af2484ddc9df688f6",
+        "content_sha256": "827e5b002f259893456183b3a6429d888a705e0f0e24f60fd8da11cf2436624b",
+        "alternate_sha256": [
+          "83b4981ad6997d196051a8eca9155a3608202ce2bf80c5f3c090c44c46cc4412"
+        ]
+      }
+    },
+    {
+      "path": "particles/size-sharpness.md",
+      "title": "How do I make the particles look larger",
+      "question": "How do I make the particles look larger?",
+      "answer": "Change Size to alter how large the particles appear. Sprite resolution changes sharpness rather than their apparent size. If this does not match what you see, send a screenshot in Help.",
+      "category": "particles",
+      "tags": [
+        "particles",
+        "size",
+        "sharpness"
+      ],
+      "screen": "Library > Particles",
+      "looks_like": "The simulator controls include Energy, Float, Swirl and Size.",
+      "legacy": {
+        "source_sha256": "5e28ea673b3b34a7ad8f39ce3c19c3c142841b4ed4ef2a484a79e278b9a9da42",
+        "content_sha256": "0e161372a176bf1c744ca9b21fb09b54c899029c33bb72d4ba8bce9ee8d5a57e",
+        "alternate_sha256": [
+          "ac9309ed11ecd5571f98294b3c4708e154df3654013b5c0b4f41e41ceaa925ee"
+        ]
+      }
+    },
+    {
+      "path": "particles/sprites-burst.md",
+      "title": "What is the difference between sprites and a burst",
+      "question": "What is the difference between sprites and a burst?",
+      "answer": "Sprites are the individual still or animated pieces of artwork. A burst is the composition made from selected sprites and their motion settings.",
+      "category": "particles",
+      "tags": [
+        "particles",
+        "sprites",
+        "burst"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "795a7ed59dd2a5efc4e49d918c512cf3e5c3aa7fb825e4025792ae0c7ce423af",
+        "content_sha256": "0846c6ae90e0e0c8789f01d6c7f70fae28d77411a6712caee20bc460ae343df1",
+        "alternate_sha256": [
+          "db8d23cd953794590d471a2cf2a01c0909b16131e1352ca02885d51fd3947da7"
+        ]
+      }
+    },
+    {
+      "path": "particles/standalone.md",
+      "title": "Can a particle set exist without a parent sticker",
+      "question": "Can a particle set exist without a parent sticker?",
+      "answer": "Yes, a stand-alone particle set is usable without a sticker owner. You can preview it, render it, download it or make a pack from it.",
+      "category": "particles",
+      "tags": [
+        "particles",
+        "standalone"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "6b59292ed1204bade839038c68480ae46d14bf5ee005de909c649950bc92abb8",
+        "content_sha256": "0955ee5764340e20770b0f9038c7fe5a923be6f465cf10f2727e1b875f1b4637",
+        "alternate_sha256": [
+          "15bc30489b2080c6907a0e461d39f467b3ce481b38e813a317614823111d1485"
+        ]
+      }
+    },
+    {
+      "path": "studio/accepted-count.md",
+      "title": "How can I find out why my batch has so few accepted stickers",
+      "question": "How can I find out why my batch has so few accepted stickers?",
+      "answer": "Ask Help about your own batch. It can read the accepted count and each excluded sticker’s recorded reason, and offer a button to open the batch in Studio. A judgement-call block may have Use it anyway on the tile, while technical file limits still need to be met.",
+      "category": "studio",
+      "tags": [
+        "studio",
+        "accepted",
+        "count"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "d02e27973c932cb1af7c3183ea0752ee4b94e4ff471b6306d316688de9499f33",
+        "content_sha256": "693fdaa3b8d12f00cad9832db7baa6835c18e951992c933351335961ddcfc9eb",
+        "alternate_sha256": [
+          "5c577ef918c546e95da852aeffda19be20c0bd53015138023ad90a6b5589ebfa"
+        ]
+      }
+    },
+    {
+      "path": "studio/bulk-allow.md",
+      "title": "Can I allow several judgement-call blocks together",
+      "question": "Can I allow several judgement-call blocks together?",
+      "answer": "Use all anyway applies to the currently allow-able stickers in that batch. Its number counts eligible overrides, and Take all back reverses those allowances. If this does not match what you see, send a screenshot in Help.",
+      "category": "studio",
+      "tags": [
+        "studio",
+        "bulk",
+        "allow"
+      ],
+      "screen": "Studio",
+      "looks_like": "Use all anyway has a count next to the button; Take all back is the reverse control.",
+      "legacy": {
+        "source_sha256": "4c6b69ebb59663d1b022a900bdb1dbd149e5aa7290e20094d338a102cc968593",
+        "content_sha256": "2421df3a0b2101d5f7168f05a9bdb388fc488d54547497eadd0edcaf5758bdfa",
+        "alternate_sha256": [
+          "c0988192c3b1d17d6aae2291de7f4e9dda104afb70f5bd7ac4f57acc9fd3ccc6"
+        ]
+      }
+    },
+    {
+      "path": "studio/drop-sticker.md",
+      "title": "Does dropping a sticker delete it",
+      "question": "Does dropping a sticker delete it?",
+      "answer": "Dropping a sticker excludes it from the set without deleting its picture. Use Bring back to include it again when the sticker is eligible. If this does not match what you see, send a screenshot in Help.",
+      "category": "studio",
+      "tags": [
+        "studio",
+        "drop",
+        "sticker"
+      ],
+      "screen": "Studio",
+      "looks_like": "A sticker tile says Dropped and offers Bring back.",
+      "legacy": {
+        "source_sha256": "16f2eb598b3b0fec510977b709e9432f7f3c31418dc1cd5695e5f298b3b02ac0",
+        "content_sha256": "9a213fad5aa559b9f30df73f4117a243a7f859c0d401085564f728b2d46bec7a",
+        "alternate_sha256": [
+          "2439d974fc79c63bbdb2c1a70e5a4b14ba33faaa619f1542ecaa9e505a40854a"
+        ]
+      }
+    },
+    {
+      "path": "studio/edit-copy.md",
+      "title": "Will editing a Studio sticker update its pack copy",
+      "question": "Will editing a Studio sticker update its pack copy?",
+      "answer": "An edit saved to a sticker from a Studio batch refreshes the copies of that sticker in its packs. Its name, emoji and order stay the same.",
+      "category": "studio",
+      "tags": [
+        "studio",
+        "edit",
+        "copy"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "4d1e8241e780ac9f9562c2f87c363f0df3c203a5eef10eeba4e115693be54bc8",
+        "content_sha256": "34c9d5d5b51f057809ada64c58b983ac82e2c421543d8d3da7874df1ffe4725e",
+        "alternate_sha256": [
+          "22716dfd2c2d66ff292a3b91bfe748e497a725335779485a7fe08370cf4b3b28"
+        ]
+      }
+    },
+    {
+      "path": "studio/external-edit-return.md",
+      "title": "Can I import a Photoshop-edited file straight into its existing pack sticker",
+      "question": "Can I import a Photoshop-edited file straight into its existing pack sticker?",
+      "answer": "The current sheet and video imports do not provide a direct replacement of an existing pack sticker with an externally edited file. Edits made through Edit in Studio can be saved to the sticker and refresh its pack copies. Ask in Help for a direct external-file replacement workflow and choose Request this feature when offered.",
+      "category": "studio",
+      "tags": [
+        "studio",
+        "external",
+        "edit",
+        "return"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "f0d186dd5115d4ec4bca8b76ce6b2fae452704a86e891bda27d02220f31dcccd",
+        "content_sha256": "4213497a836ef88ef3018b8de70d0d70090fbbb56b4926f038c0088c1ce84933",
+        "alternate_sha256": [
+          "bc7afd8baa9e3bc9c6b55c5bf2c65da230eb47bc04feb4e2f289ab75334a2290"
+        ]
+      }
+    },
+    {
+      "path": "studio/fixed-sheet.md",
+      "title": "What is the Fixed sheet view",
+      "question": "What is the Fixed sheet view?",
+      "answer": "Fixed shows the batch sheet with edited cells replaced by their current pictures. The original layout and cell numbers are preserved. If this does not match what you see, send a screenshot in Help.",
+      "category": "studio",
+      "tags": [
+        "studio",
+        "fixed",
+        "sheet"
+      ],
+      "screen": "Studio",
+      "looks_like": "The sheet panel has a Fixed view with edited cell numbers.",
+      "legacy": {
+        "source_sha256": "89d27fbc405d4d947f5a351f3c0c6d584ef5fcc2d6cd491d6d67cc19d85a1086",
+        "content_sha256": "75db377c12cf97ce477729ce2805d4382faf1511aad012386787aa940a0c2316",
+        "alternate_sha256": [
+          "208c6b69190d54f92f344f32f75b0859a93c1439f5ab4f85e1b26f9137494f89"
+        ]
+      }
+    },
+    {
+      "path": "studio/hard-limit.md",
+      "title": "Why can I not override a file or Telegram limit",
+      "question": "Why can I not override a file or Telegram limit?",
+      "answer": "A judgement-call warning can be allowed, but a file that Telegram would reject still has to meet its technical limits. An empty cell with no picture also cannot become a usable sticker through an override. If this does not match what you see, send a screenshot in Help.",
+      "category": "studio",
+      "tags": [
+        "studio",
+        "hard",
+        "limit"
+      ],
+      "screen": "Studio",
+      "looks_like": "The check category says File or Telegram limit.",
+      "legacy": {
+        "source_sha256": "b3d9d46f979e586aa7a7f98c159254a07b5d3250be5b8461e39014d24c3ad212",
+        "content_sha256": "af85efcf7d59b334ce8fcc3c6911e906cab030172a9b337ef9e354b64de10ec7",
+        "alternate_sha256": [
+          "d91882b14ba11f8b0017bac24d50d21f6de19b2034729eaead7a1def32d6f716"
+        ]
+      }
+    },
+    {
+      "path": "studio/remove-batch.md",
+      "title": "Will removing a batch remove stickers already in my packs",
+      "question": "Will removing a batch remove stickers already in my packs?",
+      "answer": "Remove batch moves the batch to the trash, where it can be restored. Stickers already added to a pack stay in their packs. If this does not match what you see, send a screenshot in Help.",
+      "category": "studio",
+      "tags": [
+        "studio",
+        "remove",
+        "batch"
+      ],
+      "screen": "Studio",
+      "looks_like": "Remove batch is available, and Removed batches appears under Earlier batches.",
+      "legacy": {
+        "source_sha256": "25e9784bba81713d268c38a2800c1cd3a5dce7f339b912abebcd0ad3c7118aac",
+        "content_sha256": "1dbe70104632dabbc977ff963a5a92c5dbcf907a25654a3f372544ce79adbb95",
+        "alternate_sha256": [
+          "18a945631e5bad3382835dd5a78d7ec2670d762f70185d0e0e91b3beac9923b5"
+        ]
+      }
+    },
+    {
+      "path": "studio/restore-batch.md",
+      "title": "How do I restore a removed batch",
+      "question": "How do I restore a removed batch?",
+      "answer": "Open Removed batches under Earlier batches and press Restore beside the batch. Restore brings it back; the Remove button in that list is a permanent-removal action. If this does not match what you see, send a screenshot in Help.",
+      "category": "studio",
+      "tags": [
+        "studio",
+        "restore",
+        "batch"
+      ],
+      "screen": "Studio",
+      "looks_like": "Removed batches lists Restore and Remove beside each batch.",
+      "legacy": {
+        "source_sha256": "a799bfd015bd3894db1be5a3b2cce347136a1d4dac7a83c75ae68db8b4f818c4",
+        "content_sha256": "a1162566b46976f1a22689e75c44dba7cc937cb774d016a28eca4a6972439d22",
+        "alternate_sha256": [
+          "1a0453ef451084404a4bce595d89b49b15aceb6ad20160e88e1d6d21e9cfb6da"
+        ]
+      }
+    },
+    {
+      "path": "studio/take-back.md",
+      "title": "How do I undo allowing a blocked sticker",
+      "question": "How do I undo allowing a blocked sticker?",
+      "answer": "Press Take it back on the sticker you allowed. This reverses the override, so the original judgement-call block applies again. If this does not match what you see, send a screenshot in Help.",
+      "category": "studio",
+      "tags": [
+        "studio",
+        "take",
+        "back"
+      ],
+      "screen": "Studio",
+      "looks_like": "The sticker says allowed by you beside Take it back.",
+      "legacy": {
+        "source_sha256": "3c78d0644eb0f60d69927c30225b736f5341970adedd0a3d0dc0d568ddcf7467",
+        "content_sha256": "fe3072541a4a1fa436d372e133a8e3c0f0349ade1b0999a10ccfb6fce745ccb7",
+        "alternate_sha256": [
+          "3a23433154a54d175bf4ba79769b420a913fe59f1c84ab60ea26b3a923070b62"
+        ]
+      }
+    },
+    {
+      "path": "studio/use-anyway.md",
+      "title": "What does Use it anyway do on a blocked sticker",
+      "question": "What does Use it anyway do on a blocked sticker?",
+      "answer": "Use it anyway lets you allow a judgement-call block, such as the picture touching its cell boundary. The warning remains as allowed by you, and you can undo that choice with Take it back. If this does not match what you see, send a screenshot in Help.",
+      "category": "studio",
+      "tags": [
+        "studio",
+        "use",
+        "anyway"
+      ],
+      "screen": "Studio",
+      "looks_like": "A blocked sticker shows its picture, a reason and Use it anyway.",
+      "legacy": {
+        "source_sha256": "c37b228bd33c77d4f69c8f31a40285509fede324ab896ef28e87599f3a16feb5",
+        "content_sha256": "6d0b1f7a35e80a249a7a6bc82c914e243c8488a7aeeaff8e69d5c46bda10a8e5",
+        "alternate_sha256": [
+          "96e30854d5241413d1374dd814f57e68585e5e4a503043b42d21b6b5bf67ad02"
+        ]
+      }
+    },
+    {
+      "path": "studio/zip-from-studio.md",
+      "title": "Can I download a whole sticker pack as a zip directly from Studio",
+      "question": "Can I download a whole sticker pack as a zip directly from Studio?",
+      "answer": "The whole-pack Download .zip control is on the pack page in Library. Studio does not currently offer that whole-pack zip control. If you want it in Studio, describe that request in Help and choose Request this feature when offered.",
+      "category": "studio",
+      "tags": [
+        "studio",
+        "zip",
+        "from",
+        "studio"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "9a211ba86bc262f1220cca75e792b011ef6ce1f7e039f25c6ead781662a4af1c",
+        "content_sha256": "5bf7fc6eb553a2777d09a51052c88d26a46ec9acf0fdd6d396cebe851fc88cd6",
+        "alternate_sha256": [
+          "35290433af336d96f36006ab2da04717a0a72d82bc4b7223787f2aca029fb25f"
+        ]
+      }
+    },
+    {
+      "path": "telegram/emoji-tag.md",
+      "title": "Why does every sticker need an emoji tag",
+      "question": "Why does every sticker need an emoji tag?",
+      "answer": "Telegram requires at least one emoji tag per sticker. Open Sticker details to edit its Emoji tag; the tag does not turn the sticker into a custom emoji.",
+      "category": "telegram",
+      "tags": [
+        "telegram",
+        "emoji",
+        "tag"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "cb91f1f125ce962500f99e4c8a1fdc62dbd9ca90d084894e0feae9af6429bb03",
+        "content_sha256": "df0857c71f9abe097e43fca89fb8ac2411a79c55df391a0853deaf0bf22a9b65",
+        "alternate_sha256": [
+          "28e4a32e2c820b1d6270f001e4223f1d87813a54a4ed3a1b1fab6f3ebbd5adf7"
+        ]
+      }
+    },
+    {
+      "path": "telegram/member-send.md",
+      "title": "Why can I not see Send to Telegram in my pack",
+      "question": "Why can I not see Send to Telegram in my pack?",
+      "answer": "Sending a pack to Telegram is available to the owner account. Members can still work with their packs and use Download .zip to download the sticker files.",
+      "category": "telegram",
+      "tags": [
+        "telegram",
+        "member",
+        "send"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "662350632882dd2bc5bed8cac5fea1fd1d87115a24cbfd45143bfefdbbeb5603",
+        "content_sha256": "6407d5f850d7d0132ca6c86b880d685f7378676fbf66de1e896f5051f7c1d70b",
+        "alternate_sha256": [
+          "ddeda6f0f13a0f62eefcd034dfd0e010b39c595b0acfd0525ad6d5c7de8e8ff3"
+        ]
+      }
+    },
+    {
+      "path": "telegram/static-limits.md",
+      "title": "What limits apply to a static Telegram sticker",
+      "question": "What limits apply to a static Telegram sticker?",
+      "answer": "Static stickers use PNG or WEBP with transparency and must fit within 512 KB. Mirsal makes the final sticker on a 512 by 512 pixel canvas.",
+      "category": "telegram",
+      "tags": [
+        "telegram",
+        "static",
+        "limits"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "3186636cb6d2a8cc11009f70ad73868a3b46e1d2e8398c5a93c1898df7d96537",
+        "content_sha256": "22a551f9bf4c16b855575b8dc6674739d86dce15d088a0c2ebe28dd5cbcf549e",
+        "alternate_sha256": [
+          "b8d49318acf713cce5701374a046cee72a3719fe479a38750b66b0740c47990c"
+        ]
+      }
+    },
+    {
+      "path": "telegram/video-limits.md",
+      "title": "What limits apply to an animated Telegram sticker",
+      "question": "What limits apply to an animated Telegram sticker?",
+      "answer": "Animated stickers use transparent WEBM video and must fit within 256 KB. Mirsal targets 512 by 512 pixels, at most three seconds and 30 frames per second, with no audio.",
+      "category": "telegram",
+      "tags": [
+        "telegram",
+        "video",
+        "limits"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "fcc8f9777d51c488bbb5c2c59319067008ca56c366b832bd166c9fc6afc49ca2",
+        "content_sha256": "18e7fff98b9491fc14b15de5c7deea4c983c9dd7315b77cb5dcded5688380103",
+        "alternate_sha256": [
+          "72adc610dec4d865c13ca3b46e1d96799b11b80bbce07a1cb1c49cb2bbe3f384"
+        ]
+      }
+    },
+    {
+      "path": "trending/comment.md",
+      "title": "How do I comment on a public pack",
+      "question": "How do I comment on a public pack?",
+      "answer": "Open the public pack, write in Say something about this pack, and press Comment. You can delete your own comment using its delete control. If this does not match what you see, send a screenshot in Help.",
+      "category": "trending",
+      "tags": [
+        "trending",
+        "comment"
+      ],
+      "screen": "Library > Trending",
+      "looks_like": "The public pack has Say something about this pack and a Comment button.",
+      "legacy": {
+        "source_sha256": "dd41299766ff423e0471941ff0844b545811181ca4e26bc80c6902d8803d18fd",
+        "content_sha256": "a83ef548318816438df1691dedb7573fd49589ac54818b0672ae0c6e3ecd74f3",
+        "alternate_sha256": [
+          "a8253f380995be02ca9f0d1f8a86b58cab8a7908c00ff495334b2a4b7a5c8c17"
+        ]
+      }
+    },
+    {
+      "path": "trending/copy-public.md",
+      "title": "How do I use a public pack in my own work",
+      "question": "How do I use a public pack in my own work?",
+      "answer": "Open the public pack in Trending and press Use in my workflow. This makes a copy in your own Library rather than editing the original public pack. If this does not match what you see, send a screenshot in Help.",
+      "category": "trending",
+      "tags": [
+        "trending",
+        "copy",
+        "public"
+      ],
+      "screen": "Library > Trending",
+      "looks_like": "A public pack has Use in my workflow.",
+      "legacy": {
+        "source_sha256": "b7f3435879e4d7da07e716763f26a3ea87cd7abb4f737e826ad11373053415e9",
+        "content_sha256": "210e5179097c36b7b05b8ffdc121be61bd7932cc64aaf9c4f6fdca1726f2ffe5",
+        "alternate_sha256": [
+          "046de5b0b82dc113bc237684a6326698876df93a2f3063ca01bf089e79bcee09"
+        ]
+      }
+    },
+    {
+      "path": "trending/no-public.md",
+      "title": "Why does Trending say Nothing public yet",
+      "question": "Why does Trending say Nothing public yet?",
+      "answer": "Trending shows packs that have been made public. If none are available, it shows Nothing public yet rather than your private Library packs. If this does not match what you see, send a screenshot in Help.",
+      "category": "trending",
+      "tags": [
+        "trending",
+        "no",
+        "public"
+      ],
+      "screen": "Library > Trending",
+      "looks_like": "Trending says Nothing public yet. Make a pack public from its page.",
+      "legacy": {
+        "source_sha256": "52cf85dafda2d21af1329c236f1b7c08f70f8a5dfb53e01e4bcd34d61e8a6a97",
+        "content_sha256": "5cadae6d7887864d1706f0b142cf64414268f6fd628477603488313aba9579c4",
+        "alternate_sha256": [
+          "60931c61f25bf3665e1a81bab743bf118b8e157def489f89ba5a84d7d9a6c7f2"
+        ]
+      }
+    },
+    {
+      "path": "trending/sort-public.md",
+      "title": "How can I change the ordering of public packs",
+      "question": "How can I change the ordering of public packs?",
+      "answer": "Use the Trending, New and Most liked tabs in Library > Trending. Each tab selects a different ordering of the public packs. If this does not match what you see, send a screenshot in Help.",
+      "category": "trending",
+      "tags": [
+        "trending",
+        "sort",
+        "public"
+      ],
+      "screen": "Library > Trending",
+      "looks_like": "The public-pack list has Trending, New and Most liked tabs.",
+      "legacy": {
+        "source_sha256": "ec7fb274c5ac8e32914574b0a48becc6877e10574891423f34e576fb801b5d5a",
+        "content_sha256": "3c1f6580612d303634d6c51d2048340e2d6f9b05deeba84c44b86ff28d0b1eb5",
+        "alternate_sha256": [
+          "3d3574cb2a5345eb9275e797c0504e4c317892e410bef481eed1077c1f5788ff"
+        ]
+      }
+    },
+    {
+      "path": "troubleshooting/answer-wrong.md",
+      "title": "What if the Help answer did not solve my issue",
+      "question": "What if the Help answer did not solve my issue?",
+      "answer": "Press No, send to support beneath Did this solve it? to escalate the issue. If the answer did work, choose Yes, solved instead. If this does not match what you see, send a screenshot in Help.",
+      "category": "troubleshooting",
+      "tags": [
+        "troubleshooting",
+        "answer",
+        "wrong"
+      ],
+      "screen": "Help",
+      "looks_like": "Did this solve it? has Yes, solved and No, send to support.",
+      "legacy": {
+        "source_sha256": "d7d75b2dc1352008a94865589869586f8e3e1b7129b7729a730f6c7c1df13c46",
+        "content_sha256": "7be91137e61e7fa5f768077d8b7f30941bb9a06bcca751d1276434bae1afc674",
+        "alternate_sha256": [
+          "0439f86cea865db2d6398e7ef7fb4905f790117d56b648cf6f885dccf00367d9"
+        ]
+      }
+    },
+    {
+      "path": "troubleshooting/feature-request.md",
+      "title": "How do I ask for a feature the app does not have",
+      "question": "How do I ask for a feature the app does not have?",
+      "answer": "Describe the feature in Help. When the answer offers Request this feature, choose it to send a feature request; an answered question also has Suggest a feature instead. Sending a request does not mean the feature has been built or guarantee when it will arrive. If this does not match what you see, send a screenshot in Help.",
+      "category": "troubleshooting",
+      "tags": [
+        "troubleshooting",
+        "feature",
+        "request"
+      ],
+      "screen": "Help",
+      "looks_like": "This is not in the app yet. appears with Request this feature; an answered question can offer Suggest a feature instead.",
+      "legacy": {
+        "source_sha256": "b359cdbb890890829d2820a183dccc32cf239512f4ac37a6b44b84b5f53a9223",
+        "content_sha256": "dacdb57581bdce5bf43b061a6718608ab038441712da3ab2c71beddf7cce8cf7",
+        "alternate_sha256": [
+          "9e6f426c7b25137d33235265ff28f5d19a6d03aaa69e75b25b32d60a6377aa23"
+        ]
+      }
+    },
+    {
+      "path": "troubleshooting/job-arrival.md",
+      "title": "Will Help tell me when the job I asked about finishes",
+      "question": "Will Help tell me when the job I asked about finishes?",
+      "answer": "When an answer cites your running job, Help watches it. Once the app checks again and finds it finished, the conversation reports the result, offers the related batch when available, and resolves; you also get an update notification. This is tied to the job you asked about, not a guarantee of provider completion.",
+      "category": "troubleshooting",
+      "tags": [
+        "troubleshooting",
+        "job",
+        "arrival"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "6ecadeb412e03517e86b46649b9eca8475fe6bd6bdb55e2627e0212d85f1a934",
+        "content_sha256": "d400ac78d6e8ecc62b11fa014a3c76eaea58e8654beb0cacfbf650bea5c6d016",
+        "alternate_sha256": [
+          "d9cf8bd263c9b1ad4bb54a59cd4fb51ea4751a9eb5a894e7ab5608faf9facba4"
+        ]
+      }
+    },
+    {
+      "path": "troubleshooting/job-failure.md",
+      "title": "Can Help explain a failed generation",
+      "question": "Can Help explain a failed generation?",
+      "answer": "Ask about the failed job and include its number if available. Help can read the failure reason recorded in your activity, but it should not invent a cause or repair when that record does not explain one.",
+      "category": "troubleshooting",
+      "tags": [
+        "troubleshooting",
+        "job",
+        "failure"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "4dbab1324bc31290a32adc126b2dacb224454b612277576b476a055faf0d3205",
+        "content_sha256": "50ed7cf8c16ff55451f1b8682c3241ebcd875ad819457169e1cb8a23201637f4",
+        "alternate_sha256": [
+          "4973aed30e40b3ba7f5ba0037fa8eb2ca6086a9a62b5f0edd6f9f3195a627b0f"
+        ]
+      }
+    },
+    {
+      "path": "troubleshooting/job-progress.md",
+      "title": "Can Help check what happened to my generation job",
+      "question": "Can Help check what happened to my generation job?",
+      "answer": "Ask Help about your own job and include its job number if you have it. Help can use your activity to explain the current status, the provider task and the related batch when available. A usual duration comes from previous completed jobs, rather than being a promise that this one will finish at that time.",
+      "category": "troubleshooting",
+      "tags": [
+        "troubleshooting",
+        "job",
+        "progress"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "3e556d4d45568a51b3ba06a09d6219171f9baa76b66cb4eccad8ddae3995cca3",
+        "content_sha256": "118229791f754052e1be3d34466318bc0597976353a76b52bd5fed9abb22a6bb",
+        "alternate_sha256": [
+          "5d63b1ed08c046348055fb9eeaa3a591833a81293fb070ba0a36d07917a39ffd"
+        ]
+      }
+    },
+    {
+      "path": "troubleshooting/job-timeout.md",
+      "title": "Does a timed-out job mean the provider has stopped making my video",
+      "question": "Does a timed-out job mean the provider has stopped making my video?",
+      "answer": "A timeout means the app stopped waiting, and the task may still finish at Higgsfield. Ask Help to check your own job status; the existing task can be checked again without paying for a new generation. Do not treat a timeout alone as a reason to start another paid job.",
+      "category": "troubleshooting",
+      "tags": [
+        "troubleshooting",
+        "job",
+        "timeout"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "ef9f4c0d015dbb122bc874524bde6887ea51ac47f58f37d26aeef4db071db44c",
+        "content_sha256": "39cc79954b6f2a8475ba33c4fc25b0629b2eb4eb0526ff7465ce3794befcdc62",
+        "alternate_sha256": [
+          "849ed210dde78962520b413da145ccec34362c6ddc9bf38877ec1b734bc75787"
+        ]
+      }
+    },
+    {
+      "path": "troubleshooting/new-question.md",
+      "title": "How do I start a separate issue in Help",
+      "question": "How do I start a separate issue in Help?",
+      "answer": "Use the New question button in Help to start a separate conversation. Describe what you did, what you expected and what happened; keep follow-up details about an existing problem in its original conversation. If this does not match what you see, send a screenshot in Help.",
+      "category": "troubleshooting",
+      "tags": [
+        "troubleshooting",
+        "new",
+        "question"
+      ],
+      "screen": "Help",
+      "looks_like": "Help has a New question button; a fresh conversation is headed How can we help?",
+      "legacy": {
+        "source_sha256": "ab3ae0e970518b6788a8dc00d5f41ef6c5440c850ffb541f201f4f908b3c4d96",
+        "content_sha256": "00692b8e40004770239de82bcf3b9122713516a0add950a9a5101bab114256c0",
+        "alternate_sha256": [
+          "b20f8d98bace99f1256a6e3407ff185c0cca886dd5e683a38d1051415e9e4ff7"
+        ]
+      }
+    },
+    {
+      "path": "troubleshooting/no-answer.md",
+      "title": "What do I do when Help has no answer",
+      "question": "What do I do when Help has no answer?",
+      "answer": "Press Send to support when Help says it has no answer. This raises the issue for a person, and their reply appears in the conversation with a notification. If this does not match what you see, send a screenshot in Help.",
+      "category": "troubleshooting",
+      "tags": [
+        "troubleshooting",
+        "no",
+        "answer"
+      ],
+      "screen": "Help",
+      "looks_like": "Nothing in the help answers this yet. appears beside Send to support.",
+      "legacy": {
+        "source_sha256": "b201106c7d013d02fb11b7fdde691b6291c79caf97be792b2def13c072fd2bb5",
+        "content_sha256": "e2f1e635eca9e7c4496940cef92dacfbc388d57aedd03ac69aad9fa449214553",
+        "alternate_sha256": [
+          "6ec0106f7d08b5c25550b09978f3128464dcf8c0244e1296f6891433c55aa8db"
+        ]
+      }
+    },
+    {
+      "path": "troubleshooting/notification.md",
+      "title": "Where do I find a reply from support",
+      "question": "Where do I find a reply from support?",
+      "answer": "Open Help and look under Notifications for Support answered or Resolved. Selecting a notification opens the related conversation and marks its notifications read. If this does not match what you see, send a screenshot in Help.",
+      "category": "troubleshooting",
+      "tags": [
+        "troubleshooting",
+        "notification"
+      ],
+      "screen": "Help",
+      "looks_like": "Notifications lists Support answered or Resolved.",
+      "legacy": {
+        "source_sha256": "08595aa93d7b1d9fba1750609bf7f5b999bf0aa26ef98040d814f6f6f61e5c61",
+        "content_sha256": "ec2916bdbc824a45680f09de5391e54662ecbfb90cb311795fc77408510d668b",
+        "alternate_sha256": [
+          "bf8afe3af49fedc3c37df9975c67772647f7e4d734d3c969ddf178f37ca87cc7"
+        ]
+      }
+    },
+    {
+      "path": "troubleshooting/own-activity.md",
+      "title": "Can Help show another person’s job or batch",
+      "question": "Can Help show another person’s job or batch?",
+      "answer": "Help uses your own jobs and batches for activity answers. Naming somebody else’s job or batch does not give you access to that person’s activity.",
+      "category": "troubleshooting",
+      "tags": [
+        "troubleshooting",
+        "own",
+        "activity"
+      ],
+      "screen": "",
+      "looks_like": "",
+      "legacy": {
+        "source_sha256": "9b6ca38a72de97d223a6bbd5cfae815f6286cfc70db292ea608eeba1dceb6b5b",
+        "content_sha256": "4793a05dcb88582b21b11b18c5cedb59b5c8794a45feb59f79cd9ed6b280944a",
+        "alternate_sha256": [
+          "811d301f74916922cd5770b24dee67c83c814ae2ecaf7a65babca030391aa06e"
+        ]
+      }
+    },
+    {
+      "path": "troubleshooting/reopen.md",
+      "title": "How do I reopen a support issue marked Resolved",
+      "question": "How do I reopen a support issue marked Resolved?",
+      "answer": "Open the resolved conversation and press Reopen under Not fixed after all? Continue in that conversation so your previous explanation remains available. If this does not match what you see, send a screenshot in Help.",
+      "category": "troubleshooting",
+      "tags": [
+        "troubleshooting",
+        "reopen"
+      ],
+      "screen": "Help",
+      "looks_like": "Resolved appears with Not fixed after all? and Reopen.",
+      "legacy": {
+        "source_sha256": "b1df191c85cb598bacb3a2dd894cfb9af31f5ec303a7413ebed6afdd08db46b4",
+        "content_sha256": "bae4254bb3d669ca91d3b58b2f0af69739c97edd21ddf0f7dfb19cdea0754bec",
+        "alternate_sha256": [
+          "4cdaa2d34473534910b5d10c625300b7450428db4f9ebbc01da553b4bb10ebbf"
+        ]
+      }
+    },
+    {
+      "path": "troubleshooting/screenshot-large.md",
+      "title": "Why does Help reject my screenshot as too large",
+      "question": "Why does Help reject my screenshot as too large?",
+      "answer": "The message A screenshot must be under 8 MB means the attachment exceeds the size limit. Use a smaller screenshot and attach it again. If this does not match what you see, send a screenshot in Help.",
+      "category": "troubleshooting",
+      "tags": [
+        "troubleshooting",
+        "screenshot",
+        "large"
+      ],
+      "screen": "Help",
+      "looks_like": "Help shows A screenshot must be under 8 MB.",
+      "legacy": {
+        "source_sha256": "e15eab7c24d5f1a56d170ee17ca648d9244c40acc31c3852b2b088ce61defad0",
+        "content_sha256": "152ec594dafeae68108c799a142649f29d88a7ad89d8cd9e90169bcb080d389f",
+        "alternate_sha256": [
+          "dfdd599785d2201267ec1ca7ebaf1c9cb3244e48b93dbd757b519d7bb5ce9beb"
+        ]
+      }
+    },
+    {
+      "path": "troubleshooting/waiting-support.md",
+      "title": "What does Waiting for support mean",
+      "question": "What does Waiting for support mean?",
+      "answer": "Your question has been sent to a person for a reply. You can add details in the same conversation, and a notification arrives when support answers. If this does not match what you see, send a screenshot in Help.",
+      "category": "troubleshooting",
+      "tags": [
+        "troubleshooting",
+        "waiting",
+        "support"
+      ],
+      "screen": "Help",
+      "looks_like": "Waiting for support appears with A person will answer here; you get a notification.",
+      "legacy": {
+        "source_sha256": "39b851e6eaa524e750d3eea28f71cdd588c18e2cbec99b248d05379107097866",
+        "content_sha256": "8d9ef8d4881fbf8600d4d0b989267a62bbea8cc4b9c1552c01cf0b11b61aa645",
+        "alternate_sha256": [
+          "e91cb944bde9c11bd2e8c04d10af689ee8e435dcf94484296ddcf97b5bd9712f"
+        ]
+      }
+    }
+  ]
+}

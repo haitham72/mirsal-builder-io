@@ -264,7 +264,7 @@ def propose_from_ticket(out: Path, tid: str, by: str, complete=None) -> dict | N
     return f
 
 
-# ---------- seed entries written as Markdown files (faq/<category>/<slug>.md; docs/architecture.md ("Chat and the agent") describes the format)
+# ---------- FAQ seed data (faq/seed.json); legacy Markdown imports remain supported.
 def parse_seed(text: str) -> dict:
     """A seed file: a `---` header of `key: value` lines (title, question, category, tags) and the answer as the body. ValueError when it is not one."""
     m = re.match(r"^\ufeff?---\s*\n(.*?)\n---\s*\n(.*)$", text.replace("\r\n", "\n"), re.S)
@@ -283,31 +283,85 @@ def parse_seed(text: str) -> dict:
             "screen": head.get("screen") or "", "looks_like": head.get("looks_like") or ""}
 
 
-def import_seeds(out: Path, folder: Path, by: str = "local", publish: bool = False) -> dict:
-    """Every `*.md` under `folder` becomes a draft (or, with `publish`, the owner's explicit choice, a published entry). Run again: an unchanged
-    file changes nothing, a changed one updates its draft or proposes a revision of its published entry. Each entry remembers its seed path."""
+def read_seeds(folder: Path, *, migration_hashes: dict | None = None) -> tuple[list[tuple[str, str, dict]], list[str]]:
+    """Read one versioned JSON bundle, or a legacy Markdown folder, without writing app state.
+
+    Bundle paths are stable seed identities, not filenames to open. Migration hashes keep
+    already-imported Markdown entries unchanged; edits use the new content's own hash.
+    """
     import hashlib
     folder = Path(folder)
+    bundle = folder / "seed.json" if folder.is_dir() else folder
+    if bundle.is_file() and bundle.suffix.lower() == ".json":
+        try:
+            data = json.loads(bundle.read_text(encoding="utf-8-sig"))
+            if not isinstance(data, dict) or type(data.get("version")) is not int or data["version"] != 1 or not isinstance(data.get("entries"), list):
+                raise ValueError("expected version 1 and an entries array")
+            rows, seen = [], set()
+            for entry in data["entries"]:
+                if not isinstance(entry, dict):
+                    raise ValueError("each entry must be an object")
+                rel = entry.get("path")
+                if not isinstance(rel, str) or not re.fullmatch(r"[a-z0-9_-]+(?:/[a-z0-9_-]+)*\.md", rel) or rel in seen:
+                    raise ValueError("entry paths must be unique relative seed identities")
+                seen.add(rel)
+                s = {k: entry.get(k, "") for k in ("title", "question", "answer", "category", "screen", "looks_like")}
+                if not all(isinstance(v, str) for v in s.values()) or not s["question"].strip() or not s["answer"].strip():
+                    raise ValueError(f"{rel}: text fields must be strings with a question and answer")
+                tags = entry.get("tags", [])
+                if not isinstance(tags, list) or not all(isinstance(tag, str) for tag in tags):
+                    raise ValueError(f"{rel}: tags must be a string array")
+                s["title"] = s["title"] or s["question"][:80]
+                s["category"] = s["category"] or (rel.rsplit("/", 1)[0] if "/" in rel else "")
+                s["tags"] = tags
+                sha = hashlib.sha256(json.dumps(s, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")).hexdigest()
+                legacy = entry.get("legacy") or {}
+                if not isinstance(legacy, dict):
+                    raise ValueError(f"{rel}: legacy migration metadata must be an object")
+                if legacy.get("content_sha256") == sha:
+                    original = legacy.get("source_sha256")
+                    if not isinstance(original, str) or not re.fullmatch(r"[0-9a-f]{64}", original):
+                        raise ValueError(f"{rel}: invalid source hash")
+                    alternates = legacy.get("alternate_sha256", [])
+                    if not isinstance(alternates, list) or not all(isinstance(h, str) and re.fullmatch(r"[0-9a-f]{64}", h) for h in alternates):
+                        raise ValueError(f"{rel}: invalid alternate source hashes")
+                    if migration_hashes is not None:
+                        migration_hashes[rel] = {original, *alternates}
+                    sha = original
+                rows.append((rel, sha, s))
+            return sorted(rows, key=lambda row: row[0]), []
+        except (OSError, UnicodeError, ValueError) as e:
+            raise FAQError(f"invalid FAQ seed bundle {bundle.name}: {e}") from e
     if not folder.is_dir():
-        raise FAQError(f"no folder {folder}")
-    by_seed = {}
-    for row in listing(out):
-        f = read(out, row["id"])
-        if f.get("seed"):
-            by_seed[f["seed"]["path"]] = f
-    made, changed, same, bad = [], [], 0, []
+        raise FAQError(f"no FAQ seed folder or JSON bundle {folder}")
+    rows, bad = [], []
     for p in sorted(folder.rglob("*.md")):
         rel = p.relative_to(folder).as_posix()
         raw = p.read_bytes()
-        sha = hashlib.sha256(raw).hexdigest()
         try:
             s = parse_seed(raw.decode("utf-8", "replace"))
         except ValueError as e:
             bad.append(f"{rel}: {e}")
             continue
         s["category"] = s["category"] or (rel.rsplit("/", 1)[0] if "/" in rel else "")
+        rows.append((rel, hashlib.sha256(raw).hexdigest(), s))
+    return rows, bad
+
+
+def import_seeds(out: Path, folder: Path, by: str = "local", publish: bool = False) -> dict:
+    """Import the JSON bundle (or legacy Markdown) as drafts, preserving seed identities,
+    idempotence and published-entry revision gates. Publishing remains an explicit choice."""
+    migration_hashes = {}
+    seeds, bad = read_seeds(folder, migration_hashes=migration_hashes)
+    by_seed = {}
+    for row in listing(out):
+        f = read(out, row["id"])
+        if f.get("seed"):
+            by_seed[f["seed"]["path"]] = f
+    made, changed, same = [], [], 0
+    for rel, sha, s in seeds:
         old = by_seed.get(rel)
-        if old and old["seed"].get("sha") == sha:
+        if old and (old["seed"].get("sha") == sha or old["seed"].get("sha") in migration_hashes.get(rel, set())):
             same += 1
             continue
         if old and old.get("status") != "archived":
