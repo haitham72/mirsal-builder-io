@@ -21,7 +21,7 @@ def build_router(ctx):
             return _j(request, *err)
         return _j(request, 200, col.status())
 
-    async def _collection(request, path, what, make_zip, mine):
+    async def _collection(request, path, what, make_zip, mine, saved_price=None):
         user, err = await _who(request, path)
         if err:
             return _j(request, *err)
@@ -33,7 +33,10 @@ def build_router(ctx):
         if bad:
             return _j(request, 400, {"error": bad})
         try:                                                               # queued: the zip (retime: what the person chose for clips under 3 s) and the upload run in the background
-            return _j(request, 202, col.enqueue(c.out, what, lambda: make_zip(body.retime, body.light), body.name, body.description, user.get("id") or "human"))
+            price = body.price
+            if "price" not in body.model_fields_set and saved_price is not None:
+                price = await asyncio.to_thread(saved_price)
+            return _j(request, 202, col.enqueue(c.out, what, lambda: make_zip(body.retime, body.light), body.name, body.description, user.get("id") or "human", price=price))
         except col.CollectionError as e:
             return _j(request, e.code, {"error": str(e)})
 
@@ -58,7 +61,7 @@ def build_router(ctx):
                 return c.lib.export_zip(pid, light=light, retime=retime)[0]
             except LibraryError as e:
                 raise col.CollectionError(str(e), getattr(e, "code", 409))
-        return await _collection(request, f"/api/packs/{pid}/export-collection", f"pack {pid}", make, lambda u: c.lib.owns(pid, u["id"]))
+        return await _collection(request, f"/api/packs/{pid}/export-collection", f"pack {pid}", make, lambda u: c.lib.owns(pid, u["id"]), lambda: c.lib.pack_price(pid))
 
     @router.post("/api/generations/{gid}/export-collection", include_in_schema=False)
     @router.post("/api/v1/generations/{gid}/export-collection", include_in_schema=False)

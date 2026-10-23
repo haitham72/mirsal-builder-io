@@ -2,9 +2,9 @@
 
 **Product:** flashy **animated Telegram stickers**, not emoji (emoji only as the ≥1 tag per sticker). v1.0 done 2026-10-04; open work is `docs/backlog.md`, human verdicts `docs/waiting-for-haitham.md`. Public deployment and Google OAuth stay paused (plan in git history). The full text of every rule below, with its history, is [`docs/rules.md`](docs/rules.md): read it only when a rule's detail matters.
 
-**Starting a session (lean, Haitham 2026-10-14: a cold start must stay small).** Read `HANDOFF.md` and `plan.md` if present: nothing else up front. Then read **only the doc of the area you touch** (table below). `docs/backlog.md` and `docs/waiting-for-haitham.md` when the task touches open work. Prefer `grep` over reading whole files; never dump a whole doc.
+**Starting a session (lean: a cold start must stay small).** Start from the current user request and read **only the doc of the area you touch** (table below). App review and API delivery use `DELIVERY_CHECKLIST.md`; read `docs/backlog.md` and `docs/waiting-for-haitham.md` when the task touches open work. Prefer `rg` over reading whole files; never dump a whole doc.
 
-`plan.md` = only what an LLM does next (a done step removed, a finished plan deleted). `HANDOFF.md` = only a save point. What is built lives in `README.md` and `docs/`.
+Plans and handoffs are temporary notes for active work, removed when stale or finished; they are not required startup files or standing trackers. What is built lives in `README.md` and `docs/`; acceptance checks live in `DELIVERY_CHECKLIST.md`.
 
 | area | start at |
 |---|---|

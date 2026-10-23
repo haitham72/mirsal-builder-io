@@ -22,6 +22,7 @@ from ..flow import pipeline as pl
 from ..media.library import Library, LibraryError, cutout, decode_image, png_bytes
 from ..engine.config import EngineConfig
 from ..runtime.users import LOCAL, UserError, UserStore, email_domains
+from ..runtime.pricing import UNSET
 from ..store import idem as idem_store
 from ..media.video_project import MAX_UPLOAD, Projects, decode_overlays
 from ..runtime.writer_lock import WriterLock
@@ -1709,13 +1710,14 @@ def make_handler(c: Console):
             if parts[:2] != ["api", "packs"]:
                 return False
             if len(parts) == 2:
-                self._json(200, lib.create_pack(self._body().get("name", ""), owner=self.user["id"]))
+                b = self._body()
+                self._json(200, lib.create_pack(b.get("name", ""), owner=self.user["id"], price=b.get("price")))
             elif len(parts) == 3:
                 b = self._body()
                 if b.get("parent") and not lib.owns(str(b["parent"]), self.user["id"]):     # a sub-pack only under one of your own packs
                     raise pl.PipelineError("not found", 404)
                 self._json(200, lib.update_pack(parts[2], b.get("name"), b.get("cover"), b.get("order"), b.get("lead"),
-                                                None if b.get("parent") is None else str(b.get("parent"))))
+                                                None if b.get("parent") is None else str(b.get("parent")), price=b.get("price", UNSET)))
             elif len(parts) == 4 and parts[3] == "delete":      # SOFT: to the trash, restorable (GET /api/trash lists it; POST /api/trash/purge deletes for good)
                 self._json(200, lib.delete_pack(parts[2], by=self.user.get("id") or "human"))
             elif len(parts) == 4 and parts[3] == "merge":       # fold this pack into another: animated stills upgrade their twins, the rest moves, the empty pack goes to the trash
@@ -1746,7 +1748,8 @@ def make_handler(c: Console):
                         raise col.CollectionError(str(e), getattr(e, "code", 409))
                 try:
                     st = col.enqueue(c.out, f"pack {pid}", lambda: make(bool(body.get("retime")), bool(body.get("light"))),
-                                     body.get("name"), str(body.get("description") or ""), self.user.get("id") or "human")
+                                     body.get("name"), str(body.get("description") or ""), self.user.get("id") or "human",
+                                     price=body["price"] if "price" in body else lib.pack_price(pid))
                 except col.CollectionError as e:
                     raise pl.PipelineError(str(e), e.code)
                 self._json(202, st)
@@ -2404,7 +2407,7 @@ def make_handler(c: Console):
                         raise pl.PipelineError("not found", 404)
                     try:
                         st = col.enqueue(c.out, f"G{gid}", lambda: make(bool(body.get("retime")), bool(body.get("light"))),
-                                         body.get("name"), str(body.get("description") or ""), self.user.get("id") or "human")
+                                         body.get("name"), str(body.get("description") or ""), self.user.get("id") or "human", price=body.get("price"))
                     except col.CollectionError as e:
                         raise pl.PipelineError(str(e), e.code)
                     return self._json(202, st)

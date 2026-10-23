@@ -1,6 +1,7 @@
 /* Pack manager (DESKTOP_05): metadata, drag-reorder grid, cover, rename, preview, export. */
 'use strict';
 let DRAG=null;
+const pkPriceLabel=value=>value==null?'Not set':value==='0'?'Free':String(value);
 RENDER.pack=async id=>{await loadLib();PACK_ID=id;drawCol2();drawPack()};
 function drawPack(){
  const p=packById(PACK_ID),el=$('s-pack');
@@ -15,7 +16,7 @@ function drawPack(){
  el.innerHTML=`<div class="page pk-page">
   <nav class=pm-crumbs aria-label="Where you are"><button data-act=nav data-to=library>Library</button><i>›</i><span>${esc(p.name)}</span></nav>
   <header class=pk-head><div class=cover>${coverMedia(p)}</div>
-   <div class=pk-ttl><h1>${esc(p.name)}</h1><small>${n} sticker${n===1?'':'s'}${anim?` · ${anim} animated`:''}${nr?` · ${nr} reaction${nr===1?'':'s'}`:''} · a Telegram set takes up to 120</small></div>
+   <div class=pk-ttl><h1>${esc(p.name)}</h1><small>${n} sticker${n===1?'':'s'}${anim?` · ${anim} animated`:''}${nr?` · ${nr} reaction${nr===1?'':'s'}`:''} · a Telegram set takes up to 120</small><div class=row><small>Collection price: ${esc(pkPriceLabel(p.price))}</small><button class="btn sm" data-act=pkprice>Edit price</button></div></div>
    <div class=pk-acts><button class="btn pri" data-act=pkstudio ${gens.length?'':'disabled'} title="${gens.length?`Open this pack's batch${gens.length===1?'':'es'} (${gens.join(', ')}) in the Studio`:'No sticker of this pack came from a Studio batch'}">${ic('gen')} Open in Studio</button>
     ${total?`<button class=btn data-act=pkzip data-l=1 title="Every sticker file of this pack in one zip, compressed small (animated: every frame kept, the best quality down to crf 46 that fits ~64 KB each; crf and size per file are in manifest.json): .webm for the animated ones, .png / .webp for the static ones, a grey silhouette PNG beside each animated one ({its name}_grey.png), and a manifest.json">${ic('download')} Download .zip</button>`:`<button class=btn disabled>${ic('download')} Download .zip</button>`}
     ${owner?`<button class=btn data-act=tgsend ${total?'':'disabled'}>${ic('telegram')} Send to Telegram</button>`:''}
@@ -58,17 +59,18 @@ ACT.pkzip=async el=>{const rt=await retimeAsk(await packShort(PACK_ID),'zip');if
 const colFit=(s,n)=>{s=String(s).trim();if(s.length<=n)return s;const cut=s.slice(0,n+1).lastIndexOf(' ');return (cut>n/2?s.slice(0,cut):s.slice(0,n)).trim()};
 function colBtn(kind,id,n,name){return colOwner()?`<button class=btn data-act=colopen data-k=${kind} data-id="${esc(String(id))}" data-n="${esc(name||'')}" ${n?'':'disabled'} title="Send these stickers (the same as Download .zip) to the collection API as one collection">${ic('upload')} Export to collection</button>`:''}
 ACT.colopen=async el=>{const k=el.dataset.k,id=el.dataset.id,st=await api('/api/collection'),cfg=st.ok?st.j:{configured:false,url:''},
-  short=k==='pack'?await packShort(id):genShort(String(id).replace(/^G/i,''));
+  short=k==='pack'?await packShort(id):genShort(String(id).replace(/^G/i,'')),price=k==='pack'?(packById(id)||{}).price:null;
  dlg(`<h2>Export to collection</h2><p class=mut>The stickers of Download .zip (animated where ready), in the same order, each with its emoji and tags, are sent as ONE new collection${cfg.url?` to <b>${esc(cfg.url)}</b>`:''}. Nothing in Mirsal changes.</p>
   ${cfg.configured?'':`<div class=warn>The collection API is not set up: generate a developer key (<code>sk-…</code>) on its Developer Keys page, put it in <code>MIRSAL_COLLECTION_API_CREDENTIALS</code> in <code>.env</code> and restart the server.</div>`}
   <div class=fld><label>Collection name <small class=mut>at most 40 characters</small></label><input id=col-name maxlength=40 value="${esc(colFit(el.dataset.n||'',40))}"></div>
   <div class=fld><label>Description <small class=mut>at most 160 characters</small></label><input id=col-desc maxlength=160 required placeholder="A short description of the pack"></div>
+  <div class=fld><label for=col-price>Collection price</label><input id=col-price type=text inputmode=decimal value="${esc(price??'')}" placeholder="e.g. 2.50" aria-describedby=col-price-help><small class=mut id=col-price-help>0 = free. Blank = omit price for this export.${k==='pack'?' Prefilled from the saved pack price; changes here apply to this export only.':''}</small></div>
   ${short.length?`<div class=fld><label>${short.length} animation${short.length===1?' is':'s are'} shorter than 3 s (${short.slice(0,6).map(s=>`${esc(s.emoji||'')} ${(+s.seconds).toFixed(1)} s`).join(', ')}${short.length>6?' …':''})</label><select id=col-retime><option value=1>Retime to 3 s (the same frames, slower)</option><option value=0>Keep their length</option></select></div>`:''}
   <div class=fld><label>Quality</label><select id=col-light><option value=0 selected>Full: the files as stored</option><option value=1>Light: smaller files, every frame kept</option></select></div>
   <div id=col-res></div><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Close</button><button class="btn pri" data-act=colsend data-k=${k} data-id="${esc(id)}" ${cfg.configured?'':'disabled'}>Send</button></div>`)};
 ACT.colsend=async el=>{const url=el.dataset.k==='pack'?`/api/packs/${encodeURIComponent(el.dataset.id)}/export-collection`:`/api/generations/${encodeURIComponent(el.dataset.id)}/export-collection`,box=$('col-res');
  if(!(($('col-desc')||{}).value||'').trim()){if(box)box.innerHTML='<div class=warn>The collection API needs a short description of the pack.</div>';return}
- el.disabled=true;el.textContent='Queuing…';const r=await post(url,{name:(($('col-name')||{}).value||'').trim()||undefined,description:(($('col-desc')||{}).value||'').trim(),retime:(($('col-retime')||{}).value)==='1',light:(($('col-light')||{}).value)==='1'});
+ el.disabled=true;el.textContent='Queuing…';const r=await post(url,{name:(($('col-name')||{}).value||'').trim()||undefined,description:(($('col-desc')||{}).value||'').trim(),price:(($('col-price')||{}).value||'').trim()||null,retime:(($('col-retime')||{}).value)==='1',light:(($('col-light')||{}).value)==='1'});
  el.textContent='Send';el.disabled=false;
  if(!r.ok){if(box)box.innerHTML=`<div class=warn>${esc(r.j.error||'Could not send')}</div>`;return}
  closeDlg();toast(`Queued “${r.j.collection||'the pack'}”: it is sent in the background, you will be told when it is done`);colWatch(r.j.id)};
@@ -103,6 +105,11 @@ ACT.pkgdel=el=>{const p=packById(PACK_ID);if(!p)return;const g=pkGroups(pkSplit(
   items.forEach(x=>SEL.delete(selKey(x.pack_id,x.id)));await loadLib();drawPack();toast(`Removed ${r.j.deleted} sticker${r.j.deleted===1?'':'s'} from the pack`)})};
 ACT.pkadd=()=>{Ed.targetPack=PACK_ID;location.hash='#/create'};
 ACT.pkrename=()=>askText('Rename pack',packById(PACK_ID).name,n=>pkUpdate({name:n},'Renamed'));
+ACT.pkprice=()=>{const p=packById(PACK_ID);if(!p)return;
+ dlg(`<h2>Pack price</h2><div class=fld><label for=pk-price>Collection price</label><input id=pk-price type=text inputmode=decimal value="${esc(p.price??'')}" placeholder="e.g. 2.50" aria-describedby=pk-price-help><small class=mut id=pk-price-help>0 = free. Leave blank to clear the saved price. New batches keep this pack's price.</small></div><div id=pk-price-error role=alert></div><div class=row style="justify-content:flex-end"><button class=btn data-act=dlgx>Cancel</button><button class="btn pri" data-act=pkpricesave data-id="${esc(p.id)}">Save price</button></div>`);$('pk-price').focus()};
+ACT.pkpricesave=async el=>{el.disabled=true;const r=await post('/api/packs/'+encodeURIComponent(el.dataset.id),{price:$('pk-price').value.trim()||null});el.disabled=false;
+ if(!r.ok){$('pk-price-error').textContent=r.j.error||'Could not save the price';return}
+ closeDlg();await loadLib();drawPack();toast('Pack price saved')};
 /* what Delete pack will do, said before it is done (plain text: confirmDlg escapes it): the pack goes to the TRASH with its stickers and files untouched (Settings > Trash restores it or deletes it for good, flow/purge.py); the stickers that came from a batch also stay in that batch */
 function pkDelText(p){const sts=p.stickers||[],gens=[...new Set(sts.map(s=>(s.source||{}).generation).filter(Boolean))].sort(),back=sts.filter(s=>(s.source||{}).generation).length,only=sts.length-back;
  if(!sts.length)return `Delete the pack “${p.name}”? It has no stickers. It goes to the trash and you can restore it from Settings, Trash. Its particle sets stay in the Library.`;

@@ -1,6 +1,7 @@
 """Collection HTTP schemas."""
 from __future__ import annotations
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+from ...runtime.pricing import normalize_price
 
 
 class CollectionExport(BaseModel):
@@ -9,5 +10,11 @@ class CollectionExport(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str | None = Field(default=None, max_length=200)
     description: str = Field(default="", max_length=2000)
+    price: str | None = None     # omitted inherits the pack's saved price; explicit null omits it
     retime: bool = False          # animations shorter than 3 s are sent stretched to 3 s (the Studio asks first)
     light: bool = False
+
+    @field_validator("price", mode="before")
+    @classmethod
+    def valid_price(cls, value):
+        return normalize_price(value)

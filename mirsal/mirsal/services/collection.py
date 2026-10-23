@@ -36,6 +36,7 @@ import urllib.request
 import uuid
 import zipfile
 from pathlib import Path
+from ..runtime.pricing import normalize_price
 
 # Default URL for the emoji CMS
 DEFAULT_URL = "https://emojicms.ehub.ae"
@@ -145,8 +146,16 @@ def content_subtype(items: list[dict]) -> str:
     return kinds.pop() if len(kinds) == 1 else "webm"
 
 
-def multipart(name: str, description: str, items: list[dict]) -> tuple[bytes, str]:
+def price_value(value) -> str | None:
+    try:
+        return normalize_price(value)
+    except ValueError as e:
+        raise CollectionError(str(e), 400) from e
+
+
+def multipart(name: str, description: str, items: list[dict], *, price: str | None = None) -> tuple[bytes, str]:
     """The form body and its Content-Type (with the boundary). Media parts in order, MediaThumbnails in the same order, then MediaMetadata as one JSON string of the same length."""
+    price = price_value(price)
     boundary = "----mirsal" + uuid.uuid4().hex
     buf = io.BytesIO()
 
@@ -156,6 +165,8 @@ def multipart(name: str, description: str, items: list[dict]) -> tuple[bytes, st
 
     field("CollectionName", name)
     field("Description", description)
+    if price is not None:
+        field("Price", price)
     field("ContentSubType", content_subtype(items))       # required by the CMS (2026-10-09: "The ContentSubType field is required")
     for it in items:
         safe = it["filename"].replace('"', "").replace("\r", "").replace("\n", "")
@@ -170,12 +181,12 @@ def multipart(name: str, description: str, items: list[dict]) -> tuple[bytes, st
     return buf.getvalue(), f"multipart/form-data; boundary={boundary}"
 
 
-def post(name: str, description: str, items: list[dict]) -> dict:
+def post(name: str, description: str, items: list[dict], *, price: str | None = None) -> dict:
     """Send one collection. {ok, status, response}; the answer's body is JSON when it is JSON, else its text (an HTML error page)."""
     auth = auth_header()
     if not auth:
         raise CollectionError("The collection API is not set up: put MIRSAL_COLLECTION_API_CREDENTIALS in .env and restart the server", 503)
-    body, ctype = multipart(name, description, items)
+    body, ctype = multipart(name, description, items, price=price)
     req = urllib.request.Request(base_url() + ENDPOINT, data=body, method="POST",
                                  headers={"Content-Type": ctype, "Authorization": auth, "Accept": "application/json"})
     ctx = None
@@ -237,19 +248,20 @@ def reason(status: int, res) -> str:
     return f"The collection API answered {status}"
 
 
-def send(out: Path, what: str, zip_bytes: bytes, name: str | None, description: str = "", by: str = "human") -> dict:
+def send(out: Path, what: str, zip_bytes: bytes, name: str | None, description: str = "", by: str = "human", *, price: str | None = None) -> dict:
     """Export the stickers of a Download .zip (`what`: `pack P…` or `G###`) as one collection. The answer:
     {ok, status, collection, count, response, error?}; a refusal by the CMS is an answer (ok false, its message), not an exception."""
+    price = price_value(price)
     pack, items = items_from_zip(zip_bytes)
     title = " ".join(str(name or pack.get("title") or pack.get("slug") or "Mirsal stickers").split())
     desc = " ".join(str(description or "").split()) or title            # the API requires a description: an empty one is the collection's name
-    row = {"at": round(time.time(), 3), "by": by, "what": what, "collection": title, "count": len(items), "url": base_url()}
+    row = {"at": round(time.time(), 3), "by": by, "what": what, "collection": title, "count": len(items), "url": base_url(), "price": price}
     try:
         if len(title) > NAME_MAX:
             raise CollectionError(f"The collection name is {len(title)} characters; the collection API takes at most {NAME_MAX}. Shorten it and send again.", 400)
         if len(desc) > DESCRIPTION_MAX:
             raise CollectionError(f"The description is {len(desc)} characters; the collection API takes at most {DESCRIPTION_MAX}. Shorten it and send again.", 400)
-        r = post(title, desc, items)
+        r = post(title, desc, items, price=price)
     except CollectionError as e:
         from ..runtime import activity
         activity.say(f'export "{title}" ({what}) failed: {e}', error=True)
@@ -262,7 +274,7 @@ def send(out: Path, what: str, zip_bytes: bytes, name: str | None, description: 
     activity.say(f'exported "{title}" ({what}): {len(items)} stickers' if ok else f'export "{title}" ({what}) refused {r["status"]}: {err}', error=not ok)
     _log(out, {**row, "ok": ok, "status": r["status"], **({"error": err, "response": res if isinstance(res, dict) else str(res)[:1000]} if err else {})})
     result = res.get("Result", res.get("result")) if isinstance(res, dict) else None          # the created pack's details, as the API returns them
-    return {"ok": ok, "status": r["status"], "collection": title, "count": len(items), "response": res, "result": result, **({"error": err} if err else {})}
+    return {"ok": ok, "status": r["status"], "collection": title, "count": len(items), "price": price, "response": res, "result": result, **({"error": err} if err else {})}
 
 
 # ---------- the queue: one export at a time in the background; each export's state is a file
@@ -296,16 +308,17 @@ def check(name: str | None, description: str = "") -> None:
         raise CollectionError("The collection API is not set up: put MIRSAL_COLLECTION_API_CREDENTIALS in .env and restart the server", 503)
 
 
-def enqueue(out: Path, what: str, make_zip, name: str | None, description: str = "", by: str = "human") -> dict:
+def enqueue(out: Path, what: str, make_zip, name: str | None, description: str = "", by: str = "human", *, price: str | None = None) -> dict:
     """Queue one export; `make_zip()` builds its Download .zip when its turn comes. Answers at once: {id, state: queued, position, …}."""
+    price = price_value(price)
     check(name, description)
     xid = f"X{int(time.time() * 1000):x}{uuid.uuid4().hex[:4]}"
-    st = {"id": xid, "what": what, "collection": " ".join(str(name or "").split()) or None, "by": by, "state": "queued", "at": round(time.time(), 3)}
+    st = {"id": xid, "what": what, "collection": " ".join(str(name or "").split()) or None, "by": by, "state": "queued", "at": round(time.time(), 3), "price": price}
     _save(out, st)
     with _QLOCK:
         _LIVE.add(xid)
         position = len(_LIVE)
-        _Q.put((Path(out), xid, make_zip, name, description, by))
+        _Q.put((Path(out), xid, make_zip, name, description, by, price))
         if not _WORKER or not _WORKER[0].is_alive():
             _WORKER[:] = [threading.Thread(target=_work, name="collection-export", daemon=True)]
             _WORKER[0].start()
@@ -330,13 +343,13 @@ def export_state(out: Path, xid: str) -> dict | None:
 
 def _work() -> None:
     while True:
-        out, xid, make_zip, name, description, by = _Q.get()
+        out, xid, make_zip, name, description, by, price = _Q.get()
         st = export_state(out, xid) or {"id": xid, "by": by}
         try:
             st["state"] = "preparing"; _save(out, st)
             data = make_zip()
             st["state"] = "sending"; _save(out, st)
-            st.update(send(out, st.get("what") or "", data, name, description, by))
+            st.update(send(out, st.get("what") or "", data, name, description, by, price=price))
             st["state"] = "done" if st["ok"] else "failed"
         except CollectionError as e:
             st.update(state="failed", ok=False, error=str(e), code=e.code)

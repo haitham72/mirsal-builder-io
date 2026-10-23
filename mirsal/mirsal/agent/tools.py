@@ -632,7 +632,8 @@ class ConsoleTools:
         if not self.c.lib.owns(pid, self.user["id"]):
             raise ToolError("not found", 404)
         try:
-            rep = col.send(self.out, f"pack {pid}", self.c.lib.export_zip(pid)[0], name, "", self.user.get("id") or "human")
+            price = self.c.lib.pack_price(pid)
+            rep = col.send(self.out, f"pack {pid}", self.c.lib.export_zip(pid)[0], name, "", self.user.get("id") or "human", price=price)
         except col.CollectionError as e:
             raise ToolError(str(e), getattr(e, "code", 409) if getattr(e, "code", 409) < 500 else 409)
         if not rep.get("ok"):

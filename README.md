@@ -1,6 +1,6 @@
 # Mirsal Builder
 
-[Visual guide](GUIDE.md) · [Remaining work](plan.md) · [User app review checklist](user%20app%20review%20guide.md)
+[Visual guide](GUIDE.md) · [App and API delivery checklist](DELIVERY_CHECKLIST.md) · [Remaining work](docs/backlog.md)
 
 It turns plain words into video stickers for Telegram: it makes the pictures, cuts them, animates them and packs them. Every step is checkable ([architecture](docs/architecture.md)); the HTTP contract is [here](docs/api-integration.md), the live route inventory at `GET /api/openapi.json`.
 

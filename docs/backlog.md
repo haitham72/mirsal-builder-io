@@ -4,9 +4,18 @@
 
 Status words: **open** (can be built now) · **needs Haitham** (a verdict first, W#) · **needs a paid test** (money first, W#) · **parked** (paused on purpose, do not touch).
 
+## API delivery (`docs/api-integration.md`)
+
+- Verify the live receiving CMS stores the intended name/price, and confirm its currency, monetary range/precision and omitted/free behavior. Pack persistence, UI controls, both API servers/aliases, queued snapshots, chat export and multipart `Price` are implemented and locally verified ([pricing evidence](../DELIVERY_CHECKLIST.md#pricing-verification-2026-10-23)); only receiving-system confirmation remains. **open**.
+- Connect reaction JSON exports to the final API: the app's pack exporter currently refuses JSON (409), while direct CMS simulator/Lottie/super-like requests report success with zero inserts, even with paired thumbnails. Resolve the receiving contract before claiming delivery. **open**.
+- Define the final API/client representation of super-like reactions: `ContentType: super_like` is rejected; allowed values are `emoji` and `emoji_reaction`. Sending the saved super-like JSON under `emoji_reaction` also reported zero inserts. **open**.
+- Validate delivered asset counts in export outcomes; a 2xx/`Success: true` response with zero inserted/updated assets must not become a false success message. **open**.
+- Handle collection upload cooldowns using the CMS's `retryAfterSeconds` response (429); the current export worker marks the request failed. [Smoke results](../DELIVERY_CHECKLIST.md#smoke-test-results-2026-10-23). **open**.
+
 ## Visual design (`docs/design.md`)
 
-- Confirmed interaction/layout defects and remaining audit scope: [root plan](../plan.md). Phone editing/Save, keyboard controls/labels, frame focus and ownership text remain **open**. App-audit residuals per the 2026-10-19 audit (full text in git history): UX-07 unbuilt; UX-10 built, verdict open; AR-02/03/04, DOC-01, QA-01 verdicts open — reconcile against plan.md. **open**.
+- Remaining app-audit scope: UX-07 unbuilt; UX-10 built, verdict open; AR-02/03/04, DOC-01, QA-01 verdicts open (full audit in git history). Implemented phone editing/Save, keyboard controls/labels, frame focus and ownership fixes are recorded in [design](design.md). **open / needs Haitham** (W1).
+- Unverified app states: loaded artwork and Prepare video, busy/error states, route-wide keyboard/menu/destructive combinations, LAN roles, all Settings/Help substates and opened/hover states. The empty Creative/Predefined pill report remains unconfirmed. Use the [unified checklist](../DELIVERY_CHECKLIST.md); completed empty-workspace/theme/width sweeps are evidence, not outstanding reruns. **open**.
 
 - Real tile art for the twelve style presets: the swatches are abstract placeholders; drop `<id>.png` into `console/assets/styles/`. **needs Haitham** (the art).
 - Inline `style="font-size:..."` in the scripts is still off the type scale. **open**.
@@ -21,6 +30,7 @@ Status words: **open** (can be built now) · **needs Haitham** (a verdict first,
 - Particle sets are not part of the trash purge yet (a deleted set waits in `out/trash/particles/`). **open**.
 - `DEFAULT_SPRITE_PX` 100 vs 200. **needs Haitham** (W21).
 - A preview of the would-be sticker in the video-sheet override dialog. **open**.
+- Optional Lottie Pre-run, Time scale, silhouette feasibility and blend modes require an owner decision and unchanged-default proof before implementation. **needs Haitham**.
 - Older batches with no keyed/raw sheet on disk are not rebuilt when a slice of an animation edit merges back into the sheet (`rebuild_sheet` returns null; nothing breaks). **open, low**.
 - Rule for all of it: effect checks are warnings with "use it anyway"; only Telegram's own limits may block.
 
@@ -69,6 +79,7 @@ Other open items:
   cp1252 cannot encode, ignores its arguments and would import a folder twice). Fix it before anyone runs it against the real `out/`. **open**.
 
 - **Repeatable browser smoke coverage:** turn the documented copied-data checks into maintained automation for issue colours, reversible overrides, history folds, captions and bulk move; unsampled combinations remain. Browser sweeps now exist in the acceptance/audit evidence, so this is automation maintenance rather than an absence of browser verification. **open**.
+- **Remaining shared-code follow-ups:** Studio edge synchronization and other watcher consumers; range/segment/download/preview/cache presenters. T-024/025 concern saved-set/Emoji sliders; T-031/034/035 retain other download/preview/cache consumers. Revalidate old leads against current code; the five reviewed refactors and API/agent/UI folder redesign are implemented. **open**.
 - A second request while the *pipeline* is busy gets 409 (the provider jobs have their own durable queue). `result.json` is read-modify-write under one in-process lock plus the cross-process writer lock: two request threads can still interleave inside one server (two processes are kept out by the writer lock; every file write is atomic: `tests/test_multiprocess.py`). **open, low**.
 - Add a focused-tier profile for the trash purge / storage area (`README.md` "Test budget": the existing profiles do not cover it). **open**.
 
