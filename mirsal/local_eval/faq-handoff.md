@@ -1,5 +1,7 @@
 # FAQ seed handoff — 2026-10-05
 
+> Historical evaluation record, reviewed 2026-10-23. Counts, source paths and hashes below describe the October 5 baseline; the live root FAQ now contains 87 files. Preserve this provenance when documentation moves. Current guidance lives in [README.md](../../README.md), [docs/architecture.md](../../docs/architecture.md) and [DELIVERY_CHECKLIST.md](../../DELIVERY_CHECKLIST.md). This record is not an active handoff or plan.
+
 ## Result and ownership
 
 Created **66 repository-root FAQ files in 12 categories**, with **45 screen/looks_like headers** (68%). All are member-facing. The repository-root copies were checked against their staged copies with SHA-256. Nothing was imported into the live app or published to its real output folder.

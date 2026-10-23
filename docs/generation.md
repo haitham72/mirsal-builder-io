@@ -1,5 +1,7 @@
 # Live generation: how it is built
 
+**Last synchronized: 2026-10-23 · `main` · implementation baseline `27009185`.** No new image/video model generation was run during the delivery smoke, pricing implementation or merge. `generation/model_catalog.py` still defaults to `kling3_0`; the requested Kling 4.0 default remains a [pending acceptance target](../DELIVERY_CHECKLIST.md). Collection sale prices are separate from the generation credits described here.
+
 A typed request defaults to a 2×2 sheet of 4 stickers made by Higgsfield, and an approved video sheet becomes a Kling animation. Explicit 3×3 remains available. Both go through the **unchanged** engine and review
 gates; the file store is the primary state (Postgres mirrors it). Converged 2026-10-21 (branch `code-audit`); history lives in git.
 

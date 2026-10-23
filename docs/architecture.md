@@ -1,5 +1,7 @@
 # docs/architecture.md — how Mirsal is put together
 
+**Last synchronized: 2026-10-23 · `main` · implementation baseline `27009185`.** Pack pricing is persisted in Library metadata, resolved before export and carried through the queue, logs and CMS multipart request. [Delivery status and evidence](../DELIVERY_CHECKLIST.md).
+
 One page for the whole app, then one section per area with the detail that used to live in a hundred files: the layers, where the data lives, how one request travels, and how the browser sandbox is wired. Converged 2026-10-21 (branch `code-audit`); history lives in git.
 
 ## 1. What it is
@@ -284,6 +286,7 @@ Each line is the module's own first docstring line.
 - `names.py` — ONE naming convention for every media file Mirsal makes (Haitham, 2026-10-02).
 - `net.py` — The names this machine answers to on the office network (docs/api-integration.md): its LAN addresses, its host name, and …
 - `paths.py` — Path config. Cross-platform (pathlib only). Override with env vars MIRSAL_INPUT / MIRSAL_OUT.
+- `pricing.py` — Shared exact decimal-string validation/normalization for saved collection prices and export overrides; null is unset, `"0"` is free.
 - `users.py` — Users and tokens (Phase 5C): who is calling, and what they may see.
 - `writer_lock.py` — One writer of result.json per out/ folder, across processes.
 
@@ -293,10 +296,10 @@ Each line is the module's own first docstring line.
 
 **`console/`**
 
-- `app.py` — The HTTP server: FastAPI on uvicorn.
-- `app_models.py` — The pydantic models of the NATIVE FastAPI routes (console/app.py). Existing routes keep their dict shapes behind the adapter; every route added after …
-- `inventory.py` — What the browser sandbox can DO, read from its own scripts: every action (`ACT.<name>=` in console/*.js), the
-- `openapi.py` — The HTTP contract as an OpenAPI 3.1 document, served at GET /api/openapi.json and turned into TypeScript types by `python -m mirsal openapi --ts …
+- `app.py` — Compatibility entry point; FastAPI construction/server lifecycle live in `api/app.py`.
+- `app_models.py` — Compatibility re-export of native request schemas from `api/schemas/`.
+- `inventory.py` — Browser action/route inventory, read through the asset manifest from `console/ui/` sources.
+- `openapi.py` — Compatibility re-export of the canonical `api/openapi.py` registry; served at `GET /api/openapi.json` and used by `python -m mirsal openapi --ts FILE`.
 - `placeholders.py` — Placeholder art for the Studio until real images are dropped into console/assets/styles/ and console/assets/vendors/.
 - `server.py` — The HTTP server: FastAPI on uvicorn over the original handler (byte-identical answers); `serve --stdlib` keeps the old ThreadingHTTPServer for one release. Binds 127.0.0.1.
 
@@ -310,7 +313,7 @@ Deterministic dict/dataclass/JSON (`mirsal/mirsal/engine/`); purity: no fastapi/
   - `OVERRIDABLE` (a human may allow): still{blank_cell,foreground,inside_cell,no_spill,holes}, animation{inside_slot,cross_slot,loop_seam}, video_sheet{no_outline_on_sheet,video_specs,layout_match}.
   - `TECHNICAL` (final): still{dimensions,transparent_corners,static_file}, animation{size_budget,codec_vp9,dimensions,fps,duration,no_audio,alpha_mode_tag,alpha_decoded}. Crashes + empty cells are always final.
   - `waived()` / `animation_verdict()` demote allowed BLOCKs to WARN "(allowed by you)".
-- **Gates** (`flow/gates.py`, 409 on out-of-order) — G1 plan → G2 stills → G3 video sheet (2048px, one scale, no outline) → G4 anims → G5 pack (G2 AND G4). Locks: G1 before G2, plan locked after the still decision, sheet build needs all READY decided + ≥1 approved, G5 locks anim decisions. Python FAILED is final; rejection never deletes; `S#` stable. `allow` API: `kind=` still|animation|video_sheet + bulk allowAll; `soft_block` (WARN-only anims OFF by default, includable) vs real BLOCK refused. Layout match IoU ≥0.6, blank slots stay empty. Batches are families (`flow/groups.py`: group/pick/hand_over, pack derivation, 6h gap); generations + resheet/redo_video with `versions/` + `anim_versions`. Recut is free (`SHEET_FATAL={sheet_decodes}` is the only hard stop).
+- **Gates** (`flow/gates.py`, 409 on out-of-order) — G1 plan → G2 stills → G3 video sheet (2048px, one scale, no outline) → G4 anims → G5 pack (G2 AND G4). Locks: G1 before G2, plan locked after the still decision, sheet build needs all READY decided + ≥1 approved, G5 locks anim decisions. Failures imposed by Telegram limits or a cut with no picture are final; judgement failures have recorded overrides under rule 10; rejection never deletes; `S#` stable. `allow` API: `kind=` still|animation|video_sheet + bulk allowAll; `soft_block` (WARN-only anims OFF by default, includable) vs real BLOCK refused. Layout match IoU ≥0.6, blank slots stay empty. Batches are families (`flow/groups.py`: group/pick/hand_over, pack derivation, 6h gap); generations + resheet/redo_video with `versions/` + `anim_versions`. Recut is free (`SHEET_FATAL={sheet_decodes}` is the only hard stop).
 - **Telegram** (`services/telegram.py`, stdlib urllib only, token never returned/logged) — verifier `telegram` + `telegram_set` stages judge before send (video ≤256KB VP9+alpha ≤3s ≤30fps 512-side; static PNG/WebP ≤512KB; 1–120 stickers, keys, emoji, name ends `_by_<bot>`). Mixed packs split `_v`/`_s`; `addStickerToSet` up to 50 + rest; sets stored on the pack (only new stickers re-sent, no deletion sync). Dry-run GET, `telegram.zip` no-credentials fallback, owner notified with the Add-Stickers link. Never-twice sends (`mode=` once|replace|new_set).
 - **Imports** (`flow/imports.py`, free lifecycle) — a sheet becomes `pipeline.start` + `run_stills` (a normal batch); a video attaches grid-matched (48×48 MAD sheet match, detected-grid 409 with cut-anyway `grid_ok=1`, duplicate/again/as_new, SHA-256 + reservation dedupe). Manual 9-emoji batches via `gates.quick_add`.
 

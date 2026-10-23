@@ -1,5 +1,7 @@
 # docs/design.md — the look of Mirsal: one shell, one palette
 
+**Last synchronized: 2026-10-23 · `main` · implementation baseline `27009185`.** The saved-price and export-price controls passed desktop/phone checks in both themes; broader owner visual acceptance remains open in the [checklist](../DELIVERY_CHECKLIST.md).
+
 The design half of the app: the shell every screen inherits, the screens, the themes, the welcome modal, and the redesign contracts that guard them. Converged 2026-10-21 (branch `code-audit`); history lives in git. **Read this before changing any CSS, the Studio's markup, or adding a screen.** `docs/backlog.md` "Visual design" carries the work items; this file says what they add up to.
 
 ## Shell

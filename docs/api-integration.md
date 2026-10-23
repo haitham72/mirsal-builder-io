@@ -1,5 +1,7 @@
 # docs/api-integration.md — the HTTP contract and the outside world
 
+**Last synchronized: 2026-10-23 · `main` · implementation baseline `27009185`.** Collection pricing is implemented; live CMS stored-price verification and JSON reaction delivery remain open. The [receiving API reference](API/API_DOCUMENTATION.md) distinguishes declared JSON support from observed delivery results.
+
 All JSON, served by `python -m mirsal serve` (FastAPI on uvicorn, `127.0.0.1:8770`). Every route below is served by an adapter over the original handler, so its answer is byte-identical to the stdlib server (`serve --stdlib` still runs that one); new routes are native FastAPI with pydantic models. **The Studio is a sandbox over this API** (rule 11): every feature is an engine function and a stable JSON shape first, a screen second. Everything is addressable by id (generation `12` in a URL and `G012` in `result.json` and the chat, sticker `G012/S3`, job `J004`, session `S002`, video sheet `A1`).
 
 Converged 2026-10-21 (branch `code-audit`); it supersedes the former `docs/api.md`, `docs/api-parts/`, the frozen `docs/http_route_inventory.md`, `docs/Api/AddCollection-API .md` and the draft `docs/integration/API_DOCUMENTATION.md`. Full text of all of them lives in git history.
@@ -39,6 +41,7 @@ A pack or one Studio batch sent, as its Download .zip holds it, to the external 
 | `CollectionName` | pack/batch name, **≤40 chars** (400 with a sentence before anything uploads; the dialog offers a word-cut name) |
 | `Description` | **≤160 chars**; empty = the name |
 | `Price` | optional canonical decimal string; `"0"` is free, unset omits the field |
+| `ContentType` | declared required in the supplied CMS reference, but omitted by the current app builder; the animated smoke was accepted anyway. Direct JSON probes used `emoji_reaction`; `super_like` was rejected. Contract reconciliation remains open. |
 | `ContentSubType` | `webm` for animated packs (and mixes), else the stills' own type (`png`/`webp`) |
 | `Media` | once per asset (`.webm`/`.png`/`.webp`), in order |
 | `MediaThumbnails` | one PNG per asset, **same order, paired by index** (`.png` as is, `.webp` converted, `.webm` grey silhouette = the zip's `{stem}_grey.png`) |
@@ -64,7 +67,7 @@ Mirsal's side (owner only, sender-scoped reads, all under `/api/` and `/api/v1/`
 
 ```
 # mirsal/.env (never in git):
-MIRSAL_COLLECTION_API_URL=https://emojicms.devinprocess.com
+MIRSAL_COLLECTION_API_URL=https://emojicms.ehub.ae
 MIRSAL_COLLECTION_API_CREDENTIALS=sk-...
 python -m mirsal serve                      # restart to load .env
 curl -H "Authorization: Bearer <owner-token>" localhost:8770/api/collection
@@ -75,4 +78,4 @@ curl -X POST -H "Authorization: Bearer <owner-token>" -H "Content-Type: applicat
 curl -H "Authorization: Bearer <owner-token>" localhost:8770/api/collection/exports/X...
 ```
 
-A fake CMS covers this in `tests/test_collection.py` (multipart pairing by index, queue lifecycle, restart-failure, both servers). Open CMS questions: why the documented JSON upload reports success without inserts, how a super-like is represented within the accepted content types, stored price/name readback, comma- vs underscore-joined tags acceptance, per-collection caps and the full `ContentSubType` set. Live smoke responses returned `Result: {insertedCount, updatedCount, existingList}` without a collection ID.
+A fake CMS covers this in `tests/test_collection.py` (multipart pairing by index, queue lifecycle, restart-failure, both servers). Open CMS questions: why the documented JSON upload reports success without inserts, whether `ContentType` is required (the app currently omits it), how a super-like is represented within the accepted content types, stored price/name readback, comma- vs underscore-joined tags acceptance, per-collection caps and the full `ContentSubType` set. Live smoke responses returned `Result: {insertedCount, updatedCount, existingList}` without a collection ID.

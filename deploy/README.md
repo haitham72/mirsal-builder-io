@@ -1,4 +1,6 @@
-# deploy/: the hosted Mirsal, prepared (branch `deployment`)
+# deploy/: prepared hosting assets, deployment paused
+
+**Status synchronized: 2026-10-23.** These assets are retained on `main`; the former implementation branches were merged and removed. Public hosting and Google OAuth remain paused. The verification below is historical preparation evidence, not a new deployment run. Current product delivery: [DELIVERY_CHECKLIST.md](../DELIVERY_CHECKLIST.md).
 
 **Nothing here is switched on.** No Supabase project, no Vercel project, no Render service and no Google OAuth client exist yet; nothing was pushed to any of them. Everything below was written and tested on a PC against fakes,
 so that the next session (on another PC) only has to create the accounts and fill in `deploy/env.example`. `docs/deployment_plan.md` (in git history since the 2026-10-21 docs convergence; restore it first if deployment unparks) is the reasoning, the phases and the open questions; this file is the map of what exists.
@@ -12,7 +14,7 @@ deploy/
   env.example     every variable, with no values
 ```
 
-and in the engine (`mirsal/mirsal/`), on this branch only:
+and retained in the engine (`mirsal/mirsal/`) on `main`:
 
 - `runtime/users.py` + `console/server.py`: the **trusted-gateway login**. With `MIRSAL_GATEWAY_SECRET` (32+ characters) set, a request that carries `X-Mirsal-Gateway-Secret`, comes from loopback and names a well-formed `X-Mirsal-Subject` is that person: a `member` created on first
   sight (`UserStore.ensure_external`). Setting the secret also switches authentication on, so the open sandbox is unreachable on a hosted box. `tests/test_gateway_login.py`.
@@ -29,9 +31,9 @@ browser --HTTPS--> gateway (deploy/gateway, FastAPI) --loopback--> engine (pytho
 The gateway strips everything a client could use to impersonate (`Authorization`, `Cookie`, `Origin`, `Sec-Fetch-*`, any `X-Mirsal-*`) and adds its own identity headers. A person is always a `member`: the owner's screens (library, Telegram setup, user list) are not reachable from the internet.
 `python -m mirsal doctor` still works on the engine; the gateway refuses to start without a 32+ character secret and a JWT issuer (`Settings.problems()`).
 
-## What the next session does, in order
+## When deployment is explicitly resumed
 
-1. Read `docs/deployment_plan.md` sections 6, 7 and 17 and answer its nine questions (numbered W40-W48 in `docs/waiting-for-haitham.md`) with Haitham (which host, whose Higgsfield account, one bot or one per person, the IP retention days...).
+1. Restore `docs/deployment_plan.md` from git history, then read sections 6, 7 and 17 and answer its nine questions (numbered W40-W48 in `docs/waiting-for-haitham.md`) with Haitham (which host, whose Higgsfield account, one bot or one per person, the IP retention days...).
 2. Create the Supabase project, enable the Google provider, apply `deploy/supabase/migrations/009..011` (see `deploy/supabase/README.md`), create the Google OAuth client.
 3. Fill `deploy/env.example` into the host's environment (Render dashboard, or `deploy/.env` for `docker compose -f deploy/docker/compose.yml --env-file deploy/.env up -d --build`).
 4. Run the engine's `python -m mirsal db migrate` against the Supabase pooler, then `python -m mirsal doctor`.

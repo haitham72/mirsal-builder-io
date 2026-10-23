@@ -1,5 +1,7 @@
 # Local Qwen 30-sticker evaluation
 
+**Scope checked: 2026-10-23.** This is a pinned evaluation procedure and its historical evidence, not the application's current model selection. The documentation sync did not rerun it or rewrite results. Current implementation and delivery status: [README.md](../../README.md) and [DELIVERY_CHECKLIST.md](../../DELIVERY_CHECKLIST.md).
+
 Uses the supplied LM Studio native endpoint `http://localhost:1234/api/v1/chat` and exactly `qwen/qwen3.5-9b`. No remote fallback, paid generation, plugins or application configuration changes. Chats use `store: false`, temperature 0 and reasoning off. Native API schema: https://lmstudio.ai/docs/developer/rest/chat.
 
 From the `mirsal/` directory in PowerShell:

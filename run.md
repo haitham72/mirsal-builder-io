@@ -1,5 +1,7 @@
 # Run Mirsal
 
+**Last updated: 2026-10-23.** Use `main` (implementation baseline `27009185`); the former work branches have been merged and removed. After pulling, restart your app from `mirsal/.venv` to load pricing/backend changes. **Pack → Edit price** saves the collection price; **Export to collection** allows a one-export override. The latest checks and remaining CMS delivery gaps are in [DELIVERY_CHECKLIST.md](DELIVERY_CHECKLIST.md).
+
 Both platforms use `mirsal/.venv`, created locally on each machine. Virtual environments are not committed or shared between Windows and macOS. Use the environment's Python directly; activation is optional.
 
 ## macOS (Terminal / zsh)

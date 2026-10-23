@@ -1,5 +1,7 @@
 # Backlog: what is still open to build, by area
 
+**Last synchronized: 2026-10-23 · implementation baseline `27009185` on `main`.** Pricing implementation and branch consolidation are complete. The highest-priority delivery gaps are the receiving CMS's JSON handling, super-like representation, stored-price verification, zero-count success validation and cooldown recovery.
+
 **This is a tracker, not a log** (`CLAUDE.md` rule 7, together with [`waiting-for-haitham.md`](waiting-for-haitham.md)). An entry is deleted the moment it is built and recorded as architecture in the doc of its area; history lives in git. Everything built is in the other files of `docs/`; what needs a person is in `waiting-for-haitham.md` (referred to below as **W#**, the item number). Build only what you are asked (rule 2).
 
 Status words: **open** (can be built now) · **needs Haitham** (a verdict first, W#) · **needs a paid test** (money first, W#) · **parked** (paused on purpose, do not touch).
@@ -7,7 +9,7 @@ Status words: **open** (can be built now) · **needs Haitham** (a verdict first,
 ## API delivery (`docs/api-integration.md`)
 
 - Verify the live receiving CMS stores the intended name/price, and confirm its currency, monetary range/precision and omitted/free behavior. Pack persistence, UI controls, both API servers/aliases, queued snapshots, chat export and multipart `Price` are implemented and locally verified ([pricing evidence](../DELIVERY_CHECKLIST.md#pricing-verification-2026-10-23)); only receiving-system confirmation remains. **open**.
-- Connect reaction JSON exports to the final API: the app's pack exporter currently refuses JSON (409), while direct CMS simulator/Lottie/super-like requests report success with zero inserts, even with paired thumbnails. Resolve the receiving contract before claiming delivery. **open**.
+- Connect reaction JSON exports to the final API: the app's pack exporter currently refuses JSON (409), while direct CMS simulator/Lottie/super-like requests report success with zero inserts, even with paired thumbnails. Reconcile the supplied required `ContentType` with the app's current omission (accepted for the animated smoke), and resolve the receiving JSON contract before claiming delivery. **open**.
 - Define the final API/client representation of super-like reactions: `ContentType: super_like` is rejected; allowed values are `emoji` and `emoji_reaction`. Sending the saved super-like JSON under `emoji_reaction` also reported zero inserts. **open**.
 - Validate delivered asset counts in export outcomes; a 2xx/`Success: true` response with zero inserted/updated assets must not become a false success message. **open**.
 - Handle collection upload cooldowns using the CMS's `retryAfterSeconds` response (429); the current export worker marks the request failed. [Smoke results](../DELIVERY_CHECKLIST.md#smoke-test-results-2026-10-23). **open**.
@@ -159,7 +161,7 @@ Other open items:
 
 ## Deployment: parked
 
-Paused by Haitham on 2026-10-02: nothing here is worked on, extended, turned on or deleted until he asks. The reasoning, phases, runbook and open questions are in [`deployment_plan.md`](deployment_plan.md); the prepared files are `deploy/` (map: `deploy/README.md`); the questions are W40-W48. The groundwork and current implementation are consolidated in `main`; deployment remains parked. Of the prepared slice, only **Telegram never-twice** (`services/telegram.py` `fingerprint()`, `send(mode="once" | "replace" | "new_set")`, `tests/test_telegram.py::NeverTwice`) and the **library fingerprint** are app work worth keeping; the gateway, SQL, Docker and Render files stay untouched. `deploy/gateway/ratelimit.py` stays inert.
+Paused by Haitham on 2026-10-02: nothing here is worked on, extended, turned on or deleted until he asks. The reasoning, phases, runbook and open questions are in `docs/deployment_plan.md` in git history; restore it if deployment is explicitly resumed. The prepared files are mapped in [deploy/README.md](../deploy/README.md); the questions are W40-W48. The groundwork and current implementation are consolidated in `main`; deployment remains parked. Of the prepared slice, only **Telegram never-twice** (`services/telegram.py` `fingerprint()`, `send(mode="once" | "replace" | "new_set")`, `tests/test_telegram.py::NeverTwice`) and the **library fingerprint** are app work worth keeping; the gateway, SQL, Docker and Render files stay untouched. `deploy/gateway/ratelimit.py` stays inert.
 
 ## Redesign
 

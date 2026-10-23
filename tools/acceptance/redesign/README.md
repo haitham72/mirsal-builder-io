@@ -1,5 +1,7 @@
 # Redesign browser acceptance
 
+**Scope checked: 2026-10-23.** This toolkit remains available on `main`; it was not rerun during the documentation sync. The latest delivery/pricing verification is recorded in [DELIVERY_CHECKLIST.md](../../../DELIVERY_CHECKLIST.md): 25 focused pricing/backend checks, 27 UI checks after the merge and isolated desktop/phone pricing browser evidence. Latest scratch artifacts are under ignored `output/playwright/pack-smoke-20261023/` and `output/playwright/pricing-20261023/`.
+
 Run from the repository root with the Windows venv and Playwright CLI skill.
 `prepare.py` creates a fresh temp output, copies only G146 artwork, and imports a
 synthetic 3×3 G156 video. It writes the scratch location to

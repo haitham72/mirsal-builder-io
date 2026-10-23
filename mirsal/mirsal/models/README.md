@@ -1,6 +1,6 @@
 # AI cutout models (optional, offline)
 
-`mirsal/matte.py` runs a U2-Net / IS-Net model through **onnxruntime only** (no rembg, torch or network). Photos that are not a
+`mirsal/media/matte.py` runs a U2-Net / IS-Net model through **onnxruntime only** (no rembg, torch or network). Photos that are not a
 green/blue screen use it for the cutout, and so does video background removal. Without a model the app falls back to OpenCV GrabCut.
 
 | file | size | use | md5 |

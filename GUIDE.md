@@ -1,5 +1,7 @@
 # Mirsal Builder — visual guide
 
+**Last synchronized: 2026-10-23 · implementation baseline `27009185` on `main`.** Pricing is implemented; current delivery results and remaining CMS gaps are in [DELIVERY_CHECKLIST.md](DELIVERY_CHECKLIST.md).
+
 > Flashy **animated Telegram stickers**. One deterministic engine, one flow layer,
 > two interfaces (AI chat + Studio web UI). All code lives under `mirsal/mirsal/`;
 > tests mirror it under `mirsal/tests/`.
@@ -10,16 +12,16 @@
 
 ```
                         ┌────────────── Studio web UI ──────────────┐
-                        │  console/*.js + studio.css + index.html   │
-                        │  (buttons only — every click posts to     │
-                        │   an API; no logic lives in the browser)  │
+                        │  console/ui/ + console/index.html         │
+                        │  UI state and API actions; the engine     │
+                        │  owns creation, validation and delivery   │
                         └──────────────┬──────────────┬─────────────┘
                                        │              │
                         ┌──────────────▼──────────────▼─────────────┐
                         │            HTTP routes                     │
-                        │  console/app.py  (native FastAPI)          │
+                        │  api/app.py  (native FastAPI)              │
                         │  console/server.py (legacy adapter)       │
-                        │  console/openapi.py (the contract)        │
+                        │  api/openapi.py (the contract)            │
                         └──────────────┬──────────────┬─────────────┘
                                        │              │
               ┌────────────────────────▼──┐   ┌───────▼───────────────────┐
@@ -49,23 +51,24 @@
 mirsal/mirsal/
 ├── engine/        cut · key · render · verify · ffmpeg   (never imports DB/LLM)
 ├── flow/          pipeline · gates · imports · batches  (the golden path)
-├── console/       Studio/Library/chat UI + routes + contract
-│   ├── studio-core.js    batch header, tiles, sliders, frame editor
-│   ├── studio-tiles.js   tile markup (what each tile shows)
-│   ├── packs.js · library.js    packs, stickers, Reactions sections
-│   ├── reactions.js · lottiestyle.js · particles.js    reaction screens
-│   ├── live.js · composer.js     generation composer, job polling
-│   ├── imports.js    import dialogs
-│   ├── app.py · server.py · app_models.py · openapi.py    routes + contract
-│   └── studio.css · theme.css · agent.css · index.html
+├── api/           app.py · routers/ · schemas/ · openapi.py (native API)
+├── console/       Studio/Library/chat UI + legacy HTTP adapter
+│   ├── ui/features/studio/     tiles, sliders, frames, composer, imports
+│   ├── ui/features/library/    packs.js · library.js · telegram.js
+│   ├── ui/features/reactions/  reactions.js · lottiestyle.js · super.js
+│   ├── ui/shell/ · ui/shared/ · ui/styles/    shell, shared UI, CSS
+│   ├── ui/manifest.json        stable UI URLs → source files
+│   ├── app.py · app_models.py · openapi.py   compatibility imports
+│   └── server.py · assets.py · index.html   legacy adapter, assets, shell
 ├── media/         library.py (packs) · grey.py (silhouettes)
 ├── generation/    jobs · prompter · expander (paid calls)
 ├── services/      telegram.py · collection.py · llm*.py
 ├── store/         postgres, search, pool
-└── runtime/       names.py (every filename), atomic writes, activity
+└── runtime/       names.py (every filename), pricing.py, atomic writes, activity
 
 mirsal/tests/     mirrors the above, plus tests/js/ (browser-less UI tests)
-mirsal/out/       runtime data — batches, jobs, library, logs (never committed)
+mirsal/out/       runtime data; selected historical artifacts are tracked
+output/           local verification/scratch evidence (ignored; never stage secrets)
 docs/             the real spec, one area per doc (see docs/<area>.md)
 ```
 
@@ -91,6 +94,8 @@ Naming (never hand-build paths): batches `out/G###-<slug>-<UTC>/`, jobs
 `{media}-{subject}-{action}[-{pack}]-{UTC}-{hash}.{ext}` — all from
 `runtime/names.py`, `pipeline.gen_dir`, `jobs.job_dir`.
 
+New requests default to **2×2 / four stickers**; existing/imported 3×3 batches keep their geometry. The catalog's video default is **Kling 3.0** (`generation/model_catalog.py`); the requested Kling 4.0 delivery target remains unverified.
+
 ---
 
 ## Studio → API wiring (click → post → backend)
@@ -102,11 +107,12 @@ Naming (never hand-build paths): batches `out/G###-<slug>-<UTC>/`, jobs
 | Frame editor Apply | `studio-core.js` `vzCard` | `/position` + `/anim_preview` (one-frame test) | same |
 | Download .zip | batch header | `/generations/{id}/export.zip` | `flow/batches.py` |
 | Export to collection | pack / batch menu | `/export-collection` (queued) | `services/collection.py` |
+| Edit price | pack header, `ui/features/library/packs.js` | pack metadata update with `{price}` | `media/library.py` + `runtime/pricing.py` |
 | Send to Telegram | pack screen | Telegram routes | `services/telegram.py` |
 | Use my own sheet | import dialog | `/api/import` (raw bytes) | `flow/imports.py` — duplicates offer Open existing / Import again as a new batch, with grid-mismatch consent |
 | Use it anyway (any rejected picture) | tile / sheet cell / chat card | `/generations/{id}/allow` | `engine/verify.py` catalogue |
 
-Every `data-act=<name>` in markup has an `ACT.<name>` handler posting a URL —
+Script names in this table are logical names from `console/ui/manifest.json`; Studio sources live in `console/ui/features/studio/`. Every `data-act=<name>` in markup has an `ACT.<name>` handler posting a URL —
 search the action name to trace any click end to end. Removed actions must be
 listed under `renamed`/`retired` in `mirsal/tests/data/ui_baseline.json`
 (tests enforce it).
@@ -126,6 +132,7 @@ listed under `renamed`/`retired` in `mirsal/tests/data/ui_baseline.json`
                                       MediaThumbnails = PNG (sticker as-is,
                                                         .webm → grey)
                                       MediaMetadata   = [{emoji_utf, tags}]
+                                      Price           = optional decimal string
 ```
 
 | piece | file | what to change when backend says "update the export field" |
@@ -133,15 +140,18 @@ listed under `renamed`/`retired` in `mirsal/tests/data/ui_baseline.json`
 | Zip manifest rows | `flow/batches.py` `export_zip` (batch), `media/library.py` `export_zip` (pack) | per-sticker fields |
 | Grey PNG | `media/grey.py` (`alpha_of` → first visible frame, `grey_png` → #BFBFBF) | silhouette logic |
 | CMS emoji/tags | `services/collection.py` (`tags_of`, `items_from_zip`, `thumbnail`) | metadata + thumbnail bytes |
+| Saved/export price | `runtime/pricing.py`, `media/library.py`, `services/collection.py` | exact decimal strings; saved value inherited when omitted, null omits, `"0"` is free; frozen before queueing |
 | CMS reference | `docs/api-integration.md` | field docs |
 | Telegram send | `services/telegram.py` | delivery |
 | Size/codec/duration rules | `engine/verify.py` (stage `telegram`) | limits |
-| API shape | `api/schemas/` + `api/routers/` + `console/openapi.py` + `docs/api-integration.md` + label in `console/ui/` | contract end to end |
+| API shape | `api/schemas/` + `api/routers/` + `api/openapi.py` + `docs/api-integration.md` + label in `console/ui/` | contract end to end |
 
 > Debugging rule: the CMS shows **our** thumbnail PNG at
 > `user_media/Emoji_Assets/{emoji}.png` — a wrong picture there means our
 > `thumbnail()` sent it, never a CMS bug. Sends are queued; state in
 > `out/collection_exports/`, log in `out/collection_exports.jsonl`.
+
+The animated `test` collection reported four inserted assets in the live smoke. JSON simulator/Lottie/super-like submissions reported zero inserts, and `super_like` was rejected as a content type. The app exporter supports WEBM/PNG/WebP and rejects JSON; count validation, cooldown recovery and live stored-price readback remain open. Consult the [delivery checklist](DELIVERY_CHECKLIST.md) before treating a success flag as completed delivery.
 
 ---
 
@@ -158,7 +168,7 @@ listed under `renamed`/`retired` in `mirsal/tests/data/ui_baseline.json`
 
 ## Run it
 
-- venv `mirsal/.venv` (Windows). Server: `python -m mirsal serve` — owner runs `:8770`, use your own `--port` with `MIRSAL_OUT=<a copy>`.
+- venv `mirsal/.venv` on Windows and macOS (created locally; see `run.md`). Server: `python -m mirsal serve` — owner runs `:8770`, use your own `--port` with `MIRSAL_OUT=<a copy>`.
 - Checks stay offline: `MIRSAL_NO_REAL_CLI=1`, `MIRSAL_LLM_PROVIDER=none` (tests never touch real providers; paid calls need a shown price + yes).
 - Tests: narrowest only — `mirsal test fast` / `focused` / `area <module>`. Full `unittest discover` is retired.
 - Health: `python -m mirsal doctor`.

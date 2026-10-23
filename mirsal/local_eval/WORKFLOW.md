@@ -1,5 +1,7 @@
 # Work split: main agent and local Qwen
 
+**Scope checked: 2026-10-23.** The Qwen model below is pinned for these isolated evaluations. Application routing follows its configured model catalog and user selection; this document does not change those defaults or authorize new model calls. Current application guidance: [CLAUDE.md](../../CLAUDE.md) and [delivery checklist](../../DELIVERY_CHECKLIST.md).
+
 Haitham's preference: the main agent handles complex reasoning and agentic work; the local model handles vision and straightforward chat tasks.
 
 ## Main agent

@@ -1,5 +1,7 @@
 # Supabase: what to apply and how (nothing here has been applied; no project exists yet)
 
+**Status synchronized: 2026-10-23.** Prepared SQL is retained on `main`; hosting, Google OAuth and application of these migrations remain paused. The instructions below apply only after deployment is explicitly resumed; see [deploy/README.md](../README.md). Collection `Price` is pack/export metadata and is separate from this proposed credit ledger.
+
 1. Create a Supabase project. Auth > Providers > Google: enable it with a Google OAuth client (`Authorized redirect URI` = the one Supabase shows; the app's own return page is `https://<host>/auth/callback`).
 2. In the SQL editor (or `psql "$SUPABASE_DB_URL" -f ...`) apply, in this order, after the repo's own `mirsal/migrations/001`..`008` have run against the same database (`python -m mirsal db migrate` with `MIRSAL_DATABASE_URL`):
    - `migrations/009_accounts.sql`  - one row per person (Google sub, name, 10 test credits). RLS on.

@@ -1,5 +1,7 @@
 # Mirsal Sticker Builder — Architecture & Screen Design Specification
 
+> Original design input, scope checked 2026-10-23. The brief below is preserved as reference material. Current implementation is documented in [docs/architecture.md](../docs/architecture.md) and [docs/design.md](../docs/design.md); delivery acceptance and known gaps are in [DELIVERY_CHECKLIST.md](../DELIVERY_CHECKLIST.md).
+
 ## 0. Purpose
 
 Build a native-feeling Sticker Builder inside the existing **Mirsal** messaging application on **mobile and desktop**.

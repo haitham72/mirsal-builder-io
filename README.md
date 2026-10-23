@@ -1,5 +1,7 @@
 # Mirsal Builder
 
+**Last updated: 2026-10-23 · implementation baseline `27009185` · `main` only.**
+
 [Visual guide](GUIDE.md) · [App and API delivery checklist](DELIVERY_CHECKLIST.md) · [Remaining work](docs/backlog.md)
 
 It turns plain words into video stickers for Telegram: it makes the pictures, cuts them, animates them and packs them. Every step is checkable ([architecture](docs/architecture.md)); the HTTP contract is [here](docs/api-integration.md), the live route inventory at `GET /api/openapi.json`.
@@ -17,6 +19,13 @@ It turns plain words into video stickers for Telegram: it makes the pictures, cu
 ## Delivery
 
 The product is the API and the two sandboxes over it: `console/` (the page) and the AI chat. The engine (`mirsal/engine/`) and flow (`mirsal/flow/`) are deterministic and testable first, screens second.
+
+Current delivery status:
+
+- Saved pack prices, export overrides, free/unset handling, validation and multipart `Price` forwarding are implemented on both servers and route aliases, including chat export. Use **Pack → Edit price** or the price field in **Export to collection**.
+- The live CMS accepted the animated pack named `test` with four inserted assets. Simulator/Lottie/super-like JSON delivery remains unconfirmed: success responses reported zero inserts; `super_like` is rejected as a content type.
+- Pricing has 25 focused backend checks and desktop/phone browser evidence; the merge added 27 passing UI checks. Live CMS stored-price/currency verification, JSON delivery, zero-count success handling and upload cooldown recovery remain open.
+- New requests default to 2×2. The current video catalog default is Kling 3.0; Kling 4.0 is an unverified delivery target. See the [single acceptance checklist](DELIVERY_CHECKLIST.md) for the remaining work and dated evidence.
 
 **Start**: `python -m mirsal serve`, then open the printed address. Server default `127.0.0.1:8770`. First run needs: Python 3.11-3.13, venv `mirsal/.venv`, `pip install -r mirsal/requirements*.txt` (fastapi/pydantic/uvicorn for serve), ffmpeg on PATH, Postgres `mirsal-db` on 5434 for the mirror (`python -m mirsal db up`).
 

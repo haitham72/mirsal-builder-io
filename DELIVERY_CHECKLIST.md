@@ -1,5 +1,7 @@
 # App and API delivery acceptance checklist
 
+**Last synchronized: 2026-10-23.** The implementation was merged and pushed to `main` at `27009185`; the other local/remote branches were removed. Pack/batch/chat pricing is implemented and locally verified. Receiving-CMS JSON delivery, stored-price/currency readback, zero-count success validation and cooldown recovery remain open.
+
 **Goal:** user entry -> default 2x2 image sheet -> video sheet using the new guidance prompt and Higgsfield Kling 4.0 -> approved pack -> delivery to the final API -> confirmed success.
 
 This is the single checklist for app review and final API delivery. These are acceptance targets, not claims that the features are implemented or tested. Check a parent topic only when its applicable child checks pass. Final Lottie asset checks stay deferred until the files are supplied.
@@ -16,6 +18,8 @@ This is the single checklist for app review and final API delivery. These are ac
 References: [final API contract](docs/API/API_DOCUMENTATION.md), [Mirsal API integration](docs/api-integration.md), [generation](docs/generation.md), [known defects and engineering limits](docs/backlog.md), [owner decisions](docs/waiting-for-haitham.md). Past audits live in git history.
 
 Latest verification: [2026-10-23 smoke-test results](#smoke-test-results-2026-10-23). Checked boxes below apply to that smoke scope; broader scenarios remain open.
+
+Evidence links below refer to local artifacts under ignored `output/playwright/`; they are available in this workspace and are not included in a fresh checkout. The dated result summaries are retained in this file.
 
 ## Acceptance checklist
 
@@ -193,11 +197,18 @@ Verified the working tree using existing pack `2d6bc270` copied to a disposable 
 
 Evidence: [browser results](output/playwright/pricing-20261023/browser-results.json), [actual multipart fields at the local receiver](output/playwright/pricing-20261023/received.json), [dialog bounds](output/playwright/pricing-20261023/layout-results.json), [phone screenshot](output/playwright/pricing-20261023/price-dark-390.png). Actual CMS stored-price/currency confirmation and JSON collection integration remain unchecked.
 
+## Repository consolidation and documentation sync: 2026-10-23
+
+- Implementation and all former branch histories are retained in merge `27009185`; `main` is the sole local/remote branch. The feature/documentation commit is `fd53a633`.
+- All 27 focused UI merge checks passed for slider retries, resize/frame controls, duplicate import choices and reaction tabs. Application source after conflict resolution matches the verified pricing branch.
+- Reviewed all 207 versioned Markdown files against git, code and the filesystem; updated 23 current guides and scope notes. Local links in maintained docs and the live FAQ resolve. Original design inputs, evaluation seeds/results and the vendor license retain their historical content. No application tests, model generation or external submissions were run for the documentation-only sync.
+
 ## Known checks to resolve
 
 - Existing generation docs describe Kling 3.0. This checklist explicitly targets **Kling 4.0 via Higgsfield**, as requested; implementation and provider availability still need verification.
 - **Pricing is implemented and locally verified; receiving-system confirmation remains:** verify the live CMS stores the intended price and confirm currency/range/precision. Earlier direct CMS requests sent `Price: "2"`, but the stored price was not returned or verified.
 - **JSON delivery is unconfirmed:** the CMS returns `Success: true` with zero inserted/updated assets for the tested simulator, Lottie-style and super-like JSON. Adding paired thumbnails did not resolve it. Mirsal's normal pack exporter rejects JSON with HTTP 409.
+- **Content type contract differs:** the supplied CMS reference requires `ContentType`, while Mirsal currently omits it and the animated `test` pack was accepted. Direct JSON probes explicitly set it. Reconcile the requirement with the receiver; `super_like` is not an accepted value.
 - **Success validation needs strengthening:** the current application checks HTTP status and the success flag, without validating the inserted/updated count. The observed response provides counts but no collection ID or stored name/price for readback.
 - Final Lottie asset checks remain deferred until those files are supplied.
 

@@ -1,5 +1,7 @@
 # Motion Graphics: the Mirsal Creator film
 
+**Scope checked: 2026-10-23.** This is the film kit's dated creative/production guide. Its storyboards and rendered sequences do not establish current API acceptance. For the merged application, pricing implementation and outstanding CMS delivery checks, use [DELIVERY_CHECKLIST.md](../DELIVERY_CHECKLIST.md); current screen behavior is in [docs/design.md](../docs/design.md). No film was rerendered during this documentation sync.
+
 This folder is a motion-as-code kit. Every frame of the film is a deterministic function of time, written in TypeScript and rendered by three.js. The browser preview and the exported MP4 are the same pixels. This guide turns the kit into **the launch film for the Mirsal Creator**, the sticker engine this repo builds for the Mirsal app.
 
 **Where it stands (2026-10-04).** Two films share the kit, switched by `FILM` in `app/src/timeline.ts`:
